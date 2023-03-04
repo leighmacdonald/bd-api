@@ -6,17 +6,14 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"time"
 )
 
 func main() {
-	const steamCacheTimeout = time.Hour * 6
-	const compCacheTimeout = time.Hour * 24 * 7
 
-	http.HandleFunc("/bans", handleGetBans(steamCacheTimeout))
-	http.HandleFunc("/summary", handleGetSummary(steamCacheTimeout))
-	http.HandleFunc("/competitive", handleGetCompetitive(compCacheTimeout))
-	http.HandleFunc("/kick", onPostKick)
+	http.HandleFunc("/bans", limit(getHandler(handleGetBans())))
+	http.HandleFunc("/summary", limit(getHandler(handleGetSummary())))
+	http.HandleFunc("/competitive", limit(getHandler(handleGetCompetitive())))
+	http.HandleFunc("/kick", limit(onPostKick))
 
 	if errServe := http.ListenAndServe(":8090", nil); errServe != nil {
 		log.Printf("HTTP Server returned error: %v", errServe)
