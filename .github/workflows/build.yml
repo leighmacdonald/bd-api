@@ -3,6 +3,9 @@ name: Build Workflow
 on:
   push:
 
+env:
+  STEAM_API_KEY: ${{secrets.STEAM_API_KEY}}
+
 jobs:
   lint:
     name: Linter
