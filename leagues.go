@@ -1,5 +1,6 @@
 package main
 
+// Division tries to define a generalized ranked division order
 type Division int
 
 // *Rough* mapping of skill for each division for sorting, 0 being invite
@@ -32,6 +33,7 @@ const (
 	UGCRankNone      Division = 10
 )
 
+// Season stores generalized league season data
 type Season struct {
 	League      string   `json:"league"`
 	Division    string   `json:"division"`

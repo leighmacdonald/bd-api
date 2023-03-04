@@ -9,21 +9,22 @@ import (
 )
 
 const (
-	testIdb4nny = steamid.SID64(76561197970669109)
+	testIDb4nny    = steamid.SID64(76561197970669109)
+	testIDSquirrel = steamid.SID64(76561197961279983)
 )
 
 func TestGetLogsTF(t *testing.T) {
-	count, errLogs := getLogsTF(context.Background(), testIdb4nny)
+	count, errLogs := getLogsTF(context.Background(), testIDb4nny)
 	require.NoError(t, errLogs)
 	require.Less(t, int64(13000), count)
 
-	countZero, errLogsZero := getLogsTF(context.Background(), testIdb4nny+2)
+	countZero, errLogsZero := getLogsTF(context.Background(), testIDb4nny+2)
 	require.NoError(t, errLogsZero)
 	require.Equal(t, int64(0), countZero)
 }
 
 func TestGetUGC(t *testing.T) {
-	seasons, errLogs := getUGC(context.Background(), testIdb4nny)
+	seasons, errLogs := getUGC(context.Background(), testIDb4nny)
 	require.NoError(t, errLogs)
 	require.GreaterOrEqual(t, 30, len(seasons))
 

@@ -25,11 +25,11 @@ func main() {
 }
 
 func init() {
-	steamApiKey, steamApiKeyFound := os.LookupEnv("STEAM_API_KEY")
-	if !steamApiKeyFound || steamApiKey == "" {
+	steamAPIKey, steamAPIKeyFound := os.LookupEnv("STEAM_API_KEY")
+	if !steamAPIKeyFound || steamAPIKey == "" {
 		log.Panicf("Must set STEAM_API_KEY")
 	}
-	if errSetKey := steamweb.SetKey(steamApiKey); errSetKey != nil {
+	if errSetKey := steamweb.SetKey(steamAPIKey); errSetKey != nil {
 		log.Panicf("Failed to set steam api key: %v\n", errSetKey)
 	}
 	reLOGSResults = regexp.MustCompile(`<p>(\d+|\d+,\d+)\sresults</p>`)

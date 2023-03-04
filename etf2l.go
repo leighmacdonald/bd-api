@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-type Comp struct {
+type comp struct {
 	Category    string `json:"category"`
 	Competition string `json:"competition"`
 	Division    struct {
@@ -22,7 +22,7 @@ type Comp struct {
 	URL string `json:"url"`
 }
 
-type ETF2LPlayer struct {
+type etf2lPlayer struct {
 	Player struct {
 		Bans       interface{} `json:"bans"`
 		Classes    []string    `json:"classes"`
@@ -37,7 +37,7 @@ type ETF2LPlayer struct {
 			ID64   string `json:"id64"`
 		} `json:"steam"`
 		Teams []struct {
-			Competitions map[string]Comp `json:"competitions,omitempty"`
+			Competitions map[string]comp `json:"competitions,omitempty"`
 			Country      string          `json:"country"`
 			Homepage     string          `json:"homepage"`
 			ID           int             `json:"id"`
@@ -82,7 +82,7 @@ func sortSeasons(s []Season) []Season {
 
 func getETF2L(ctx context.Context, sid steamid.SID64) ([]Season, error) {
 	url := fmt.Sprintf("https://api.etf2l.org/player/%d", sid.Int64())
-	var player ETF2LPlayer
+	var player etf2lPlayer
 	resp, errGet := get(ctx, url, nil)
 	if errGet != nil {
 		return nil, errGet
@@ -107,7 +107,7 @@ func getETF2L(ctx context.Context, sid steamid.SID64) ([]Season, error) {
 	return seasons, nil
 }
 
-func parseETF2L(player ETF2LPlayer) ([]Season, error) {
+func parseETF2L(player etf2lPlayer) ([]Season, error) {
 	var seasons []Season
 	for _, team := range player.Player.Teams {
 		for _, comp := range team.Competitions {
@@ -150,7 +150,8 @@ func parseETF2L(player ETF2LPlayer) ([]Season, error) {
 			case "6on6":
 				format = "6s"
 			default:
-				fmt.Printf("Unknown etf2l format: %s\n", team.Type)
+				//log.Printf("Unknown etf2l format: %s\n", team.Type)
+				continue
 			}
 			seasons = append(seasons, Season{
 				League:      "ETF2L",

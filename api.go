@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-func get(ctx context.Context, url string, recv interface{}) (*http.Response, error) {
+func get(ctx context.Context, url string, receiver interface{}) (*http.Response, error) {
 	req, errNewReq := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if errNewReq != nil {
 		return nil, errors.Wrapf(errNewReq, "Failed to create request: %v", errNewReq)
@@ -33,7 +33,7 @@ func get(ctx context.Context, url string, recv interface{}) (*http.Response, err
 		return nil, errors.Wrapf(errResp, "error during get: %v", errResp)
 	}
 
-	if recv != nil {
+	if receiver != nil {
 		body, errRead := io.ReadAll(resp.Body)
 		if errRead != nil {
 			return nil, errors.Wrapf(errNewReq, "error reading stream: %v", errRead)
@@ -43,7 +43,7 @@ func get(ctx context.Context, url string, recv interface{}) (*http.Response, err
 				log.Panicf("Failed to close response body: %v", err)
 			}
 		}()
-		if errUnmarshal := json.Unmarshal(body, &recv); errUnmarshal != nil {
+		if errUnmarshal := json.Unmarshal(body, &receiver); errUnmarshal != nil {
 			return resp, errors.Wrapf(errUnmarshal, "Failed to decode json: %v", errUnmarshal)
 		}
 	}
@@ -69,72 +69,97 @@ func sendItem(w http.ResponseWriter, req *http.Request, item any) {
 
 func handleGetSummary(cache caches) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		steamIdQuery := req.URL.Query().Get("steam_id")
-		steamId, steamIdErr := steamid.SID64FromString(steamIdQuery)
-		if steamIdErr != nil {
+		steamIDQuery := req.URL.Query().Get("steam_id")
+		steamID, steamIDErr := steamid.SID64FromString(steamIDQuery)
+		if steamIDErr != nil || !steamID.Valid() {
 			http.Error(w, "Invalid steam id", http.StatusBadRequest)
 			return
 		}
-		item := cache.summary.Get(steamId)
+		item := cache.summary.Get(steamID)
 		sendItem(w, req, item.Value())
 	}
 }
 
 func handleGetBans(cache caches) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		steamIdQuery := req.URL.Query().Get("steam_id")
-		steamId, steamIdErr := steamid.SID64FromString(steamIdQuery)
-		if steamIdErr != nil {
+		steamIDQuery := req.URL.Query().Get("steam_id")
+		steamID, steamIDErr := steamid.SID64FromString(steamIDQuery)
+		if steamIDErr != nil {
 			http.Error(w, "Invalid steam id", http.StatusBadRequest)
 			return
 		}
-		item := cache.bans.Get(steamId)
+		item := cache.bans.Get(steamID)
 		sendItem(w, req, item.Value())
 	}
 }
 
+// Profile is a high level meta profile of several services
 type Profile struct {
 	Summary   steamweb.PlayerSummary  `json:"summary"`
 	BanState  steamweb.PlayerBanState `json:"ban_state"`
 	Seasons   []Season                `json:"seasons"`
+	Friends   []steamweb.Friend       `json:"friends"`
 	LogsCount int64                   `json:"logs_count"`
 }
 
 func handleGetProfile(cache caches) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		steamIdQuery := req.URL.Query().Get("steam_id")
-		steamId, steamIdErr := steamid.SID64FromString(steamIdQuery)
-		if steamIdErr != nil {
+		steamIDQuery := req.URL.Query().Get("steam_id")
+		steamID, steamIDErr := steamid.SID64FromString(steamIDQuery)
+		if steamIDErr != nil {
 			http.Error(w, "Invalid steam id", http.StatusBadRequest)
 			return
 		}
 		profile := Profile{}
 		var mu sync.RWMutex
 		wg := &sync.WaitGroup{}
-		wg.Add(5)
+		wg.Add(6)
 		go func() {
 			defer wg.Done()
-			profile.BanState = cache.bans.Get(steamId).Value()
+			item := cache.bans.Get(steamID)
+			if item != nil {
+				profile.BanState = item.Value()
+			}
 		}()
 		go func() {
 			defer wg.Done()
-			profile.Summary = cache.summary.Get(steamId).Value()
+			item := cache.summary.Get(steamID)
+			if item != nil {
+				profile.Summary = item.Value()
+			}
 		}()
 		go func() {
 			defer wg.Done()
-			profile.LogsCount = cache.logsTF.Get(steamId).Value()
+			item := cache.logsTF.Get(steamID)
+			if item != nil {
+				profile.LogsCount = item.Value()
+			}
 		}()
 		go func() {
 			defer wg.Done()
-			mu.Lock()
-			profile.Seasons = append(profile.Seasons, cache.etf2lSeasons.Get(steamId).Value()...)
-			mu.Unlock()
+			item := cache.friends.Get(steamID)
+			if item != nil {
+				profile.Friends = item.Value()
+			}
 		}()
 		go func() {
 			defer wg.Done()
-			mu.Lock()
-			profile.Seasons = append(profile.Seasons, cache.ugcSeasons.Get(steamId).Value()...)
-			mu.Unlock()
+			item := cache.etf2lSeasons.Get(steamID)
+			if item != nil {
+				mu.Lock()
+				profile.Seasons = append(profile.Seasons, item.Value()...)
+				mu.Unlock()
+			}
+
+		}()
+		go func() {
+			defer wg.Done()
+			item := cache.ugcSeasons.Get(steamID)
+			if item != nil {
+				mu.Lock()
+				profile.Seasons = append(profile.Seasons, item.Value()...)
+				mu.Unlock()
+			}
 		}()
 		wg.Wait()
 		sort.Slice(profile.Seasons, func(i, j int) bool {

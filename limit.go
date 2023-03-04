@@ -59,13 +59,11 @@ func limit(next http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-
 		limiter := getVisitor(ip)
-		if limiter.Allow() == false {
-			http.Error(w, http.StatusText(429), http.StatusTooManyRequests)
+		if !limiter.Allow() {
+			http.Error(w, http.StatusText(http.StatusTooManyRequests), http.StatusTooManyRequests)
 			return
 		}
-
 		next.ServeHTTP(w, r)
 	}
 }

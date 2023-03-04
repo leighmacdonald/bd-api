@@ -13,6 +13,7 @@ type caches struct {
 	summary      *ttlcache.Cache[steamid.SID64, steamweb.PlayerSummary]
 	bans         *ttlcache.Cache[steamid.SID64, steamweb.PlayerBanState]
 	logsTF       *ttlcache.Cache[steamid.SID64, int64]
+	friends      *ttlcache.Cache[steamid.SID64, []steamweb.Friend]
 	ugcSeasons   *ttlcache.Cache[steamid.SID64, []Season]
 	rglSeasons   *ttlcache.Cache[steamid.SID64, []Season]
 	etf2lSeasons *ttlcache.Cache[steamid.SID64, []Season]
@@ -42,6 +43,19 @@ func newCaches(ctx context.Context, summaryTimeout time.Duration, seasonTimeout 
 				},
 			)),
 		),
+		friends: ttlcache.New[steamid.SID64, []steamweb.Friend](
+			ttlcache.WithCapacity[steamid.SID64, []steamweb.Friend](maxCapacity),
+			ttlcache.WithLoader[steamid.SID64, []steamweb.Friend](ttlcache.LoaderFunc[steamid.SID64, []steamweb.Friend](
+				func(c *ttlcache.Cache[steamid.SID64, []steamweb.Friend], steamId steamid.SID64) *ttlcache.Item[steamid.SID64, []steamweb.Friend] {
+					friends, errFriends := steamweb.GetFriendList(steamId)
+					if errFriends != nil {
+						log.Printf("Failed to fetch friends: %v\n", errFriends)
+						return nil
+					}
+					return c.Set(steamId, friends, summaryTimeout)
+				},
+			)),
+		),
 		ugcSeasons: ttlcache.New[steamid.SID64, []Season](
 			ttlcache.WithCapacity[steamid.SID64, []Season](maxCapacity),
 			ttlcache.WithLoader[steamid.SID64, []Season](ttlcache.LoaderFunc[steamid.SID64, []Season](
@@ -65,7 +79,7 @@ func newCaches(ctx context.Context, summaryTimeout time.Duration, seasonTimeout 
 					defer cancel()
 					logCount, errSum := getLogsTF(timeout, steamId)
 					if errSum != nil {
-						log.Printf("Failed to fetch ugc hist: %v\n", errSum)
+						log.Printf("Failed to fetch lost count: %v\n", errSum)
 						return nil
 					}
 					return c.Set(steamId, logCount, seasonTimeout)
@@ -80,7 +94,7 @@ func newCaches(ctx context.Context, summaryTimeout time.Duration, seasonTimeout 
 					defer cancel()
 					seasons, errSum := getETF2L(timeout, steamId)
 					if errSum != nil {
-						log.Printf("Failed to fetch ugc hist: %v\n", errSum)
+						log.Printf("Failed to fetch etf2l hist: %v\n", errSum)
 						return nil
 					}
 					return c.Set(steamId, seasons, seasonTimeout)

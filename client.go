@@ -1,28 +1,90 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
 	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/leighmacdonald/steamweb"
+	"io"
+	"log"
 	"net/http"
 )
 
+// Client is a simple api client
 type Client struct {
 	*http.Client
+	endPoint string
 }
 
-func NewClient() *Client {
-	c := Client{Client: &http.Client{}}
+// NewClient returns a configured api client
+func NewClient(endPoint string) *Client {
+	c := Client{Client: &http.Client{}, endPoint: endPoint}
 	return &c
 }
 
-func (c *Client) PlayerSummaries(steamIDs steamid.Collection) ([]steamweb.PlayerSummary, error) {
-	return nil, nil
+// PlayerSummary fetches and returns the steam web profile summary from valves api
+func (c *Client) PlayerSummary(ctx context.Context, steamID steamid.SID64, summary *steamweb.PlayerSummary) error {
+	req, errReq := http.NewRequestWithContext(ctx, http.MethodGet, c.endPoint+fmt.Sprintf("/summary?steam_id=%d", steamID), nil)
+	if errReq != nil {
+		return errReq
+	}
+	resp, errResp := c.Do(req)
+	if errResp != nil {
+		return errResp
+	}
+	body, errBody := io.ReadAll(resp.Body)
+	if errBody != nil {
+		return errBody
+	}
+	defer func() {
+		if errClose := resp.Body.Close(); errClose != nil {
+			log.Printf("Failed to close body: %v\n", errClose)
+		}
+	}()
+	return json.Unmarshal(body, summary)
 }
 
-func (c *Client) GetPlayerBans(steamIDs steamid.Collection) ([]steamweb.PlayerBanState, error) {
-	return nil, nil
+// GetPlayerBan fetches and returns the steam web ban summary from valves api
+func (c *Client) GetPlayerBan(ctx context.Context, steamID steamid.SID64, banState *steamweb.PlayerBanState) error {
+	req, errReq := http.NewRequestWithContext(ctx, http.MethodGet, c.endPoint+fmt.Sprintf("/bans?steam_id=%d", steamID), nil)
+	if errReq != nil {
+		return errReq
+	}
+	resp, errResp := c.Do(req)
+	if errResp != nil {
+		return errResp
+	}
+	body, errBody := io.ReadAll(resp.Body)
+	if errBody != nil {
+		return errBody
+	}
+	defer func() {
+		if errClose := resp.Body.Close(); errClose != nil {
+			log.Printf("Failed to close body: %v\n", errClose)
+		}
+	}()
+	return json.Unmarshal(body, banState)
 }
 
-func (c *Client) GetFriendList(steamID steamid.SID64) ([]steamweb.Friend, error) {
-	return nil, nil
+// GetProfile assembles and returns a high level profile
+func (c *Client) GetProfile(ctx context.Context, steamID steamid.SID64, profile *Profile) error {
+	req, errReq := http.NewRequestWithContext(ctx, http.MethodGet, c.endPoint+fmt.Sprintf("/profile?steam_id=%d", steamID), nil)
+	if errReq != nil {
+		return errReq
+	}
+	resp, errResp := c.Do(req)
+	if errResp != nil {
+		return errResp
+	}
+	body, errBody := io.ReadAll(resp.Body)
+	if errBody != nil {
+		return errBody
+	}
+	defer func() {
+		if errClose := resp.Body.Close(); errClose != nil {
+			log.Printf("Failed to close body: %v\n", errClose)
+		}
+	}()
+	return json.Unmarshal(body, profile)
 }
