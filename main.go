@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/leighmacdonald/steamweb"
 	"log"
 	"net/http"
@@ -9,10 +10,13 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
 
-	http.HandleFunc("/bans", limit(getHandler(handleGetBans())))
-	http.HandleFunc("/summary", limit(getHandler(handleGetSummary())))
-	http.HandleFunc("/competitive", limit(getHandler(handleGetCompetitive())))
+	cache := newCaches(ctx, steamCacheTimeout, compCacheTimeout, steamCacheTimeout)
+
+	http.HandleFunc("/bans", limit(getHandler(handleGetBans(cache))))
+	http.HandleFunc("/summary", limit(getHandler(handleGetSummary(cache))))
+	http.HandleFunc("/profile", limit(getHandler(handleGetProfile(cache))))
 	http.HandleFunc("/kick", limit(onPostKick))
 
 	if errServe := http.ListenAndServe(":8090", nil); errServe != nil {

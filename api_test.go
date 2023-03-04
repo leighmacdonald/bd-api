@@ -2,37 +2,67 @@ package main
 
 import (
 	"context"
-	"github.com/leighmacdonald/steamid/v2/steamid"
+	"encoding/json"
+	"fmt"
+	"github.com/leighmacdonald/steamweb"
 	"github.com/stretchr/testify/require"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"testing"
-	"time"
 )
 
-const (
-	testIdb4nny = steamid.SID64(76561197970669109)
-)
-
-func TestGetLogsTF(t *testing.T) {
-	count, errLogs := getLogsTF(context.Background(), testIdb4nny)
-	require.NoError(t, errLogs)
-	require.Less(t, int64(13000), count)
-
-	countZero, errLogsZero := getLogsTF(context.Background(), testIdb4nny+2)
-	require.NoError(t, errLogsZero)
-	require.Equal(t, int64(0), countZero)
+func TestGetBans(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/bans?steam_id=%d", testIdb4nny), nil)
+	w := httptest.NewRecorder()
+	getHandler(handleGetBans(newCaches(context.Background(), steamCacheTimeout, compCacheTimeout, steamCacheTimeout)))(w, req)
+	res := w.Result()
+	defer func() {
+		require.NoError(t, res.Body.Close())
+	}()
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		t.Errorf("expected error to be nil got %v", err)
+	}
+	var bs steamweb.PlayerBanState
+	require.NoError(t, json.Unmarshal(data, &bs))
+	sid := testIdb4nny
+	require.Equal(t, sid.String(), bs.SteamID)
 }
 
-func TestGetUGC(t *testing.T) {
-	count, errLogs := getUGC(context.Background(), testIdb4nny)
-	require.NoError(t, errLogs)
-	require.Less(t, int64(13000), count)
-
+func TestGetSummary(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/summary?steam_id=%d", testIdb4nny), nil)
+	w := httptest.NewRecorder()
+	getHandler(handleGetBans(newCaches(context.Background(), steamCacheTimeout, compCacheTimeout, steamCacheTimeout)))(w, req)
+	res := w.Result()
+	defer func() {
+		require.NoError(t, res.Body.Close())
+	}()
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		t.Errorf("expected error to be nil got %v", err)
+	}
+	var bs steamweb.PlayerSummary
+	require.NoError(t, json.Unmarshal(data, &bs))
+	sid := testIdb4nny
+	require.Equal(t, sid.String(), bs.Steamid)
 }
 
-func TestETF2L(t *testing.T) {
-	c, cancel := context.WithTimeout(context.Background(), time.Second*25)
-	defer cancel()
-	seasons, err := getETF2L(c, 76561198004469267)
-	require.NoError(t, err)
-	require.Greater(t, len(seasons), 2)
+func TestGetProfile(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/profile?steam_id=%d", testIdb4nny), nil)
+	w := httptest.NewRecorder()
+	getHandler(handleGetProfile(newCaches(context.Background(), steamCacheTimeout, compCacheTimeout, steamCacheTimeout)))(w, req)
+	res := w.Result()
+	defer func() {
+		require.NoError(t, res.Body.Close())
+	}()
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		t.Errorf("expected error to be nil got %v", err)
+	}
+	var profile Profile
+	require.NoError(t, json.Unmarshal(data, &profile))
+	sid := testIdb4nny
+	require.Equal(t, "none", profile.BanState.EconomyBan)
+	require.Equal(t, sid.String(), profile.Summary.Steamid)
 }

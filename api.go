@@ -6,10 +6,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/leighmacdonald/steamid/v2/steamid"
+	"github.com/leighmacdonald/steamweb"
 	"github.com/pkg/errors"
 	"io"
 	"log"
 	"net/http"
+	"sort"
+	"sync"
 	"time"
 )
 
@@ -47,17 +50,6 @@ func get(ctx context.Context, url string, recv interface{}) (*http.Response, err
 	return resp, nil
 }
 
-type KickEvent struct {
-	SteamID    steamid.SID64 `json:"steam_id"`
-	ServerName string        `json:"server_name"`
-}
-
-type UserProfile struct {
-	SteamId     steamid.SID64 `json:"steam_id"`
-	LogsTFCount int           `json:"logs_tf_count"`
-	Seasons     []Season      `json:"seasons"`
-}
-
 func onPostKick(w http.ResponseWriter, _ *http.Request) {
 	if _, errWrite := fmt.Fprintf(w, ""); errWrite != nil {
 		log.Printf("failed to write response body: %v\n", errWrite)
@@ -75,7 +67,7 @@ func sendItem(w http.ResponseWriter, req *http.Request, item any) {
 	http.ServeContent(w, req, "", time.Now(), bytes.NewReader(resp))
 }
 
-func handleGetSummary() func(http.ResponseWriter, *http.Request) {
+func handleGetSummary(cache caches) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		steamIdQuery := req.URL.Query().Get("steam_id")
 		steamId, steamIdErr := steamid.SID64FromString(steamIdQuery)
@@ -88,20 +80,7 @@ func handleGetSummary() func(http.ResponseWriter, *http.Request) {
 	}
 }
 
-func handleGetCompetitive() func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, req *http.Request) {
-		steamIdQuery := req.URL.Query().Get("steam_id")
-		steamId, steamIdErr := steamid.SID64FromString(steamIdQuery)
-		if steamIdErr != nil {
-			http.Error(w, "Invalid steam id", http.StatusBadRequest)
-			return
-		}
-		item := cache.seasons.Get(steamId)
-		sendItem(w, req, item.Value())
-	}
-}
-
-func handleGetBans() func(http.ResponseWriter, *http.Request) {
+func handleGetBans(cache caches) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		steamIdQuery := req.URL.Query().Get("steam_id")
 		steamId, steamIdErr := steamid.SID64FromString(steamIdQuery)
@@ -114,9 +93,60 @@ func handleGetBans() func(http.ResponseWriter, *http.Request) {
 	}
 }
 
+type Profile struct {
+	Summary   steamweb.PlayerSummary  `json:"summary"`
+	BanState  steamweb.PlayerBanState `json:"ban_state"`
+	Seasons   []Season                `json:"seasons"`
+	LogsCount int64                   `json:"logs_count"`
+}
+
+func handleGetProfile(cache caches) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		steamIdQuery := req.URL.Query().Get("steam_id")
+		steamId, steamIdErr := steamid.SID64FromString(steamIdQuery)
+		if steamIdErr != nil {
+			http.Error(w, "Invalid steam id", http.StatusBadRequest)
+			return
+		}
+		profile := Profile{}
+		var mu sync.RWMutex
+		wg := &sync.WaitGroup{}
+		wg.Add(5)
+		go func() {
+			defer wg.Done()
+			profile.BanState = cache.bans.Get(steamId).Value()
+		}()
+		go func() {
+			defer wg.Done()
+			profile.Summary = cache.summary.Get(steamId).Value()
+		}()
+		go func() {
+			defer wg.Done()
+			profile.LogsCount = cache.logsTF.Get(steamId).Value()
+		}()
+		go func() {
+			defer wg.Done()
+			mu.Lock()
+			profile.Seasons = append(profile.Seasons, cache.etf2lSeasons.Get(steamId).Value()...)
+			mu.Unlock()
+		}()
+		go func() {
+			defer wg.Done()
+			mu.Lock()
+			profile.Seasons = append(profile.Seasons, cache.ugcSeasons.Get(steamId).Value()...)
+			mu.Unlock()
+		}()
+		wg.Wait()
+		sort.Slice(profile.Seasons, func(i, j int) bool {
+			return profile.Seasons[i].DivisionInt < profile.Seasons[j].DivisionInt
+		})
+		sendItem(w, req, &profile)
+	}
+}
+
 func getHandler(wrappedFn func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		if req.Method != "GET" {
+		if req.Method != http.MethodGet {
 			http.Error(w, "Not found", http.StatusNotFound)
 			return
 		}

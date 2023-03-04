@@ -1,10 +1,5 @@
 package main
 
-import (
-	"github.com/leighmacdonald/steamid/v2/steamid"
-	"github.com/pkg/errors"
-)
-
 type Division int
 
 // *Rough* mapping of skill for each division for sorting, 0 being invite
@@ -43,8 +38,4 @@ type Season struct {
 	DivisionInt Division `json:"division_int"`
 	Format      string   `json:"format"`
 	Count       int      `json:"count"`
-}
-
-func fetchSeasons(sid64 steamid.SID64) ([]Season, error) {
-	return nil, errors.New("Not implemented")
 }
