@@ -16,6 +16,7 @@ func TestClientProfile(t *testing.T) {
 	defer testGetProfileServer.Close()
 	client := NewClient(testGetProfileServer.URL)
 	var profile Profile
+
 	require.NoError(t, client.GetProfile(ctx, testIDb4nny, &profile))
 	sid := testIDb4nny
 	require.Equal(t, sid.String(), profile.Summary.Steamid)
