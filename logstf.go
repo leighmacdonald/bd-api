@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	"io"
 	"regexp"
 	"strconv"
@@ -14,20 +16,31 @@ import (
 var reLOGSResults *regexp.Regexp
 
 func getLogsTF(ctx context.Context, steamid steamid.SID64) (int64, error) {
-	resp, err := get(ctx, fmt.Sprintf("https://logs.tf/profile/%d", steamid.Int64()), nil)
-	if err != nil {
-		return 0, err
+	fullURL := fmt.Sprintf("https://logs.tf/profile/%d", steamid.Int64())
+	body, errCache := cacheGet(fullURL)
+	if errCache != nil {
+		if !errors.Is(errCache, errCacheExpired) {
+			return 0, errCache
+		}
+		resp, err := get(ctx, fullURL, nil)
+		if err != nil {
+			return 0, err
+		}
+		newBody, errRead := io.ReadAll(resp.Body)
+		if errRead != nil {
+			return 0, errRead
+		}
+		defer logClose(resp.Body)
+		body = newBody
+		if errSet := cacheSet(fullURL, bytes.NewReader(newBody)); errSet != nil {
+			logger.Error("Failed to update cache", zap.Error(errSet), zap.String("site", "logs.tf"))
+		}
 	}
-	b, errRead := io.ReadAll(resp.Body)
-	if errRead != nil {
-		return 0, errRead
-	}
-	defer logClose(resp.Body)
-	bStr := string(b)
-	if strings.Contains(bStr, "No logs found.") {
+	stringBody := string(body)
+	if strings.Contains(stringBody, "No logs found.") {
 		return 0, nil
 	}
-	m := reLOGSResults.FindStringSubmatch(bStr)
+	m := reLOGSResults.FindStringSubmatch(stringBody)
 	if len(m) != 2 {
 		logger.Error("Got unexpected results for logs.tf")
 		return 0, nil

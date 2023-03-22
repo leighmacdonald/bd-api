@@ -33,7 +33,7 @@ func newCaches(ctx context.Context, summaryTimeout time.Duration, seasonTimeout 
 			ttlcache.WithLoader[steamid.SID64, steamweb.PlayerSummary](ttlcache.LoaderFunc[steamid.SID64, steamweb.PlayerSummary](
 				func(c *ttlcache.Cache[steamid.SID64, steamweb.PlayerSummary], steamId steamid.SID64) *ttlcache.Item[steamid.SID64, steamweb.PlayerSummary] {
 					ids := steamid.Collection{steamId}
-					summaries, errSum := steamweb.PlayerSummaries(ids)
+					summaries, errSum := getSteamSummary(steamId)
 					if errSum != nil || len(ids) != len(summaries) {
 						logger.Error("Failed to fetch summary",
 							zap.Error(errSum), zap.Int64("steam_id", steamId.Int64()))
@@ -48,7 +48,7 @@ func newCaches(ctx context.Context, summaryTimeout time.Duration, seasonTimeout 
 			ttlcache.WithCapacity[steamid.SID64, []steamweb.Friend](maxCapacity),
 			ttlcache.WithLoader[steamid.SID64, []steamweb.Friend](ttlcache.LoaderFunc[steamid.SID64, []steamweb.Friend](
 				func(c *ttlcache.Cache[steamid.SID64, []steamweb.Friend], steamId steamid.SID64) *ttlcache.Item[steamid.SID64, []steamweb.Friend] {
-					friends, errFriends := steamweb.GetFriendList(steamId)
+					friends, errFriends := getSteamFriends(steamId)
 					if errFriends != nil {
 						logger.Error("Failed to fetch friends",
 							zap.Error(errFriends), zap.Int64("steam_id", steamId.Int64()))

@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	"io"
 	"regexp"
 	"strings"
@@ -20,16 +22,27 @@ const (
 var reUGCRank *regexp.Regexp
 
 func getUGC(ctx context.Context, steam steamid.SID64) ([]Season, error) {
-	resp, err := get(ctx,
-		fmt.Sprintf("https://www.ugcleague.com/players_page.cfm?player_id=%d", steam.Int64()), nil)
-	if err != nil {
-		return nil, errors.Wrapf(err, "Failed to get ugc response: %v", err)
+	fullURL := fmt.Sprintf("https://www.ugcleague.com/players_page.cfm?player_id=%d", steam.Int64())
+	body, errCache := cacheGet(fullURL)
+	if errCache != nil {
+		if !errors.Is(errCache, errCacheExpired) {
+			return nil, errCache
+		}
+		resp, err := get(ctx, fullURL, nil)
+		if err != nil {
+			return nil, errors.Wrapf(err, "Failed to get ugc response: %v", err)
+		}
+		newBody, errRead := io.ReadAll(resp.Body)
+		if errRead != nil {
+			return nil, errors.Wrapf(errRead, "Failed to read response body: %v", errRead)
+		}
+		defer logClose(resp.Body)
+		body = newBody
+		if errSet := cacheSet(fullURL, bytes.NewReader(newBody)); errSet != nil {
+			logger.Error("Failed to update cache", zap.Error(errSet), zap.String("site", "ugc"))
+		}
 	}
-	b, errRead := io.ReadAll(resp.Body)
-	if errRead != nil {
-		return nil, errors.Wrapf(errRead, "Failed to read response body: %v", errRead)
-	}
-	seasons, errSeasons := parseUGCRank(string(b))
+	seasons, errSeasons := parseUGCRank(string(body))
 	if errSeasons != nil {
 		return seasons, errors.Wrapf(errSeasons, "Failed to parse ugc response: %v", errSeasons)
 	}

@@ -1,15 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	"io"
-	"regexp"
 	"sort"
-	"strings"
 )
 
 type comp struct {
@@ -81,30 +81,31 @@ func sortSeasons(s []Season) []Season {
 }
 
 func getETF2L(ctx context.Context, sid steamid.SID64) ([]Season, error) {
-	url := fmt.Sprintf("https://api.etf2l.org/player/%d", sid.Int64())
+	fullURL := fmt.Sprintf("https://api.etf2l.org/player/%d.json", sid.Int64())
 	var player etf2lPlayer
-	resp, errGet := get(ctx, url, nil)
-	if errGet != nil {
-		return nil, errGet
+	body, errCache := cacheGet(fullURL)
+	if errCache != nil {
+		if !errors.Is(errCache, errCacheExpired) {
+			return nil, errCache
+		}
+		resp, errGet := get(ctx, fullURL, nil)
+		if errGet != nil {
+			return nil, errGet
+		}
+		newBody, errRead := io.ReadAll(resp.Body)
+		if errRead != nil {
+			return nil, errRead
+		}
+		defer logClose(resp.Body)
+		body = newBody
+		if errSet := cacheSet(fullURL, bytes.NewReader(newBody)); errSet != nil {
+			logger.Error("Failed to update cache", zap.Error(errSet), zap.String("site", "etf2l"))
+		}
 	}
-	b, errRead := io.ReadAll(resp.Body)
-	if errRead != nil {
-		return nil, errRead
-	}
-	rx := regexp.MustCompile(`<div id="source" style="display:none;">(.+?)</div>`)
-	m := rx.FindStringSubmatch(strings.ReplaceAll(string(b), "\n", ""))
-	if len(m) != 2 {
-		return nil, errors.New("Failed to find match")
-	}
-	b = []byte(m[1])
-	if errUnmarshal := json.Unmarshal(b, &player); errUnmarshal != nil {
+	if errUnmarshal := json.Unmarshal(body, &player); errUnmarshal != nil {
 		return nil, errUnmarshal
 	}
-	seasons, errParse := parseETF2L(player)
-	if errParse != nil {
-		return nil, errParse
-	}
-	return seasons, nil
+	return parseETF2L(player)
 }
 
 func parseETF2L(player etf2lPlayer) ([]Season, error) {

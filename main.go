@@ -12,6 +12,8 @@ import (
 
 var logger *zap.Logger
 
+var cacheDir string
+
 func main() {
 	ctx := context.Background()
 	defer func() {
@@ -51,6 +53,7 @@ func logClose(closer io.Closer) {
 }
 
 func init() {
+	cacheDir = "./cache"
 	logConfig := zap.NewDevelopmentConfig()
 	newLogger, errLogger := logConfig.Build()
 	if errLogger != nil {
