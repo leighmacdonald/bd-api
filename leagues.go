@@ -33,6 +33,7 @@ const (
 	UGCRankNone      Division = 10
 )
 
+// League represents supported leagues
 type League string
 
 const (
