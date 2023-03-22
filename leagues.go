@@ -37,9 +37,9 @@ type League string
 
 const (
 	leagueUGC   League = "ugc"
-	leagueESEA         = "esea"
-	leagueETF2L        = "etf2l"
-	leagueRGL          = "rgl"
+	leagueESEA  League = "esea"
+	leagueETF2L League = "etf2l"
+	leagueRGL   League = "rgl"
 )
 
 // Season stores generalized league season data
