@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/leighmacdonald/steamweb"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 )
@@ -15,7 +14,6 @@ import (
 type Client struct {
 	*http.Client
 	endPoint string
-	logger   *zap.Logger
 }
 
 // NewClient returns a configured api client
