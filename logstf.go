@@ -6,7 +6,6 @@ import (
 	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/pkg/errors"
 	"io"
-	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -23,14 +22,14 @@ func getLogsTF(ctx context.Context, steamid steamid.SID64) (int64, error) {
 	if errRead != nil {
 		return 0, errRead
 	}
-	defer resp.Body.Close()
+	defer logClose(resp.Body)
 	bStr := string(b)
 	if strings.Contains(bStr, "No logs found.") {
 		return 0, nil
 	}
 	m := reLOGSResults.FindStringSubmatch(bStr)
 	if len(m) != 2 {
-		log.Printf("Got unexpected results for logs.tf\n")
+		logger.Error("Got unexpected results for logs.tf")
 		return 0, nil
 	}
 	value := strings.ReplaceAll(m[1], ",", "")

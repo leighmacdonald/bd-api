@@ -1,8 +1,8 @@
 package main
 
 import (
+	"go.uber.org/zap"
 	"golang.org/x/time/rate"
-	"log"
 	"net"
 	"net/http"
 	"sync"
@@ -55,7 +55,7 @@ func limit(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ip, _, err := net.SplitHostPort(r.RemoteAddr)
 		if err != nil {
-			log.Print(err.Error())
+			logger.Error("Failed to parse remote host", zap.Error(err))
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}

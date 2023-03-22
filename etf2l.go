@@ -110,8 +110,8 @@ func getETF2L(ctx context.Context, sid steamid.SID64) ([]Season, error) {
 func parseETF2L(player etf2lPlayer) ([]Season, error) {
 	var seasons []Season
 	for _, team := range player.Player.Teams {
-		for _, comp := range team.Competitions {
-			if comp.Division.Tier == nil {
+		for _, competition := range team.Competitions {
+			if competition.Division.Tier == nil {
 				continue
 			}
 			var (
@@ -119,7 +119,7 @@ func parseETF2L(player etf2lPlayer) ([]Season, error) {
 				divStr string
 				format string
 			)
-			switch comp.Division.Name {
+			switch competition.Division.Name {
 			case "Open":
 				div = ETF2LOpen
 				divStr = "Open"
@@ -141,10 +141,15 @@ func parseETF2L(player etf2lPlayer) ([]Season, error) {
 			case "Premiership":
 				div = ETF2LPremiership
 				divStr = "Premiership"
+
 			default:
-				fmt.Printf("Unknown etf2l div: %s\n", comp.Division.Name)
+				fmt.Printf("Unknown etf2l div: %s\n", competition.Division.Name)
 			}
 			switch team.Type {
+			case "National Highlander Team":
+				// Special divs
+				divStr = "Nations Cup"
+				fallthrough
 			case "Highlander":
 				format = "Highlander"
 			case "6on6":
@@ -154,7 +159,7 @@ func parseETF2L(player etf2lPlayer) ([]Season, error) {
 				continue
 			}
 			seasons = append(seasons, Season{
-				League:      "ETF2L",
+				League:      leagueETF2L,
 				Division:    divStr,
 				DivisionInt: div,
 				Format:      format,

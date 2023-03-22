@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/leighmacdonald/steamweb"
+	"go.uber.org/zap"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -15,6 +15,7 @@ import (
 type Client struct {
 	*http.Client
 	endPoint string
+	logger   *zap.Logger
 }
 
 // NewClient returns a configured api client
@@ -37,11 +38,7 @@ func (c *Client) PlayerSummary(ctx context.Context, steamID steamid.SID64, summa
 	if errBody != nil {
 		return errBody
 	}
-	defer func() {
-		if errClose := resp.Body.Close(); errClose != nil {
-			log.Printf("Failed to close body: %v\n", errClose)
-		}
-	}()
+	defer logClose(resp.Body)
 	return json.Unmarshal(body, summary)
 }
 
@@ -59,11 +56,7 @@ func (c *Client) GetPlayerBan(ctx context.Context, steamID steamid.SID64, banSta
 	if errBody != nil {
 		return errBody
 	}
-	defer func() {
-		if errClose := resp.Body.Close(); errClose != nil {
-			log.Printf("Failed to close body: %v\n", errClose)
-		}
-	}()
+	defer logClose(resp.Body)
 	return json.Unmarshal(body, banState)
 }
 
@@ -81,10 +74,6 @@ func (c *Client) GetProfile(ctx context.Context, steamID steamid.SID64, profile 
 	if errBody != nil {
 		return errBody
 	}
-	defer func() {
-		if errClose := resp.Body.Close(); errClose != nil {
-			log.Printf("Failed to close body: %v\n", errClose)
-		}
-	}()
+	defer logClose(resp.Body)
 	return json.Unmarshal(body, profile)
 }

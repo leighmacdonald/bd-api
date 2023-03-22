@@ -55,7 +55,7 @@ func parseUGCRank(body string) ([]Season, error) {
 					format = "4s"
 				}
 				seasons = append(seasons, Season{
-					League:      "UGC",
+					League:      leagueUGC,
 					Division:    curRankStr,
 					DivisionInt: curRank,
 					Format:      format,

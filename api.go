@@ -4,12 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/leighmacdonald/steamweb"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	"io"
-	"log"
 	"net/http"
 	"sort"
 	"sync"
@@ -40,7 +39,7 @@ func get(ctx context.Context, url string, receiver interface{}) (*http.Response,
 		}
 		defer func() {
 			if err := resp.Body.Close(); err != nil {
-				log.Panicf("Failed to close response body: %v", err)
+				logger.Error("Failed to close response body", zap.Error(err))
 			}
 		}()
 		if errUnmarshal := json.Unmarshal(body, &receiver); errUnmarshal != nil {
@@ -50,16 +49,10 @@ func get(ctx context.Context, url string, receiver interface{}) (*http.Response,
 	return resp, nil
 }
 
-func onPostKick(w http.ResponseWriter, _ *http.Request) {
-	if _, errWrite := fmt.Fprintf(w, ""); errWrite != nil {
-		log.Printf("failed to write response body: %v\n", errWrite)
-	}
-}
-
 func sendItem(w http.ResponseWriter, req *http.Request, item any) {
 	resp, jsonErr := json.Marshal(item)
 	if jsonErr != nil {
-		log.Printf("Failed to encode summary: %v\n", jsonErr)
+		logger.Error("Failed to marshal json item", zap.Error(jsonErr))
 		http.Error(w, "Internal error", http.StatusInternalServerError)
 		return
 	}
@@ -72,6 +65,7 @@ func handleGetSummary(cache caches) func(http.ResponseWriter, *http.Request) {
 		steamIDQuery := req.URL.Query().Get("steam_id")
 		steamID, steamIDErr := steamid.SID64FromString(steamIDQuery)
 		if steamIDErr != nil || !steamID.Valid() {
+			logger.Error("Summary request invalid steamid", zap.String("steam_id", steamIDQuery))
 			http.Error(w, "Invalid steam id", http.StatusBadRequest)
 			return
 		}
@@ -107,6 +101,7 @@ func handleGetProfile(cache caches) func(http.ResponseWriter, *http.Request) {
 		steamIDQuery := req.URL.Query().Get("steam_id")
 		steamID, steamIDErr := steamid.SID64FromString(steamIDQuery)
 		if steamIDErr != nil {
+			logger.Error("GetProfile invalid steamid", zap.String("steam_id", steamIDQuery))
 			http.Error(w, "Invalid steam id", http.StatusBadRequest)
 			return
 		}
@@ -172,6 +167,7 @@ func handleGetProfile(cache caches) func(http.ResponseWriter, *http.Request) {
 func getHandler(wrappedFn func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		if req.Method != http.MethodGet {
+			logger.Error("Invalid method", zap.String("method", req.Method))
 			http.Error(w, "Not found", http.StatusNotFound)
 			return
 		}

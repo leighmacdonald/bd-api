@@ -33,9 +33,18 @@ const (
 	UGCRankNone      Division = 10
 )
 
+type League string
+
+const (
+	leagueUGC   League = "ugc"
+	leagueESEA         = "esea"
+	leagueETF2L        = "etf2l"
+	leagueRGL          = "rgl"
+)
+
 // Season stores generalized league season data
 type Season struct {
-	League      string   `json:"league"`
+	League      League   `json:"league"`
 	Division    string   `json:"division"`
 	DivisionInt Division `json:"division_int"`
 	Format      string   `json:"format"`

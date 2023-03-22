@@ -3,34 +3,66 @@ package main
 import (
 	"context"
 	"github.com/leighmacdonald/steamweb"
-	"log"
+	"go.uber.org/zap"
+	"io"
 	"net/http"
 	"os"
 	"regexp"
 )
 
+var logger *zap.Logger
+
 func main() {
 	ctx := context.Background()
+	defer func() {
+		logger.Info("Shutting down")
+		if errSync := logger.Sync(); errSync != nil {
+			logger.Panic("Failed to sync", zap.Error(errSync))
+		}
+	}()
+	listenAddr, found := os.LookupEnv("LISTEN")
+	if !found {
+		listenAddr = ":8888"
+	}
+	steamAPIKey, steamAPIKeyFound := os.LookupEnv("STEAM_API_KEY")
+	if !steamAPIKeyFound || steamAPIKey == "" {
+		logger.Panic("Must set STEAM_API_KEY")
+	}
+	if errSetKey := steamweb.SetKey(steamAPIKey); errSetKey != nil {
+		logger.Panic("Failed to configure steam api key", zap.Error(errSetKey))
+	}
 
 	cache := newCaches(ctx, steamCacheTimeout, compCacheTimeout, steamCacheTimeout)
 
 	http.HandleFunc("/bans", limit(getHandler(handleGetBans(cache))))
 	http.HandleFunc("/summary", limit(getHandler(handleGetSummary(cache))))
 	http.HandleFunc("/profile", limit(getHandler(handleGetProfile(cache))))
-	http.HandleFunc("/kick", limit(onPostKick))
 
-	if errServe := http.ListenAndServe(":8090", nil); errServe != nil {
-		log.Printf("HTTP Server returned error: %v", errServe)
+	logger.Info("Starting HTTP listener", zap.String("host", listenAddr))
+	if errServe := http.ListenAndServe(listenAddr, nil); errServe != nil {
+		logger.Error("HTTP listener error", zap.Error(errServe))
+	}
+}
+
+func logClose(closer io.Closer) {
+	if err := closer.Close(); err != nil {
+		logger.Error("Failed to close", zap.Error(err))
 	}
 }
 
 func init() {
+	logConfig := zap.NewDevelopmentConfig()
+	newLogger, errLogger := logConfig.Build()
+	if errLogger != nil {
+		panic(errLogger)
+	}
+	logger = newLogger
 	steamAPIKey, steamAPIKeyFound := os.LookupEnv("STEAM_API_KEY")
 	if !steamAPIKeyFound || steamAPIKey == "" {
-		log.Panicf("Must set STEAM_API_KEY")
+		panic("Must set STEAM_API_KEY")
 	}
 	if errSetKey := steamweb.SetKey(steamAPIKey); errSetKey != nil {
-		log.Panicf("Failed to set steam api key: %v\n", errSetKey)
+		panic(errSetKey)
 	}
 	reLOGSResults = regexp.MustCompile(`<p>(\d+|\d+,\d+)\sresults</p>`)
 	//reETF2L = regexp.MustCompile(`.org/forum/user/(\d+)`)
