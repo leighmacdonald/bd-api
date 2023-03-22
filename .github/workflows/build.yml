@@ -24,7 +24,7 @@ jobs:
         run: make check_deps
 
       - name: Lint golangci-lint
-        run: make link_golangci
+        run: make lint_golangci
 
       - name: Lint vet
         run: make lint_vet
