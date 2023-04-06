@@ -15,7 +15,7 @@ lint_vet:
 lint_imports:
 	@test -z $(goimports -e -d . | tee /dev/stderr)
 
-lint_cyclo:ssh mt
+lint_cyclo:
 	@gocyclo -over 45 .
 
 lint_golint:
