@@ -82,7 +82,7 @@ type Profile struct {
 func loadProfile(steamID steamid.SID64, profile *Profile) error {
 	var mu sync.RWMutex
 	wg := &sync.WaitGroup{}
-	wg.Add(6)
+	wg.Add(7)
 	go func() {
 		defer wg.Done()
 		item := cache.bans.Get(steamID)
