@@ -10,9 +10,7 @@ import (
 	"github.com/alecthomas/chroma/styles"
 	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/leighmacdonald/steamweb"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"io"
 	"log"
 	"net/http"
 	"sort"
@@ -29,40 +27,6 @@ func init() {
 	http.HandleFunc(profilesSlugUrl, limit(getHandler(handleGetProfiles())))
 }
 
-func get(ctx context.Context, url string, receiver interface{}) (*http.Response, error) {
-	req, errNewReq := http.NewRequestWithContext(ctx, "GET", url, nil)
-	if errNewReq != nil {
-		return nil, errors.Wrapf(errNewReq, "Failed to create request: %v", errNewReq)
-	}
-	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{
-		// Don't follow redirects
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-	resp, errResp := client.Do(req)
-	if errResp != nil {
-		return nil, errors.Wrapf(errResp, "error during get: %v", errResp)
-	}
-
-	if receiver != nil {
-		body, errRead := io.ReadAll(resp.Body)
-		if errRead != nil {
-			return nil, errors.Wrapf(errNewReq, "error reading stream: %v", errRead)
-		}
-		defer func() {
-			if err := resp.Body.Close(); err != nil {
-				log.Panicf("Failed to close response body: %v", err)
-			}
-		}()
-		if errUnmarshal := json.Unmarshal(body, &receiver); errUnmarshal != nil {
-			return resp, errors.Wrapf(errUnmarshal, "Failed to decode json: %v", errUnmarshal)
-		}
-	}
-	return resp, nil
-}
-
 func onPostKick(w http.ResponseWriter, _ *http.Request) {
 	if _, errWrite := fmt.Fprintf(w, ""); errWrite != nil {
 		log.Printf("failed to write response body: %v\n", errWrite)
@@ -72,7 +36,7 @@ func onPostKick(w http.ResponseWriter, _ *http.Request) {
 func sendItem(w http.ResponseWriter, req *http.Request, item any) {
 	resp, jsonErr := json.Marshal(item)
 	if jsonErr != nil {
-		log.Printf("Failed to encode summary: %v\n", jsonErr)
+		logger.Error("Failed to marshal json item", zap.Error(jsonErr))
 		http.Error(w, "Internal error", http.StatusInternalServerError)
 		return
 	}

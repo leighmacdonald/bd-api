@@ -4,9 +4,9 @@ all: fmt check
 fmt:
 	gofmt -s -w .
 
-check: link_golangci lint_vet lint_imports lint_cyclo lint_golint static
+check: lint_golangci lint_vet lint_imports lint_cyclo lint_golint static
 
-link_golangci:
+lint_golangci:
 	@golangci-lint run --timeout 3m
 
 lint_vet:
@@ -22,10 +22,10 @@ lint_golint:
 	@golint -set_exit_status $(go list -tags ci ./...)
 
 static:
-	@staticcheck -go 1.19 ./...
+	@staticcheck -go 1.20 ./...
 
 check_deps:
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.51.2
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.52.2
 	go install golang.org/x/tools/cmd/goimports@latest
 	go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
 	go install golang.org/x/lint/golint@latest

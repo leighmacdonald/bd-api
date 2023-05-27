@@ -5,7 +5,7 @@ import (
 	"github.com/jellydator/ttlcache/v3"
 	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/leighmacdonald/steamweb"
-	"log"
+	"go.uber.org/zap"
 	"time"
 )
 
@@ -33,9 +33,10 @@ func newCaches(ctx context.Context, summaryTimeout time.Duration, seasonTimeout 
 			ttlcache.WithLoader[steamid.SID64, steamweb.PlayerSummary](ttlcache.LoaderFunc[steamid.SID64, steamweb.PlayerSummary](
 				func(c *ttlcache.Cache[steamid.SID64, steamweb.PlayerSummary], steamId steamid.SID64) *ttlcache.Item[steamid.SID64, steamweb.PlayerSummary] {
 					ids := steamid.Collection{steamId}
-					summaries, errSum := steamweb.PlayerSummaries(ids)
+					summaries, errSum := getSteamSummary(steamId)
 					if errSum != nil || len(ids) != len(summaries) {
-						log.Printf("Failed to fetch summary: %v\n", errSum)
+						logger.Error("Failed to fetch summary",
+							zap.Error(errSum), zap.Int64("steam_id", steamId.Int64()))
 						return nil
 					}
 
@@ -47,9 +48,10 @@ func newCaches(ctx context.Context, summaryTimeout time.Duration, seasonTimeout 
 			ttlcache.WithCapacity[steamid.SID64, []steamweb.Friend](maxCapacity),
 			ttlcache.WithLoader[steamid.SID64, []steamweb.Friend](ttlcache.LoaderFunc[steamid.SID64, []steamweb.Friend](
 				func(c *ttlcache.Cache[steamid.SID64, []steamweb.Friend], steamId steamid.SID64) *ttlcache.Item[steamid.SID64, []steamweb.Friend] {
-					friends, errFriends := steamweb.GetFriendList(steamId)
+					friends, errFriends := getSteamFriends(steamId)
 					if errFriends != nil {
-						log.Printf("Failed to fetch friends: %v\n", errFriends)
+						logger.Error("Failed to fetch friends",
+							zap.Error(errFriends), zap.Int64("steam_id", steamId.Int64()))
 						return nil
 					}
 					return c.Set(steamId, friends, summaryTimeout)
@@ -62,9 +64,10 @@ func newCaches(ctx context.Context, summaryTimeout time.Duration, seasonTimeout 
 				func(c *ttlcache.Cache[steamid.SID64, []Season], steamId steamid.SID64) *ttlcache.Item[steamid.SID64, []Season] {
 					timeout, cancel := context.WithTimeout(ctx, time.Second*10)
 					defer cancel()
-					seasons, errSum := getUGC(timeout, steamId)
-					if errSum != nil {
-						log.Printf("Failed to fetch ugc hist: %v\n", errSum)
+					seasons, errUGC := getUGC(timeout, steamId)
+					if errUGC != nil {
+						logger.Error("Failed to fetch ugc history",
+							zap.Error(errUGC), zap.Int64("steam_id", steamId.Int64()))
 						return nil
 					}
 					return c.Set(steamId, seasons, seasonTimeout)
@@ -77,9 +80,10 @@ func newCaches(ctx context.Context, summaryTimeout time.Duration, seasonTimeout 
 				func(c *ttlcache.Cache[steamid.SID64, int64], steamId steamid.SID64) *ttlcache.Item[steamid.SID64, int64] {
 					timeout, cancel := context.WithTimeout(ctx, time.Second*30)
 					defer cancel()
-					logCount, errSum := getLogsTF(timeout, steamId)
-					if errSum != nil {
-						log.Printf("Failed to fetch lost count: %v\n", errSum)
+					logCount, errLogs := getLogsTF(timeout, steamId)
+					if errLogs != nil {
+						logger.Error("Failed to fetch logs",
+							zap.Error(errLogs), zap.Int64("steam_id", steamId.Int64()))
 						return nil
 					}
 					return c.Set(steamId, logCount, seasonTimeout)
@@ -92,9 +96,10 @@ func newCaches(ctx context.Context, summaryTimeout time.Duration, seasonTimeout 
 				func(c *ttlcache.Cache[steamid.SID64, []Season], steamId steamid.SID64) *ttlcache.Item[steamid.SID64, []Season] {
 					timeout, cancel := context.WithTimeout(ctx, time.Second*10)
 					defer cancel()
-					seasons, errSum := getETF2L(timeout, steamId)
-					if errSum != nil {
-						log.Printf("Failed to fetch etf2l hist: %v\n", errSum)
+					seasons, errETF2L := getETF2L(timeout, steamId)
+					if errETF2L != nil {
+						logger.Error("Failed to fetch etf2l",
+							zap.Error(errETF2L), zap.Int64("steam_id", steamId.Int64()))
 						return nil
 					}
 					return c.Set(steamId, seasons, seasonTimeout)
@@ -109,7 +114,7 @@ func newCaches(ctx context.Context, summaryTimeout time.Duration, seasonTimeout 
 					defer cancel()
 					seasons, errSum := getRGL(timeout, steamId)
 					if errSum != nil {
-						log.Printf("Failed to fetch rgl hist: %v\n", errSum)
+						logger.Error("Failed to fetch rgl hist", zap.Error(errSum))
 						return nil
 					}
 					return c.Set(steamId, seasons, seasonTimeout)
@@ -121,9 +126,10 @@ func newCaches(ctx context.Context, summaryTimeout time.Duration, seasonTimeout 
 			ttlcache.WithLoader[steamid.SID64, steamweb.PlayerBanState](ttlcache.LoaderFunc[steamid.SID64, steamweb.PlayerBanState](
 				func(c *ttlcache.Cache[steamid.SID64, steamweb.PlayerBanState], steamId steamid.SID64) *ttlcache.Item[steamid.SID64, steamweb.PlayerBanState] {
 					ids := steamid.Collection{steamId}
-					bans, errSum := steamweb.GetPlayerBans(ids)
-					if errSum != nil || len(ids) != len(bans) {
-						log.Printf("Failed to fetch ban: %v\n", errSum)
+					bans, errBans := steamweb.GetPlayerBans(ids)
+					if errBans != nil || len(ids) != len(bans) {
+						logger.Error("Failed to fetch player bans",
+							zap.Error(errBans), zap.Int64("steam_id", steamId.Int64()))
 						return nil
 					}
 					return c.Set(steamId, bans[0], bansTimeout)

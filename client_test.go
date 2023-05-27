@@ -14,7 +14,6 @@ func TestClientProfile(t *testing.T) {
 	defer testGetProfileServer.Close()
 	client := NewClient(testGetProfileServer.URL)
 	var profile Profile
-
 	require.NoError(t, client.GetProfile(ctx, testIDb4nny, &profile))
 	sid := testIDb4nny
 	require.Equal(t, sid.String(), profile.Summary.Steamid)
@@ -25,6 +24,21 @@ func TestClientProfile(t *testing.T) {
 	errSummaries := clientSummary.PlayerSummary(ctx, sid, &summary)
 	require.NoError(t, errSummaries)
 	require.EqualValues(t, profile.Summary, summary)
+	hasUGC, hasETF2L, hasRGL := false, false, false
+	for _, season := range profile.Seasons {
+		switch season.League {
+		case leagueUGC:
+			hasUGC = true
+		case leagueETF2L:
+			hasETF2L = true
+		case leagueRGL:
+			hasRGL = true
+		}
+	}
+	require.True(t, hasETF2L)
+	require.True(t, hasUGC)
+	require.False(t, hasRGL)
+	require.True(t, profile.LogsCount > 5000)
 }
 
 func TestClientBans(t *testing.T) {

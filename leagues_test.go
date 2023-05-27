@@ -33,9 +33,9 @@ func TestGetUGC(t *testing.T) {
 func TestETF2L(t *testing.T) {
 	c, cancel := context.WithTimeout(context.Background(), time.Second*25)
 	defer cancel()
-	seasons, err := getETF2L(c, 76561198004469267)
+	seasons, err := getETF2L(c, testIDb4nny)
 	require.NoError(t, err)
-	require.Greater(t, len(seasons), 2)
+	require.Greater(t, len(seasons), 3)
 }
 
 func TestRGL(t *testing.T) {

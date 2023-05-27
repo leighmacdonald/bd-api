@@ -30,9 +30,19 @@ const (
 	UnknownDivision     Division = 20
 )
 
+// League represents supported leagues
+type League string
+
+const (
+	leagueUGC   League = "ugc"
+	leagueESEA  League = "esea"
+	leagueETF2L League = "etf2l"
+	leagueRGL   League = "rgl"
+)
+
 // Season stores generalized league season data
 type Season struct {
-	League      string   `json:"league"`
+	League      League   `json:"league"`
 	Division    string   `json:"division"`
 	DivisionInt Division `json:"division_int"`
 	Format      string   `json:"format"`
