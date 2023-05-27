@@ -11,6 +11,7 @@ import (
 const (
 	testIDb4nny    = steamid.SID64(76561197970669109)
 	testIDSquirrel = steamid.SID64(76561197961279983)
+	testIDCamper   = steamid.SID64(76561197992870439)
 )
 
 func TestGetLogsTF(t *testing.T) {
@@ -27,7 +28,6 @@ func TestGetUGC(t *testing.T) {
 	seasons, errLogs := getUGC(context.Background(), testIDb4nny)
 	require.NoError(t, errLogs)
 	require.GreaterOrEqual(t, 30, len(seasons))
-
 }
 
 func TestETF2L(t *testing.T) {
@@ -36,4 +36,10 @@ func TestETF2L(t *testing.T) {
 	seasons, err := getETF2L(c, 76561198004469267)
 	require.NoError(t, err)
 	require.Greater(t, len(seasons), 2)
+}
+
+func TestRGL(t *testing.T) {
+	seasons, errSeasons := getRGL(context.Background(), 76561198084134025)
+	require.NoError(t, errSeasons)
+	require.LessOrEqual(t, 1, len(seasons))
 }

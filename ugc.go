@@ -29,6 +29,7 @@ func getUGC(ctx context.Context, steam steamid.SID64) ([]Season, error) {
 	if errRead != nil {
 		return nil, errors.Wrapf(errRead, "Failed to read response body: %v", errRead)
 	}
+	defer logCloser(resp.Body)
 	seasons, errSeasons := parseUGCRank(string(b))
 	if errSeasons != nil {
 		return seasons, errors.Wrapf(errSeasons, "Failed to parse ugc response: %v", errSeasons)

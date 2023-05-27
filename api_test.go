@@ -1,21 +1,26 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/leighmacdonald/steamweb"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
+func testLogger() *zap.Logger {
+	l, _ := zap.NewDevelopment()
+	return l
+}
+
 func TestGetBans(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/bans?steam_id=%d", testIDb4nny), nil)
 	w := httptest.NewRecorder()
-	getHandler(handleGetBans(newCaches(context.Background(), steamCacheTimeout, compCacheTimeout, steamCacheTimeout)))(w, req)
+	getHandler(handleGetBans())(w, req)
 	res := w.Result()
 	defer func() {
 		require.NoError(t, res.Body.Close())
@@ -33,7 +38,7 @@ func TestGetBans(t *testing.T) {
 func TestGetSummary(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/summary?steam_id=%d", testIDb4nny), nil)
 	w := httptest.NewRecorder()
-	getHandler(handleGetBans(newCaches(context.Background(), steamCacheTimeout, compCacheTimeout, steamCacheTimeout)))(w, req)
+	getHandler(handleGetBans())(w, req)
 	res := w.Result()
 	defer func() {
 		require.NoError(t, res.Body.Close())
@@ -51,7 +56,7 @@ func TestGetSummary(t *testing.T) {
 func TestGetProfile(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/profile?steam_id=%d", testIDb4nny), nil)
 	w := httptest.NewRecorder()
-	getHandler(handleGetProfile(newCaches(context.Background(), steamCacheTimeout, compCacheTimeout, steamCacheTimeout)))(w, req)
+	getHandler(handleGetProfile())(w, req)
 	res := w.Result()
 	defer func() {
 		require.NoError(t, res.Body.Close())

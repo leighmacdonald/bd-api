@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"github.com/leighmacdonald/steamweb"
 	"github.com/stretchr/testify/require"
 	"net/http"
@@ -10,9 +9,8 @@ import (
 )
 
 func TestClientProfile(t *testing.T) {
-	ctx := context.Background()
-	cache := newCaches(ctx, steamCacheTimeout, compCacheTimeout, steamCacheTimeout)
-	testGetProfileServer := httptest.NewServer(http.HandlerFunc(handleGetProfile(cache)))
+	cache = newCaches(ctx, steamCacheTimeout, compCacheTimeout, steamCacheTimeout)
+	testGetProfileServer := httptest.NewServer(http.HandlerFunc(handleGetProfile()))
 	defer testGetProfileServer.Close()
 	client := NewClient(testGetProfileServer.URL)
 	var profile Profile
@@ -20,7 +18,7 @@ func TestClientProfile(t *testing.T) {
 	require.NoError(t, client.GetProfile(ctx, testIDb4nny, &profile))
 	sid := testIDb4nny
 	require.Equal(t, sid.String(), profile.Summary.Steamid)
-	testGetSummaryServer := httptest.NewServer(http.HandlerFunc(handleGetSummary(cache)))
+	testGetSummaryServer := httptest.NewServer(http.HandlerFunc(handleGetSummary()))
 	defer testGetSummaryServer.Close()
 	clientSummary := NewClient(testGetSummaryServer.URL)
 	var summary steamweb.PlayerSummary
@@ -30,9 +28,8 @@ func TestClientProfile(t *testing.T) {
 }
 
 func TestClientBans(t *testing.T) {
-	ctx := context.Background()
-	cache := newCaches(ctx, steamCacheTimeout, compCacheTimeout, steamCacheTimeout)
-	testGetProfileServer := httptest.NewServer(http.HandlerFunc(handleGetBans(cache)))
+	cache = newCaches(ctx, steamCacheTimeout, compCacheTimeout, steamCacheTimeout)
+	testGetProfileServer := httptest.NewServer(http.HandlerFunc(handleGetBans()))
 	defer testGetProfileServer.Close()
 	client := NewClient(testGetProfileServer.URL)
 	var bans steamweb.PlayerBanState

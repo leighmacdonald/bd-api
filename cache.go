@@ -75,7 +75,7 @@ func newCaches(ctx context.Context, summaryTimeout time.Duration, seasonTimeout 
 			ttlcache.WithCapacity[steamid.SID64, int64](maxCapacity),
 			ttlcache.WithLoader[steamid.SID64, int64](ttlcache.LoaderFunc[steamid.SID64, int64](
 				func(c *ttlcache.Cache[steamid.SID64, int64], steamId steamid.SID64) *ttlcache.Item[steamid.SID64, int64] {
-					timeout, cancel := context.WithTimeout(ctx, time.Second*10)
+					timeout, cancel := context.WithTimeout(ctx, time.Second*30)
 					defer cancel()
 					logCount, errSum := getLogsTF(timeout, steamId)
 					if errSum != nil {
@@ -105,15 +105,14 @@ func newCaches(ctx context.Context, summaryTimeout time.Duration, seasonTimeout 
 			ttlcache.WithCapacity[steamid.SID64, []Season](maxCapacity),
 			ttlcache.WithLoader[steamid.SID64, []Season](ttlcache.LoaderFunc[steamid.SID64, []Season](
 				func(c *ttlcache.Cache[steamid.SID64, []Season], steamId steamid.SID64) *ttlcache.Item[steamid.SID64, []Season] {
-					return nil
-					//timeout, cancel := context.WithTimeout(ctx, time.Second*10)
-					//defer cancel()
-					//seasons, errSum := getRGL(timeout, steamId)
-					//if errSum != nil {
-					//	log.Printf("Failed to fetch ugc hist: %v\n", errSum)
-					//	return nil
-					//}
-					//return c.Set(steamId, seasons, seasonTimeout)
+					timeout, cancel := context.WithTimeout(ctx, time.Second*30)
+					defer cancel()
+					seasons, errSum := getRGL(timeout, steamId)
+					if errSum != nil {
+						log.Printf("Failed to fetch rgl hist: %v\n", errSum)
+						return nil
+					}
+					return c.Set(steamId, seasons, seasonTimeout)
 				},
 			)),
 		),

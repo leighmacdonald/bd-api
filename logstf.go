@@ -23,7 +23,7 @@ func getLogsTF(ctx context.Context, steamid steamid.SID64) (int64, error) {
 	if errRead != nil {
 		return 0, errRead
 	}
-	defer resp.Body.Close()
+	defer logCloser(resp.Body)
 	bStr := string(b)
 	if strings.Contains(bStr, "No logs found.") {
 		return 0, nil

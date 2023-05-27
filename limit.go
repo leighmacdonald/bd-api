@@ -18,11 +18,6 @@ var visitors map[string]*visitor
 
 var visitorsMu sync.Mutex
 
-func init() {
-	visitors = map[string]*visitor{}
-	go cleanupVisitors()
-}
-
 func getVisitor(ip string) *rate.Limiter {
 	visitorsMu.Lock()
 	defer visitorsMu.Unlock()

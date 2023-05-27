@@ -5,11 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/leighmacdonald/steamid/v2/steamid"
-	"github.com/pkg/errors"
 	"io"
-	"regexp"
 	"sort"
-	"strings"
 )
 
 type comp struct {
@@ -81,7 +78,7 @@ func sortSeasons(s []Season) []Season {
 }
 
 func getETF2L(ctx context.Context, sid steamid.SID64) ([]Season, error) {
-	url := fmt.Sprintf("https://api.etf2l.org/player/%d", sid.Int64())
+	url := fmt.Sprintf("https://api.etf2l.org/player/%d.json", sid.Int64())
 	var player etf2lPlayer
 	resp, errGet := get(ctx, url, nil)
 	if errGet != nil {
@@ -91,12 +88,7 @@ func getETF2L(ctx context.Context, sid steamid.SID64) ([]Season, error) {
 	if errRead != nil {
 		return nil, errRead
 	}
-	rx := regexp.MustCompile(`<div id="source" style="display:none;">(.+?)</div>`)
-	m := rx.FindStringSubmatch(strings.ReplaceAll(string(b), "\n", ""))
-	if len(m) != 2 {
-		return nil, errors.New("Failed to find match")
-	}
-	b = []byte(m[1])
+	defer logCloser(resp.Body)
 	if errUnmarshal := json.Unmarshal(b, &player); errUnmarshal != nil {
 		return nil, errUnmarshal
 	}
@@ -110,54 +102,51 @@ func getETF2L(ctx context.Context, sid steamid.SID64) ([]Season, error) {
 func parseETF2L(player etf2lPlayer) ([]Season, error) {
 	var seasons []Season
 	for _, team := range player.Player.Teams {
-		for _, comp := range team.Competitions {
-			if comp.Division.Tier == nil {
-				continue
-			}
+		for _, competition := range team.Competitions {
 			var (
-				div    Division
-				divStr string
-				format string
+				div    = UnknownDivision
+				divStr = competition.Competition
+				format = "N/A"
 			)
-			switch comp.Division.Name {
-			case "Open":
-				div = ETF2LOpen
-				divStr = "Open"
-			case "Mid":
-				div = ETF2LMid
-				divStr = "Mid"
-			case "Division 4":
-				div = ETF2LLow
-				divStr = "Low"
-			case "Division 3":
-				div = ETF2LMid
-				divStr = "Div 3"
-			case "Division 2":
-				div = ETF2LDiv2
-				divStr = "Div 2"
-			case "Division 1":
-				div = ETF2LDiv1
-				divStr = "Div 1"
-			case "Premiership":
-				div = ETF2LPremiership
-				divStr = "Premiership"
-			default:
-				fmt.Printf("Unknown etf2l div: %s\n", comp.Division.Name)
+			if competition.Division.Name != nil {
+				switch competition.Division.Name {
+				case "Open":
+					div = ETF2LOpen
+					divStr = "Open"
+				case "Mid":
+					div = ETF2LMid
+					divStr = "Mid"
+				case "Division 4":
+					div = ETF2LLow
+					divStr = "Low"
+				case "Division 3":
+					div = ETF2LMid
+					divStr = "Div 3"
+				case "Division 2":
+					div = ETF2LDiv2
+					divStr = "Div 2"
+				case "Division 1":
+					div = ETF2LDiv1
+					divStr = "Div 1"
+				case "Premiership":
+					div = ETF2LPremiership
+					divStr = "Premiership"
+				default:
+					fmt.Printf("Unknown etf2l div: %s\n", competition.Division.Name)
+				}
 			}
 			switch team.Type {
 			case "Highlander":
 				format = "Highlander"
 			case "6on6":
 				format = "6s"
-			default:
-				//log.Printf("Unknown etf2l format: %s\n", team.Type)
-				continue
 			}
 			seasons = append(seasons, Season{
 				League:      "ETF2L",
 				Division:    divStr,
 				DivisionInt: div,
 				Format:      format,
+				TeamName:    team.Name,
 			})
 		}
 	}
