@@ -1,0 +1,3062 @@
+<!DOCTYPE html>
+<html lang="en" class="tee">
+<head>
+<script type="text/javascript" src="themes/sourcebans-web-theme-fluent/scripts/initial.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<style id="colorTheme" type="text/css"></style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ban List | Server dos Brothers - BANS</title>
+<link rel="Shortcut Icon" href="themes/sourcebans-web-theme-fluent/images/favicon.ico" />
+<link rel="stylesheet" type="text/css" href="themes/sourcebans-web-theme-fluent/style/global.css?v05212021" />
+<link rel="stylesheet" type="text/css" href="themes/sourcebans-web-theme-fluent/style/global.css.map?v05212021" />
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/v4-shims.css">
+<meta name="description" content="Server dos Brothers - Sourcebans" />
+<script type="text/javascript" src="themes/sourcebans-web-theme-fluent/scripts/sourcebans.js"></script>
+<script type="text/javascript" src="./scripts/mootools.js"></script>
+<script type="text/javascript" src="./scripts/contextMenoo.js"></script>
+<script type="text/javascript">
+var xajaxRequestUri="./index.php";
+var xajaxDebug=false;
+var xajaxStatusMessages=false;
+var xajaxWaitCursor=true;
+var xajaxDefinedGet=0;
+var xajaxDefinedPost=1;
+var xajaxLoaded=false;
+function xajax_Plogin(){return xajax.call("Plogin", arguments, 1);}
+function xajax_ServerHostPlayers(){return xajax.call("ServerHostPlayers", arguments, 1);}
+function xajax_ServerHostProperty(){return xajax.call("ServerHostProperty", arguments, 1);}
+function xajax_ServerHostPlayers_list(){return xajax.call("ServerHostPlayers_list", arguments, 1);}
+function xajax_ServerPlayers(){return xajax.call("ServerPlayers", arguments, 1);}
+function xajax_LostPassword(){return xajax.call("LostPassword", arguments, 1);}
+function xajax_RefreshServer(){return xajax.call("RefreshServer", arguments, 1);}
+	</script>
+<script type="text/javascript" src="scripts/xajax.js"></script>
+<script type="text/javascript">
+window.setTimeout(function () { if (!xajaxLoaded) { alert('Error: the xajax Javascript file could not be included. Perhaps the URL is incorrect?\nURL: scripts/xajax.js'); } }, 6000);
+	</script>
+</head>
+<body>
+<header class="header">
+<div class="layout_container responsive_hide:mobile flex flex-jc:space-between flex-ai:center">
+<div class="flex flex-fd:column text:left">
+<a href="./index.php?p=home" class="header_logo">
+<img src="images/logos/sb-large.png" alt="SourceBans Logo" />
+</a>
+</div>
+<div class="flex flex-fd:column text:right responsive_show:desktop">
+<form method="get" action="index.php">
+<input type="hidden" name="p" value="banlist" />
+<input class="searchbox" alt="Search Bans" name="searchText" type="text" onfocus="this.value='';" onblur="if (this.value=='') {this.value=' Search Bans...';}" value=" Search Bans..." />
+<input class="button_search" type="submit" name="Submit" value="Search" />
+</form>
+<form method="get" action="index.php">
+<input type="hidden" name="p" value="commslist" />
+<input class="searchbox" alt="Search Comms" name="searchText" type="text" onfocus="this.value='';" onblur="if (this.value=='') {this.value=' Search Comms...';}" value=" Search Comms... " />
+<input class="button_search" type="submit" name="Submit" value="Search" />
+</form>
+</div>
+</div>
+</header>
+<main>
+<div class="layout_topBar">
+<div class="layout_container flex flex-jc:end flex-ai:center">
+<ul class="SocialMedia layout_topBar_action flex">
+<li>
+<button id="user_action_change_dark" aria-label="Dark mode"><i class="fas fa-moon"></i></button>
+</li>
+<li class="jscolor_li">
+<button data-jscolor aria-label="Color"></button>
+</li>
+<li id="jscolor_reset" class="jscolor_li" style="display: none;">
+<button aria-label="Reset color"><i class="fa fa-refresh"></i></button>
+</li>
+
+
+
+
+
+
+
+
+
+</ul>
+<ul class="layout_topBar_userBar responsive_show:desktop flex flex-ai:center">
+<li>
+<a class="button button-success" href="index.php?p=login">Existing user? Sign In</a>
+</li>
+</ul>
+<button id="button_mobile_open" class="nav_mobile_open responsive_hide:desktop" aria-label="Mobile nav open">
+<i class="fas fa-bars"></i>
+</button>
+</div>
+</div>
+<div id="layout_mobile" class="nav_mobile">
+<button id="button_mobile_close" class="nav_mobile_close" aria-label="Mobile nav close">
+<i class="fas fa-times"></i>
+</button>
+<div class="nav_mobile_content">
+<div class="nav_mobile_tab_top padding flex">
+<a class="button button-success button:full" href="index.php?p=login">Existing user? Sign In</a>
+</div>
+<nav class="nav_mobile_tab_nav">
+<ul>
+<li class="nonactive">
+<a href="index.php?p=home" data-nav="home">
+Dashboard
+</a>
+</li>
+<li class="nonactive">
+<a href="index.php?p=servers" data-nav="servers">
+Servers
+</a>
+</li>
+<li class="active">
+<a href="index.php?p=banlist" data-nav="banlist">
+Bans
+</a>
+</li>
+<li class="nonactive">
+<a href="index.php?p=commslist" data-nav="commslist">
+Comms
+</a>
+</li>
+<li class="nonactive">
+<a href="index.php?p=submit" data-nav="submit">
+Report a Player
+</a>
+</li>
+<li class="nonactive">
+<a href="index.php?p=protest" data-nav="protest">
+Appeal a Ban
+</a>
+</li>
+</ul>
+</nav>
+</div>
+<div class="nav_mobile_background"></div>
+</div>
+<nav id="navBar" class="nav responsive_show:desktop">
+<div class="nav_tab">
+<ul>
+<li class="nonactive">
+<a href="index.php?p=home" data-nav="home">
+Dashboard
+</a>
+</li>
+<li class="nonactive">
+<a href="index.php?p=servers" data-nav="servers">
+Servers
+</a>
+</li>
+<li class="active">
+<a href="index.php?p=banlist" data-nav="banlist">
+Bans
+</a>
+</li>
+<li class="nonactive">
+<a href="index.php?p=commslist" data-nav="commslist">
+Comms
+</a>
+</li>
+<li class="nonactive">
+<a href="index.php?p=submit" data-nav="submit">
+Report a Player
+</a>
+</li>
+<li class="nonactive">
+<a href="index.php?p=protest" data-nav="protest">
+Appeal a Ban
+</a>
+</li>
+</ul>
+</div>
+</nav>
+<div id="mainwrapper" class="layout_body flex:11">
+<div id="dialog-placement" class="popup popup_block">
+<div class="layout_box">
+<div class="popup_title padding:half">
+<div id="dialog-title"></div>
+</div>
+<div class="padding:half">
+<div class="popup_icon margin-bottom:half">
+<i id="dialog-icon"></i>
+</div>
+<div id="dialog-content-text"></div>
+</div>
+<div class="popup_footer padding:half flex" id="dialog-control"></div>
+</div>
+</div>
+<div id="dialog-placement-background" class="popup popup_background" onclick="closeMsg('');"></div>
+<div class="page_header">
+<h1>Ban List</h1>
+</div>
+<div class="breadcrumb">
+<i class="fas fa-angle-right"></i> <a href="index.php?p=home">Home</a>
+<i class="fas fa-angle-right"></i> <a href="index.php?p=banlist">Ban List</a>
+</div>
+<div class="layout_box margin-bottom">
+<div class="table padding">
+<div class="table_box">
+<table>
+<tbody>
+<tr class="collapse">
+<td class="text:center">
+<span class="text:bold">Advanced Search</span> (Click)
+</td>
+</tr>
+<tr class="table_hide">
+<td colspan="1">
+<div class="collapse_content flex flex-jc:center">
+<div class="padding">
+<div class="flex m:flex-fd:column">
+<div class="flex:11 margin-right">
+<div class="margin-bottom:half">
+<input id="name" name="search_type" class="form-radio" type="radio" value="name" />
+<label for="name" class="form-label form-label:bottom">
+Nickname
+</label>
+<input class="form-input form-full" type="text" id="nick" value onmouseup="$('name').checked = true" />
+</div>
+<div class="margin-bottom:half">
+<input id="steam_" type="radio" name="search_type" class="form-radio" value="radiobutton" />
+<label for="steam_" class="form-label form-label:bottom form-label:right">
+Steam ID
+</label>
+<div class="flex">
+<input class="form-input form-full margin-right" type="text" id="steamid" value onmouseup="$('steam_').checked = true" />
+<select class="form-select form-full" id="steam_match" onmouseup="$('steam_').checked = true">
+<option value="0" selected>Exact Match</option>
+<option value="1">Partial Match</option>
+</select>
+</div>
+</div>
+<div class="margin-bottom:half">
+<input id="reason_" type="radio" name="search_type" class="form-radio" value="radiobutton" />
+<label for="ban_reason" class="form-label form-label:bottom">
+Reason
+</label>
+<input class="form-input form-full" type="text" id="ban_reason" value onmouseup="$('reason_').checked = true" />
+</div>
+</div>
+<div class="flex:11">
+<div class="margin-bottom:half">
+<input id="date" type="radio" name="search_type" class="form-radio" value="radiobutton" />
+<label for="date" class="form-label form-label:bottom form-label:right">
+Date
+</label>
+<div class="flex">
+<input class="form-input form-full margin-right" type="text" id="day" value="DD" onmouseup="$('date').checked = true" maxlength="2" />
+<input class="form-input form-full margin-right" type="text" id="month" value="MM" onmouseup="$('date').checked = true" maxlength="2" />
+<input class="form-input form-full" type="text" id="year" value="YY" onmouseup="$('date').checked = true" maxlength="4" />
+</div>
+</div>
+<div class="margin-bottom:half">
+<input id="ban_type_" type="radio" name="search_type" class="form-radio" value="radiobutton" />
+<label for="ban_type" class="form-label form-label:bottom form-label:right">
+Type
+</label>
+<select class="form-select form-full" id="ban_type" onmouseup="$('ban_type_').checked = true">
+<option value="0" selected>Steam ID</option>
+<option value="1">IP Address</option>
+</select>
+</div>
+<div class="margin-bottom:half">
+<input id="where_banned" name="search_type" class="form-radio" type="radio" value="radiobutton" />
+<label for="server" class="form-label form-label:bottom form-label:right">
+Server
+</label>
+<select class="form-select form-full" id="server" onmouseup="$('where_banned').checked = true">
+<option label="Web Ban" value="0">Web Ban</option>
+<option value="1" id="ss1">Retrieving
+Hostname...
+(216.238.111.126:27015)</option>
+</select>
+</div>
+</div>
+</div>
+<div class="margin-bottom:half">
+<input id="length_" type="radio" name="search_type" class="form-radio" value="radiobutton" />
+<label for="other_length" class="form-label form-label:bottom form-label:right">
+Length
+</label>
+<div class="flex">
+<select class="form-select form-full margin-right" id="length_type" onmouseup="$('length_').checked = true">
+<option value="e" title="equal to">=</option>
+<option value="h" title="greater">&gt;</option>
+<option value="l" title="smaller">&lt;</option>
+<option value="eh" title="equal to or greater">&gt;=</option>
+<option value="el" title="equal to or smaller">&lt;=</option>
+</select>
+<select class="form-select form-full margin-right" id="length" onmouseup="$('length_').checked = true" onchange="switch_length(this);" onmouseover="if(this.options[this.selectedIndex].value=='other')$('length').setStyle('width', '210px');if(this.options[this.selectedIndex].value=='other')this.focus();" onblur="if(this.options[this.selectedIndex].value=='other')$('length').setStyle('width', '20px');">
+<option value="0">Permanent</option>
+<optgroup label="minutes">
+<option value="1">1 minute</option>
+<option value="5">5 minutes</option>
+<option value="10">10 minutes</option>
+<option value="15">15 minutes</option>
+<option value="30">30 minutes</option>
+<option value="45">45 minutes</option>
+</optgroup>
+<optgroup label="hours">
+<option value="60">1 hour</option>
+<option value="120">2 hours</option>
+<option value="180">3 hours</option>
+<option value="240">4 hours</option>
+<option value="480">8 hours</option>
+<option value="720">12 hours</option>
+</optgroup>
+<optgroup label="days">
+<option value="1440">1 day</option>
+<option value="2880">2 days</option>
+<option value="4320">3 days</option>
+<option value="5760">4 days</option>
+<option value="7200">5 days</option>
+<option value="8640">6 days</option>
+</optgroup>
+<optgroup label="weeks">
+<option value="10080">1 week</option>
+<option value="20160">2 weeks</option>
+<option value="30240">3 weeks</option>
+</optgroup>
+<optgroup label="months">
+<option value="40320">1 month</option>
+<option value="80640">2 months</option>
+<option value="120960">3 months</option>
+<option value="241920">6 months</option>
+<option value="483840">12 months</option>
+</optgroup>
+<option value="other">Other length in minutes</option>
+</select>
+<input type="text" id="other_length" name="other_length" class="form-input form-full" onmouseup="$('length_').checked = true" style="display: none;" />
+</div>
+</div>
+<div class="flex">
+<input type="button" onclick="search_bans();" name="searchbtn" class="btn button button-primary flex:11" onmouseover="ButtonOver(&quot;searchbtn&quot;)" onmouseout="ButtonOver(&quot;searchbtn&quot;)" id="searchbtn" value="Search" />
+</div>
+</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<script type="text/javascript">xajax_ServerHostPlayers('1', 'id', 'ss1', '', '', false, 200);</script><script type="text/javascript">
+function switch_length(opt)
+{
+    if (opt.options[opt.selectedIndex].value=='other') {
+        $('other_length').setStyle('display', 'block');
+        $('other_length').focus();
+        $('length').setStyle('width', '20px');
+    } else {
+        $('other_length').setStyle('display', 'none');
+        $('length').setStyle('width', '210px');
+    }
+}
+</script>
+<div class="layout_box margin-bottom padding:half flex flex-jc:space-between flex-ai:center m:flex-fd:column">
+<span>
+<a href="index.php?p=banlist&hideinactive=true" title="Hide inactive">Hide inactive</a> | <i>Total Bans: 1109 </i>
+</span>
+<div class="pagination">
+<span>displaying&nbsp;0&nbsp;-&nbsp;30&nbsp;of&nbsp;1109&nbsp;results | <b><a href="index.php?p=banlist&page=2" onclick target="_self"> next <i class="fas fa-arrow-right fa-lg"></i> </a></b>&nbsp;<select onchange="changePage(this,'B','','');"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option><option value="32">32</option><option value="33">33</option><option value="34">34</option><option value="35">35</option><option value="36">36</option><option value="37">37</option></select></span>
+</div>
+</div>
+<div class="layout_box">
+<div class="table padding">
+<div class="table_box">
+<table>
+<thead>
+<tr>
+<th>MOD/Country</th>
+<th class="text:left">Date</th>
+<th class="text:left">Player</th>
+<th class="text:left">Length</th>
+</tr>
+</thead>
+<tbody>
+<tr class="collapse">
+<td class="text:center"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+<td>04/06/23 - 16:06:40</td>
+<td>
+ComuNigga
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>ComuNigga</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:235895018</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:471790037]" target="_blank" rel="noopener">[U:1:471790037]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561198432055765" target="_blank" rel="noopener">76561198432055765</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>04/06/23 - 16:06:40</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Nome inapropriado</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span>
+Web Ban
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_1175');">
+<td class="text:center"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/br.jpg" alt="BR" border="0" align="absmiddle" /></td>
+<td>04/06/23 - 14:05:50</td>
+<td>
+<div style="float:right;">
+1 <i class="fas fa-clipboard-list fa-lg"></i>
+</div>
+Master Exploder
+</td>
+<td class="listtable_1_unbanned">Permanent (Unbanned)</td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>Master Exploder</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:185564018</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:371128037]" target="_blank" rel="noopener">[U:1:371128037]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561198331393765" target="_blank" rel="noopener">76561198331393765</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>04/06/23 - 14:05:50</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent (Unbanned)</span>
+</li>
+<li>
+<span><i class="fas fa-user-shield"></i> Unban reason</span>
+<span>Pedido de unban aceito e desculpas feitas</span>
+</li>
+<li>
+<span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+<span class="text:italic">Admin deleted</span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Racismo</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span id="host_1175">
+Please Wait...
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (1)</span>
+<i><span title="Server: 216.238.111.126:27015, Date: 04/06/23 - 14:46:18">Master Exploder</span></i>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<ul>
+<li>
+<div class="layout_box-child padding">
+<div class="ban_list_comments_header">
+<span class="text:bold">Mathx</span>
+<span>04/06/23 - 14:08:12</span>
+</div>
+<div class="margin-top flex flex-fd:column">
+<a href="https://i.imgur.com/Y6TQ2Hj.png" target="_blank">https://i.imgur.com/Y6TQ2Hj.png</a>
+</div>
+</div>
+</li>
+</ul>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_1176');">
+<td class="text:center"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/br.jpg" alt="BR" border="0" align="absmiddle" /></td>
+<td>04/06/23 - 14:05:50</td>
+<td>
+<div style="float:right;">
+1 <i class="fas fa-clipboard-list fa-lg"></i>
+</div>
+CelsoColares
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>CelsoColares</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:0:159467575</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:318935150]" target="_blank" rel="noopener">[U:1:318935150]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561198279200878" target="_blank" rel="noopener">76561198279200878</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>04/06/23 - 14:05:50</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Racismo</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span id="host_1176">
+Please Wait...
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<ul>
+<li>
+<div class="layout_box-child padding">
+<div class="ban_list_comments_header">
+<span class="text:bold">Mathx</span>
+<span>04/06/23 - 14:08:48</span>
+</div>
+<div class="margin-top flex flex-fd:column">
+<a href="https://i.imgur.com/TwmnHFj.png" target="_blank">https://i.imgur.com/TwmnHFj.png</a>
+</div>
+</div>
+</li>
+</ul>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_1174');">
+<td class="text:center"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/hk.jpg" alt="HK" border="0" align="absmiddle" /></td>
+<td>04/06/23 - 10:57:41</td>
+<td>
+louis138681gamerlol
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>louis138681gamerlol</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:772258730</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:1544517461]" target="_blank" rel="noopener">[U:1:1544517461]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561199504783189" target="_blank" rel="noopener">76561199504783189</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>04/06/23 - 10:57:41</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>[SourceSleuth] Duplicate account</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span id="host_1174">
+Please Wait...
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_1173');">
+<td class="text:center"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/pt.jpg" alt="PT" border="0" align="absmiddle" /></td>
+<td>03/06/23 - 16:39:59</td>
+<td>
+<div style="float:right;">
+1 <i class="fas fa-clipboard-list fa-lg"></i>
+</div>
+B1lly K1dd0
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>B1lly K1dd0</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:0:760986390</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:1521972780]" target="_blank" rel="noopener">[U:1:1521972780]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561199482238508" target="_blank" rel="noopener">76561199482238508</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>03/06/23 - 16:39:59</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Racismo</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span id="host_1173">
+Please Wait...
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (1)</span>
+<i><span title="Server: 216.238.111.126:27015, Date: 03/06/23 - 16:40:10">B1lly K1dd0</span></i>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<ul>
+<li>
+<div class="layout_box-child padding">
+<div class="ban_list_comments_header">
+<span class="text:bold">Tiagoquix</span>
+<span>03/06/23 - 16:43:03</span>
+</div>
+<div class="margin-top flex flex-fd:column">
+<a href="https://imgur.com/a/7Sunmdq" target="_blank">https://imgur.com/a/7Sunmdq</a> <a href="https://www.urbandictionary.com/define.php?term=Nigorian" target="_blank">https://www.urbandictionary.com/define.php?term=Nigorian</a>
+<span class="margin-top:half text:italic">
+<i class="fas fa-pencil-alt"></i> Last edit
+03/06/23 - 16:43:24 by Tiagoquix </span>
+</div>
+</div>
+</li>
+</ul>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse">
+<td class="text:center"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+<td>01/06/23 - 18:40:06</td>
+<td>
+ᴍᴀʀʟᴏɴ
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>ᴍᴀʀʟᴏɴ</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:0:17577453</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:35154906]" target="_blank" rel="noopener">[U:1:35154906]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561197995420634" target="_blank" rel="noopener">76561197995420634</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>01/06/23 - 18:40:06</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Uso de cheat (casual); associação com cheater</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span>
+Web Ban
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_1170');">
+<td class="text:center"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/py.jpg" alt="PY" border="0" align="absmiddle" /></td>
+<td>01/06/23 - 16:23:48</td>
+<td>
+<div style="float:right;">
+1 <i class="fas fa-clipboard-list fa-lg"></i>
+</div>
+Pankakes_2
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>Pankakes_2</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:0:740999770</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:1481999540]" target="_blank" rel="noopener">[U:1:1481999540]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561199442265268" target="_blank" rel="noopener">76561199442265268</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>01/06/23 - 16:23:48</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Racismo</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span id="host_1170">
+Please Wait...
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<ul>
+<li>
+<div class="layout_box-child padding">
+<div class="ban_list_comments_header">
+<span class="text:bold">Tiagoquix</span>
+<span>01/06/23 - 16:27:20</span>
+</div>
+<div class="margin-top flex flex-fd:column">
+<a href="https://i.imgur.com/zdOfhax.png" target="_blank">https://i.imgur.com/zdOfhax.png</a>
+</div>
+</div>
+</li>
+</ul>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse">
+<td class="text:center"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/br.jpg" alt="BR" border="0" align="absmiddle" /></td>
+<td>31/05/23 - 21:46:51</td>
+<td>
+N w
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>N w</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:552425103</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:1104850207]" target="_blank" rel="noopener">[U:1:1104850207]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561199065115935" target="_blank" rel="noopener">76561199065115935</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>31/05/23 - 21:46:51</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Banido em alt (STEAM_0:0:714173279)</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>5 <a href="index.php?p=banlist&searchText=STEAM_0:1:552425103&Submit" onclick target="_self"> (search) </a></span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span>
+Web Ban
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse">
+<td class="text:center"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/br.jpg" alt="BR" border="0" align="absmiddle" /></td>
+<td>31/05/23 - 21:45:27</td>
+<td>
+<i class="fas fa-video fa-lg"></i>
+spokyu
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="getdemo.php?type=B&id=1168" onclick target="_self"> <i class="fas fa-video fa-lg"></i> Review Demo </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>spokyu</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:0:714173279</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:1428346558]" target="_blank" rel="noopener">[U:1:1428346558]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561199388612286" target="_blank" rel="noopener">76561199388612286</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>31/05/23 - 21:45:27</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Uso de cheat (detecção do lilac, bhop)</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span>
+Web Ban
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_1167');">
+<td class="text:center"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+<td>31/05/23 - 18:53:41</td>
+<td>
+.dllllllllllllllllllllllllllll
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>.dllllllllllllllllllllllllllll</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:775179587</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:1550359175]" target="_blank" rel="noopener">[U:1:1550359175]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561199510624903" target="_blank" rel="noopener">76561199510624903</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>31/05/23 - 18:53:41</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>na sua main pfv ( conta alt e toxidade )</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span id="host_1167">
+Please Wait...
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_1166');">
+<td class="text:center"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/br.jpg" alt="BR" border="0" align="absmiddle" /></td>
+<td>30/05/23 - 00:35:54</td>
+<td>
+falling on the road..
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>falling on the road..</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:774782529</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:1549565059]" target="_blank" rel="noopener">[U:1:1549565059]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561199509830787" target="_blank" rel="noopener">76561199509830787</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>30/05/23 - 00:35:54</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>[SourceSleuth] Conta duplicada</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span id="host_1166">
+Please Wait...
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_1165');">
+<td class="text:center"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/br.jpg" alt="BR" border="0" align="absmiddle" /></td>
+<td>29/05/23 - 23:21:47</td>
+<td>
+<div style="float:right;">
+1 <i class="fas fa-clipboard-list fa-lg"></i>
+</div>
+fugitvo da policia do tf2
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>fugitvo da policia do tf2</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:775210671</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:1550421343]" target="_blank" rel="noopener">[U:1:1550421343]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561199510687071" target="_blank" rel="noopener">76561199510687071</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>29/05/23 - 23:21:47</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Banido em outra conta</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span id="host_1165">
+Please Wait...
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<ul>
+<li>
+<div class="layout_box-child padding">
+<div class="ban_list_comments_header">
+<span class="text:bold">Mathx</span>
+<span>04/06/23 - 14:10:22</span>
+</div>
+<div class="margin-top flex flex-fd:column">
+STEAM_0:1:437569880
+</div>
+</div>
+</li>
+</ul>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_1164');">
+<td class="text:center"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/br.jpg" alt="BR" border="0" align="absmiddle" /></td>
+<td>29/05/23 - 01:11:00</td>
+<td>
+dreddie
+</td>
+<td class="listtable_1_unbanned">1 wk (Expired)</td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>dreddie</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:437569880</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:875139761]" target="_blank" rel="noopener">[U:1:875139761]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561198835405489" target="_blank" rel="noopener">76561198835405489</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>29/05/23 - 01:11:00</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>1 wk (Expired)</span>
+</li>
+<li>
+<span><i class="fas fa-user-shield"></i> Unban reason</span>
+<span class="text:italic">No reason present</span>
+</li>
+<li>
+<span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+<span class="text:italic">Admin deleted</span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span>05/06/23 - 01:11:00</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Desrespeito apos diversos avisos</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>3 <a href="index.php?p=banlist&searchText=STEAM_0:1:437569880&Submit" onclick target="_self"> (search) </a></span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span id="host_1164">
+Please Wait...
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse">
+<td class="text:center"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/pt.jpg" alt="PT" border="0" align="absmiddle" /></td>
+<td>28/05/23 - 16:20:26</td>
+<td>
+<i class="fas fa-video fa-lg"></i>
+Oli ❤
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="getdemo.php?type=B&id=1163" onclick target="_self"> <i class="fas fa-video fa-lg"></i> Review Demo </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>Oli ❤</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:599527630</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:1199055261]" target="_blank" rel="noopener">[U:1:1199055261]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561199159320989" target="_blank" rel="noopener">76561199159320989</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>28/05/23 - 16:20:26</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Uso de cheat // Detectado pelo StAC</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span>
+Web Ban
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_1161');">
+<td class="text:center"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/cl.jpg" alt="CL" border="0" align="absmiddle" /></td>
+<td>27/05/23 - 14:35:10</td>
+<td>
+DeusWoof
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>DeusWoof</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:48104092</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:96208185]" target="_blank" rel="noopener">[U:1:96208185]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561198056473913" target="_blank" rel="noopener">76561198056473913</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>27/05/23 - 14:35:10</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Racismo</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span id="host_1161">
+Please Wait...
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_1160');">
+<td class="text:center"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/br.jpg" alt="BR" border="0" align="absmiddle" /></td>
+<td>27/05/23 - 10:19:28</td>
+<td>
+<div style="float:right;">
+1 <i class="fas fa-clipboard-list fa-lg"></i>
+</div>
+AY Carinha legal
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>AY Carinha legal</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:774316172</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:1548632345]" target="_blank" rel="noopener">[U:1:1548632345]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561199508898073" target="_blank" rel="noopener">76561199508898073</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>27/05/23 - 10:19:28</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Cheater, banido em outra conta</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span id="host_1160">
+Please Wait...
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (1)</span>
+<i><span title="Server: 216.238.111.126:27015, Date: 05/06/23 - 08:30:17">AY Carinha legal blw.tf</span></i>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<ul>
+<li>
+<div class="layout_box-child padding">
+<div class="ban_list_comments_header">
+<span class="text:bold">Mathx</span>
+<span>04/06/23 - 14:12:28</span>
+</div>
+<div class="margin-top flex flex-fd:column">
+STEAM_0:1:768504940
+</div>
+</div>
+</li>
+</ul>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_1159');">
+<td class="text:center"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/br.jpg" alt="BR" border="0" align="absmiddle" /></td>
+<td>26/05/23 - 18:31:02</td>
+<td>
+mariajoana6513
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>mariajoana6513</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:773375941</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:1546751883]" target="_blank" rel="noopener">[U:1:1546751883]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561199507017611" target="_blank" rel="noopener">76561199507017611</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>26/05/23 - 18:31:02</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>[SourceSleuth] Duplicate account</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span id="host_1159">
+Please Wait...
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_1158');">
+<td class="text:center"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/br.jpg" alt="BR" border="0" align="absmiddle" /></td>
+<td>26/05/23 - 18:15:26</td>
+<td>
+Julia
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>Julia</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:0:772111993</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:1544223986]" target="_blank" rel="noopener">[U:1:1544223986]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561199504489714" target="_blank" rel="noopener">76561199504489714</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>26/05/23 - 18:15:26</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>[SourceSleuth] Duplicate account</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span id="host_1158">
+Please Wait...
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse">
+<td class="text:center"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/br.jpg" alt="BR" border="0" align="absmiddle" /></td>
+<td>24/05/23 - 18:48:38</td>
+<td>
+<i class="fas fa-video fa-lg"></i>
+HomiBomba
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="getdemo.php?type=B&id=1157" onclick target="_self"> <i class="fas fa-video fa-lg"></i> Review Demo </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>HomiBomba</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:643251350</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:1286502701]" target="_blank" rel="noopener">[U:1:1286502701]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561199246768429" target="_blank" rel="noopener">76561199246768429</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>24/05/23 - 18:48:38</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Aimbot; violaçao de cvar detectada pelo lilac</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span>
+Web Ban
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (5)</span>
+<i><span title="Server: 216.238.111.126:27015, Date: 24/05/23 - 20:07:19">HomiBomba</span>, <span title="Server: 216.238.111.126:27015, Date: 24/05/23 - 20:43:32">HomiBomba</span>, <span title="Server: 216.238.111.126:27015, Date: 24/05/23 - 20:57:06">HomiBomba</span>, <span title="Server: 216.238.111.126:27015, Date: 26/05/23 - 18:10:53">HomiBomba</span>, <span title="Server: 216.238.111.126:27015, Date: 01/06/23 - 16:51:28">HomiBomba</span></i>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_1156');">
+<td class="text:center"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/ar.jpg" alt="AR" border="0" align="absmiddle" /></td>
+<td>21/05/23 - 12:05:15</td>
+<td>
+Ivan The Wolfy
+</td>
+<td class="listtable_1_unbanned">4 wk (Unbanned)</td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>Ivan The Wolfy</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:109412657</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:218825315]" target="_blank" rel="noopener">[U:1:218825315]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561198179091043" target="_blank" rel="noopener">76561198179091043</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>21/05/23 - 12:05:15</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>4 wk (Unbanned)</span>
+</li>
+<li>
+<span><i class="fas fa-user-shield"></i> Unban reason</span>
+<span>Tempo do ban original já finalizado</span>
+</li>
+<li>
+<span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+<span class="text:italic">Admin deleted</span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span>18/06/23 - 12:05:15</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>[SourceSleuth] Duplicate account</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>4 <a href="index.php?p=banlist&searchText=STEAM_0:1:109412657&Submit" onclick target="_self"> (search) </a></span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span id="host_1156">
+Please Wait...
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse">
+<td class="text:center"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/br.jpg" alt="BR" border="0" align="absmiddle" /></td>
+<td>21/05/23 - 00:38:07</td>
+<td>
+Kino
+</td>
+<td class="listtable_1_unbanned">1 wk (Expired)</td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>Kino</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:0:121693524</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:243387048]" target="_blank" rel="noopener">[U:1:243387048]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561198203652776" target="_blank" rel="noopener">76561198203652776</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>21/05/23 - 00:38:07</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>1 wk (Expired)</span>
+</li>
+<li>
+<span><i class="fas fa-user-shield"></i> Unban reason</span>
+<span class="text:italic">No reason present</span>
+</li>
+<li>
+<span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+<span class="text:italic">Admin deleted</span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span>28/05/23 - 00:38:07</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Desrespeito após avisos</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span>
+Web Ban
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (1)</span>
+<i><span title="Server: 216.238.111.126:27015, Date: 21/05/23 - 16:04:55">Kino</span></i>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse">
+<td class="text:center"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/br.jpg" alt="BR" border="0" align="absmiddle" /></td>
+<td>19/05/23 - 23:37:39</td>
+<td>
+Custodity
+</td>
+<td class="listtable_1_unbanned">1 d (Expired)</td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>Custodity</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:0:768286663</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:1536573326]" target="_blank" rel="noopener">[U:1:1536573326]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561199496839054" target="_blank" rel="noopener">76561199496839054</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>19/05/23 - 23:37:39</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>1 d (Expired)</span>
+</li>
+<li>
+<span><i class="fas fa-user-shield"></i> Unban reason</span>
+<span class="text:italic">No reason present</span>
+</li>
+<li>
+<span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+<span class="text:italic">Admin deleted</span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span>20/05/23 - 23:37:39</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Desrespeito</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span>
+Web Ban
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (1)</span>
+<i><span title="Server: 216.238.111.126:27015, Date: 20/05/23 - 19:45:17">Custodity</span></i>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_1153');">
+<td class="text:center"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/ar.jpg" alt="AR" border="0" align="absmiddle" /></td>
+<td>18/05/23 - 10:56:51</td>
+<td>
+T ɾ i ƚ σ ɳ i α
+</td>
+<td class="listtable_1_unbanned">2 wk (Unbanned)</td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>T ɾ i ƚ σ ɳ i α</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:209314053</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:418628107]" target="_blank" rel="noopener">[U:1:418628107]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561198378893835" target="_blank" rel="noopener">76561198378893835</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>18/05/23 - 10:56:51</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>2 wk (Unbanned)</span>
+</li>
+<li>
+<span><i class="fas fa-user-shield"></i> Unban reason</span>
+<span>Tempo do ban original já finalizado</span>
+</li>
+<li>
+<span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+<span class="text:italic">Admin deleted</span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span>01/06/23 - 10:56:51</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>[SourceSleuth] Duplicate account</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span id="host_1153">
+Please Wait...
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_1152');">
+<td class="text:center"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/br.jpg" alt="BR" border="0" align="absmiddle" /></td>
+<td>15/05/23 - 18:56:40</td>
+<td>
+Bruh &#039;-&#039; blw.tf
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>Bruh &#039;-&#039; blw.tf</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:768504940</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:1537009881]" target="_blank" rel="noopener">[U:1:1537009881]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561199497275609" target="_blank" rel="noopener">76561199497275609</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>15/05/23 - 18:56:40</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>[StAC] Banned for pSilent after 10 detections. Demo file: demos/2023-05-15_18-35-23_dm_mariokart2_b3.dem</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span id="host_1152">
+Please Wait...
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_1151');">
+<td class="text:center"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/br.jpg" alt="BR" border="0" align="absmiddle" /></td>
+<td>14/05/23 - 17:12:41</td>
+<td>
+ahd21
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>ahd21</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:202893476</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:405786953]" target="_blank" rel="noopener">[U:1:405786953]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561198366052681" target="_blank" rel="noopener">76561198366052681</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>14/05/23 - 17:12:41</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Discurso nazista no bot de musica</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>2 <a href="index.php?p=banlist&searchText=STEAM_0:1:202893476&Submit" onclick target="_self"> (search) </a></span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span id="host_1151">
+Please Wait...
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (2)</span>
+<i><span title="Server: 216.238.111.126:27015, Date: 14/05/23 - 17:13:41">ahd21</span>, <span title="Server: 216.238.111.126:27015, Date: 16/05/23 - 20:18:10">ahd21</span></i>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse">
+<td class="text:center"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/ar.jpg" alt="AR" border="0" align="absmiddle" /></td>
+<td>13/05/23 - 23:43:29</td>
+<td>
+Ivan The Wolfy
+</td>
+<td class="listtable_1_unbanned">1 wk (Expired)</td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>Ivan The Wolfy</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:109412657</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:218825315]" target="_blank" rel="noopener">[U:1:218825315]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561198179091043" target="_blank" rel="noopener">76561198179091043</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>13/05/23 - 23:43:29</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>1 wk (Expired)</span>
+</li>
+<li>
+<span><i class="fas fa-user-shield"></i> Unban reason</span>
+<span class="text:italic">No reason present</span>
+</li>
+<li>
+<span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+<span class="text:italic">Admin deleted</span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span>20/05/23 - 23:43:29</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Abuso de exploit - reincidencia (entrando em sala de adm do mapa com exploit de lançar teletransportador)</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>4 <a href="index.php?p=banlist&searchText=STEAM_0:1:109412657&Submit" onclick target="_self"> (search) </a></span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span>
+Web Ban
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (1)</span>
+<i><span title="Server: 216.238.111.126:27015, Date: 15/05/23 - 11:33:48">Ivan The Wolfy</span></i>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse">
+<td class="text:center"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/br.jpg" alt="BR" border="0" align="absmiddle" /></td>
+<td>12/05/23 - 15:39:42</td>
+<td>
+<div style="float:right;">
+1 <i class="fas fa-clipboard-list fa-lg"></i>
+</div>
+amot
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>amot</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:0:547781687</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:1095563374]" target="_blank" rel="noopener">[U:1:1095563374]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561199055829102" target="_blank" rel="noopener">76561199055829102</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>12/05/23 - 15:39:42</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Racismo/desrespeito</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span>
+Web Ban
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (1)</span>
+<i><span title="Server: 216.238.111.126:27015, Date: 13/05/23 - 11:38:25">amot</span></i>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<ul>
+<li>
+<div class="layout_box-child padding">
+<div class="ban_list_comments_header">
+<span class="text:bold">Edgyiel</span>
+<span>12/05/23 - 15:39:57</span>
+</div>
+<div class="margin-top flex flex-fd:column">
+<a href="https://imgur.com/a/LNkPgJS" target="_blank">https://imgur.com/a/LNkPgJS</a>
+</div>
+</div>
+</li>
+</ul>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_1148');">
+<td class="text:center"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/hk.jpg" alt="HK" border="0" align="absmiddle" /></td>
+<td>11/05/23 - 10:20:50</td>
+<td>
+louis138681gamerlol
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>louis138681gamerlol</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:770945760</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:1541891521]" target="_blank" rel="noopener">[U:1:1541891521]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561199502157249" target="_blank" rel="noopener">76561199502157249</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>11/05/23 - 10:20:50</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Uso de cheat // Detectado pelo StAC</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span id="host_1148">
+Please Wait...
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse">
+<td class="text:center"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/br.jpg" alt="BR" border="0" align="absmiddle" /></td>
+<td>10/05/23 - 11:16:27</td>
+<td>
+Coconut Gun
+</td>
+<td class="listtable_1_unbanned">1 d (Expired)</td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>Coconut Gun</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:0:56820149</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:113640298]" target="_blank" rel="noopener">[U:1:113640298]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561198073906026" target="_blank" rel="noopener">76561198073906026</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>10/05/23 - 11:16:27</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>1 d (Expired)</span>
+</li>
+<li>
+<span><i class="fas fa-user-shield"></i> Unban reason</span>
+<span class="text:italic">No reason present</span>
+</li>
+<li>
+<span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+<span class="text:italic">Admin deleted</span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span>11/05/23 - 11:16:27</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>Abuso de exploit</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span>
+Web Ban
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (1)</span>
+<i><span title="Server: 216.238.111.126:27015, Date: 10/05/23 - 18:21:07">Wizard of Cum</span></i>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+<tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_1146');">
+<td class="text:center"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/es.jpg" alt="ES" border="0" align="absmiddle" /></td>
+<td>07/05/23 - 16:37:31</td>
+<td>
+TOP1 JAMAICAN MGE PLAYER
+</td>
+<td class="listtable_1_permanent">Permanent </td>
+</tr>
+<tr class="table_hide">
+<td colspan="8">
+<div class="collapse_content">
+<div class="padding flex flex-jc:start">
+<ul class="ban_action responsive_show:desktop">
+<li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+<li>
+<a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+</li>
+</ul>
+<ul class="ban_list_detal">
+<li>
+<span><i class="fas fa-user"></i> Player</span>
+<span>TOP1 JAMAICAN MGE PLAYER</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+<span>STEAM_0:1:556135046</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+<span>
+<a href="http://steamcommunity.com/profiles/[U:1:1112270093]" target="_blank" rel="noopener">[U:1:1112270093]</a>
+</span>
+</li>
+<li>
+<span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+<span>
+<a href="http://steamcommunity.com/profiles/76561199072535821" target="_blank" rel="noopener">76561199072535821</a>
+</span>
+</li>
+<li>
+<span><i class="fas fa-play"></i> Invoked on</span>
+<span>07/05/23 - 16:37:31</span>
+</li>
+<li>
+<span><i class="fas fa-hourglass-half"></i> Ban length</span>
+<span>Permanent </span>
+</li>
+<li>
+<span><i class="fas fa-clock"></i> Expires on</span>
+<span class="text:italic">Not applicable</span>
+</li>
+<li>
+<span><i class="fas fa-question"></i> Reason</span>
+<span>[StAC] Banned for OOB cvar/netvar values. Demo file: demos/2023-05-07_16-04-45_dm_mariokart2_b3.dem</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Total Bans</span>
+<span>No previous bans</span>
+</li>
+<li>
+<span><i class="fas fa-server"></i> Banned from </span>
+<span id="host_1146">
+Please Wait...
+</span>
+</li>
+<li>
+<span><i class="fas fa-ban"></i> Blocked (0)</span>
+<span class="text:italic">Never</span>
+</li>
+</ul>
+<ul class="ban_list_comments margin-left responsive_show:desktop">
+<div class="layout_box_title">
+<h2><i class="fa-solid fa-comments"></i> Comments</h2>
+</div>
+<div class="padding">
+None
+</div>
+</ul>
+</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<script type="text/javascript" src="themes/sourcebans-web-theme-fluent/scripts/collapse.js"></script>
+<script>
+    document.querySelectorAll('.form-check').forEach(e => e.addEventListener('click', el => el.stopPropagation()));
+  </script>
+<script type="text/javascript">
+      window.addEvent('domready', function() {
+      
+            
+      });
+    </script>
+
+</div>
+</main>
+<footer class="footer">
+<div class="layout_container flex flex-jc:space-between flex-ai:center">
+<div class="flex flex-fd:column text:left">
+<a href="https://sbpp.github.io/" target="_blank" rel="noopener">SourceBans++</a> 1.8.0 | Git: 1294
+<span>Powered by <a href="https://www.sourcemod.net" target="_blank" rel="noopener">SourceMod</a></span>
+</div>
+<div class="flex flex-fd:column text:right">
+<span>Copyright © Server dos Brothers</span>
+<span><i class="fas fa-code"></i> Original <a href="https://github.com/Rushaway/sourcebans-web-theme-fluent" title="Theme Fluent for SourceBans++" target="_blank" rel="noopener">Theme</a> by <a href="https://axendev.net/" title="Theme by aXenDev" target="_blank" rel="noopener">aXenDev</a></span>
+</div>
+</div>
+</footer>
+<script type="text/javascript" src="themes/sourcebans-web-theme-fluent/scripts/nav.js"></script>
+<script type="text/javascript" src="themes/sourcebans-web-theme-fluent/scripts/jscolor.min.js"></script>
+<script type="text/javascript" src="themes/sourcebans-web-theme-fluent/scripts/theme.js"></script>
+<script>
+	  
+
+	  
+  	  window.addEvent('domready', function() {
+
+  	    ProcessAdminTabs();
+
+  	    var Tips2 = new Tips($('.tip'), {
+  	      initialize: function() {
+  	        this.fx = new Fx.Style(this.toolTip, 'opacity', {duration: 300, wait: false}).set(0);
+  	      },
+  	      onShow: function(toolTip) {
+  	        this.fx.start(1);
+  	      },
+  	      onHide: function(toolTip) {
+  	        this.fx.start(0);
+  	      }
+  	    });
+  	    var Tips4 = new Tips($('.perm'), {
+  	      className: 'perm'
+  	    });
+  	  });
+	  
+	</script>
+</body>
+</html>

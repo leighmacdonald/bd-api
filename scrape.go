@@ -258,6 +258,11 @@ func NewMaxDBScraper() *Scraper {
 		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
+func NewSvdosBrothersScraper() *Scraper {
+	return newScraper("svdosbrothers", "https://bans.svdosbrothers.com/", "index.php?p=banlist",
+		parseFluent, nextUrlFluent, parseSVDos)
+}
+
 type metaKey int
 
 const (
@@ -288,6 +293,14 @@ func parseSkialTime(s string) (time.Time, error) {
 		return time.Time{}, nil
 	}
 	return time.Parse("01-02-06 15:04", s)
+}
+
+// 17/05/23 - 03:07:05
+func parseSVDos(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("02/01/06 - 15:04:05", s)
 }
 
 // 17-05-2023 03:07:05

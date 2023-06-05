@@ -112,6 +112,10 @@ func TestMaxDB(t *testing.T) {
 	testParser(t, "test_data/maxdb_home.html", NewMaxDBScraper(), 30, "index.php?p=banlist&page=2")
 }
 
+func TestSvdosBrothers(t *testing.T) {
+	testParser(t, "test_data/svdosbrothers_home.html", NewSvdosBrothersScraper(), 27, "index.php?p=banlist&page=2")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)
