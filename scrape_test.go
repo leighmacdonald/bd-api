@@ -125,6 +125,10 @@ func TestGlobalParadise(t *testing.T) {
 	testParser(t, NewGlobalParadiseScraper(), 25, "index.php?p=banlist&page=2")
 }
 
+func TestSavageServidores(t *testing.T) {
+	testParser(t, NewSavageServidoresScraper(), 29, "index.php?p=banlist&page=2")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)

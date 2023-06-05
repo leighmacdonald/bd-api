@@ -267,6 +267,11 @@ func NewGlobalParadiseScraper() *Scraper {
 		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
+func NewSavageServidoresScraper() *Scraper {
+	return newScraper("savageservidores", "https://bans.savageservidores.com/", "index.php?p=banlist",
+		parseFluent, nextUrlFluent, parseDefaultTime)
+}
+
 type metaKey int
 
 const (
