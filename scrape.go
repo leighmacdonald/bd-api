@@ -248,6 +248,11 @@ func NewSGGamingScraper() *Scraper {
 		parseDefault, nextUrlLast, parseSGGaming)
 }
 
+func NewApeModeScraper() *Scraper {
+	return newScraper("apemode", "https://sourcebans.apemode.tf/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseSkialTime)
+}
+
 type metaKey int
 
 const (

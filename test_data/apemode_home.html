@@ -1,0 +1,3643 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Apemode.tf - Bans</title>
+<link rel="Shortcut Icon" href="themes/glitch-theme/images/favicon.ico" />
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+<script type="text/javascript" src="./scripts/sourcebans.js"></script>
+<link href="themes/glitch-theme/css/css.php" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="./scripts/mootools.js"></script>
+<script type="text/javascript" src="./scripts/contextMenoo.js"></script>
+
+
+
+	<script type="text/javascript">
+var xajaxRequestUri="./index.php";
+var xajaxDebug=false;
+var xajaxStatusMessages=false;
+var xajaxWaitCursor=true;
+var xajaxDefinedGet=0;
+var xajaxDefinedPost=1;
+var xajaxLoaded=false;
+function xajax_AddMod(){return xajax.call("AddMod", arguments, 1);}
+function xajax_RemoveMod(){return xajax.call("RemoveMod", arguments, 1);}
+function xajax_AddGroup(){return xajax.call("AddGroup", arguments, 1);}
+function xajax_RemoveGroup(){return xajax.call("RemoveGroup", arguments, 1);}
+function xajax_RemoveAdmin(){return xajax.call("RemoveAdmin", arguments, 1);}
+function xajax_RemoveSubmission(){return xajax.call("RemoveSubmission", arguments, 1);}
+function xajax_RemoveServer(){return xajax.call("RemoveServer", arguments, 1);}
+function xajax_UpdateGroupPermissions(){return xajax.call("UpdateGroupPermissions", arguments, 1);}
+function xajax_UpdateAdminPermissions(){return xajax.call("UpdateAdminPermissions", arguments, 1);}
+function xajax_AddAdmin(){return xajax.call("AddAdmin", arguments, 1);}
+function xajax_SetupEditServer(){return xajax.call("SetupEditServer", arguments, 1);}
+function xajax_AddServerGroupName(){return xajax.call("AddServerGroupName", arguments, 1);}
+function xajax_AddServer(){return xajax.call("AddServer", arguments, 1);}
+function xajax_AddBan(){return xajax.call("AddBan", arguments, 1);}
+function xajax_EditGroup(){return xajax.call("EditGroup", arguments, 1);}
+function xajax_RemoveProtest(){return xajax.call("RemoveProtest", arguments, 1);}
+function xajax_SendRcon(){return xajax.call("SendRcon", arguments, 1);}
+function xajax_EditAdminPerms(){return xajax.call("EditAdminPerms", arguments, 1);}
+function xajax_SelTheme(){return xajax.call("SelTheme", arguments, 1);}
+function xajax_ApplyTheme(){return xajax.call("ApplyTheme", arguments, 1);}
+function xajax_AddComment(){return xajax.call("AddComment", arguments, 1);}
+function xajax_EditComment(){return xajax.call("EditComment", arguments, 1);}
+function xajax_RemoveComment(){return xajax.call("RemoveComment", arguments, 1);}
+function xajax_PrepareReban(){return xajax.call("PrepareReban", arguments, 1);}
+function xajax_ClearCache(){return xajax.call("ClearCache", arguments, 1);}
+function xajax_KickPlayer(){return xajax.call("KickPlayer", arguments, 1);}
+function xajax_PasteBan(){return xajax.call("PasteBan", arguments, 1);}
+function xajax_RehashAdmins(){return xajax.call("RehashAdmins", arguments, 1);}
+function xajax_GroupBan(){return xajax.call("GroupBan", arguments, 1);}
+function xajax_BanMemberOfGroup(){return xajax.call("BanMemberOfGroup", arguments, 1);}
+function xajax_GetGroups(){return xajax.call("GetGroups", arguments, 1);}
+function xajax_BanFriends(){return xajax.call("BanFriends", arguments, 1);}
+function xajax_SendMessage(){return xajax.call("SendMessage", arguments, 1);}
+function xajax_ViewCommunityProfile(){return xajax.call("ViewCommunityProfile", arguments, 1);}
+function xajax_SetupBan(){return xajax.call("SetupBan", arguments, 1);}
+function xajax_CheckPassword(){return xajax.call("CheckPassword", arguments, 1);}
+function xajax_ChangePassword(){return xajax.call("ChangePassword", arguments, 1);}
+function xajax_CheckSrvPassword(){return xajax.call("CheckSrvPassword", arguments, 1);}
+function xajax_ChangeSrvPassword(){return xajax.call("ChangeSrvPassword", arguments, 1);}
+function xajax_ChangeEmail(){return xajax.call("ChangeEmail", arguments, 1);}
+function xajax_CheckVersion(){return xajax.call("CheckVersion", arguments, 1);}
+function xajax_SendMail(){return xajax.call("SendMail", arguments, 1);}
+function xajax_AddBlock(){return xajax.call("AddBlock", arguments, 1);}
+function xajax_PrepareReblock(){return xajax.call("PrepareReblock", arguments, 1);}
+function xajax_PrepareBlockFromBan(){return xajax.call("PrepareBlockFromBan", arguments, 1);}
+function xajax_PasteBlock(){return xajax.call("PasteBlock", arguments, 1);}
+function xajax_Plogin(){return xajax.call("Plogin", arguments, 1);}
+function xajax_ServerHostPlayers(){return xajax.call("ServerHostPlayers", arguments, 1);}
+function xajax_ServerHostProperty(){return xajax.call("ServerHostProperty", arguments, 1);}
+function xajax_ServerHostPlayers_list(){return xajax.call("ServerHostPlayers_list", arguments, 1);}
+function xajax_ServerPlayers(){return xajax.call("ServerPlayers", arguments, 1);}
+function xajax_LostPassword(){return xajax.call("LostPassword", arguments, 1);}
+function xajax_RefreshServer(){return xajax.call("RefreshServer", arguments, 1);}
+	</script>
+	<script type="text/javascript" src="scripts/xajax.js"></script>
+	<script type="text/javascript">
+window.setTimeout(function () { if (!xajaxLoaded) { alert('Error: the xajax Javascript file could not be included. Perhaps the URL is incorrect?\nURL: scripts/xajax.js'); } }, 6000);
+	</script>
+
+
+
+</head>
+<body>
+
+
+    <div style="background-color: #334756;">
+	<div id="header">
+		<div id="head-logo">
+    		<a href="index.php">
+    			<img src="images/ape_logo.png" border="0" alt="SourceBans Logo" />
+    		</a>
+		</div>
+	</div>
+	</div>
+	<div id="tabsWrapper">
+		<div id="mainwrapper">
+            <div id="tabs">
+	            	                <div style="float: right;">
+	                    <ul>
+	                    	<li>
+	          	                <a style="background-color: #70B04A;" href='index.php?p=login'>Login</a>
+	          	            </li>
+	          	        </ul>
+	          	    </div>
+	                            <ul>	<li class="nonactive">
+		<a href="index.php?p=home" class="tip" title="Dashboard :: This page shows an overview of your bans and servers." target="_self">Dashboard </a>
+</li>
+
+		<li class="nonactive">
+		<a href="index.php?p=servers" class="tip" title="Servers :: All of your servers and their status can be viewed here" target="_self">Servers </a>
+</li>
+
+		<li class="active">
+		<a href="index.php?p=banlist" class="tip" title="Bans :: All of the bans in the database can be viewed from here." target="_self">Bans </a>
+</li>
+
+		<li class="nonactive">
+		<a href="index.php?p=commslist" class="tip" title="Comms :: All of the communication bans (such as chat gags and voice mutes) in the database can be viewed from here." target="_self">Comms </a>
+</li>
+
+		<li class="nonactive">
+		<a href="index.php?p=submit" class="tip" title="Report Player :: You can submit a demo or screenshot of a suspected cheater here. It will then be up for review by one of the admins" target="_self">Report Player </a>
+</li>
+
+		<li class="nonactive">
+		<a href="index.php?p=protest" class="tip" title="Appeal Ban :: Here you can appeal your ban. And prove your case as to why you should be unbanned." target="_self">Appeal Ban </a>
+</li>
+
+	</ul>
+        </div>
+	</div>
+</div>
+<div id="mainwrapper">
+<div id="innerwrapper">
+	<div id="navigation">
+		<div id="nav"></div>
+		<div id="search">
+			<form method="get" action="index.php">
+				<input type="hidden" name="p" value="banlist" />
+				<input class="searchbox" alt="Search Bans" name="searchText" type="text" onfocus="this.value='';" onblur="if (this.value=='') {this.value=' Search Bans...';}" value=" Search Bans..." />
+				<input type="submit" name="Submit" value="Search" style="cursor:pointer;" class="button" />
+			</form>
+			<form method="get" action="index.php">
+				<input type="hidden" name="p" value="commslist" />
+				<input class="searchbox" alt="Search Comms" name="searchText" type="text" onfocus="this.value='';" onblur="if (this.value=='') {this.value=' Search Comms...';}" value=" Search Comms... " />
+				<input type="submit" name="Submit" value="Search" style="cursor:pointer;" class="button" />
+			</form>
+		</div>
+	</div><div id="msg-red-debug" style="display:none;" >
+	<i><img src="./images/warning.png" alt="Warning" /></i>
+	<b>Debug</b>
+	<br />
+	<div id="debug-text">
+	</div>
+</div>
+
+<div id="dialog-placement" style="vertical-align:middle;display:none;opacity:0;text-align:center;width:892px;margin:0 auto;position:fixed !important;position:absolute;overflow:hidden;top:10px;left:100px;"> 
+<table width="460px" id="dialog-holder" class="dialog-holder" border="0" cellspacing="0" cellpadding="0" >
+	<tbody width="460px">
+	  <tr>
+	    <td class="dialog-topleft"></td>
+	    <td class="dialog-border"></td>
+	    <td class="dialog-topright"></td>
+	  </tr>
+	  <tr>
+	    <td class="dialog-border"></td>
+	    <td class="box-content">
+			<div id="dragbar" style="cursor:pointer">
+			<ilayer width="100%" onSelectStart="return false">
+			<layer width="100%" onMouseover="dragswitch=1;if (ns4) drag_drop_ns(dialog-placement)" onMouseout="dragswitch=0">
+	    	<h2 align="left" id="dialog-title" class="ok"></h2>
+	        </layer></ilayer></div>
+	        <div class="dialog-content" align="left">
+	        	<div class="dialog-body">
+	            	<div class="clearfix">
+	                    <div style="float: left; margin-right: 15px;" id="dialog-icon" class="icon-info">&nbsp;</div>
+	                    <div style="width:360px;float: right; padding-bottom: 5px; font-size: 11px;" id="dialog-content-text"></div>
+	                </div>
+	            </div>
+	            <div class="dialog-control" id="dialog-control">    
+	            </div>
+	        </div>
+		</td>
+	    <td class="dialog-border"></td>
+	  </tr>
+	  <tr>
+	    <td class="dialog-bottomleft"></td>
+	    <td class="dialog-border"></td>
+	    <td class="dialog-bottomright"></td>
+	  </tr>
+	</tbody>
+</table>
+</div>
+
+
+<div id="content_title">
+	<b>Bans</b>
+</div>
+<div id="breadcrumb">
+</div>
+<div id="content">
+<script type="text/javascript">$("breadcrumb").setHTML("&raquo; <a href='index.php?p=home'>Home</a> &raquo; <b>Bans</b>");</script>
+
+
+<h3 align="left">Banlist Overview - <i>Total Bans: 911</i></h3>
+<br />
+<div align="center">
+	<table width="50%" cellpadding="0" class="listtable" cellspacing="0">
+		<tr class="sea_open">
+			<td width="2%" height="16" class="listtable_top" colspan="3" style="text-align: center;"><b>Advanced Search</b> (Click)</td>
+	  	</tr>
+	  	<tr>
+	  		<td>
+	  		<div class="panel">
+	  			<table width="100%" cellpadding="0" class="listtable" cellspacing="0">
+			    <tr>
+					<td class="listtable_1" width="8%" align="center"><input id="name" name="search_type" type="radio" value="name"></td>
+			        <td class="listtable_1" width="26%">Nickname</td>
+			        <td class="listtable_1" width="66%"><input class="textbox" type="text" id="nick" value="" onmouseup="$('name').checked = true" style="width: 87%;"></td>
+				</tr>       
+			    <tr>
+			        <td align="center" class="listtable_1" ><input id="steam_" type="radio" name="search_type" value="radiobutton"></td>
+			        <td class="listtable_1" >Steam ID</td>
+			        <td class="listtable_1" >
+			            <input class="textbox" type="text" id="steamid" value="" onmouseup="$('steam_').checked = true"style="width: 50%; margin-right: 12px;"><select class="select" id="steam_match" onmouseup="$('steam_').checked = true" style="width: 33%;">
+				        <option value="0" selected>Exact Match</option>
+				        <option value="1">Partial Match</option>
+				    </select>
+				</td>
+			    </tr>
+								<tr>
+					<td align="center" class="listtable_1" ><input id="ip_" type="radio" name="search_type" value="radiobutton"></td>
+					<td class="listtable_1" >IP</td>
+					<td class="listtable_1" ><input class="textbox" type="text" id="ip" value="" onmouseup="$('ip_').checked = true"style="width: 87%;"></td>
+				</tr>
+							    <tr>
+			        <td align="center" class="listtable_1" ><input id="reason_" type="radio" name="search_type" value="radiobutton"></td>
+			        <td class="listtable_1" >Reason</td>
+			        <td class="listtable_1" ><input class="textbox" type="text" id="ban_reason" value="" onmouseup="$('reason_').checked = true" style="width: 87%;"></td>
+			    </tr>
+				<tr>
+					<td align="center" class="listtable_1" ><input id="date" type="radio" name="search_type" value="radiobutton"></td>
+			        <td class="listtable_1" >Date</td>
+			        <td class="listtable_1" >
+			        	<input class="textbox" type="text" id="day" value="DD" onmouseup="$('date').checked = true" maxlength="2" style="width: 22%;">
+			            <input class="textbox" type="text" id="month" value="MM" onmouseup="$('date').checked = true" maxlength="2" style="width: 22%;">
+			            <input class="textbox" type="text" id="year" value="YY" onmouseup="$('date').checked = true" maxlength="4" style="width: 24%;"> 
+			        </td>
+			  	</tr>
+				<tr>
+			        <td align="center" class="listtable_1" ><input id="length_" type="radio" name="search_type" value="radiobutton"></td>
+			        <td class="listtable_1" >Length</td>
+			        <td class="listtable_1" >
+						<table border="0" cellpadding="0" cellspacing="0">
+							<tr>
+								<td>
+						            <select class="select" id="length_type" onmouseup="$('length_').checked = true" style="width: 60px; margin-right: 12px;">
+										<option value="e" title="equal to">=</option>
+										<option value="h" title="greater">&gt;</option>
+										<option value="l" title="smaller">&lt;</option>
+										<option value="eh" title="equal to or greater">&gt;=</option>
+										<option value="el" title="equal to or smaller">&lt;=</option>
+									</select>
+								</td>
+								<td>
+									<input type="text" id="other_length" name="other_length" onmouseup="$('length_').checked = true" style="border: 1px solid #000000; font-size: 12px; background-color: rgb(215, 215, 215);width: 190px;display:none;">
+								</td>
+								<td>
+									<select class="select" id="length" onmouseup="$('length_').checked = true" onchange="switch_length(this);" onmouseover="if(this.options[this.selectedIndex].value=='other')$('length').setStyle('width', '210px');if(this.options[this.selectedIndex].value=='other')this.focus();" onblur="if(this.options[this.selectedIndex].value=='other')$('length').setStyle('width', '20px');" style="width: 127%;">
+								        <option value="0">Permanent</option>
+										<optgroup label="minutes">
+											<option value="1">1 minute</option>
+											<option value="5">5 minutes</option>
+											<option value="10">10 minutes</option>
+											<option value="15">15 minutes</option>
+											<option value="30">30 minutes</option>
+											<option value="45">45 minutes</option>
+										</optgroup>
+										<optgroup label="hours">
+											<option value="60">1 hour</option>
+											<option value="120">2 hours</option>
+											<option value="180">3 hours</option>
+											<option value="240">4 hours</option>
+											<option value="480">8 hours</option>
+											<option value="720">12 hours</option>
+										</optgroup>
+										<optgroup label="days">
+											<option value="1440">1 day</option>
+											<option value="2880">2 days</option>
+											<option value="4320">3 days</option>
+											<option value="5760">4 days</option>
+											<option value="7200">5 days</option>
+											<option value="8640">6 days</option>
+										</optgroup>
+										<optgroup label="weeks">
+											<option value="10080">1 week</option>
+											<option value="20160">2 weeks</option>
+											<option value="30240">3 weeks</option>
+										</optgroup>
+										<optgroup label="months">
+											<option value="40320">1 month</option>
+											<option value="80640">2 months</option>
+											<option value="120960">3 months</option>
+											<option value="241920">6 months</option>
+											<option value="483840">12 months</option>
+										</optgroup>
+										<option value="other">Other length in minutes</option>
+									</select>
+								</td>
+							</tr>
+						</table>
+					</td>
+			    </tr>
+				<tr>
+			        <td align="center" class="listtable_1" ><input id="ban_type_" type="radio" name="search_type" value="radiobutton"></td>
+			        <td class="listtable_1" >Type</td>
+			        <td class="listtable_1" >
+			            <select class="select" id="ban_type" onmouseup="$('ban_type_').checked = true" style="width: 95%;">
+					        <option value="0" selected>Steam ID</option>
+					        <option value="1">IP Address</option>
+						</select>
+					</td>
+			    </tr>
+                			    <tr>
+			    	<td class="listtable_1"  align="center"><input id="admin" name="search_type" type="radio" value="radiobutton"></td>
+			        <td class="listtable_1" >Admin</td>
+			        <td class="listtable_1" >
+						<select class="select" id="ban_admin" onmouseup="$('admin').checked = true" style="width: 95%;">
+															<option label="Admin" value="1">Admin</option>
+															<option label="CONSOLE" value="0">CONSOLE</option>
+													</select>           
+					</td> 
+				</tr>
+                			    <tr>
+			    	<td class="listtable_1"  align="center"><input id="where_banned" name="search_type" type="radio" value="radiobutton"></td>
+					<td class="listtable_1" >Server</td>
+			        <td class="listtable_1" >
+						<select class="select" id="server" onmouseup="$('where_banned').checked = true" style="width: 95%;">
+						<option label="Web Ban" value="0">Web Ban</option>
+															<option value="5" id="ss5">Retrieving Hostname... (51.161.198.119:27401)</option>
+															<option value="3" id="ss3">Retrieving Hostname... (51.161.198.98:27015)</option>
+															<option value="4" id="ss4">Retrieving Hostname... (51.161.198.119:27400)</option>
+															<option value="6" id="ss6">Retrieving Hostname... (51.161.198.119:27402)</option>
+															<option value="7" id="ss7">Retrieving Hostname... (51.161.198.119:27403)</option>
+													</select>            
+					</td>
+			    </tr>
+							    <tr>
+			        <td colspan="4"><input type='button' onclick="search_bans();" name='searchbtn' class='btn ok searchbtn' onmouseover='ButtonOver("searchbtn")' onmouseout='ButtonOver("searchbtn")' id='searchbtn' value='Search' /></td>
+			    </tr>
+			   </table>
+			   </div>
+		  </td>
+		</tr>
+	</table>
+</div>
+<script type="text/javascript">xajax_ServerHostPlayers('5', 'id', 'ss5', '', '', false, 200);xajax_ServerHostPlayers('3', 'id', 'ss3', '', '', false, 200);xajax_ServerHostPlayers('4', 'id', 'ss4', '', '', false, 200);xajax_ServerHostPlayers('6', 'id', 'ss6', '', '', false, 200);xajax_ServerHostPlayers('7', 'id', 'ss7', '', '', false, 200);</script>
+<script>InitAccordion('tr.sea_open', 'div.panel', 'mainwrapper');</script><script type="text/javascript">
+function switch_length(opt)
+{
+    if (opt.options[opt.selectedIndex].value=='other') {
+        $('other_length').setStyle('display', 'block');
+        $('other_length').focus();
+        $('length').setStyle('width', '20px');
+    } else {
+        $('other_length').setStyle('display', 'none');
+        $('length').setStyle('width', '210px');
+    }
+}
+</script>
+<br />
+<div id="banlist-nav"><a href="index.php?p=banlist&hideinactive=true" title="Hide inactive">Hide inactive</a> | <i>Total Bans: 911</i></div>
+<div id="banlist">
+	<table width="100%" cellspacing="0" cellpadding="0" align="center" class="listtable">
+		<tr>
+						<td width="12%" height="16" class="listtable_top" align="center"><b>MOD/Country</b></td>
+			<td width="14%" height="16" class="listtable_top" align="center"><b>Date</b></td>
+			<td height="16" class="listtable_top"><b>Player</b></td>
+						<td width="20%" height="16" class="listtable_top"><b>Admin</b></td>
+						<td width="10%" height="16" class="listtable_top" align="center"><b>Length</b></td>
+		</tr>
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(2, 'id', 'host_2213');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">06-03-23 07:36</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      nubs
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      nubs
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:187819982
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:375639964]" target="_blank">[U:1:375639964]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198335905692" target="_blank">76561198335905692</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" />&nbsp;58.7.107.20
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">06-03-23 07:36</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for pSilent after 10 detections</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2213">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2212');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/id.jpg" alt="ID" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">05-24-23 10:36</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      FemboyGamer&gt;;3
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      FemboyGamer&gt;;3
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:713296680
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1426593360]" target="_blank">[U:1:1426593360]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199386859088" target="_blank">76561199386859088</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/id.jpg" alt="ID" border="0" align="absmiddle" />&nbsp;110.138.72.30
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">05-24-23 10:36</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for 10 fake angle detections</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2212">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2211');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/id.jpg" alt="ID" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">05-19-23 12:06</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      CornDoggo
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      CornDoggo
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:772446855
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1544893711]" target="_blank">[U:1:1544893711]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199505159439" target="_blank">76561199505159439</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/id.jpg" alt="ID" border="0" align="absmiddle" />&nbsp;180.242.131.215
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">05-19-23 12:06</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for OOB cvar/netvar values</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2211">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">2 <a href="index.php?p=banlist&searchText=STEAM_0:1:772446855&Submit" onclick="" target="_self">(search) </a></td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2210');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/id.jpg" alt="ID" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">05-15-23 11:35</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      CornDoggo
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      CornDoggo
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:772446855
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1544893711]" target="_blank">[U:1:1544893711]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199505159439" target="_blank">76561199505159439</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/id.jpg" alt="ID" border="0" align="absmiddle" />&nbsp;180.242.131.215
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">05-15-23 11:35</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for 10 fake angle detections</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2210">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">2 <a href="index.php?p=banlist&searchText=STEAM_0:1:772446855&Submit" onclick="" target="_self">(search) </a></td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2209');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/ru.jpg" alt="RU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">05-14-23 09:51</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      AlduinSounder
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      AlduinSounder
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:769423998
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1538847997]" target="_blank">[U:1:1538847997]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199499113725" target="_blank">76561199499113725</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/ru.jpg" alt="RU" border="0" align="absmiddle" />&nbsp;31.181.84.159
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">05-14-23 09:51</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for 10 fake angle detections</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2209">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2208');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/ro.jpg" alt="RO" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">04-28-23 05:36</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      pixelgod999
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      pixelgod999
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:768324575
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1536649150]" target="_blank">[U:1:1536649150]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199496914878" target="_blank">76561199496914878</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/ro.jpg" alt="RO" border="0" align="absmiddle" />&nbsp;82.77.77.60
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">04-28-23 05:36</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for 10 fake angle detections</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2208">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (1)</td>
+								<td height="16" class="listtable_1">
+																	<span title="Server: :, Date: 04-28-23 07:29">pixelgod999</span>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2207');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/ru.jpg" alt="RU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">04-25-23 03:47</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      ILikePhlogistinator
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      ILikePhlogistinator
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:768883485
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1537766971]" target="_blank">[U:1:1537766971]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199498032699" target="_blank">76561199498032699</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/ru.jpg" alt="RU" border="0" align="absmiddle" />&nbsp;185.2.185.246
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">04-25-23 03:47</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for OOB cvar/netvar values</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2207">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2206');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/ru.jpg" alt="RU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">04-18-23 04:30</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      ручная работа
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      ручная работа
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:465293925
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:930587851]" target="_blank">[U:1:930587851]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198890853579" target="_blank">76561198890853579</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/ru.jpg" alt="RU" border="0" align="absmiddle" />&nbsp;46.236.135.62
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">04-18-23 04:30</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for OOB cvar/netvar values</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2206">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(2, 'id', 'host_2205');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">04-16-23 13:02</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      noh
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      noh
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:422365649
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:844731299]" target="_blank">[U:1:844731299]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198804997027" target="_blank">76561198804997027</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" />&nbsp;101.189.211.146
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">04-16-23 13:02</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[SourceSleuth] Duplicate account</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2205">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(2, 'id', 'host_2204');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">04-16-23 13:02</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      jakob
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      jakob
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:117627053
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:235254106]" target="_blank">[U:1:235254106]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198195519834" target="_blank">76561198195519834</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" />&nbsp;203.206.80.143
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">04-16-23 13:02</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for bhop cheats after 12 consec bhops</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2204">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2203');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">04-15-23 10:53</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      imqq
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      imqq
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:607691548
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1215383097]" target="_blank">[U:1:1215383097]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199175648825" target="_blank">76561199175648825</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" />&nbsp;1.159.188.141
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">04-15-23 10:53</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[SourceSleuth] Duplicate account</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2203">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (3)</td>
+								<td height="16" class="listtable_1">
+																	<span title="Server: :, Date: 04-19-23 10:46">katsu</span>, <span title="Server: :, Date: 04-21-23 09:04">rexx the camgirl</span>, <span title="Server: :, Date: 05-10-23 13:09">jumpbug</span>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2202');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">04-15-23 10:49</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      beou
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      beou
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:733363302
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1466726604]" target="_blank">[U:1:1466726604]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199426992332" target="_blank">76561199426992332</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" />&nbsp;1.159.188.141
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">04-15-23 10:49</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for bhop cheats after 17 consec bhops</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2202">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2201');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">04-11-23 07:23</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      sog
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      sog
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:762282753
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1524565506]" target="_blank">[U:1:1524565506]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199484831234" target="_blank">76561199484831234</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" />&nbsp;1.158.219.54
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">04-11-23 07:23</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[SourceSleuth] Duplicate account</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2201">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (1)</td>
+								<td height="16" class="listtable_1">
+																	<span title="Server: :, Date: 04-28-23 12:13">cola</span>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(2, 'id', 'host_2199');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">04-11-23 04:30</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      X
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      X
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:713749043
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1427498087]" target="_blank">[U:1:1427498087]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199387763815" target="_blank">76561199387763815</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" />&nbsp;58.105.104.131
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">04-11-23 04:30</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for OOB cvar/netvar values</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2199">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">2 <a href="index.php?p=banlist&searchText=STEAM_0:1:713749043&Submit" onclick="" target="_self">(search) </a></td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2197');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">04-11-23 03:21</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      X
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      X
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:713749043
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1427498087]" target="_blank">[U:1:1427498087]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199387763815" target="_blank">76561199387763815</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" />&nbsp;58.105.104.131
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">04-11-23 03:21</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for OOB cvar/netvar values</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2197">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">2 <a href="index.php?p=banlist&searchText=STEAM_0:1:713749043&Submit" onclick="" target="_self">(search) </a></td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (2)</td>
+								<td height="16" class="listtable_1">
+																	<span title="Server: :, Date: 04-11-23 06:11">X</span>, <span title="Server: :, Date: 04-11-23 06:52">X</span>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(2, 'id', 'host_2198');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">04-06-23 16:31</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      imma have it one day
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      imma have it one day
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:493316252
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:986632505]" target="_blank">[U:1:986632505]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198946898233" target="_blank">76561198946898233</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" />&nbsp;101.189.211.146
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">04-06-23 16:31</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for bhop cheats after 12 consec bhops</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2198">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2200');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/ph.jpg" alt="PH" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">04-05-23 07:31</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      anti.doeshotter
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      anti.doeshotter
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:764206769
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1528413538]" target="_blank">[U:1:1528413538]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199488679266" target="_blank">76561199488679266</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/ph.jpg" alt="PH" border="0" align="absmiddle" />&nbsp;49.144.34.61
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">04-05-23 07:31</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for 20 cmdnum spikes</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2200">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (1)</td>
+								<td height="16" class="listtable_1">
+																	<span title="Server: :, Date: 05-03-23 08:48">anti.doeshotter</span>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2196');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/pl.jpg" alt="PL" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">04-03-23 12:16</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Mr.Dies a lot๊
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Mr.Dies a lot๊
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:764551328
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1529102656]" target="_blank">[U:1:1529102656]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199489368384" target="_blank">76561199489368384</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/pl.jpg" alt="PL" border="0" align="absmiddle" />&nbsp;109.206.213.179
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">04-03-23 12:16</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for OOB cvar/netvar values</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2196">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2195');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">03-26-23 06:27</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      hey baby girl
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      hey baby girl
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:618837321
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1237674642]" target="_blank">[U:1:1237674642]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199197940370" target="_blank">76561199197940370</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" />&nbsp;1.158.219.54
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">03-26-23 06:27</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for 20 cmdnum spikes</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2195">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2194');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">03-24-23 13:10</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      mastah of P
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      mastah of P
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:763597007
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1527194014]" target="_blank">[U:1:1527194014]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199487459742" target="_blank">76561199487459742</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" />&nbsp;159.196.41.26
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">03-24-23 13:10</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[SourceSleuth] Duplicate account</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2194">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2193');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/ru.jpg" alt="RU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">03-24-23 11:56</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      d.
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      d.
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:230993110
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:461986220]" target="_blank">[U:1:461986220]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198422251948" target="_blank">76561198422251948</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/ru.jpg" alt="RU" border="0" align="absmiddle" />&nbsp;176.192.125.247
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">03-24-23 11:56</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for OOB cvar/netvar values</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2193">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2192');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/no.jpg" alt="NO" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">03-23-23 07:26</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      MarshMa11ow
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      MarshMa11ow
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:758350714
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1516701429]" target="_blank">[U:1:1516701429]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199476967157" target="_blank">76561199476967157</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/no.jpg" alt="NO" border="0" align="absmiddle" />&nbsp;136.158.46.173
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">03-23-23 07:26</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for OOB cvar/netvar values</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2192">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2191');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/th.jpg" alt="TH" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">03-18-23 03:11</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      bart‏o
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      bart‏o
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:763241798
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1526483597]" target="_blank">[U:1:1526483597]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199486749325" target="_blank">76561199486749325</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/th.jpg" alt="TH" border="0" align="absmiddle" />&nbsp;223.206.44.84
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">03-18-23 03:11</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for 10 fake angle detections</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2191">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2190');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/tr.jpg" alt="TR" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">03-17-23 22:01</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      УИЛЬЯМ АФТОН
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      УИЛЬЯМ АФТОН
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:756635491
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1513270982]" target="_blank">[U:1:1513270982]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199473536710" target="_blank">76561199473536710</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/tr.jpg" alt="TR" border="0" align="absmiddle" />&nbsp;78.180.33.133
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">03-17-23 22:01</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for OOB cvar/netvar values</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2190">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2189');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/ph.jpg" alt="PH" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">03-16-23 05:51</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      gallendovon
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      gallendovon
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:763181463
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1526362927]" target="_blank">[U:1:1526362927]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199486628655" target="_blank">76561199486628655</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/ph.jpg" alt="PH" border="0" align="absmiddle" />&nbsp;49.144.43.241
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">03-16-23 05:51</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for OOB cvar/netvar values</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2189">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2188');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/nz.jpg" alt="NZ" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">03-10-23 08:00</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Mr_SpyCrab
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Mr_SpyCrab
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:607423581
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1214847162]" target="_blank">[U:1:1214847162]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199175112890" target="_blank">76561199175112890</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/nz.jpg" alt="NZ" border="0" align="absmiddle" />&nbsp;118.93.16.27
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">03-10-23 08:00</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[SourceSleuth] Duplicate account</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2188">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (5)</td>
+								<td height="16" class="listtable_1">
+																	<span title="Server: :, Date: 04-13-23 08:34">MR_Spycrab</span>, <span title="Server: :, Date: 04-16-23 03:46">MR_Spycrab</span>, <span title="Server: :, Date: 04-25-23 04:11">MR_Spycrab</span>, <span title="Server: :, Date: 05-24-23 01:43">MR_Spycrab</span>, <span title="Server: :, Date: 06-02-23 12:07">MR_Spycrab</span>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2187');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/nz.jpg" alt="NZ" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">03-09-23 06:25</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Funny boi
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Funny boi
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:761777737
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1523555474]" target="_blank">[U:1:1523555474]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199483821202" target="_blank">76561199483821202</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/nz.jpg" alt="NZ" border="0" align="absmiddle" />&nbsp;118.93.16.27
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">03-09-23 06:25</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for bhop cheats after 17 consec bhops</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2187">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2186');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">03-05-23 06:27</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      luigi bong
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      luigi bong
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:616177852
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1232355704]" target="_blank">[U:1:1232355704]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199192621432" target="_blank">76561199192621432</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" />&nbsp;149.167.30.64
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">03-05-23 06:27</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for bhop cheats after 17 consec bhops</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2186">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2185');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/th.jpg" alt="TH" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">03-05-23 04:42</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      [BFHMSC]
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      [BFHMSC]
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:761959610
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1523919220]" target="_blank">[U:1:1523919220]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199484184948" target="_blank">76561199484184948</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/th.jpg" alt="TH" border="0" align="absmiddle" />&nbsp;223.206.42.241
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">03-05-23 04:42</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for 10 fake angle detections</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2185">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_2170');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">03-03-23 17:29</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      ilikemen69
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    CONSOLE
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      ilikemen69
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:627240657
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1254481315]" target="_blank">[U:1:1254481315]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199214747043" target="_blank">76561199214747043</a></td>
+              </tr>
+                                          <tr align="left">
+                <td width="20%" height="16" class="listtable_1">IP address</td>
+                <td height="16" class="listtable_1">
+                                      <img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" />&nbsp;220.245.214.130
+                                  </td>
+              </tr>
+                            <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">03-03-23 17:29</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[StAC] Banned for OOB cvar/netvar values</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			CONSOLE
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_2170">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (1)</td>
+								<td height="16" class="listtable_1">
+																	<span title="Server: :, Date: 03-08-23 20:12">-=NiceTitsBro=-</span>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+			</table>
+	<div id="banlist-nav">
+        displaying&nbsp;0&nbsp;-&nbsp;30&nbsp;of&nbsp;911&nbsp;results | <b><a href="index.php?p=banlist&page=2" onclick="" target="_self">next <img border="0" alt="next" src="images/right.png" style="vertical-align:middle;" /> </a></b>&nbsp;<select onchange="changePage(this,'B','','');"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option></select>
+    </div>
+		</div>
+
+<script type="text/javascript">window.addEvent('domready', function(){
+InitAccordion('tr.opener', 'div.opener', 'mainwrapper');
+
+
+});
+</script>
+
+	</div></div></div>
+	<div id="footer">
+		<div id="mainwrapper" style="text-align: center;">
+			<a href="https://sbpp.github.io/" target="_blank"><img src="images/sb.png" alt="SourceBans" border="0" /></a><br/>
+			<div id="footqversion" style="line-height: 20px;"><a style="color: #425c70" href="https://sbpp.github.io/" target="_blank">SourceBans++</a> 1.6.3</div>
+		    <span style="line-height: 20px;">Powered by <a href="http://www.sourcemod.net" target="_blank" style="color: #425c70">SourceMod</a></span><br />
+		    <span style="line-height: 20px;">"Get your ass ingame" - <i>Viper</i><span>
+		</div>
+	</div>
+	</div>
+<script type="text/javascript">
+var settab = ProcessAdminTabs();
+window.addEvent('domready', function(){
+        var Tips2 = new Tips($$('.tip'), {
+            initialize:function(){
+                this.fx = new Fx.Style(this.toolTip, 'opacity', {duration: 300, wait: false}).set(0);
+            },
+            onShow: function(toolTip) {
+                this.fx.start(1);
+            },
+            onHide: function(toolTip) {
+                this.fx.start(0);
+            }
+        });
+        var Tips4 = new Tips($$('.perm'), {
+            className: 'perm'
+        });
+    });
+$('nav').setHTML('');    $('content_title').setHTML('Ban List');
+
+
+        </script>
+<!--[if lt IE 7]>
+<script defer type="text/javascript" src="./scripts/pngfix.js"></script>
+<![endif]-->
+</body>
+</html>
