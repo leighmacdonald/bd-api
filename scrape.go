@@ -54,6 +54,7 @@ func Start() {
 
 type Scraper struct {
 	*colly.Collector
+	name      string
 	log       *zap.Logger
 	results   []banData
 	resultsMu sync.RWMutex
@@ -96,6 +97,7 @@ func newScraper(name string, baseUrl string, startPath string, parser parserFunc
 
 	scraper := Scraper{
 		baseUrl:   baseUrl,
+		name:      name,
 		startPath: startPath,
 		parser:    parser,
 		nextUrl:   nextUrl,
@@ -145,14 +147,6 @@ func NewSkialScraper() *Scraper {
 	)
 }
 
-func rowFilterGFL(doc *goquery.Selection) bool {
-	v := doc.Text()
-	if strings.Contains(v, "tf2") {
-		return true
-	}
-	return false
-}
-
 func NewGFLScraper() *Scraper {
 	return newScraper("gfl", "https://sourcebans.gflclan.com/", "index.php?p=banlist",
 		parseDefault, nextUrlLast, parseDefaultTime)
@@ -164,12 +158,12 @@ func NewSpaceShipScraper() *Scraper {
 }
 
 func NewUGCScraper() *Scraper {
-	return newScraper("ugc-gaming", "https://sb.ugc-gaming.net/", "index.php?p=banlist",
+	return newScraper("ugc", "https://sb.ugc-gaming.net/", "index.php?p=banlist",
 		parseFluent, nextUrlFluent, parseDefaultTime)
 }
 
 func NewSirPleaseScraper() *Scraper {
-	return newScraper("sirplease.gg", "https://sirplease.gg/", "index.php?p=banlist",
+	return newScraper("sirplease", "https://sirplease.gg/", "index.php?p=banlist",
 		parseFluent, nextUrlFluent, parseDefaultTime)
 }
 
@@ -179,7 +173,7 @@ func NewVidyaGaemsScraper() *Scraper {
 }
 
 func NewOwlTFScraper() *Scraper {
-	return newScraper("owl.tf", "https://kingpandagamer.xyz/sb/", "index.php?p=banlist",
+	return newScraper("owl", "https://kingpandagamer.xyz/sb/", "index.php?p=banlist",
 		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
@@ -189,12 +183,12 @@ func NewZMBrasilScraper() *Scraper {
 }
 
 func NewScrapTFScraper() *Scraper {
-	return newScraper("scrap.tf", "https://bans.scrap.tf/", "index.php?p=banlist",
+	return newScraper("scraptf", "https://bans.scrap.tf/", "index.php?p=banlist",
 		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
 func NewWonderlandTFScraper() *Scraper {
-	return newScraper("wonderland.tf", "https://bans.wonderland.tf/", "index.php?p=banlist",
+	return newScraper("wonderland", "https://bans.wonderland.tf/", "index.php?p=banlist",
 		parseDefault, nextUrlLast, parseWonderlandTime)
 }
 
@@ -224,7 +218,7 @@ func NewNeonHeightsScraper() *Scraper {
 }
 
 func NewPancakesScraper() *Scraper {
-	return newScraper("pancakestf", "https://pancakes.tf/", "index.php?p=banlist",
+	return newScraper("pancakes", "https://pancakes.tf/", "index.php?p=banlist",
 		parseDefault, nextUrlLast, parsePancakesTime)
 }
 
@@ -239,12 +233,12 @@ func NewPubsTFScraper() *Scraper {
 }
 
 func NewServiliveClScraper() *Scraper {
-	return newScraper("servilive.cl", "https://sourcebans.servilive.cl/", "index.php?p=banlist",
+	return newScraper("servilivecl", "https://sourcebans.servilive.cl/", "index.php?p=banlist",
 		parseFluent, nextUrlFluent, parseDefaultTimeMonthFirst)
 }
 
 func NewSGGamingScraper() *Scraper {
-	return newScraper("sg-gaming", "https://sg-gaming.net/bans/", "index.php?p=banlist",
+	return newScraper("sggaming", "https://sg-gaming.net/bans/", "index.php?p=banlist",
 		parseDefault, nextUrlLast, parseSGGaming)
 }
 
@@ -261,6 +255,11 @@ func NewMaxDBScraper() *Scraper {
 func NewSvdosBrothersScraper() *Scraper {
 	return newScraper("svdosbrothers", "https://bans.svdosbrothers.com/", "index.php?p=banlist",
 		parseFluent, nextUrlFluent, parseSVDos)
+}
+
+func NewElectricScraper() *Scraper {
+	return newScraper("electric", "http://168.181.184.179/", "index.php?p=banlist",
+		parseFluent, nextUrlFluent, parseDefaultTime)
 }
 
 type metaKey int

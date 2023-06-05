@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/require"
 	"os"
@@ -8,8 +9,8 @@ import (
 	"time"
 )
 
-func testParser(t *testing.T, path string, scraper *Scraper, count int, nextPage string) {
-	testBody, errOpen := os.Open(path)
+func testParser(t *testing.T, scraper *Scraper, count int, nextPage string) {
+	testBody, errOpen := os.Open(fmt.Sprintf("test_data/%s.html", scraper.name))
 	require.NoError(t, errOpen)
 	defer logCloser(testBody)
 	doc, errDoc := goquery.NewDocumentFromReader(testBody)
@@ -25,95 +26,99 @@ func testParser(t *testing.T, path string, scraper *Scraper, count int, nextPage
 }
 
 func TestParseSkial(t *testing.T) {
-	testParser(t, "test_data/skial_home.html", NewSkialScraper(), 50, "index.php?p=banlist&page=2")
+	testParser(t, NewSkialScraper(), 50, "index.php?p=banlist&page=2")
 }
 
 func TestParseUGC(t *testing.T) {
-	testParser(t, "test_data/ugc_home.html", NewUGCScraper(), 50, "index.php?p=banlist&page=2")
+	testParser(t, NewUGCScraper(), 50, "index.php?p=banlist&page=2")
 }
 
 func TestParseWonderland(t *testing.T) {
-	testParser(t, "test_data/wonderland_home.html", NewWonderlandTFScraper(), 23, "index.php?p=banlist&page=2")
+	testParser(t, NewWonderlandTFScraper(), 23, "index.php?p=banlist&page=2")
 }
 
 func TestParseGFL(t *testing.T) {
-	testParser(t, "test_data/gfl_home.html", NewGFLScraper(), 30, "index.php?p=banlist&page=2")
+	testParser(t, NewGFLScraper(), 30, "index.php?p=banlist&page=2")
 }
 
 func TestParsePancakes(t *testing.T) {
-	testParser(t, "test_data/pancakes_home.html", NewPancakesScraper(), 10, "index.php?p=banlist&page=2")
+	testParser(t, NewPancakesScraper(), 10, "index.php?p=banlist&page=2")
 }
 
 func TestParseOWL(t *testing.T) {
-	testParser(t, "test_data/owl_home.html", NewOwlTFScraper(), 30, "index.php?p=banlist&page=2")
+	testParser(t, NewOwlTFScraper(), 30, "index.php?p=banlist&page=2")
 }
 
 func TestParseSpaceShip(t *testing.T) {
-	testParser(t, "test_data/ss_home.html", NewSpaceShipScraper(), 69, "index.php?p=banlist&page=2")
+	testParser(t, NewSpaceShipScraper(), 69, "index.php?p=banlist&page=2")
 }
 
 func TestParseLazyPurple(t *testing.T) {
-	testParser(t, "test_data/lp_home.html", NewLazyPurpleScraper(), 30, "index.php?p=banlist&page=2")
+	testParser(t, NewLazyPurpleScraper(), 30, "index.php?p=banlist&page=2")
 }
 
 func TestParseFirePowered(t *testing.T) {
-	testParser(t, "test_data/firepowered_home.html", NewFirePoweredScraper(), 28, "index.php?p=banlist&page=2")
+	testParser(t, NewFirePoweredScraper(), 28, "index.php?p=banlist&page=2")
 }
 
 func TestParseHarpoon(t *testing.T) {
-	testParser(t, "test_data/harpoon_home.html", NewHarpoonScraper(), 38, "index.php?p=banlist&page=2")
+	testParser(t, NewHarpoonScraper(), 38, "index.php?p=banlist&page=2")
 }
 
 func TestParsePanda(t *testing.T) {
-	testParser(t, "test_data/panda_home.html", NewPandaScraper(), 40, "index.php?p=banlist&page=2")
+	testParser(t, NewPandaScraper(), 40, "index.php?p=banlist&page=2")
 }
 
 func TestParseNeonHeights(t *testing.T) {
-	testParser(t, "test_data/neonheights_home.html", NewNeonHeightsScraper(), 28, "index.php?p=banlist&page=2")
+	testParser(t, NewNeonHeightsScraper(), 28, "index.php?p=banlist&page=2")
 }
 
 func TestParseLOOS(t *testing.T) {
-	testParser(t, "test_data/loos_home.html", NewLOOSScraper(), 30, "index.php?p=banlist&page=2")
+	testParser(t, NewLOOSScraper(), 30, "index.php?p=banlist&page=2")
 }
 
 func TestParsePubsTF(t *testing.T) {
-	testParser(t, "test_data/pubstf_home.html", NewPubsTFScraper(), 29, "index.php?p=banlist&page=2")
+	testParser(t, NewPubsTFScraper(), 29, "index.php?p=banlist&page=2")
 }
 
 func TestParseScrapTF(t *testing.T) {
-	testParser(t, "test_data/scraptf_home.html", NewScrapTFScraper(), 30, "index.php?p=banlist&page=2")
+	testParser(t, NewScrapTFScraper(), 30, "index.php?p=banlist&page=2")
 }
 
 func TestParseServiliveCl(t *testing.T) {
-	testParser(t, "test_data/servilivecl_home.html", NewServiliveClScraper(), 27, "index.php?p=banlist&page=2")
+	testParser(t, NewServiliveClScraper(), 27, "index.php?p=banlist&page=2")
 }
 
 func TestParseZMBrasil(t *testing.T) {
-	testParser(t, "test_data/zmbrasil_home.html", NewZMBrasilScraper(), 30, "index.php?p=banlist&page=2")
+	testParser(t, NewZMBrasilScraper(), 30, "index.php?p=banlist&page=2")
 }
 
 func TestParseSirPlease(t *testing.T) {
-	testParser(t, "test_data/sirplease_home.html", NewSirPleaseScraper(), 30, "index.php?p=banlist&page=2")
+	testParser(t, NewSirPleaseScraper(), 30, "index.php?p=banlist&page=2")
 }
 
 func TestVidyaGaems(t *testing.T) {
-	testParser(t, "test_data/vidyagaems_home.html", NewVidyaGaemsScraper(), 30, "index.php?p=banlist&page=2")
+	testParser(t, NewVidyaGaemsScraper(), 30, "index.php?p=banlist&page=2")
 }
 
 func TestSGGaming(t *testing.T) {
-	testParser(t, "test_data/sggaming_home.html", NewSGGamingScraper(), 50, "index.php?p=banlist&page=2")
+	testParser(t, NewSGGamingScraper(), 50, "index.php?p=banlist&page=2")
 }
 
 func TestApeMode(t *testing.T) {
-	testParser(t, "test_data/apemode_home.html", NewApeModeScraper(), 30, "index.php?p=banlist&page=2")
+	testParser(t, NewApeModeScraper(), 30, "index.php?p=banlist&page=2")
 }
 
 func TestMaxDB(t *testing.T) {
-	testParser(t, "test_data/maxdb_home.html", NewMaxDBScraper(), 30, "index.php?p=banlist&page=2")
+	testParser(t, NewMaxDBScraper(), 30, "index.php?p=banlist&page=2")
 }
 
 func TestSvdosBrothers(t *testing.T) {
-	testParser(t, "test_data/svdosbrothers_home.html", NewSvdosBrothersScraper(), 27, "index.php?p=banlist&page=2")
+	testParser(t, NewSvdosBrothersScraper(), 27, "index.php?p=banlist&page=2")
+}
+
+func TestElectric(t *testing.T) {
+	testParser(t, NewElectricScraper(), 24, "index.php?p=banlist&page=2")
 }
 
 func TestParseGFLTime(t *testing.T) {
