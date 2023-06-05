@@ -173,6 +173,11 @@ func NewSirPleaseScraper() *Scraper {
 		parseFluent, nextUrlFluent, parseDefaultTime)
 }
 
+func NewVidyaGaemsScraper() *Scraper {
+	return newScraper("vidyagaems", "https://www.vidyagaems.net/", "index.php?p=banlist",
+		parseFluent, nextUrlFluent, parseTrailYear)
+}
+
 func NewOwlTFScraper() *Scraper {
 	return newScraper("owl.tf", "https://kingpandagamer.xyz/sb/", "index.php?p=banlist",
 		parseDefault, nextUrlLast, parseDefaultTime)
@@ -268,6 +273,14 @@ func parseSkialTime(s string) (time.Time, error) {
 		return time.Time{}, nil
 	}
 	return time.Parse("01-02-06 15:04", s)
+}
+
+// 17-05-2023 03:07:05
+func parseTrailYear(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("02-01-2006 15:04:05", s)
 }
 
 // 2023-05-17 03:07:05
