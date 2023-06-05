@@ -57,7 +57,7 @@ func TestParseLazyPurple(t *testing.T) {
 }
 
 func TestParseFirePowered(t *testing.T) {
-	testParser(t, "test_data/firepowered_home.html", parseDefault, nextUrlLast, parseSkialTime, 30, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/firepowered_home.html", parseDefault, nextUrlLast, parseSkialTime, 28, "index.php?p=banlist&page=2")
 }
 
 func TestParseHarpoon(t *testing.T) {

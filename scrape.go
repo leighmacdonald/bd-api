@@ -479,7 +479,9 @@ func parseDefault(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTi
 				curBan.Length = t.Sub(curBan.CreatedOn)
 			case reason:
 				curBan.Reason = txt
-				bans = append(bans, curBan)
+				if curBan.SteamId.Valid() {
+					bans = append(bans, curBan)
+				}
 				curBan = banData{}
 				curState = last
 			}
