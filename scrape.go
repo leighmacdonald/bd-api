@@ -338,6 +338,11 @@ func parseWonderlandTime(s string) (time.Time, error) {
 	return time.Parse("January 2, 2006 (15:04)", s)
 }
 
+func nextUrlFluent(doc *goquery.Selection) string {
+	nextPage, _ := doc.Find(".pagination a[href]").First().Attr("href")
+	return nextPage
+}
+
 func nextUrlFirst(doc *goquery.Selection) string {
 	nextPage, _ := doc.Find("#banlist-nav a[href]").First().Attr("href")
 	return nextPage
@@ -346,6 +351,58 @@ func nextUrlFirst(doc *goquery.Selection) string {
 func nextUrlLast(doc *goquery.Selection) string {
 	nextPage, _ := doc.Find("#banlist-nav a[href]").Last().Attr("href")
 	return nextPage
+}
+
+// https://github.com/aXenDeveloper/sourcebans-web-theme-fluent
+func parseFluent(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTimeFunc, filter rowFilter) (string, []banData, error) {
+	var (
+		bans   []banData
+		curBan banData
+	)
+	doc.Find("ul.ban_list_detal li").Each(func(i int, selection *goquery.Selection) {
+		child := selection.Children()
+		key := strings.TrimSpace(strings.ToLower(child.First().Contents().Text()))
+		value := strings.TrimSpace(child.Last().Contents().Text())
+		switch key {
+		case "player":
+			curBan.Name = value
+		case "steam community":
+			pts := strings.Split(value, " ")
+			sid64, errSid := steamid.StringToSID64(pts[0])
+			if errSid != nil {
+				logger.Error("Failed to parse sid", zap.Error(errSid))
+				return
+			}
+			curBan.SteamId = sid64
+		case "invoked on":
+			t, errTime := parseTime(value)
+			if errTime != nil {
+				logger.Error("Failed to parse invoke tme", zap.Error(errTime))
+				return
+			}
+			curBan.CreatedOn = t
+		case "ban length":
+			if "permanent" == strings.ToLower(value) {
+				curBan.Permanent = true
+			}
+			curBan.Length = 0
+		case "expires on":
+			if curBan.Permanent {
+				return
+			}
+			t, errTime := parseTime(value)
+			if errTime != nil {
+				logger.Error("Failed to parse invoke tme", zap.Error(errTime))
+				return
+			}
+			curBan.Length = t.Sub(curBan.CreatedOn)
+		case "reason":
+			curBan.Reason = value
+			bans = append(bans, curBan)
+			curBan = banData{}
+		}
+	})
+	return urlFunc(doc), bans, nil
 }
 
 func parseDefault(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTimeFunc, filter rowFilter) (string, []banData, error) {
@@ -363,7 +420,6 @@ func parseDefault(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTi
 			case "player":
 				curState = player
 				isValue = true
-				return
 			case "steam id":
 				curState = steamId
 				isValue = true

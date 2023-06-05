@@ -29,7 +29,7 @@ func TestParseSkial(t *testing.T) {
 }
 
 func TestParseUGC(t *testing.T) {
-	testParser(t, "test_data/ugc_home.html", parseDefault, nextUrlLast, parseSkialTime, 50, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/ugc_home.html", parseFluent, nextUrlFluent, parseDefaultTime, 50, "index.php?p=banlist&page=2")
 }
 
 func TestParseWonderland(t *testing.T) {
