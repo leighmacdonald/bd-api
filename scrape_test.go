@@ -33,7 +33,7 @@ func TestParseUGC(t *testing.T) {
 }
 
 func TestParseWonderland(t *testing.T) {
-	testParser(t, "test_data/wonderland_home.html", parseDefault, nextUrlLast, parseWonderlandTime, 30, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/wonderland_home.html", parseDefault, nextUrlLast, parseWonderlandTime, 23, "index.php?p=banlist&page=2")
 }
 
 func TestParseGFL(t *testing.T) {
@@ -61,7 +61,7 @@ func TestParseFirePowered(t *testing.T) {
 }
 
 func TestParseHarpoon(t *testing.T) {
-	testParser(t, "test_data/harpoon_home.html", parseDefault, nextUrlLast, parseDefaultTime, 50, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/harpoon_home.html", parseDefault, nextUrlLast, parseDefaultTime, 38, "index.php?p=banlist&page=2")
 }
 
 func TestParsePanda(t *testing.T) {
@@ -69,7 +69,7 @@ func TestParsePanda(t *testing.T) {
 }
 
 func TestParseNeonHeights(t *testing.T) {
-	testParser(t, "test_data/neonheights_home.html", parseDefault, nextUrlLast, parseSkialTime, 30, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/neonheights_home.html", parseDefault, nextUrlLast, parseSkialTime, 28, "index.php?p=banlist&page=2")
 }
 
 func TestParseLOOS(t *testing.T) {
@@ -77,7 +77,7 @@ func TestParseLOOS(t *testing.T) {
 }
 
 func TestParsePubsTF(t *testing.T) {
-	testParser(t, "test_data/pubstf_home.html", parseDefault, nextUrlLast, parseSkialTime, 30, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/pubstf_home.html", parseDefault, nextUrlLast, parseSkialTime, 29, "index.php?p=banlist&page=2")
 }
 
 func TestParseGFLTime(t *testing.T) {
