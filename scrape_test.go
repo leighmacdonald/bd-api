@@ -8,14 +8,14 @@ import (
 	"time"
 )
 
-func testParser(t *testing.T, path string, parser parserFunc, urlFunc nextUrlFunc, timeFunc parseTimeFunc, count int, nextPage string) {
+func testParser(t *testing.T, path string, scraper *Scraper, count int, nextPage string) {
 	testBody, errOpen := os.Open(path)
 	require.NoError(t, errOpen)
 	defer logCloser(testBody)
 	doc, errDoc := goquery.NewDocumentFromReader(testBody)
 	require.NoError(t, errDoc)
 
-	next, results, errParse := parser(doc.Selection, urlFunc, timeFunc, nil)
+	next, results, errParse := scraper.parser(doc.Selection, scraper.nextUrl, scraper.parseTIme, nil)
 	require.NoError(t, errParse)
 	require.Equal(t, count, len(results))
 	require.Equal(t, nextPage, next)
@@ -25,59 +25,63 @@ func testParser(t *testing.T, path string, parser parserFunc, urlFunc nextUrlFun
 }
 
 func TestParseSkial(t *testing.T) {
-	testParser(t, "test_data/skial_home.html", parseDefault, nextUrlFirst, parseSkialTime, 50, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/skial_home.html", NewSkialScraper(), 50, "index.php?p=banlist&page=2")
 }
 
 func TestParseUGC(t *testing.T) {
-	testParser(t, "test_data/ugc_home.html", parseFluent, nextUrlFluent, parseDefaultTime, 50, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/ugc_home.html", NewUGCScraper(), 50, "index.php?p=banlist&page=2")
 }
 
 func TestParseWonderland(t *testing.T) {
-	testParser(t, "test_data/wonderland_home.html", parseDefault, nextUrlLast, parseWonderlandTime, 23, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/wonderland_home.html", NewWonderlandTFScraper(), 23, "index.php?p=banlist&page=2")
 }
 
 func TestParseGFL(t *testing.T) {
-	testParser(t, "test_data/gfl_home.html", parseDefault, nextUrlLast, parseDefaultTime, 30, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/gfl_home.html", NewGFLScraper(), 30, "index.php?p=banlist&page=2")
 }
 
 func TestParsePancakes(t *testing.T) {
-	testParser(t, "test_data/pancakes_home.html", parseDefault, nextUrlLast, parsePancakesTime, 10, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/pancakes_home.html", NewPancakesScraper(), 10, "index.php?p=banlist&page=2")
 }
 
 func TestParseOWL(t *testing.T) {
-	testParser(t, "test_data/owl_home.html", parseDefault, nextUrlLast, parseDefaultTime, 30, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/owl_home.html", NewOwlTFScraper(), 30, "index.php?p=banlist&page=2")
 }
 
 func TestParseSpaceShip(t *testing.T) {
-	testParser(t, "test_data/ss_home.html", parseDefault, nextUrlLast, parseDefaultTime, 69, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/ss_home.html", NewSpaceShipScraper(), 69, "index.php?p=banlist&page=2")
 }
 
 func TestParseLazyPurple(t *testing.T) {
-	testParser(t, "test_data/lp_home.html", parseDefault, nextUrlLast, parseDefaultTime, 30, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/lp_home.html", NewLazyPurpleScraper(), 30, "index.php?p=banlist&page=2")
 }
 
 func TestParseFirePowered(t *testing.T) {
-	testParser(t, "test_data/firepowered_home.html", parseDefault, nextUrlLast, parseSkialTime, 28, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/firepowered_home.html", NewFirePoweredScraper(), 28, "index.php?p=banlist&page=2")
 }
 
 func TestParseHarpoon(t *testing.T) {
-	testParser(t, "test_data/harpoon_home.html", parseDefault, nextUrlLast, parseDefaultTime, 38, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/harpoon_home.html", NewHarpoonScraper(), 38, "index.php?p=banlist&page=2")
 }
 
 func TestParsePanda(t *testing.T) {
-	testParser(t, "test_data/panda_home.html", parseDefault, nextUrlLast, parseSkialTime, 50, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/panda_home.html", NewPandaScraper(), 40, "index.php?p=banlist&page=2")
 }
 
 func TestParseNeonHeights(t *testing.T) {
-	testParser(t, "test_data/neonheights_home.html", parseDefault, nextUrlLast, parseSkialTime, 28, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/neonheights_home.html", NewNeonHeightsScraper(), 28, "index.php?p=banlist&page=2")
 }
 
 func TestParseLOOS(t *testing.T) {
-	testParser(t, "test_data/loos_home.html", parseDefault, nextUrlLast, parseDefaultTime, 30, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/loos_home.html", NewLOOSScraper(), 30, "index.php?p=banlist&page=2")
 }
 
 func TestParsePubsTF(t *testing.T) {
-	testParser(t, "test_data/pubstf_home.html", parseDefault, nextUrlLast, parseSkialTime, 29, "index.php?p=banlist&page=2")
+	testParser(t, "test_data/pubstf_home.html", NewPubsTFScraper(), 29, "index.php?p=banlist&page=2")
+}
+
+func TestParseScrapTF(t *testing.T) {
+	testParser(t, "test_data/scraptf_home.html", NewScrapTFScraper(), 30, "index.php?p=banlist&page=2")
 }
 
 func TestParseGFLTime(t *testing.T) {

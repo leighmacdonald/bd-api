@@ -42,9 +42,12 @@ var (
 	ctx      context.Context
 	logger   *zap.Logger
 	cacheDir = "./.cache/"
+
+	config *Config
 )
 
 func init() {
+	config = &Config{}
 	ctx = context.Background()
 	newLogger, errLogger := zap.NewProduction()
 	if errLogger != nil {

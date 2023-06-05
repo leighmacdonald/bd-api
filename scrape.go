@@ -31,8 +31,6 @@ type Startable interface {
 	Start() error
 }
 
-var config *Config
-
 func Start() {
 	if errConfig := readConfig("config.yml"); errConfig != nil {
 		logger.Panic("Failed to load config", zap.Error(errConfig))
@@ -91,7 +89,7 @@ func (scraper *Scraper) Start() error {
 	return nil
 }
 
-func newScraper(name string, baseUrl string, startPath string, parser parserFunc, nextUrl nextUrlFunc, parseTime parseTimeFunc) (*Scraper, error) {
+func newScraper(name string, baseUrl string, startPath string, parser parserFunc, nextUrl nextUrlFunc, parseTime parseTimeFunc) *Scraper {
 	u, errUrl := url.Parse(baseUrl)
 	if errUrl != nil {
 		logger.Panic("Failed to parse base url", zap.Error(errUrl))
@@ -123,14 +121,14 @@ func newScraper(name string, baseUrl string, startPath string, parser parserFunc
 	}
 
 	if errProxies := setupProxies(scraper.Collector); errProxies != nil {
-		return nil, errProxies
+		logger.Panic("Failed to setup proxies", zap.Error(errProxies))
 	}
 
 	scraper.OnError(func(r *colly.Response, err error) {
 		logger.Error("Request error", zap.String("url", r.Request.URL.String()), zap.Error(err))
 	})
 
-	return &scraper, nil
+	return &scraper
 }
 
 func (scraper *Scraper) url(path string) string {
@@ -138,7 +136,7 @@ func (scraper *Scraper) url(path string) string {
 }
 
 func NewSkialScraper() *Scraper {
-	scraper, errS := newScraper(
+	return newScraper(
 		"skial",
 		"https://www.skial.com/sourcebans/",
 		"index.php?p=banlist",
@@ -146,10 +144,6 @@ func NewSkialScraper() *Scraper {
 		nextUrlFirst,
 		parseSkialTime,
 	)
-	if errS != nil {
-		panic(errS)
-	}
-	return scraper
 }
 
 func rowFilterGFL(doc *goquery.Selection) bool {
@@ -161,122 +155,75 @@ func rowFilterGFL(doc *goquery.Selection) bool {
 }
 
 func NewGFLScraper() *Scraper {
-	scraper, errS := newScraper("gfl", "https://sourcebans.gflclan.com/", "index.php?p=banlist",
-		parseDefault, nextUrlFirst, parseDefaultTime)
+	scraper := newScraper("gfl", "https://sourcebans.gflclan.com/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
 	scraper.rowFilter = rowFilterGFL
-
-	if errS != nil {
-		panic(errS)
-	}
 	return scraper
 }
 
 func NewSpaceShipScraper() *Scraper {
-	scraper, errS := newScraper("spaceship", "https://sappho.io/bans/", "index.php?p=banlist",
-		parseDefault, nextUrlFirst, parseDefaultTime)
-	if errS != nil {
-		panic(errS)
-	}
-	return scraper
+	return newScraper("spaceship", "https://sappho.io/bans/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
+}
+
+func NewUGCScraper() *Scraper {
+	return newScraper("owl.tf", "https://sb.ugc-gaming.net//", "index.php?p=banlist",
+		parseFluent, nextUrlFluent, parseDefaultTime)
 }
 
 func NewOwlTFScraper() *Scraper {
-	scraper, errS := newScraper("owl.tf", "https://kingpandagamer.xyz/sb/", "index.php?p=banlist",
-		parseDefault, nextUrlFirst, parseDefaultTime)
-	if errS != nil {
-		panic(errS)
-	}
-	return scraper
+	return newScraper("owl.tf", "https://kingpandagamer.xyz/sb/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
+}
+
+func NewScrapTFScraper() *Scraper {
+	return newScraper("owl.tf", "https://bans.scrap.tf/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
 func NewWonderlandTFScraper() *Scraper {
-	scraper, errS := newScraper("wonderland.tf", "https://bans.wonderland.tf/", "index.php?p=banlist",
-		parseDefault, nextUrlFirst, parseWonderlandTime)
-	if errS != nil {
-		panic(errS)
-	}
-	return scraper
+	return newScraper("wonderland.tf", "https://bans.wonderland.tf/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseWonderlandTime)
 }
 
 func NewLazyPurpleScraper() *Scraper {
-	scraper, errS := newScraper("lazypurple", "https://www.lazypurple.com/sourcebans/", "index.php?p=banlist",
-		parseDefault, nextUrlFirst, parseDefaultTime)
-	if errS != nil {
-		panic(errS)
-	}
-	return scraper
+	return newScraper("lazypurple", "https://www.lazypurple.com/sourcebans/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
 func NewFirePoweredScraper() *Scraper {
-	scraper, errS := newScraper("firepowered", "https://firepoweredgaming.com/sourcebanspp/", "index.php?p=banlist",
-		parseDefault, nextUrlFirst, parseSkialTime)
-	if errS != nil {
-		panic(errS)
-	}
-	return scraper
+	return newScraper("firepowered", "https://firepoweredgaming.com/sourcebanspp/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseSkialTime)
 }
 
 func NewHarpoonScraper() *Scraper {
-	scraper, errS := newScraper("harpoongaming", "https://bans.harpoongaming.com/", "index.php?p=banlist",
-		parseDefault, nextUrlFirst, parseDefaultTime)
-	if errS != nil {
-		panic(errS)
-	}
-	return scraper
+	return newScraper("harpoongaming", "https://bans.harpoongaming.com/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
 func NewPandaScraper() *Scraper {
-	scraper, errS := newScraper("panda", "https://bans.panda-community.com/", "index.php?p=banlist",
-		parseDefault, nextUrlFirst, parseSkialTime)
-	if errS != nil {
-		panic(errS)
-	}
-	return scraper
+	return newScraper("panda", "https://bans.panda-community.com/", "index.php?p=banlist",
+		parseFluent, nextUrlFluent, parseDefaultTime)
 }
 
 func NewNeonHeightsScraper() *Scraper {
-	scraper, errS := newScraper("neonheights", "https://neonheights.xyz/bans/", "index.php?p=banlist",
-		parseDefault, nextUrlFirst, parseSkialTime)
-	if errS != nil {
-		panic(errS)
-	}
-	return scraper
+	return newScraper("neonheights", "https://neonheights.xyz/bans/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseSkialTime)
 }
 
 func NewPancakesScraper() *Scraper {
-	scraper, errS := newScraper("pancakestf", "https://pancakes.tf/", "index.php?p=banlist",
-		parseDefault, nextUrlFirst, parsePancakesTime)
-	if errS != nil {
-		panic(errS)
-	}
-	return scraper
+	return newScraper("pancakestf", "https://pancakes.tf/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parsePancakesTime)
 }
 
 func NewLOOSScraper() *Scraper {
-	scraper, errS := newScraper("loos", "https://looscommunity.com/bans/", "index.php?p=banlist",
-		parseDefault, nextUrlFirst, parseDefaultTime)
-	if errS != nil {
-		panic(errS)
-	}
-	return scraper
+	return newScraper("loos", "https://looscommunity.com/bans/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
 func NewPubsTFScraper() *Scraper {
-	scraper, errS := newScraper("pubstf", "https://bans.pubs.tf/", "index.php?p=banlist",
-		parseDefault, nextUrlFirst, parseSkialTime)
-	if errS != nil {
-		panic(errS)
-	}
-	return scraper
-}
-
-func NewFFScraper() *Scraper {
-	scraper, errS := newScraper("pubstf", "https://bans.pubs.tf/", "index.php?p=banlist",
-		parseDefault, nextUrlFirst, parseSkialTime)
-	if errS != nil {
-		panic(errS)
-	}
-	return scraper
+	return newScraper("pubstf", "https://bans.pubs.tf/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseSkialTime)
 }
 
 type metaKey int
