@@ -173,6 +173,11 @@ func NewOwlTFScraper() *Scraper {
 		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
+func NewZMBrasilScraper() *Scraper {
+	return newScraper("owl.tf", "http://bans.zmbrasil.com.br/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseSkialTime)
+}
+
 func NewScrapTFScraper() *Scraper {
 	return newScraper("owl.tf", "https://bans.scrap.tf/", "index.php?p=banlist",
 		parseDefault, nextUrlLast, parseDefaultTime)
