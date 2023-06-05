@@ -92,6 +92,10 @@ func TestParseZMBrasil(t *testing.T) {
 	testParser(t, "test_data/zmbrasil_home.html", NewZMBrasilScraper(), 30, "index.php?p=banlist&page=2")
 }
 
+func TestParseSirPlease(t *testing.T) {
+	testParser(t, "test_data/sirplease_home.html", NewSirPleaseScraper(), 30, "index.php?p=banlist&page=2")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)

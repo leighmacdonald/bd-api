@@ -164,7 +164,12 @@ func NewSpaceShipScraper() *Scraper {
 }
 
 func NewUGCScraper() *Scraper {
-	return newScraper("owl.tf", "https://sb.ugc-gaming.net//", "index.php?p=banlist",
+	return newScraper("ugc-gaming", "https://sb.ugc-gaming.net/", "index.php?p=banlist",
+		parseFluent, nextUrlFluent, parseDefaultTime)
+}
+
+func NewSirPleaseScraper() *Scraper {
+	return newScraper("sirplease.gg", "https://sirplease.gg/", "index.php?p=banlist",
 		parseFluent, nextUrlFluent, parseDefaultTime)
 }
 
@@ -174,12 +179,12 @@ func NewOwlTFScraper() *Scraper {
 }
 
 func NewZMBrasilScraper() *Scraper {
-	return newScraper("owl.tf", "http://bans.zmbrasil.com.br/", "index.php?p=banlist",
+	return newScraper("zmbrasil", "http://bans.zmbrasil.com.br/", "index.php?p=banlist",
 		parseDefault, nextUrlLast, parseSkialTime)
 }
 
 func NewScrapTFScraper() *Scraper {
-	return newScraper("owl.tf", "https://bans.scrap.tf/", "index.php?p=banlist",
+	return newScraper("scrap.tf", "https://bans.scrap.tf/", "index.php?p=banlist",
 		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
