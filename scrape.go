@@ -25,7 +25,7 @@ type nextUrlFunc func(doc *goquery.Selection) string
 
 type parseTimeFunc func(s string) (time.Time, error)
 
-type parserFunc func(doc *goquery.Selection, nextUrl nextUrlFunc, timeParser parseTimeFunc, filter rowFilter) (string, []banData, error)
+type parserFunc func(doc *goquery.Selection, nextUrl nextUrlFunc, timeParser parseTimeFunc) (string, []banData, error)
 
 type Startable interface {
 	Start() error
@@ -62,12 +62,11 @@ type Scraper struct {
 	parser    parserFunc
 	nextUrl   nextUrlFunc
 	parseTIme parseTimeFunc
-	rowFilter rowFilter
 }
 
 func (scraper *Scraper) Start() error {
 	scraper.Collector.OnHTML("*", func(e *colly.HTMLElement) {
-		nextUrl, results, parseErr := parseDefault(e.DOM, scraper.nextUrl, scraper.parseTIme, scraper.rowFilter)
+		nextUrl, results, parseErr := parseDefault(e.DOM, scraper.nextUrl, scraper.parseTIme)
 		if parseErr != nil {
 			logger.Error("Parser returned error", zap.Error(parseErr))
 			return
@@ -155,10 +154,8 @@ func rowFilterGFL(doc *goquery.Selection) bool {
 }
 
 func NewGFLScraper() *Scraper {
-	scraper := newScraper("gfl", "https://sourcebans.gflclan.com/", "index.php?p=banlist",
+	return newScraper("gfl", "https://sourcebans.gflclan.com/", "index.php?p=banlist",
 		parseDefault, nextUrlLast, parseDefaultTime)
-	scraper.rowFilter = rowFilterGFL
-	return scraper
 }
 
 func NewSpaceShipScraper() *Scraper {
@@ -226,6 +223,11 @@ func NewPubsTFScraper() *Scraper {
 		parseDefault, nextUrlLast, parseSkialTime)
 }
 
+func NewServiliveClScraper() *Scraper {
+	return newScraper("servilive.cl", "https://sourcebans.servilive.cl/", "index.php?p=banlist",
+		parseFluent, nextUrlFluent, parseDefaultTimeMonthFirst)
+}
+
 type metaKey int
 
 const (
@@ -266,6 +268,14 @@ func parseDefaultTime(s string) (time.Time, error) {
 	return time.Parse("2006-01-02 15:04:05", s)
 }
 
+// 2023-17-05 03:07:05
+func parseDefaultTimeMonthFirst(s string) (time.Time, error) {
+	if s == "Not applicable." {
+		return time.Time{}, nil
+	}
+	return time.Parse("2006-02-01 15:04:05", s)
+}
+
 // Thu, May 11, 2023 7:14 PM
 func parsePancakesTime(s string) (time.Time, error) {
 	if s == "Not applicable." || s == "never, this is permanent" {
@@ -301,7 +311,7 @@ func nextUrlLast(doc *goquery.Selection) string {
 }
 
 // https://github.com/aXenDeveloper/sourcebans-web-theme-fluent
-func parseFluent(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTimeFunc, filter rowFilter) (string, []banData, error) {
+func parseFluent(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTimeFunc) (string, []banData, error) {
 	var (
 		bans   []banData
 		curBan banData
@@ -324,35 +334,40 @@ func parseFluent(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTim
 		case "invoked on":
 			t, errTime := parseTime(value)
 			if errTime != nil {
-				logger.Error("Failed to parse invoke tme", zap.Error(errTime))
+				logger.Error("Failed to parse invoke time", zap.Error(errTime))
 				return
 			}
 			curBan.CreatedOn = t
 		case "ban length":
-			if "permanent" == strings.ToLower(value) {
+			lowerVal := strings.ToLower(value)
+			if strings.Contains(lowerVal, "unbanned") {
+				curBan.SteamId = 0 // invalidate it
+			} else if "permanent" == lowerVal {
 				curBan.Permanent = true
 			}
 			curBan.Length = 0
 		case "expires on":
-			if curBan.Permanent {
+			if curBan.Permanent || !curBan.SteamId.Valid() {
 				return
 			}
 			t, errTime := parseTime(value)
 			if errTime != nil {
-				logger.Error("Failed to parse invoke tme", zap.Error(errTime))
+				logger.Error("Failed to parse expire time", zap.Error(errTime))
 				return
 			}
 			curBan.Length = t.Sub(curBan.CreatedOn)
 		case "reason":
 			curBan.Reason = value
-			bans = append(bans, curBan)
+			if curBan.SteamId.Valid() {
+				bans = append(bans, curBan)
+			}
 			curBan = banData{}
 		}
 	})
 	return urlFunc(doc), bans, nil
 }
 
-func parseDefault(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTimeFunc, filter rowFilter) (string, []banData, error) {
+func parseDefault(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTimeFunc) (string, []banData, error) {
 	var (
 		bans     []banData
 		curBan   banData
@@ -405,7 +420,7 @@ func parseDefault(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTi
 			case invokedOn:
 				t, errTime := parseTime(txt)
 				if errTime != nil {
-					logger.Error("Failed to parse invoke tme", zap.Error(errTime))
+					logger.Error("Failed to parse invoke time", zap.Error(errTime))
 					return
 				}
 				curBan.CreatedOn = t
@@ -420,7 +435,7 @@ func parseDefault(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTi
 				}
 				t, errTime := parseTime(txt)
 				if errTime != nil {
-					logger.Error("Failed to parse invoke tme", zap.Error(errTime))
+					logger.Error("Failed to parse expire time", zap.Error(errTime))
 					return
 				}
 				curBan.Length = t.Sub(curBan.CreatedOn)

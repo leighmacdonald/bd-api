@@ -15,7 +15,7 @@ func testParser(t *testing.T, path string, scraper *Scraper, count int, nextPage
 	doc, errDoc := goquery.NewDocumentFromReader(testBody)
 	require.NoError(t, errDoc)
 
-	next, results, errParse := scraper.parser(doc.Selection, scraper.nextUrl, scraper.parseTIme, nil)
+	next, results, errParse := scraper.parser(doc.Selection, scraper.nextUrl, scraper.parseTIme)
 	require.NoError(t, errParse)
 	require.Equal(t, count, len(results))
 	require.Equal(t, nextPage, next)
@@ -82,6 +82,10 @@ func TestParsePubsTF(t *testing.T) {
 
 func TestParseScrapTF(t *testing.T) {
 	testParser(t, "test_data/scraptf_home.html", NewScrapTFScraper(), 30, "index.php?p=banlist&page=2")
+}
+
+func TestParseServiliveCl(t *testing.T) {
+	testParser(t, "test_data/servilivecl_home.html", NewServiliveClScraper(), 27, "index.php?p=banlist&page=2")
 }
 
 func TestParseGFLTime(t *testing.T) {
