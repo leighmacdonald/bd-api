@@ -46,7 +46,6 @@ var (
 
 func init() {
 	ctx = context.Background()
-	visitors = map[string]*visitor{}
 	newLogger, errLogger := zap.NewProduction()
 	if errLogger != nil {
 		panic(errLogger)
@@ -70,5 +69,4 @@ func init() {
 	//reETF2L = regexp.MustCompile(`.org/forum/user/(\d+)`)
 	reUGCRank = regexp.MustCompile(`Season (\d+) (\D+) (\S+)`)
 
-	go cleanupVisitors()
 }

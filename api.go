@@ -20,11 +20,11 @@ import (
 )
 
 func init() {
-	http.HandleFunc("/bans", limit(getHandler(handleGetBans())))
-	http.HandleFunc("/summary", limit(getHandler(handleGetSummary())))
-	http.HandleFunc("/profile", limit(getHandler(handleGetProfile())))
-	http.HandleFunc("/kick", limit(onPostKick))
-	http.HandleFunc(profilesSlugUrl, limit(getHandler(handleGetProfiles())))
+	http.HandleFunc("/bans", getHandler(handleGetBans()))
+	http.HandleFunc("/summary", getHandler(handleGetSummary()))
+	http.HandleFunc("/profile", getHandler(handleGetProfile()))
+	http.HandleFunc("/kick", onPostKick)
+	http.HandleFunc(profilesSlugUrl, getHandler(handleGetProfiles()))
 }
 
 func onPostKick(w http.ResponseWriter, _ *http.Request) {
