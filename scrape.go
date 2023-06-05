@@ -243,6 +243,11 @@ func NewServiliveClScraper() *Scraper {
 		parseFluent, nextUrlFluent, parseDefaultTimeMonthFirst)
 }
 
+func NewSGGamingScraper() *Scraper {
+	return newScraper("sg-gaming", "https://sg-gaming.net/bans/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseSGGaming)
+}
+
 type metaKey int
 
 const (
@@ -305,6 +310,14 @@ func parsePancakesTime(s string) (time.Time, error) {
 		return time.Time{}, nil
 	}
 	return time.Parse("Mon, Jan 02, 2006 15:04 PM", s)
+}
+
+// May 11, 2023 7:14 PM
+func parseSGGaming(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "never, this is permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("Jan 02, 2006 15:04 PM", s)
 }
 
 // May 17th, 2023 (6:56)
