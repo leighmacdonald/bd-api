@@ -253,6 +253,11 @@ func NewApeModeScraper() *Scraper {
 		parseDefault, nextUrlLast, parseSkialTime)
 }
 
+func NewMaxDBScraper() *Scraper {
+	return newScraper("maxdb", "https://bans.maxdb.net/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
+}
+
 type metaKey int
 
 const (
