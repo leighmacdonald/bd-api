@@ -262,6 +262,11 @@ func NewElectricScraper() *Scraper {
 		parseFluent, nextUrlFluent, parseDefaultTime)
 }
 
+func NewGlobalParadiseScraper() *Scraper {
+	return newScraper("globalparadise", "https://bans.theglobalparadise.org/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
+}
+
 type metaKey int
 
 const (
