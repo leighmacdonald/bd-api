@@ -402,6 +402,11 @@ func NewTF2MapsScraper() *Scraper {
 		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
+func NewVaticanCityScraper() *Scraper {
+	return newScraper("vaticancity", "https://www.the-vaticancity.com/sourcebans/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseSkialTime)
+}
+
 type metaKey int
 
 const (
