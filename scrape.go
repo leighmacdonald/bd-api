@@ -397,6 +397,11 @@ func NewAstraManiaScraper() *Scraper {
 		parseDefault, nextUrlLast, parseTrailYear)
 }
 
+func NewTF2MapsScraper() *Scraper {
+	return newScraper("tf2maps", "https://bans.tf2maps.net/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
+}
+
 type metaKey int
 
 const (
