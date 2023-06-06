@@ -331,6 +331,12 @@ func NewJumpAcademyScraper() *Scraper {
 		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
+func NewTF2ROScraper() *Scraper {
+	// Not enough values to page yet...
+	return newScraper("tf2ro", "https://bans.tf2ro.com/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
+}
+
 type metaKey int
 
 const (
@@ -580,7 +586,10 @@ func parseDefault(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTi
 				}
 				curBan.CreatedOn = t
 			case banLength:
-				if "permanent" == strings.ToLower(txt) {
+				lowerVal := strings.ToLower(txt)
+				if strings.Contains(lowerVal, "unbanned") {
+					curBan.SteamId = 0 // invalidate it
+				} else if "permanent" == lowerVal {
 					curBan.Permanent = true
 				}
 				curBan.Length = 0

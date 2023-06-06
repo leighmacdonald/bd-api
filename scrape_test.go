@@ -177,6 +177,10 @@ func TestJumpAcademy(t *testing.T) {
 	testParser(t, NewJumpAcademyScraper(), 30, "index.php?p=banlist&page=2")
 }
 
+func TestTF2RO(t *testing.T) {
+	testParser(t, NewTF2ROScraper(), 21, "index.php?p=banlist&hideinactive=true")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)
