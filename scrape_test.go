@@ -161,6 +161,10 @@ func TestFurryPound(t *testing.T) {
 	testParser(t, NewFurryPoundScraper(), 30, "index.php?p=banlist&page=2")
 }
 
+func TestRetroServers(t *testing.T) {
+	testParser(t, NewRetroServersScraper(), 30, "index.php?p=banlist&page=2")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)

@@ -311,6 +311,11 @@ func NewFurryPoundScraper() *Scraper {
 		parseDefault, nextUrlLast, parseFurryPoundTime)
 }
 
+func NewRetroServersScraper() *Scraper {
+	return newScraper("retroservers", "https://bans.retroservers.net/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
+}
+
 type metaKey int
 
 const (
