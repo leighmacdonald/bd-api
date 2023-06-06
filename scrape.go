@@ -301,6 +301,11 @@ func NewOpstOnlineScraper() *Scraper {
 		parseDefault, nextUrlLast, parseSkialTime)
 }
 
+func NewBouncyBallScraper() *Scraper {
+	return newScraper("bouncyball", "https://www.bouncyball.eu/bans2/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseSkialTime)
+}
+
 type metaKey int
 
 const (
