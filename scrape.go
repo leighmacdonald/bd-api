@@ -237,6 +237,10 @@ func NewServiliveClScraper() *Scraper {
 		parseFluent, nextUrlFluent, parseDefaultTimeMonthFirst)
 }
 
+func NewCutiePieScraper() *Scraper {
+	return newScraper("cutiepie", "https://bans.cutiepie.tf/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
+}
 func NewSGGamingScraper() *Scraper {
 	return newScraper("sggaming", "https://sg-gaming.net/bans/", "index.php?p=banlist",
 		parseDefault, nextUrlLast, parseSGGamingTime)
