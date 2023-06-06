@@ -372,6 +372,11 @@ func NewSettiScraper() *Scraper {
 		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
+func NewGunServerScraper() *Scraper {
+	return newScraper("gunserver", "https://gunserver.ru/sourcebans/", "index.php?p=banlist",
+		parseDefault, nextUrlFirst, parseGunServer)
+}
+
 type metaKey int
 
 const (
@@ -402,6 +407,14 @@ func parseSkialTime(s string) (time.Time, error) {
 		return time.Time{}, nil
 	}
 	return time.Parse("01-02-06 15:04", s)
+}
+
+// 05-17-23 03:07
+func parseGunServer(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("02.01.2006 15:04", s)
 }
 
 // 17/05/23 - 03:07:05
