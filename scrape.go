@@ -362,6 +362,11 @@ func NewSpectreScraper() *Scraper {
 		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
+func NewDreamFireScraper() *Scraper {
+	return newScraper("dreamfire", "https://sourcebans.dreamfire.fr/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
+}
+
 type metaKey int
 
 const (
