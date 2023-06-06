@@ -137,6 +137,10 @@ func TestLBGaming(t *testing.T) {
 	testParser(t, NewLBGamingScraper(), 30, "index.php?p=banlist&page=2")
 }
 
+func TestFluxTF(t *testing.T) {
+	testParser(t, NewFluxTFScraper(), 30, "index.php?p=banlist&page=2")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)

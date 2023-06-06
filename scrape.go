@@ -239,7 +239,7 @@ func NewServiliveClScraper() *Scraper {
 
 func NewSGGamingScraper() *Scraper {
 	return newScraper("sggaming", "https://sg-gaming.net/bans/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSGGaming)
+		parseDefault, nextUrlLast, parseSGGamingTime)
 }
 
 func NewApeModeScraper() *Scraper {
@@ -280,6 +280,11 @@ func NewCSIServersScraper() *Scraper {
 func NewLBGamingScraper() *Scraper {
 	return newScraper("lbgaming", "https://bans.lbgaming.co/", "index.php?p=banlist",
 		parseDefault, nextUrlLast, parseSkialTime)
+}
+
+func NewFluxTFScraper() *Scraper {
+	return newScraper("fluxtf", "https://bans.flux.tf/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseFluxTime)
 }
 
 type metaKey int
@@ -355,11 +360,22 @@ func parsePancakesTime(s string) (time.Time, error) {
 }
 
 // May 11, 2023 7:14 PM
-func parseSGGaming(s string) (time.Time, error) {
+func parseSGGamingTime(s string) (time.Time, error) {
 	if s == "Not applicable." || s == "never, this is permanent" {
 		return time.Time{}, nil
 	}
 	return time.Parse("Jan 02, 2006 15:04 PM", s)
+}
+
+// Sunday 11th of May 2023 7:14:05 PM
+func parseFluxTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "never, this is permanent" {
+		return time.Time{}, nil
+	}
+	for _, k := range []string{"st ", "nd ", "rd ", "th "} {
+		s = strings.Replace(s, k, " ", -1)
+	}
+	return time.Parse("Monday _2 of January 2006 15:04:05 PM", s)
 }
 
 // May 17th, 2023 (6:56)
