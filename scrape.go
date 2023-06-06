@@ -321,6 +321,11 @@ func NewSwapShopScraper() *Scraper {
 		parseDefault, nextUrlLast, parseSkialTime)
 }
 
+func NewECJScraper() *Scraper {
+	return newScraper("ecj", "https://ecj.tf/sourcebans/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseSkialTime)
+}
+
 type metaKey int
 
 const (
