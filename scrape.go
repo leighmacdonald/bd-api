@@ -306,6 +306,11 @@ func NewBouncyBallScraper() *Scraper {
 		parseDefault, nextUrlLast, parseSkialTime)
 }
 
+func NewFurryPoundScraper() *Scraper {
+	return newScraper("furrypound", "http://sourcebans.thefurrypound.org/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseFurryPoundTime)
+}
+
 type metaKey int
 
 const (
@@ -392,6 +397,14 @@ func parseSGGamingTime(s string) (time.Time, error) {
 		return time.Time{}, nil
 	}
 	return time.Parse("Jan 02, 2006 15:04 PM", s)
+}
+
+// May 11, 2023 7:14 PM   / June 7, 2022, 1:15 am
+func parseFurryPoundTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "never, this is permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("January _2, 2006, 15:04 pm", s)
 }
 
 // Sunday 11th of May 2023 7:14:05 PM
@@ -530,6 +543,7 @@ func parseDefault(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTi
 			switch curState {
 			case player:
 				curBan.Name = txt
+
 			case steamComm:
 				pts := strings.Split(txt, " ")
 				sid64, errSid := steamid.StringToSID64(pts[0])
