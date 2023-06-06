@@ -316,6 +316,11 @@ func NewRetroServersScraper() *Scraper {
 		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
+func NewSwapShopScraper() *Scraper {
+	return newScraper("swapshop", "http://tf2swapshop.com/sourcebans/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseSkialTime)
+}
+
 type metaKey int
 
 const (
