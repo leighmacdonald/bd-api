@@ -412,6 +412,11 @@ func NewLazyNeerScraper() *Scraper {
 		parseDefault, nextUrlLast, parseSkialAltTime)
 }
 
+func NewTheVilleScraper() *Scraper {
+	return newScraper("theville", "https://www.theville.org/sourcebans/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseSkialTime)
+}
+
 type metaKey int
 
 const (
