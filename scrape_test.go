@@ -262,8 +262,12 @@ func TestTawerna(t *testing.T) {
 }
 
 func TestTitan(t *testing.T) {
-	testParser(t, NewTawernaScraper(), 30, "index.php?p=banlist&page=2")
+	testParser(t, NewTitanScraper(), 30, "index.php?p=banlist&page=2")
 }
+
+//func TestOtaku(t *testing.T) {
+//	testParser(t, NewOtakuScraper(), 30, "index.php?p=banlist&page=2")
+//}
 
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")

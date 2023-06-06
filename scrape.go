@@ -439,7 +439,12 @@ func NewTawernaScraper() *Scraper {
 
 func NewTitanScraper() *Scraper {
 	return newScraper("titan", "https://bans.titan.tf/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSkialTime)
+		parseDefault, nextUrlLast, parseTitanTime)
+}
+
+func NewOtakuScraper() *Scraper {
+	return newScraper("otaku", "https://bans.otaku.tf/bans", "",
+		parseDefault, nextUrlLast, parseOtakuTime)
 }
 
 type metaKey int
@@ -560,6 +565,22 @@ func parsePancakesTime(s string) (time.Time, error) {
 		return time.Time{}, nil
 	}
 	return time.Parse("Mon, Jan 02, 2006 15:04 PM", s)
+}
+
+// Thu, May 11, 2023 7:14 PM
+func parseOtakuTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "never, this is permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("Jan-2-2006 15:04:05", s)
+}
+
+// Thu, May 11, 2023 7:14 PM
+func parseTitanTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "never, this is permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("Monday, 2 Jan 2006 15:04:05 PM", s)
 }
 
 // May 11, 2023 7:14 PM
