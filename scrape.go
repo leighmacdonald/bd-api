@@ -338,15 +338,18 @@ func NewTF2ROScraper() *Scraper {
 }
 
 func NewSameTeemScraper() *Scraper {
-	// Not enough values to page yet...
 	return newScraper("sameteem", "https://sameteem.com/sourcebans/", "index.php?p=banlist",
 		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
 func NewPowerFPSScraper() *Scraper {
-	// Not enough values to page yet...
 	return newScraper("powerfps", "https://bans.powerfps.com/", "index.php?p=banlist",
 		parseDefault, nextUrlLast, parseSkialTime)
+}
+
+func New7MauScraper() *Scraper {
+	return newScraper("7mau", "https://7-mau.com/server/", "index.php?p=banlist",
+		parseFluent, nextUrlFluent, parseDefaultTime)
 }
 
 type metaKey int

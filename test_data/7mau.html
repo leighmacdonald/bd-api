@@ -1,0 +1,3555 @@
+<!DOCTYPE html>
+<html lang="en" class="tee">
+<head>
+  <script src="/cdn-cgi/apps/head/hOWeF2AKCXYWnXgs31NDktmm9Gs.js"></script><script type="text/javascript" src="themes/sourcebans-web-theme-fluent/scripts/initial.js"></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <style id="colorTheme" type="text/css"></style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ban List | Welcome to 7-Màu CSGO server VIỆT NAM</title>
+  <link rel="Shortcut Icon" href="themes/sourcebans-web-theme-fluent/images/favicon.ico" />
+  <link rel="stylesheet" type="text/css" href="themes/sourcebans-web-theme-fluent/style/global.css?v05212021" />
+  <link rel="stylesheet" type="text/css" href="themes/sourcebans-web-theme-fluent/style/global.css.map?v05212021" />
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/v4-shims.css">
+  <meta name="description" content="Sourcebans for website" />
+  <script type="text/javascript" src="themes/sourcebans-web-theme-fluent/scripts/sourcebans.js"></script>
+  <script type="text/javascript" src="./scripts/mootools.js"></script>
+  <script type="text/javascript" src="./scripts/contextMenoo.js"></script>
+  <script type="text/javascript">
+    var xajaxRequestUri="./index.php";
+    var xajaxDebug=false;
+    var xajaxStatusMessages=false;
+    var xajaxWaitCursor=true;
+    var xajaxDefinedGet=0;
+    var xajaxDefinedPost=1;
+    var xajaxLoaded=false;
+    function xajax_Plogin(){return xajax.call("Plogin", arguments, 1);}
+    function xajax_ServerHostPlayers(){return xajax.call("ServerHostPlayers", arguments, 1);}
+    function xajax_ServerHostProperty(){return xajax.call("ServerHostProperty", arguments, 1);}
+    function xajax_ServerHostPlayers_list(){return xajax.call("ServerHostPlayers_list", arguments, 1);}
+    function xajax_ServerPlayers(){return xajax.call("ServerPlayers", arguments, 1);}
+    function xajax_LostPassword(){return xajax.call("LostPassword", arguments, 1);}
+    function xajax_RefreshServer(){return xajax.call("RefreshServer", arguments, 1);}
+  </script>
+  <script type="text/javascript" src="scripts/xajax.js"></script>
+  <script type="text/javascript">
+    window.setTimeout(function () { if (!xajaxLoaded) { alert('Error: the xajax Javascript file could not be included. Perhaps the URL is incorrect?\nURL: scripts/xajax.js'); } }, 6000);
+  </script>
+</head>
+<body>
+<header class="header">
+  <div class="layout_container responsive_hide:mobile flex flex-jc:space-between flex-ai:center">
+    <div class="flex flex-fd:column text:left">
+      <a href="./index.php?p=home" class="header_logo">
+        <img src="images/logos/sb-large.png" alt="SourceBans Logo" />
+      </a>
+    </div>
+    <div class="flex flex-fd:column text:right responsive_show:desktop">
+      <form method="get" action="index.php">
+        <input type="hidden" name="p" value="banlist" />
+        <input class="searchbox" alt="Search Bans" name="searchText" type="text" onfocus="this.value='';" onblur="if (this.value=='') {this.value=' Search Bans...';}" value=" Search Bans..." />
+        <input class="button_search" type="submit" name="Submit" value="Search" />
+      </form>
+      <form method="get" action="index.php">
+        <input type="hidden" name="p" value="commslist" />
+        <input class="searchbox" alt="Search Comms" name="searchText" type="text" onfocus="this.value='';" onblur="if (this.value=='') {this.value=' Search Comms...';}" value=" Search Comms... " />
+        <input class="button_search" type="submit" name="Submit" value="Search" />
+      </form>
+    </div>
+  </div>
+</header>
+<main>
+  <div class="layout_topBar">
+    <div class="layout_container flex flex-jc:end flex-ai:center">
+      <ul class="SocialMedia layout_topBar_action flex">
+        <li>
+          <button id="user_action_change_dark" aria-label="Dark mode"><i class="fas fa-moon"></i></button>
+        </li>
+        <li class="jscolor_li">
+          <button data-jscolor aria-label="Color"></button>
+        </li>
+        <li id="jscolor_reset" class="jscolor_li" style="display: none;">
+          <button aria-label="Reset color"><i class="fa fa-refresh"></i></button>
+        </li>
+
+
+
+
+
+
+
+
+
+      </ul>
+      <ul class="layout_topBar_userBar responsive_show:desktop flex flex-ai:center">
+        <li>
+          <a class="button button-success" href="index.php?p=login">Existing user? Sign In</a>
+        </li>
+      </ul>
+      <button id="button_mobile_open" class="nav_mobile_open responsive_hide:desktop" aria-label="Mobile nav open">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </div>
+  <div id="layout_mobile" class="nav_mobile">
+    <button id="button_mobile_close" class="nav_mobile_close" aria-label="Mobile nav close">
+      <i class="fas fa-times"></i>
+    </button>
+    <div class="nav_mobile_content">
+      <div class="nav_mobile_tab_top padding flex">
+        <a class="button button-success button:full" href="index.php?p=login">Existing user? Sign In</a>
+      </div>
+      <nav class="nav_mobile_tab_nav">
+        <ul>
+          <li class="nonactive">
+            <a href="index.php?p=home" data-nav="home">
+              Dashboard
+            </a>
+          </li>
+          <li class="nonactive">
+            <a href="index.php?p=servers" data-nav="servers">
+              Servers
+            </a>
+          </li>
+          <li class="active">
+            <a href="index.php?p=banlist" data-nav="banlist">
+              Bans
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <div class="nav_mobile_background"></div>
+  </div>
+  <nav id="navBar" class="nav responsive_show:desktop">
+    <div class="nav_tab">
+      <ul>
+        <li class="nonactive">
+          <a href="index.php?p=home" data-nav="home">
+            Dashboard
+          </a>
+        </li>
+        <li class="nonactive">
+          <a href="index.php?p=servers" data-nav="servers">
+            Servers
+          </a>
+        </li>
+        <li class="active">
+          <a href="index.php?p=banlist" data-nav="banlist">
+            Bans
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <div id="mainwrapper" class="layout_body flex:11">
+    <div id="dialog-placement" class="popup popup_block">
+      <div class="layout_box">
+        <div class="popup_title padding:half">
+          <div id="dialog-title"></div>
+        </div>
+        <div class="padding:half">
+          <div class="popup_icon margin-bottom:half">
+            <i id="dialog-icon"></i>
+          </div>
+          <div id="dialog-content-text"></div>
+        </div>
+        <div class="popup_footer padding:half flex" id="dialog-control"></div>
+      </div>
+    </div>
+    <div id="dialog-placement-background" class="popup popup_background" onclick="closeMsg('');"></div>
+    <div class="page_header">
+      <h1>Ban List</h1>
+    </div>
+    <div class="breadcrumb">
+      <i class="fas fa-angle-right"></i> <a href="index.php?p=home">Home</a>
+      <i class="fas fa-angle-right"></i> <a href="index.php?p=banlist">Ban List</a>
+    </div>
+    <div class="layout_box margin-bottom">
+      <div class="table padding">
+        <div class="table_box">
+          <table>
+            <tbody>
+            <tr class="collapse">
+              <td class="text:center">
+                <span class="text:bold">Advanced Search</span> (Click)
+              </td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="1">
+                <div class="collapse_content flex flex-jc:center">
+                  <div class="padding">
+                    <div class="flex m:flex-fd:column">
+                      <div class="flex:11 margin-right">
+                        <div class="margin-bottom:half">
+                          <input id="name" name="search_type" class="form-radio" type="radio" value="name" />
+                          <label for="name" class="form-label form-label:bottom">
+                            Nickname
+                          </label>
+                          <input class="form-input form-full" type="text" id="nick" value onmouseup="$('name').checked = true" />
+                        </div>
+                        <div class="margin-bottom:half">
+                          <input id="steam_" type="radio" name="search_type" class="form-radio" value="radiobutton" />
+                          <label for="steam_" class="form-label form-label:bottom form-label:right">
+                            Steam ID
+                          </label>
+                          <div class="flex">
+                            <input class="form-input form-full margin-right" type="text" id="steamid" value onmouseup="$('steam_').checked = true" />
+                            <select class="form-select form-full" id="steam_match" onmouseup="$('steam_').checked = true">
+                              <option value="0" selected>Exact Match</option>
+                              <option value="1">Partial Match</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="margin-bottom:half">
+                          <input id="ip_" type="radio" class="form-radio" name="search_type" value="radiobutton" />
+                          <label for="ip" class="form-label form-label:bottom">
+                            IP
+                          </label>
+                          <input class="form-input form-full" type="text" id="ip" value onmouseup="$('ip_').checked = true" />
+                        </div>
+                        <div class="margin-bottom:half">
+                          <input id="reason_" type="radio" name="search_type" class="form-radio" value="radiobutton" />
+                          <label for="ban_reason" class="form-label form-label:bottom">
+                            Reason
+                          </label>
+                          <input class="form-input form-full" type="text" id="ban_reason" value onmouseup="$('reason_').checked = true" />
+                        </div>
+                      </div>
+                      <div class="flex:11">
+                        <div class="margin-bottom:half">
+                          <input id="date" type="radio" name="search_type" class="form-radio" value="radiobutton" />
+                          <label for="date" class="form-label form-label:bottom form-label:right">
+                            Date
+                          </label>
+                          <div class="flex">
+                            <input class="form-input form-full margin-right" type="text" id="day" value="DD" onmouseup="$('date').checked = true" maxlength="2" />
+                            <input class="form-input form-full margin-right" type="text" id="month" value="MM" onmouseup="$('date').checked = true" maxlength="2" />
+                            <input class="form-input form-full" type="text" id="year" value="YY" onmouseup="$('date').checked = true" maxlength="4" />
+                          </div>
+                        </div>
+                        <div class="margin-bottom:half">
+                          <input id="ban_type_" type="radio" name="search_type" class="form-radio" value="radiobutton" />
+                          <label for="ban_type" class="form-label form-label:bottom form-label:right">
+                            Type
+                          </label>
+                          <select class="form-select form-full" id="ban_type" onmouseup="$('ban_type_').checked = true">
+                            <option value="0" selected>Steam ID</option>
+                            <option value="1">IP Address</option>
+                          </select>
+                        </div>
+                        <div class="margin-bottom:half">
+                          <input id="admin" name="search_type" type="radio" class="form-radio" value="radiobutton" />
+                          <label for="ban_admin" class="form-label form-label:bottom form-label:right">
+                            Admin
+                          </label>
+                          <select class="form-select form-full" id="ban_admin" onmouseup="$('admin').checked = true">
+                            <option label="baikaita" value="530">baikaita
+                            </option>
+                            <option label="bellingham 26.7" value="842">bellingham 26.7
+                            </option>
+                            <option label="binhbebong 10.6" value="772">binhbebong 10.6
+                            </option>
+                            <option label="bontrongluc 23.8" value="829">bontrongluc 23.8
+                            </option>
+                            <option label="bykyta" value="1">bykyta
+                            </option>
+                            <option label="chiplove 25.6" value="881">chiplove 25.6
+                            </option>
+                            <option label="CONSOLE" value="0">CONSOLE
+                            </option>
+                            <option label="cuong 11.6" value="866">cuong 11.6
+                            </option>
+                            <option label="dancho 8.6" value="862">dancho 8.6
+                            </option>
+                            <option label="dean 25.6" value="840">dean 25.6
+                            </option>
+                            <option label="dohoangnam 24.7" value="833">dohoangnam 24.7
+                            </option>
+                            <option label="ducanh 21.6" value="876">ducanh 21.6
+                            </option>
+                            <option label="ducanh 26.7" value="844">ducanh 26.7
+                            </option>
+                            <option label="godnova 15.6" value="872">godnova 15.6
+                            </option>
+                            <option label="greaper DONATE" value="368">greaper DONATE
+                            </option>
+                            <option label="green 21.6" value="740">green 21.6
+                            </option>
+                            <option label="hei 1.10" value="794">hei 1.10
+                            </option>
+                            <option label="HOANGNGOVIET 26.7" value="846">HOANGNGOVIET 26.7
+                            </option>
+                            <option label="hoangtusansi 25.6" value="882">hoangtusansi 25.6
+                            </option>
+                            <option label="hoangviet 24.7" value="831">hoangviet 24.7
+                            </option>
+                            <option label="hope 10.8" value="807">hope 10.8
+                            </option>
+                            <option label="hungle 25.6" value="880">hungle 25.6
+                            </option>
+                            <option label="huyb 10.8" value="879">huyb 10.8
+                            </option>
+                            <option label="jaypark 14.6" value="871">jaypark 14.6
+                            </option>
+                            <option label="jks 30.6" value="884">jks 30.6
+                            </option>
+                            <option label="july 7.8" value="864">july 7.8
+                            </option>
+                            <option label="keena 12.6" value="870">keena 12.6
+                            </option>
+                            <option label="kynce 29.6" value="848">kynce 29.6
+                            </option>
+                            <option label="liar retake" value="414">liar retake
+                            </option>
+                            <option label="luxiie" value="62">luxiie
+                            </option>
+                            <option label="mai 12.6" value="869">mai 12.6
+                            </option>
+                            <option label="mainhan donate" value="812">mainhan donate
+                            </option>
+                            <option label="manhtuan 27.6" value="789">manhtuan 27.6
+                            </option>
+                            <option label="max 23.6" value="877">max 23.6
+                            </option>
+                            <option label="miraie" value="731">miraie
+                            </option>
+                            <option label="ngocyukata 8.8" value="863">ngocyukata 8.8
+                            </option>
+                            <option label="non 24.7" value="835">non 24.7
+                            </option>
+                            <option label="ongmap 24.7" value="834">ongmap 24.7
+                            </option>
+                            <option label="phuoctran 16.7" value="873">phuoctran 16.7
+                            </option>
+                            <option label="quocanh 1.7" value="886">quocanh 1.7
+                            </option>
+                            <option label="Raser" value="30">Raser
+                            </option>
+                            <option label="satan 20.6" value="875">satan 20.6
+                            </option>
+                            <option label="saurieng 24.7" value="838">saurieng 24.7
+                            </option>
+                            <option label="Sh1no 11.6" value="865">Sh1no 11.6
+                            </option>
+                            <option label="shrimp 24.6" value="878">shrimp 24.6
+                            </option>
+                            <option label="simple 8.6" value="861">simple 8.6
+                            </option>
+                            <option label="snim 27.6" value="883">snim 27.6
+                            </option>
+                            <option label="tachyon 24.7" value="847">tachyon 24.7
+                            </option>
+                            <option label="taddd adminscrim" value="796">taddd adminscrim
+                            </option>
+                            <option label="thaidatscrim" value="874">thaidatscrim
+                            </option>
+                            <option label="thanhphat 25.7" value="841">thanhphat 25.7
+                            </option>
+                            <option label="thichviethoang 11.6" value="868">thichviethoang 11.6
+                            </option>
+                            <option label="tranminh 9.6" value="769">tranminh 9.6
+                            </option>
+                            <option label="truongvoky 29.7.2023" value="637">truongvoky 29.7.2023
+                            </option>
+                            <option label="vivian 1.7" value="885">vivian 1.7
+                            </option>
+                            <option label="vudang 25.6" value="787">vudang 25.6
+                            </option>
+                            <option label="xnam 24.8" value="839">xnam 24.8
+                            </option>
+                            <option label="xuanhuy 7.8" value="805">xuanhuy 7.8
+                            </option>
+                            <option label="xuka 11.8" value="867">xuka 11.8
+                            </option>
+                            <option label="xuka 24.7" value="850">xuka 24.7
+                            </option>
+                          </select>
+                        </div>
+                        <div class="margin-bottom:half">
+                          <input id="where_banned" name="search_type" class="form-radio" type="radio" value="radiobutton" />
+                          <label for="server" class="form-label form-label:bottom form-label:right">
+                            Server
+                          </label>
+                          <select class="form-select form-full" id="server" onmouseup="$('where_banned').checked = true">
+                            <option label="Web Ban" value="0">Web Ban</option>
+                            <option value="21" id="ss21">Retrieving
+                              Hostname...
+                              (CSGO2.7-MAU.COM:37115)</option>
+                            <option value="20" id="ss20">Retrieving
+                              Hostname...
+                              (CSGO2.7-MAU.COM:37105)</option>
+                            <option value="22" id="ss22">Retrieving
+                              Hostname...
+                              (CSGO3.7-MAU.COM:27015)</option>
+                            <option value="18" id="ss18">Retrieving
+                              Hostname...
+                              (CSGO2.7-MAU.COM:37135)</option>
+                            <option value="17" id="ss17">Retrieving
+                              Hostname...
+                              (CSGO2.7-MAU.COM:37125)</option>
+                            <option value="16" id="ss16">Retrieving
+                              Hostname...
+                              (CSGO2.7-MAU.COM:27085)</option>
+                            <option value="15" id="ss15">Retrieving
+                              Hostname...
+                              (CSGO2.7-MAU.COM:27075)</option>
+                            <option value="14" id="ss14">Retrieving
+                              Hostname...
+                              (CSGO2.7-MAU.COM:27065)</option>
+                            <option value="13" id="ss13">Retrieving
+                              Hostname...
+                              (CSGO2.7-MAU.COM:27055)</option>
+                            <option value="12" id="ss12">Retrieving
+                              Hostname...
+                              (CSGO2.7-MAU.COM:27045)</option>
+                            <option value="11" id="ss11">Retrieving
+                              Hostname...
+                              (CSGO2.7-MAU.COM:27035)</option>
+                            <option value="10" id="ss10">Retrieving
+                              Hostname...
+                              (CSGO2.7-MAU.COM:27025)</option>
+                            <option value="9" id="ss9">Retrieving
+                              Hostname...
+                              (CSGO2.7-MAU.COM:27015)</option>
+                            <option value="6" id="ss6">Retrieving
+                              Hostname...
+                              (CSGO2.7-MAU.COM:27018)</option>
+                            <option value="5" id="ss5">Retrieving
+                              Hostname...
+                              (CSGO2.7-MAU.COM:37145)</option>
+                            <option value="4" id="ss4">Retrieving
+                              Hostname...
+                              (CSGO2.7-MAU.COM:37095)</option>
+                            <option value="3" id="ss3">Retrieving
+                              Hostname...
+                              (CSGO2.7-MAU.COM:27105)</option>
+                            <option value="2" id="ss2">Retrieving
+                              Hostname...
+                              (CSGO2.7-MAU.COM:27095)</option>
+                            <option value="1" id="ss1">Retrieving
+                              Hostname...
+                              (CSGO2.7-MAU.COM:27016)</option>
+                            <option value="23" id="ss23">Retrieving
+                              Hostname...
+                              (CSGO3.7-MAU.COM:27025)</option>
+                            <option value="24" id="ss24">Retrieving
+                              Hostname...
+                              (CSGO3.7-MAU.COM:27035)</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="margin-bottom:half">
+                      <input id="length_" type="radio" name="search_type" class="form-radio" value="radiobutton" />
+                      <label for="other_length" class="form-label form-label:bottom form-label:right">
+                        Length
+                      </label>
+                      <div class="flex">
+                        <select class="form-select form-full margin-right" id="length_type" onmouseup="$('length_').checked = true">
+                          <option value="e" title="equal to">=</option>
+                          <option value="h" title="greater">&gt;</option>
+                          <option value="l" title="smaller">&lt;</option>
+                          <option value="eh" title="equal to or greater">&gt;=</option>
+                          <option value="el" title="equal to or smaller">&lt;=</option>
+                        </select>
+                        <select class="form-select form-full margin-right" id="length" onmouseup="$('length_').checked = true" onchange="switch_length(this);" onmouseover="if(this.options[this.selectedIndex].value=='other')$('length').setStyle('width', '210px');if(this.options[this.selectedIndex].value=='other')this.focus();" onblur="if(this.options[this.selectedIndex].value=='other')$('length').setStyle('width', '20px');">
+                          <option value="0">Permanent</option>
+                          <optgroup label="minutes">
+                            <option value="1">1 minute</option>
+                            <option value="5">5 minutes</option>
+                            <option value="10">10 minutes</option>
+                            <option value="15">15 minutes</option>
+                            <option value="30">30 minutes</option>
+                            <option value="45">45 minutes</option>
+                          </optgroup>
+                          <optgroup label="hours">
+                            <option value="60">1 hour</option>
+                            <option value="120">2 hours</option>
+                            <option value="180">3 hours</option>
+                            <option value="240">4 hours</option>
+                            <option value="480">8 hours</option>
+                            <option value="720">12 hours</option>
+                          </optgroup>
+                          <optgroup label="days">
+                            <option value="1440">1 day</option>
+                            <option value="2880">2 days</option>
+                            <option value="4320">3 days</option>
+                            <option value="5760">4 days</option>
+                            <option value="7200">5 days</option>
+                            <option value="8640">6 days</option>
+                          </optgroup>
+                          <optgroup label="weeks">
+                            <option value="10080">1 week</option>
+                            <option value="20160">2 weeks</option>
+                            <option value="30240">3 weeks</option>
+                          </optgroup>
+                          <optgroup label="months">
+                            <option value="40320">1 month</option>
+                            <option value="80640">2 months</option>
+                            <option value="120960">3 months</option>
+                            <option value="241920">6 months</option>
+                            <option value="483840">12 months</option>
+                          </optgroup>
+                          <option value="other">Other length in minutes</option>
+                        </select>
+                        <input type="text" id="other_length" name="other_length" class="form-input form-full" onmouseup="$('length_').checked = true" style="display: none;" />
+                      </div>
+                    </div>
+                    <div class="flex">
+                      <input type="button" onclick="search_bans();" name="searchbtn" class="btn button button-primary flex:11" onmouseover="ButtonOver(&quot;searchbtn&quot;)" onmouseout="ButtonOver(&quot;searchbtn&quot;)" id="searchbtn" value="Search" />
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">xajax_ServerHostPlayers('21', 'id', 'ss21', '', '', false, 200);xajax_ServerHostPlayers('20', 'id', 'ss20', '', '', false, 200);xajax_ServerHostPlayers('22', 'id', 'ss22', '', '', false, 200);xajax_ServerHostPlayers('18', 'id', 'ss18', '', '', false, 200);xajax_ServerHostPlayers('17', 'id', 'ss17', '', '', false, 200);xajax_ServerHostPlayers('16', 'id', 'ss16', '', '', false, 200);xajax_ServerHostPlayers('15', 'id', 'ss15', '', '', false, 200);xajax_ServerHostPlayers('14', 'id', 'ss14', '', '', false, 200);xajax_ServerHostPlayers('13', 'id', 'ss13', '', '', false, 200);xajax_ServerHostPlayers('12', 'id', 'ss12', '', '', false, 200);xajax_ServerHostPlayers('11', 'id', 'ss11', '', '', false, 200);xajax_ServerHostPlayers('10', 'id', 'ss10', '', '', false, 200);xajax_ServerHostPlayers('9', 'id', 'ss9', '', '', false, 200);xajax_ServerHostPlayers('6', 'id', 'ss6', '', '', false, 200);xajax_ServerHostPlayers('5', 'id', 'ss5', '', '', false, 200);xajax_ServerHostPlayers('4', 'id', 'ss4', '', '', false, 200);xajax_ServerHostPlayers('3', 'id', 'ss3', '', '', false, 200);xajax_ServerHostPlayers('2', 'id', 'ss2', '', '', false, 200);xajax_ServerHostPlayers('1', 'id', 'ss1', '', '', false, 200);xajax_ServerHostPlayers('23', 'id', 'ss23', '', '', false, 200);xajax_ServerHostPlayers('24', 'id', 'ss24', '', '', false, 200);</script><script type="text/javascript">
+    function switch_length(opt)
+    {
+      if (opt.options[opt.selectedIndex].value=='other') {
+        $('other_length').setStyle('display', 'block');
+        $('other_length').focus();
+        $('length').setStyle('width', '20px');
+      } else {
+        $('other_length').setStyle('display', 'none');
+        $('length').setStyle('width', '210px');
+      }
+    }
+  </script>
+    <div class="layout_box margin-bottom padding:half flex flex-jc:space-between flex-ai:center m:flex-fd:column">
+<span>
+<a href="index.php?p=banlist&hideinactive=true" title="Hide inactive">Hide inactive</a> | <i>Total Bans: 6045 </i>
+</span>
+      <div class="pagination">
+        <span>displaying&nbsp;0&nbsp;-&nbsp;30&nbsp;of&nbsp;6045&nbsp;results | <b><a href="index.php?p=banlist&page=2" onclick target="_self"> next <i class="fas fa-arrow-right fa-lg"></i> </a></b>&nbsp;<select onchange="changePage(this,'B','','');"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option><option value="32">32</option><option value="33">33</option><option value="34">34</option><option value="35">35</option><option value="36">36</option><option value="37">37</option><option value="38">38</option><option value="39">39</option><option value="40">40</option><option value="41">41</option><option value="42">42</option><option value="43">43</option><option value="44">44</option><option value="45">45</option><option value="46">46</option><option value="47">47</option><option value="48">48</option><option value="49">49</option><option value="50">50</option><option value="51">51</option><option value="52">52</option><option value="53">53</option><option value="54">54</option><option value="55">55</option><option value="56">56</option><option value="57">57</option><option value="58">58</option><option value="59">59</option><option value="60">60</option><option value="61">61</option><option value="62">62</option><option value="63">63</option><option value="64">64</option><option value="65">65</option><option value="66">66</option><option value="67">67</option><option value="68">68</option><option value="69">69</option><option value="70">70</option><option value="71">71</option><option value="72">72</option><option value="73">73</option><option value="74">74</option><option value="75">75</option><option value="76">76</option><option value="77">77</option><option value="78">78</option><option value="79">79</option><option value="80">80</option><option value="81">81</option><option value="82">82</option><option value="83">83</option><option value="84">84</option><option value="85">85</option><option value="86">86</option><option value="87">87</option><option value="88">88</option><option value="89">89</option><option value="90">90</option><option value="91">91</option><option value="92">92</option><option value="93">93</option><option value="94">94</option><option value="95">95</option><option value="96">96</option><option value="97">97</option><option value="98">98</option><option value="99">99</option><option value="100">100</option><option value="101">101</option><option value="102">102</option><option value="103">103</option><option value="104">104</option><option value="105">105</option><option value="106">106</option><option value="107">107</option><option value="108">108</option><option value="109">109</option><option value="110">110</option><option value="111">111</option><option value="112">112</option><option value="113">113</option><option value="114">114</option><option value="115">115</option><option value="116">116</option><option value="117">117</option><option value="118">118</option><option value="119">119</option><option value="120">120</option><option value="121">121</option><option value="122">122</option><option value="123">123</option><option value="124">124</option><option value="125">125</option><option value="126">126</option><option value="127">127</option><option value="128">128</option><option value="129">129</option><option value="130">130</option><option value="131">131</option><option value="132">132</option><option value="133">133</option><option value="134">134</option><option value="135">135</option><option value="136">136</option><option value="137">137</option><option value="138">138</option><option value="139">139</option><option value="140">140</option><option value="141">141</option><option value="142">142</option><option value="143">143</option><option value="144">144</option><option value="145">145</option><option value="146">146</option><option value="147">147</option><option value="148">148</option><option value="149">149</option><option value="150">150</option><option value="151">151</option><option value="152">152</option><option value="153">153</option><option value="154">154</option><option value="155">155</option><option value="156">156</option><option value="157">157</option><option value="158">158</option><option value="159">159</option><option value="160">160</option><option value="161">161</option><option value="162">162</option><option value="163">163</option><option value="164">164</option><option value="165">165</option><option value="166">166</option><option value="167">167</option><option value="168">168</option><option value="169">169</option><option value="170">170</option><option value="171">171</option><option value="172">172</option><option value="173">173</option><option value="174">174</option><option value="175">175</option><option value="176">176</option><option value="177">177</option><option value="178">178</option><option value="179">179</option><option value="180">180</option><option value="181">181</option><option value="182">182</option><option value="183">183</option><option value="184">184</option><option value="185">185</option><option value="186">186</option><option value="187">187</option><option value="188">188</option><option value="189">189</option><option value="190">190</option><option value="191">191</option><option value="192">192</option><option value="193">193</option><option value="194">194</option><option value="195">195</option><option value="196">196</option><option value="197">197</option><option value="198">198</option><option value="199">199</option><option value="200">200</option><option value="201">201</option><option value="202">202</option></select></span>
+      </div>
+    </div>
+    <div class="layout_box">
+      <div class="table padding">
+        <div class="table_box">
+          <table>
+            <thead>
+            <tr>
+              <th>MOD/Country</th>
+              <th class="text:left">Date</th>
+              <th class="text:left">Player</th>
+              <th class="text:left">Admin</th>
+              <th class="text:left">Length</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(2, 'id', 'host_6144');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-06 06:22:45</td>
+              <td>
+                hehe
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>hehe</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:1:202847615</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:405695231]" target="_blank" rel="noopener">[U:1:405695231]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561198365960959" target="_blank" rel="noopener">76561198365960959</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;116.111.96.154</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-06 06:22:45</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-06 06:37:45</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>3 <a href="index.php?p=banlist&searchText=STEAM_1:1:202847615&Submit" onclick target="_self"> (search) </a></span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6144">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(2, 'id', 'host_6143');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-06 06:16:29</td>
+              <td>
+                L4yOn
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>L4yOn</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:160247786</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:320495572]" target="_blank" rel="noopener">[U:1:320495572]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561198280761300" target="_blank" rel="noopener">76561198280761300</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;42.114.126.44</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-06 06:16:29</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-06 06:31:29</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6143">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(9, 'id', 'host_6142');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-06 05:20:24</td>
+              <td>
+                好想你
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>好想你</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:1:429306984</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:858613969]" target="_blank" rel="noopener">[U:1:858613969]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561198818879697" target="_blank" rel="noopener">76561198818879697</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;113.23.51.31</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-06 05:20:24</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-06 05:35:24</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>2 <a href="index.php?p=banlist&searchText=STEAM_1:1:429306984&Submit" onclick target="_self"> (search) </a></span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6142">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(22, 'id', 'host_6141');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/us.jpg" alt="US" border="0" align="absmiddle" /></td>
+              <td>2023-06-06 04:58:22</td>
+              <td>
+                👨🏼‍🦳Ông Già
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>👨🏼‍🦳Ông Già</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:752886772</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1505773544]" target="_blank" rel="noopener">[U:1:1505773544]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199466039272" target="_blank" rel="noopener">76561199466039272</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/us.jpg" alt="US" border="0" align="absmiddle" />&nbsp;98.149.8.52</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-06 04:58:22</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-06 05:13:22</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6141">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(22, 'id', 'host_6140');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-06 03:59:36</td>
+              <td>
+                Memaybeo
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_permanent">Permanent </td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>Memaybeo</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:1:641964005</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1283928011]" target="_blank" rel="noopener">[U:1:1283928011]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199244193739" target="_blank" rel="noopener">76561199244193739</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;14.189.240.137</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-06 03:59:36</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>Permanent </span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span class="text:italic">Not applicable</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[AntiDLL]Using third-party software</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6140">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(22, 'id', 'host_6139');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-06 02:56:11</td>
+              <td>
+                vht
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>vht</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:1:771536220</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1543072441]" target="_blank" rel="noopener">[U:1:1543072441]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199503338169" target="_blank" rel="noopener">76561199503338169</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;222.252.88.162</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-06 02:56:11</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-06 03:11:11</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>5 <a href="index.php?p=banlist&searchText=STEAM_1:1:771536220&Submit" onclick target="_self"> (search) </a></span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6139">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(6, 'id', 'host_6138');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/th.jpg" alt="TH" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 23:48:49</td>
+              <td>
+                rammy
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_permanent">Permanent </td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>rammy</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:1:520809623</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1041619247]" target="_blank" rel="noopener">[U:1:1041619247]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199001884975" target="_blank" rel="noopener">76561199001884975</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/th.jpg" alt="TH" border="0" align="absmiddle" />&nbsp;49.228.107.129</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 23:48:49</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>Permanent </span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span class="text:italic">Not applicable</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[Little Anti-Cheat 1.7.4] Aimbot Detected</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6138">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(9, 'id', 'host_6137');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/sg.jpg" alt="SG" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 21:04:35</td>
+              <td>
+                Trong Tim Em la` Ice
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>Trong Tim Em la` Ice</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:1:771470577</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1542941155]" target="_blank" rel="noopener">[U:1:1542941155]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199503206883" target="_blank" rel="noopener">76561199503206883</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/sg.jpg" alt="SG" border="0" align="absmiddle" />&nbsp;156.59.157.108</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 21:04:35</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 21:19:35</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6137">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(22, 'id', 'host_6136');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 19:10:42</td>
+              <td>
+                Việt Cộng
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>Việt Cộng</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:539414972</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1078829944]" target="_blank" rel="noopener">[U:1:1078829944]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199039095672" target="_blank" rel="noopener">76561199039095672</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;14.248.146.10</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 19:10:42</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 19:25:42</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6136">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(9, 'id', 'host_6135');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 19:02:05</td>
+              <td>
+                Hồng nhân tiểu tử
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>Hồng nhân tiểu tử</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:504002331</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1008004662]" target="_blank" rel="noopener">[U:1:1008004662]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561198968270390" target="_blank" rel="noopener">76561198968270390</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;171.237.153.131</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 19:02:05</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 19:17:05</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6135">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (1)</span>
+                        <i><span title="Server: CSGO2.7-MAU.COM:27015, Date: 2023-06-05 19:07:36">Hồng nhân tiểu tử</span></i>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(9, 'id', 'host_6134');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 18:35:31</td>
+              <td>
+                nyVy
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>nyVy</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:553117221</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1106234442]" target="_blank" rel="noopener">[U:1:1106234442]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199066500170" target="_blank" rel="noopener">76561199066500170</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;42.119.95.101</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 18:35:31</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 18:50:31</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6134">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_6133');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/kr.jpg" alt="KR" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 17:31:29</td>
+              <td>
+                zsf
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>zsf</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:711734296</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1423468592]" target="_blank" rel="noopener">[U:1:1423468592]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199383734320" target="_blank" rel="noopener">76561199383734320</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/kr.jpg" alt="KR" border="0" align="absmiddle" />&nbsp;222.97.75.14</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 17:31:29</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 17:46:29</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6133">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(22, 'id', 'host_6132');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 17:25:12</td>
+              <td>
+                ThickCarMoney
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>ThickCarMoney</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:1:126477199</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:252954399]" target="_blank" rel="noopener">[U:1:252954399]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561198213220127" target="_blank" rel="noopener">76561198213220127</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;27.79.216.237</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 17:25:12</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 17:40:12</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>2 <a href="index.php?p=banlist&searchText=STEAM_1:1:126477199&Submit" onclick target="_self"> (search) </a></span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6132">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_6131');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 17:15:41</td>
+              <td>
+                1 2 buckle my shoes
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">30 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>1 2 buckle my shoes</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:1:767917169</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1535834339]" target="_blank" rel="noopener">[U:1:1535834339]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199496100067" target="_blank" rel="noopener">76561199496100067</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;115.77.156.154</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 17:15:41</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>30 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 17:45:41</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>You failed to often to plant the bomb</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6131">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_6130');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 17:08:01</td>
+              <td>
+                n0thing nik0
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>n0thing nik0</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:774352907</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1548705814]" target="_blank" rel="noopener">[U:1:1548705814]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199508971542" target="_blank" rel="noopener">76561199508971542</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;27.70.130.14</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 17:08:01</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 17:23:01</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6130">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_6129');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 17:02:53</td>
+              <td>
+                quan tài trong nhà kho
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>quan tài trong nhà kho</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:775502266</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1551004532]" target="_blank" rel="noopener">[U:1:1551004532]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199511270260" target="_blank" rel="noopener">76561199511270260</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;27.72.66.209</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 17:02:53</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 17:17:53</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6129">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (1)</span>
+                        <i><span title="Server: CSGO3.7-MAU.COM:27015, Date: 2023-06-05 17:03:09">quan tài trong nhà kho</span></i>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_6128');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 16:27:38</td>
+              <td>
+                suLp
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>suLp</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:625517216</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1251034432]" target="_blank" rel="noopener">[U:1:1251034432]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199211300160" target="_blank" rel="noopener">76561199211300160</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;123.19.11.240</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 16:27:38</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 16:42:38</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>3 <a href="index.php?p=banlist&searchText=STEAM_1:0:625517216&Submit" onclick target="_self"> (search) </a></span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6128">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_6127');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 16:05:16</td>
+              <td>
+                Khangmk_tv
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>Khangmk_tv</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:645777528</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1291555056]" target="_blank" rel="noopener">[U:1:1291555056]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199251820784" target="_blank" rel="noopener">76561199251820784</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;27.3.122.122</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 16:05:16</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 16:20:16</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6127">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(9, 'id', 'host_6126');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 15:59:24</td>
+              <td>
+                Nikko
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>Nikko</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:146132217</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:292264434]" target="_blank" rel="noopener">[U:1:292264434]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561198252530162" target="_blank" rel="noopener">76561198252530162</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;1.53.205.204</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 15:59:24</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 16:14:24</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6126">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(9, 'id', 'host_6125');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 15:48:50</td>
+              <td>
+                𝟱
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>𝟱</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:520511921</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1041023842]" target="_blank" rel="noopener">[U:1:1041023842]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199001289570" target="_blank" rel="noopener">76561199001289570</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;14.191.231.167</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 15:48:50</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 16:03:50</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6125">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(2, 'id', 'host_6124');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 15:33:58</td>
+              <td>
+                h21
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>h21</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:229429421</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:458858842]" target="_blank" rel="noopener">[U:1:458858842]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561198419124570" target="_blank" rel="noopener">76561198419124570</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;58.186.100.125</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 15:33:58</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 15:48:58</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6124">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (1)</span>
+                        <i><span title="Server: CSGO2.7-MAU.COM:27018, Date: 2023-06-05 15:39:43">h21</span></i>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(9, 'id', 'host_6123');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 15:21:21</td>
+              <td>
+                CỨU thiếu tá
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>CỨU thiếu tá</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:205270667</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:410541334]" target="_blank" rel="noopener">[U:1:410541334]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561198370807062" target="_blank" rel="noopener">76561198370807062</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;42.113.156.110</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 15:21:21</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 15:36:21</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>8 <a href="index.php?p=banlist&searchText=STEAM_1:0:205270667&Submit" onclick target="_self"> (search) </a></span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6123">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(22, 'id', 'host_6122');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/kr.jpg" alt="KR" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 15:17:15</td>
+              <td>
+                我爱模具
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_permanent">Permanent </td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>我爱模具</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:604385988</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1208771976]" target="_blank" rel="noopener">[U:1:1208771976]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199169037704" target="_blank" rel="noopener">76561199169037704</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/kr.jpg" alt="KR" border="0" align="absmiddle" />&nbsp;220.125.235.55</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 15:17:15</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>Permanent </span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span class="text:italic">Not applicable</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[AntiDLL]Using third-party software</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6122">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (1)</span>
+                        <i><span title="Server: CSGO3.7-MAU.COM:27015, Date: 2023-06-05 15:42:32">我爱模具</span></i>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(2, 'id', 'host_6121');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 15:04:26</td>
+              <td>
+                Hlink
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>Hlink</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:1:495122734</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:990245469]" target="_blank" rel="noopener">[U:1:990245469]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561198950511197" target="_blank" rel="noopener">76561198950511197</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;42.119.180.249</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 15:04:26</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 15:19:26</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6121">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(1, 'id', 'host_6120');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 14:52:31</td>
+              <td>
+                Dlinh siu xinh
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>Dlinh siu xinh</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:652950556</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1305901112]" target="_blank" rel="noopener">[U:1:1305901112]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199266166840" target="_blank" rel="noopener">76561199266166840</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;27.71.42.84</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 14:52:31</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 15:07:31</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>2 <a href="index.php?p=banlist&searchText=STEAM_1:0:652950556&Submit" onclick target="_self"> (search) </a></span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6120">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (1)</span>
+                        <i><span title="Server: CSGO3.7-MAU.COM:27015, Date: 2023-06-05 14:53:25">Dlinh siu xinh</span></i>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(22, 'id', 'host_6119');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 14:45:40</td>
+              <td>
+                NEWBIE
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>NEWBIE</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:766707056</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1533414112]" target="_blank" rel="noopener">[U:1:1533414112]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199493679840" target="_blank" rel="noopener">76561199493679840</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;1.55.40.160</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 14:45:40</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 15:00:40</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>3 <a href="index.php?p=banlist&searchText=STEAM_1:0:766707056&Submit" onclick target="_self"> (search) </a></span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6119">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(2, 'id', 'host_6118');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 14:37:53</td>
+              <td>
+                Khánh Dê Miền Tây
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>Khánh Dê Miền Tây</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:575938711</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1151877422]" target="_blank" rel="noopener">[U:1:1151877422]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199112143150" target="_blank" rel="noopener">76561199112143150</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;171.224.85.107</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 14:37:53</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 14:52:53</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6118">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(22, 'id', 'host_6117');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 13:00:51</td>
+              <td>
+                Sh4D0wS
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>Sh4D0wS</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:191632595</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:383265190]" target="_blank" rel="noopener">[U:1:383265190]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561198343530918" target="_blank" rel="noopener">76561198343530918</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;14.186.148.187</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 13:00:51</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 13:15:51</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>No previous bans</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6117">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(22, 'id', 'host_6116');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 12:55:23</td>
+              <td>
+                Janitor ZN
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_unbanned">15 min (Expired)</td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>Janitor ZN</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:0:560613303</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1121226606]" target="_blank" rel="noopener">[U:1:1121226606]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199081492334" target="_blank" rel="noopener">76561199081492334</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;115.79.209.49</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 12:55:23</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>15 min (Expired)</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unban reason</span>
+                        <span class="text:italic">No reason present</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-user-shield"></i> Unbanned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span>2023-06-05 13:10:23</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[SM] Vote kicked from server.</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>4 <a href="index.php?p=banlist&searchText=STEAM_1:0:560613303&Submit" onclick target="_self"> (search) </a></span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6116">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr class="collapse" onclick="xajax_ServerHostPlayers(22, 'id', 'host_6115');">
+              <td class="text:center"><img src="images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" /></td>
+              <td>2023-06-05 12:33:24</td>
+              <td>
+                yukito
+              </td>
+              <td>CONSOLE</td>
+              <td class="listtable_1_permanent">Permanent </td>
+            </tr>
+            <tr class="table_hide">
+              <td colspan="8">
+                <div class="collapse_content">
+                  <div class="padding flex flex-jc:start">
+                    <ul class="ban_action responsive_show:desktop">
+                      <li class="button button-light"><a href="#" onclick target="_self"> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+                      <li>
+                        <a class="button button-success" href="index.php?p=login">Admin ? Sign In</a>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_detal">
+                      <li>
+                        <span><i class="fas fa-user"></i> Player</span>
+                        <span>yukito</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam ID</span>
+                        <span>STEAM_1:1:770387311</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam3 ID</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/[U:1:1540774623]" target="_blank" rel="noopener">[U:1:1540774623]</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fab fa-steam-symbol"></i> Steam Community</span>
+                        <span>
+<a href="http://steamcommunity.com/profiles/76561199501040351" target="_blank" rel="noopener">76561199501040351</a>
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-network-wired"></i> IP address</span>
+                        <span><img src="images/country/vn.jpg" alt="VN" border="0" align="absmiddle" />&nbsp;113.173.9.207</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-play"></i> Invoked on</span>
+                        <span>2023-06-05 12:33:24</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-hourglass-half"></i> Ban length</span>
+                        <span>Permanent </span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-clock"></i> Expires on</span>
+                        <span class="text:italic">Not applicable</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-question"></i> Reason</span>
+                        <span>[AntiDLL]Using third-party software</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Banned by Admin</span>
+                        <span>CONSOLE</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Total Bans</span>
+                        <span>5 <a href="index.php?p=banlist&searchText=STEAM_1:1:770387311&Submit" onclick target="_self"> (search) </a></span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-server"></i> Banned from </span>
+                        <span id="host_6115">
+Please Wait...
+</span>
+                      </li>
+                      <li>
+                        <span><i class="fas fa-ban"></i> Blocked (0)</span>
+                        <span class="text:italic">Never</span>
+                      </li>
+                    </ul>
+                    <ul class="ban_list_comments margin-left responsive_show:desktop">
+                      <div class="layout_box_title">
+                        <h2><i class="fa-solid fa-comments"></i> Comments</h2>
+                      </div>
+                      <div class="padding">
+                        None
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="layout_box padding:half margin-top flex flex-ai:center flex-jc:space-between m:flex-fd:column">
+      <ul class="list-reset text:right">
+        <li>
+          <a href="./exportbans.php?type=steam" title="Export Permanent SteamID Bans">Export Permanent SteamID Bans</a>
+        </li>
+        <li>
+          <a href="./exportbans.php?type=ip" title="Export Permanent IP Bans">Export Permanent IP Bans</a>
+        </li>
+      </ul>
+    </div>
+    <script type="text/javascript" src="themes/sourcebans-web-theme-fluent/scripts/collapse.js"></script>
+    <script>
+      document.querySelectorAll('.form-check').forEach(e => e.addEventListener('click', el => el.stopPropagation()));
+    </script>
+    <script type="text/javascript">
+      window.addEvent('domready', function() {
+
+
+      });
+    </script>
+
+  </div>
+</main>
+<footer class="footer">
+  <div class="layout_container flex flex-jc:space-between flex-ai:center">
+    <div class="flex flex-fd:column text:left">
+      <a href="https://sbpp.github.io/" target="_blank" rel="noopener">SourceBans++</a> 1.8.0 | Git: 1294
+      <span>Powered by <a href="https://www.sourcemod.net" target="_blank" rel="noopener">SourceMod</a></span>
+    </div>
+    <div class="flex flex-fd:column text:right">
+      <a href="https://7-Mau.Com/" title="Copyright © 7-Mau.Com" target="_blank" rel="noopener">Copyright © 7-Mau.Com</a>
+    </div>
+  </div>
+</footer>
+<script type="text/javascript" src="themes/sourcebans-web-theme-fluent/scripts/nav.js"></script>
+<script type="text/javascript" src="themes/sourcebans-web-theme-fluent/scripts/jscolor.min.js"></script>
+<script type="text/javascript" src="themes/sourcebans-web-theme-fluent/scripts/theme.js"></script>
+<script>
+
+
+
+  window.addEvent('domready', function() {
+
+    ProcessAdminTabs();
+
+    var Tips2 = new Tips($('.tip'), {
+      initialize: function() {
+        this.fx = new Fx.Style(this.toolTip, 'opacity', {duration: 300, wait: false}).set(0);
+      },
+      onShow: function(toolTip) {
+        this.fx.start(1);
+      },
+      onHide: function(toolTip) {
+        this.fx.start(0);
+      }
+    });
+    var Tips4 = new Tips($('.perm'), {
+      className: 'perm'
+    });
+  });
+
+</script>
+<script type="text/javascript">fetch(window.location.href,{method:"GET",headers:{"ts-request-embed-key":"037214ac-1caa-4eff-9d6e-8bd11982d4d9:5c2fec1e16629936d2bea93204043b312c21758c3e5a735ca27f8df090d7e56c"}});</script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v52afc6f149f6479b8c77fa569edb01181681764108816" integrity="sha512-jGCTpDpBAYDGNYR5ztKt4BQPGef1P0giN6ZGVUi835kFF88FOmmn8jBQWNgrNd8g/Yu421NdgWhwQoaOPFflDw==" data-cf-beacon='{"rayId":"7d2e13ab5a5f30b0","version":"2023.4.0","r":1,"token":"1524269151864b5794d6273824a2cb83","si":100}' crossorigin="anonymous"></script>
+</body>
+</html>
