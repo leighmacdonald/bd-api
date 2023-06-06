@@ -417,6 +417,11 @@ func NewTheVilleScraper() *Scraper {
 		parseDefault, nextUrlLast, parseSkialTime)
 }
 
+func NewOreonScraper() *Scraper {
+	return newScraper("oreon", "https://www.tf2-oreon.fr/sourceban/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseSkialTime)
+}
+
 type metaKey int
 
 const (
@@ -777,8 +782,8 @@ func parseMegaScatter(bodyReader io.Reader) ([]banData, error) {
 	fmt.Println(string(pass3[len(match[1])-2048]))
 
 	o, _ := os.Create("temp.json")
-	io.WriteString(o, pass3)
-	o.Close()
+	_, _ = io.WriteString(o, pass3)
+	_ = o.Close()
 	var msNodes []megaScatterNode
 	if errJson := json.Unmarshal([]byte(pass3), &msNodes); errJson != nil {
 		return nil, errJson
