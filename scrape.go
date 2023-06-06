@@ -343,6 +343,12 @@ func NewSameTeemScraper() *Scraper {
 		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
+func NewPowerFPSScraper() *Scraper {
+	// Not enough values to page yet...
+	return newScraper("powerfps", "https://bans.powerfps.com/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseSkialTime)
+}
+
 type metaKey int
 
 const (
@@ -474,6 +480,11 @@ func nextUrlFirst(doc *goquery.Selection) string {
 func nextUrlLast(doc *goquery.Selection) string {
 	nextPage, _ := doc.Find("#banlist-nav a[href]").Last().Attr("href")
 	return nextPage
+}
+
+// https://github.com/brhndursun/SourceBans-StarTheme
+func parseStar(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTimeFunc) (string, []banData, error) {
+	return "", nil, nil
 }
 
 // https://github.com/aXenDeveloper/sourcebans-web-theme-fluent
