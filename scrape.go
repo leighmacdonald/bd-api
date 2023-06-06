@@ -407,6 +407,11 @@ func NewVaticanCityScraper() *Scraper {
 		parseDefault, nextUrlLast, parseSkialTime)
 }
 
+func NewLazyNeerScraper() *Scraper {
+	return newScraper("lazyneer", "https://www.lazyneer.com/SourceBans/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseSkialAltTime)
+}
+
 type metaKey int
 
 const (
@@ -437,6 +442,14 @@ func parseSkialTime(s string) (time.Time, error) {
 		return time.Time{}, nil
 	}
 	return time.Parse("01-02-06 15:04", s)
+}
+
+// 05-17-23 03:07
+func parseSkialAltTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("06-01-02 15:04", s)
 }
 
 // 05-17-23 03:07

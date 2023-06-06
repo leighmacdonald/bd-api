@@ -237,6 +237,10 @@ func TestVaticanCity(t *testing.T) {
 	testParser(t, NewVaticanCityScraper(), 50, "index.php?p=banlist&page=2")
 }
 
+func TestLazyNeer(t *testing.T) {
+	testParser(t, NewLazyNeerScraper(), 30, "index.php?p=banlist&page=2")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)
