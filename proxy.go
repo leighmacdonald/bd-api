@@ -18,7 +18,7 @@ func init() {
 	proxies = map[string]*proxyConfig{}
 }
 
-func startProxies() {
+func startProxies(config *Config) {
 	wg := &sync.WaitGroup{}
 	for _, serverCfg := range config.Proxies {
 		wg.Add(1)
@@ -72,7 +72,7 @@ func stopProxies() {
 	wg.Wait()
 }
 
-func setupProxies(c *colly.Collector) error {
+func setupProxies(c *colly.Collector, config *Config) error {
 	var proxyAddresses []string
 	for _, p := range config.Proxies {
 		proxyAddresses = append(proxyAddresses, fmt.Sprintf("socks5://%s", p.LocalAddr))

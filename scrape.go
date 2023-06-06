@@ -19,32 +19,29 @@ import (
 	"time"
 )
 
-type rowFilter func(doc *goquery.Selection) bool
-
 type nextUrlFunc func(doc *goquery.Selection) string
 
 type parseTimeFunc func(s string) (time.Time, error)
 
-type parserFunc func(doc *goquery.Selection, nextUrl nextUrlFunc, timeParser parseTimeFunc) (string, []banData, error)
+type parserFunc func(doc *goquery.Selection, nextUrl nextUrlFunc, timeParser parseTimeFunc) (string, []SBRecord, error)
 
-type Startable interface {
-	Start() error
-}
+func startScraper(config *Config) {
 
-func Start() {
-	if errConfig := readConfig("config.yml"); errConfig != nil {
-		logger.Panic("Failed to load config", zap.Error(errConfig))
-	}
-	startProxies()
+	startProxies(config)
 	defer stopProxies()
 
-	for _, scraper := range []Startable{
+	for _, scraper := range []*Scraper{
 		NewSkialScraper(),
 		NewGFLScraper(),
 		NewSpaceShipScraper(),
 		NewLazyPurpleScraper(),
 	} {
-		go func(s Startable) {
+
+		if errProxies := setupProxies(scraper.Collector, config); errProxies != nil {
+			logger.Panic("Failed to setup proxies", zap.Error(errProxies))
+		}
+
+		go func(s *Scraper) {
 			if errScrape := s.Start(); errScrape != nil {
 				logger.Error("Scraper returned error", zap.Error(errScrape))
 			}
@@ -52,11 +49,35 @@ func Start() {
 	}
 }
 
+type metaKey int
+
+const (
+	unknown metaKey = iota
+	player
+	steamId
+	steam2
+	steamComm
+	invokedOn
+	banLength // "Permanent"
+	expiresOn // "Not applicable."
+	reason
+	last
+)
+
+type SBRecord struct {
+	Name      string
+	SteamId   steamid.SID64
+	Reason    string
+	CreatedOn time.Time
+	Length    time.Duration
+	Permanent bool
+}
+
 type Scraper struct {
 	*colly.Collector
 	name      string
 	log       *zap.Logger
-	results   []banData
+	results   []SBRecord
 	resultsMu sync.RWMutex
 	baseUrl   string
 	startPath string
@@ -119,10 +140,6 @@ func newScraper(name string, baseUrl string, startPath string, parser parserFunc
 		RandomDelay: 5 * time.Second,
 	}); errLimit != nil {
 		logger.Panic("Failed to set limit", zap.Error(errLimit))
-	}
-
-	if errProxies := setupProxies(scraper.Collector); errProxies != nil {
-		logger.Panic("Failed to setup proxies", zap.Error(errProxies))
 	}
 
 	scraper.OnError(func(r *colly.Response, err error) {
@@ -452,30 +469,6 @@ func NewOtakuScraper() *Scraper {
 		parseDefault, nextUrlLast, parseOtakuTime)
 }
 
-type metaKey int
-
-const (
-	unknown metaKey = iota
-	player
-	steamId
-	steam2
-	steamComm
-	invokedOn
-	banLength // "Permanent"
-	expiresOn // "Not applicable."
-	reason
-	last
-)
-
-type banData struct {
-	Name      string
-	SteamId   steamid.SID64
-	Reason    string
-	CreatedOn time.Time
-	Length    time.Duration
-	Permanent bool
-}
-
 // 05-17-23 03:07
 func parseSkialTime(s string) (time.Time, error) {
 	if s == "Not applicable." || s == "Permanent" {
@@ -642,15 +635,15 @@ func nextUrlLast(doc *goquery.Selection) string {
 }
 
 // https://github.com/brhndursun/SourceBans-StarTheme
-func parseStar(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTimeFunc) (string, []banData, error) {
-	return "", nil, nil
+func parseStar(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTimeFunc) (string, []SBRecord, error) {
+	panic("todo")
 }
 
 // https://github.com/aXenDeveloper/sourcebans-web-theme-fluent
-func parseFluent(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTimeFunc) (string, []banData, error) {
+func parseFluent(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTimeFunc) (string, []SBRecord, error) {
 	var (
-		bans   []banData
-		curBan banData
+		bans   []SBRecord
+		curBan SBRecord
 	)
 	doc.Find("ul.ban_list_detal li").Each(func(i int, selection *goquery.Selection) {
 		child := selection.Children()
@@ -697,16 +690,16 @@ func parseFluent(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTim
 			if curBan.SteamId.Valid() {
 				bans = append(bans, curBan)
 			}
-			curBan = banData{}
+			curBan = SBRecord{}
 		}
 	})
 	return urlFunc(doc), bans, nil
 }
 
-func parseDefault(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTimeFunc) (string, []banData, error) {
+func parseDefault(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTimeFunc) (string, []SBRecord, error) {
 	var (
-		bans     []banData
-		curBan   banData
+		bans     []SBRecord
+		curBan   SBRecord
 		curState = unknown
 		isValue  bool
 	)
@@ -784,7 +777,7 @@ func parseDefault(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTi
 				if curBan.SteamId.Valid() {
 					bans = append(bans, curBan)
 				}
-				curBan = banData{}
+				curBan = SBRecord{}
 				curState = last
 			}
 			curState = unknown
@@ -814,7 +807,7 @@ type megaScatterNode struct {
 	Aliases []string `json:"-"`
 }
 
-func parseMegaScatter(bodyReader io.Reader) ([]banData, error) {
+func parseMegaScatter(bodyReader io.Reader) ([]SBRecord, error) {
 	body, errBody := io.ReadAll(bodyReader)
 	if errBody != nil {
 		return nil, errBody

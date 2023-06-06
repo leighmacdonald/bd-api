@@ -19,6 +19,9 @@ type proxyConfig struct {
 }
 
 type Config struct {
+	ListenAddr     string         `yaml:"listen_addr"`
+	SteamApiKey    string         `yaml:"steam_api_key"`
+	DSN            string         `yaml:"dsn"`
 	Proxies        []*proxyConfig `yaml:"proxies"`
 	PrivateKeyPath string         `yaml:"private_key_path"`
 }
@@ -47,23 +50,21 @@ func makeSigner(keyPath string) (ssh.Signer, error) {
 	return signer, nil
 }
 
-func readConfig(configFile string) error {
+func readConfig(configFile string, config *Config) error {
 	cf, errCf := os.Open(configFile)
 	if errCf != nil {
 		return errCf
 	}
 	defer logCloser(cf)
-	var newConfig Config
-	if errDecode := yaml.NewDecoder(cf).Decode(&newConfig); errDecode != nil {
+	if errDecode := yaml.NewDecoder(cf).Decode(&config); errDecode != nil {
 		return errDecode
 	}
-	signer, errSigner := makeSigner(newConfig.PrivateKeyPath)
+	signer, errSigner := makeSigner(config.PrivateKeyPath)
 	if errSigner != nil {
 		return errors.Wrap(errSigner, "Failed to setup SSH signer")
 	}
-	for _, cfg := range newConfig.Proxies {
+	for _, cfg := range config.Proxies {
 		cfg.signer = signer
 	}
-	config = &newConfig
 	return nil
 }
