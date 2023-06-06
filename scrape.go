@@ -432,6 +432,11 @@ func NewDefuseRoScraper() *Scraper {
 		parseFluent, nextUrlFluent, parseDefaultTime)
 }
 
+func NewTawernaScraper() *Scraper {
+	return newScraper("tawerna", "https://sb.tawerna.tf/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseSkialTime)
+}
+
 type metaKey int
 
 const (
