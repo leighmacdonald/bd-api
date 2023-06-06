@@ -352,6 +352,11 @@ func New7MauScraper() *Scraper {
 		parseFluent, nextUrlFluent, parseDefaultTime)
 }
 
+func NewGhostCapScraper() *Scraper {
+	return newScraper("ghostcap", "https://sourcebans.ghostcap.com/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
+}
+
 type metaKey int
 
 const (
