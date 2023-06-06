@@ -1,0 +1,35 @@
+version: "3.3"
+
+services:
+  gbans:
+    build:
+      context: "."
+      dockerfile: Dockerfile
+    volumes:
+      - ./config.yml:/app/config.yml
+    depends_on:
+      - postgres
+    networks:
+      - prod_network
+    environment:
+      BDAPI_DATABASE_DSN: postgresql://bdapi:bdapi@postgres:5445/bdapi
+    command: ./bd-api serve
+  postgres:
+    image: postgres:15-bullseye
+    restart: always
+    volumes:
+      - bdapi_db:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5445:5432"
+    environment:
+      POSTGRES_USER: bdapi
+      POSTGRES_DB: bdapi
+      POSTGRES_PASSWORD: bdapi
+    networks:
+      - prod_network
+
+volumes:
+  bdapi_db:
+
+networks:
+  prod_network:
