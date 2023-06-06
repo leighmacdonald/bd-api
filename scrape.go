@@ -442,6 +442,11 @@ func NewTitanScraper() *Scraper {
 		parseDefault, nextUrlLast, parseTitanTime)
 }
 
+func NewDiscFFScraper() *Scraper {
+	return newScraper("discff", "http://disc-ff.site.nfoservers.com/sourcebanstf2/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
+}
+
 func NewOtakuScraper() *Scraper {
 	return newScraper("otaku", "https://bans.otaku.tf/bans", "",
 		parseDefault, nextUrlLast, parseOtakuTime)

@@ -265,6 +265,10 @@ func TestTitan(t *testing.T) {
 	testParser(t, NewTitanScraper(), 30, "index.php?p=banlist&page=2")
 }
 
+func TestDiscFF(t *testing.T) {
+	testParser(t, NewDiscFFScraper(), 29, "index.php?p=banlist&page=2")
+}
+
 //func TestOtaku(t *testing.T) {
 //	testParser(t, NewOtakuScraper(), 30, "index.php?p=banlist&page=2")
 //}
