@@ -357,6 +357,11 @@ func NewGhostCapScraper() *Scraper {
 		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
+func NewSpectreScraper() *Scraper {
+	return newScraper("spectre", "https://spectre.gg/bans/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
+}
+
 type metaKey int
 
 const (
