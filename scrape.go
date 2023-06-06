@@ -422,6 +422,11 @@ func NewOreonScraper() *Scraper {
 		parseDefault, nextUrlLast, parseSkialTime)
 }
 
+func NewTriggerHappyScraper() *Scraper {
+	return newScraper("triggerhappy", "https://triggerhappygamers.com/sourcebans/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseTriggerHappyTime)
+}
+
 type metaKey int
 
 const (
@@ -476,6 +481,14 @@ func parseSVDos(s string) (time.Time, error) {
 		return time.Time{}, nil
 	}
 	return time.Parse("02/01/06 - 15:04:05", s)
+}
+
+// 17/05/23 - 03:07:05
+func parseTriggerHappyTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("02/01/2006 15:04:05", s)
 }
 
 // 17/05/23 03:07 PM
