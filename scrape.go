@@ -382,6 +382,11 @@ func NewHellClanScraper() *Scraper {
 		parseDefault, nextUrlLast, parseHellClanTime)
 }
 
+func NewSneaksScraper() *Scraper {
+	return newScraper("sneaks", "https://bans.snksrv.com/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseSneakTime)
+}
+
 type metaKey int
 
 const (
@@ -452,6 +457,14 @@ func parseHellClanTime(s string) (time.Time, error) {
 		return time.Time{}, nil
 	}
 	return time.Parse("02-01-2006 15:04 MST", s)
+}
+
+// 17-05-2023 03:07:05
+func parseSneakTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("02-01-2006 15:04 PM MST", s)
 }
 
 // 2023-05-17 03:07:05
