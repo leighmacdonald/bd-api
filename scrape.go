@@ -392,6 +392,11 @@ func NewNideScraper() *Scraper {
 		parseFluent, nextUrlFluent, parseDefaultTime)
 }
 
+func NewAstraManiaScraper() *Scraper {
+	return newScraper("astramania", "https://astramania.ro/sban2/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseTrailYear)
+}
+
 type metaKey int
 
 const (
