@@ -427,6 +427,11 @@ func NewTriggerHappyScraper() *Scraper {
 		parseDefault, nextUrlLast, parseTriggerHappyTime)
 }
 
+func NewDefuseRoScraper() *Scraper {
+	return newScraper("defusero", "https://bans.defusero.org/", "index.php?p=banlist",
+		parseFluent, nextUrlFluent, parseDefaultTime)
+}
+
 type metaKey int
 
 const (
