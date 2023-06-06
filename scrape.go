@@ -387,6 +387,11 @@ func NewSneaksScraper() *Scraper {
 		parseDefault, nextUrlLast, parseSneakTime)
 }
 
+func NewNideScraper() *Scraper {
+	return newScraper("nide", "https://bans.nide.gg/", "index.php?p=banlist",
+		parseFluent, nextUrlFluent, parseDefaultTime)
+}
+
 type metaKey int
 
 const (

@@ -221,6 +221,10 @@ func TestSneaks(t *testing.T) {
 	testParser(t, NewSneaksScraper(), 30, "index.php?p=banlist&page=2")
 }
 
+func TestNide(t *testing.T) {
+	testParser(t, NewNideScraper(), 20, "index.php?p=banlist&page=2")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)
