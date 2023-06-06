@@ -291,6 +291,16 @@ func NewFluxTFScraper() *Scraper {
 		parseDefault, nextUrlLast, parseFluxTime)
 }
 
+func NewDarkPyroScraper() *Scraper {
+	return newScraper("darkpyro", "https://bans.darkpyrogaming.com/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDarkPyroTime)
+}
+
+func NewOpstOnlineScraper() *Scraper {
+	return newScraper("opstonline", "https://www.opstonline.com/bans/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseSkialTime)
+}
+
 type metaKey int
 
 const (
@@ -329,6 +339,14 @@ func parseSVDos(s string) (time.Time, error) {
 		return time.Time{}, nil
 	}
 	return time.Parse("02/01/06 - 15:04:05", s)
+}
+
+// 17/05/23 03:07 PM
+func parseDarkPyroTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("02/01/06 15:04 PM", s)
 }
 
 // 17-05-2023 03:07:05
