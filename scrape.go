@@ -326,6 +326,11 @@ func NewECJScraper() *Scraper {
 		parseDefault, nextUrlLast, parseSkialTime)
 }
 
+func NewJumpAcademyScraper() *Scraper {
+	return newScraper("jumpacademy", "https://bans.jumpacademy.tf/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
+}
+
 type metaKey int
 
 const (
