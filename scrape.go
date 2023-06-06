@@ -437,6 +437,11 @@ func NewTawernaScraper() *Scraper {
 		parseDefault, nextUrlLast, parseSkialTime)
 }
 
+func NewTitanScraper() *Scraper {
+	return newScraper("titan", "https://bans.titan.tf/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseSkialTime)
+}
+
 type metaKey int
 
 const (

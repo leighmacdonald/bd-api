@@ -1,0 +1,3666 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Ban List | Titan.TF Bans</title>
+<script src="/cdn-cgi/apps/head/tnGmt--IYqXQO24Mg3cPvrhk7u0.js"></script><link rel="Shortcut Icon" href="themes/default/images/favicon.ico" />
+<script type="bbe0aa9d318ef3f8568d9f3b-text/javascript" src="./scripts/fontawesome-all.min.js"></script>
+<script type="bbe0aa9d318ef3f8568d9f3b-text/javascript" src="./scripts/sourcebans.js"></script>
+<link href="themes/default/css/main.css" rel="stylesheet" type="text/css" />
+<script type="bbe0aa9d318ef3f8568d9f3b-text/javascript" src="./scripts/mootools.js"></script>
+<script type="bbe0aa9d318ef3f8568d9f3b-text/javascript" src="./scripts/contextMenoo.js"></script>
+<script type="bbe0aa9d318ef3f8568d9f3b-text/javascript">
+var xajaxRequestUri="./index.php";
+var xajaxDebug=false;
+var xajaxStatusMessages=false;
+var xajaxWaitCursor=true;
+var xajaxDefinedGet=0;
+var xajaxDefinedPost=1;
+var xajaxLoaded=false;
+function xajax_Plogin(){return xajax.call("Plogin", arguments, 1);}
+function xajax_ServerHostPlayers(){return xajax.call("ServerHostPlayers", arguments, 1);}
+function xajax_ServerHostProperty(){return xajax.call("ServerHostProperty", arguments, 1);}
+function xajax_ServerHostPlayers_list(){return xajax.call("ServerHostPlayers_list", arguments, 1);}
+function xajax_ServerPlayers(){return xajax.call("ServerPlayers", arguments, 1);}
+function xajax_LostPassword(){return xajax.call("LostPassword", arguments, 1);}
+function xajax_RefreshServer(){return xajax.call("RefreshServer", arguments, 1);}
+	</script>
+<script type="bbe0aa9d318ef3f8568d9f3b-text/javascript" src="scripts/xajax.js"></script>
+<script type="bbe0aa9d318ef3f8568d9f3b-text/javascript">
+window.setTimeout(function () { if (!xajaxLoaded) { alert('Error: the xajax Javascript file could not be included. Perhaps the URL is incorrect?\nURL: scripts/xajax.js'); } }, 6000);
+	</script>
+</head>
+<body>
+<div id="header">
+<div id="head-logo">
+<a href="index.php">
+<img src="images/logos/space_sword3.gif" border="0" alt="SourceBans Logo" />
+</a>
+</div>
+<div id="search">
+<form method="get" action="index.php">
+<input type="hidden" name="p" value="banlist" />
+<input class="searchbox" alt="Search Bans" name="searchText" type="text" onfocus="if (!window.__cfRLUnblockHandlers) return false; this.value='';" onblur="if (!window.__cfRLUnblockHandlers) return false; if (this.value=='') {this.value=' Search Bans...';}" value=" Search Bans..." data-cf-modified-bbe0aa9d318ef3f8568d9f3b- />
+<input type="submit" name="Submit" value="Search" style="cursor:pointer;" class="button" />
+</form>
+<form method="get" action="index.php">
+<input type="hidden" name="p" value="commslist" />
+<input class="searchbox" alt="Search Comms" name="searchText" type="text" onfocus="if (!window.__cfRLUnblockHandlers) return false; this.value='';" onblur="if (!window.__cfRLUnblockHandlers) return false; if (this.value=='') {this.value=' Search Comms...';}" value=" Search Comms... " data-cf-modified-bbe0aa9d318ef3f8568d9f3b- />
+<input type="submit" name="Submit" value="Search" style="cursor:pointer;" class="button" />
+</form>
+</div>
+</div><div id="tabsWrapper">
+<div id="mainwrapper">
+<div id="tabs">
+<ul>
+<li class="nonactive">
+<a href="index.php?p=home" class="tip" title="Dashboard::This page shows an overview of your bans and servers." target="_self">Dashboard</a>
+</li>
+<li class="nonactive">
+<a href="index.php?p=servers" class="tip" title="Servers::All of your servers and their status can be viewed here." target="_self">Servers</a>
+</li>
+<li class="active">
+<a href="index.php?p=banlist" class="tip" title="Bans::All of the bans in the database can be viewed from here." target="_self">Bans</a>
+</li>
+<li class="nonactive">
+<a href="index.php?p=commslist" class="tip" title="Comms::All of the communication bans (such as chat gags and voice mutes) in the database can be viewed from here." target="_self">Comms</a>
+</li>
+</ul>
+<div id="nav">
+</div>
+<div style="float: right;">
+<ul>
+<li>
+<a style="background-color: #70B04A;" href="index.php?p=login">Login</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="mainwrapper">
+<div id="innerwrapper"><div id="dialog-placement" style="vertical-align:middle;display:none;opacity:0;text-align:center;width:892px;margin:0 auto;position:fixed !important;position:absolute;overflow:hidden;top:10px;left:100px;">
+<table width="460px" id="dialog-holder" class="dialog-holder" border="0" cellspacing="0" cellpadding="0">
+<tbody width="460px">
+<tr>
+<td class="box-content">
+<h2 align="left" id="dialog-title" class="ok"></h2>
+<div class="dialog-content" align="left">
+<div class="dialog-body">
+<div class="clearfix">
+<div style="float: left; margin-right: 15px;" id="dialog-icon" class="icon-info">&nbsp;</div>
+<div style="width:360px;float: right; padding-bottom: 5px; font-size: 11px;" id="dialog-content-text"></div>
+</div>
+</div>
+<div class="dialog-control" id="dialog-control">
+</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<br/>
+<div id="content_title">
+<b>Ban List</b>
+</div>
+<div id="breadcrumb">
+&raquo; <a href="index.php?p=home">Home</a>
+&raquo; <a href="index.php?p=banlist">Ban List</a>
+</div>
+<div id="content"> <h3 align="left">Banlist Overview - <i>Total Bans: 142</i></h3>
+<br/>
+<div align="center">
+<table width="50%" cellpadding="0" class="listtable" cellspacing="0">
+<tr class="sea_open">
+<td width="2%" height="16" class="listtable_top" colspan="3" style="text-align: center;"><b>Advanced Search</b> (Click)</td>
+</tr>
+<tr>
+<td>
+<div class="panel">
+<table width="100%" cellpadding="0" class="listtable" cellspacing="0">
+<tr>
+<td class="listtable_1" width="8%" align="center"><input id="name" name="search_type" type="radio" value="name"></td>
+<td class="listtable_1" width="26%">Nickname</td>
+<td class="listtable_1" width="66%"><input class="textbox" type="text" id="nick" value onmouseup="if (!window.__cfRLUnblockHandlers) return false; $('name').checked = true" style="width: 87%;" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-></td>
+</tr>
+<tr>
+<td align="center" class="listtable_1"><input id="steam_" type="radio" name="search_type" value="radiobutton"></td>
+<td class="listtable_1">Steam ID</td>
+<td class="listtable_1">
+<input class="textbox" type="text" id="steamid" value onmouseup="if (!window.__cfRLUnblockHandlers) return false; $('steam_').checked = true" style="width: 50%; margin-right: 12px;" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-><select class="select" id="steam_match" onmouseup="if (!window.__cfRLUnblockHandlers) return false; $('steam_').checked = true" style="width: 33%;" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<option value="0" selected>Exact Match</option>
+<option value="1">Partial Match</option>
+</select>
+</td>
+</tr>
+<tr>
+<td align="center" class="listtable_1"><input id="reason_" type="radio" name="search_type" value="radiobutton"></td>
+<td class="listtable_1">Reason</td>
+<td class="listtable_1"><input class="textbox" type="text" id="ban_reason" value onmouseup="if (!window.__cfRLUnblockHandlers) return false; $('reason_').checked = true" style="width: 87%;" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-></td>
+</tr>
+<tr>
+<td align="center" class="listtable_1"><input id="date" type="radio" name="search_type" value="radiobutton"></td>
+<td class="listtable_1">Date</td>
+<td class="listtable_1">
+<input class="textbox" type="text" id="day" value="DD" onmouseup="if (!window.__cfRLUnblockHandlers) return false; $('date').checked = true" maxlength="2" style="width: 22%;" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<input class="textbox" type="text" id="month" value="MM" onmouseup="if (!window.__cfRLUnblockHandlers) return false; $('date').checked = true" maxlength="2" style="width: 22%;" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<input class="textbox" type="text" id="year" value="YY" onmouseup="if (!window.__cfRLUnblockHandlers) return false; $('date').checked = true" maxlength="4" style="width: 24%;" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+</td>
+</tr>
+<tr>
+<td align="center" class="listtable_1"><input id="length_" type="radio" name="search_type" value="radiobutton"></td>
+<td class="listtable_1">Length</td>
+<td class="listtable_1">
+<table border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td>
+<select class="select" id="length_type" onmouseup="if (!window.__cfRLUnblockHandlers) return false; $('length_').checked = true" style="width: 60px; margin-right: 12px;" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<option value="e" title="equal to">=</option>
+<option value="h" title="greater">&gt;</option>
+<option value="l" title="smaller">&lt;</option>
+<option value="eh" title="equal to or greater">&gt;=</option>
+<option value="el" title="equal to or smaller">&lt;=</option>
+</select>
+</td>
+<td>
+<input type="text" id="other_length" name="other_length" onmouseup="if (!window.__cfRLUnblockHandlers) return false; $('length_').checked = true" style="border: 1px solid #000000; font-size: 12px; background-color: rgb(215, 215, 215);width: 190px;display:none;" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+</td>
+<td>
+<select class="select" id="length" onmouseup="if (!window.__cfRLUnblockHandlers) return false; $('length_').checked = true" onchange="if (!window.__cfRLUnblockHandlers) return false; switch_length(this);" onmouseover="if (!window.__cfRLUnblockHandlers) return false; if(this.options[this.selectedIndex].value=='other')$('length').setStyle('width', '210px');if(this.options[this.selectedIndex].value=='other')this.focus();" onblur="if (!window.__cfRLUnblockHandlers) return false; if(this.options[this.selectedIndex].value=='other')$('length').setStyle('width', '20px');" style="width: 127%;" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<option value="0">Permanent</option>
+<optgroup label="minutes">
+<option value="1">1 minute</option>
+<option value="5">5 minutes</option>
+<option value="10">10 minutes</option>
+<option value="15">15 minutes</option>
+<option value="30">30 minutes</option>
+<option value="45">45 minutes</option>
+</optgroup>
+<optgroup label="hours">
+<option value="60">1 hour</option>
+<option value="120">2 hours</option>
+<option value="180">3 hours</option>
+<option value="240">4 hours</option>
+<option value="480">8 hours</option>
+<option value="720">12 hours</option>
+</optgroup>
+<optgroup label="days">
+<option value="1440">1 day</option>
+<option value="2880">2 days</option>
+<option value="4320">3 days</option>
+<option value="5760">4 days</option>
+<option value="7200">5 days</option>
+<option value="8640">6 days</option>
+</optgroup>
+<optgroup label="weeks">
+<option value="10080">1 week</option>
+<option value="20160">2 weeks</option>
+<option value="30240">3 weeks</option>
+</optgroup>
+<optgroup label="months">
+<option value="40320">1 month</option>
+<option value="80640">2 months</option>
+<option value="120960">3 months</option>
+<option value="241920">6 months</option>
+<option value="483840">12 months</option>
+</optgroup>
+<option value="other">Other length in minutes</option>
+</select>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td align="center" class="listtable_1"><input id="ban_type_" type="radio" name="search_type" value="radiobutton"></td>
+<td class="listtable_1">Type</td>
+<td class="listtable_1">
+<select class="select" id="ban_type" onmouseup="if (!window.__cfRLUnblockHandlers) return false; $('ban_type_').checked = true" style="width: 95%;" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<option value="0" selected>Steam ID</option>
+<option value="1">IP Address</option>
+</select>
+</td>
+</tr>
+<tr>
+<td class="listtable_1" align="center"><input id="admin" name="search_type" type="radio" value="radiobutton"></td>
+<td class="listtable_1">Admin</td>
+<td class="listtable_1">
+<select class="select" id="ban_admin" onmouseup="if (!window.__cfRLUnblockHandlers) return false; $('admin').checked = true" style="width: 95%;" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<option label="CONSOLE" value="0">CONSOLE</option>
+<option label="lecubon" value="32">lecubon</option>
+<option label="leeroy" value="22">leeroy</option>
+<option label="mrmemeguy" value="24">mrmemeguy</option>
+<option label="myst" value="1">myst</option>
+</select>
+</td>
+</tr>
+<tr>
+<td class="listtable_1" align="center"><input id="where_banned" name="search_type" type="radio" value="radiobutton"></td>
+<td class="listtable_1">Server</td>
+<td class="listtable_1">
+<select class="select" id="server" onmouseup="if (!window.__cfRLUnblockHandlers) return false; $('where_banned').checked = true" style="width: 95%;" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<option label="Web Ban" value="0">Web Ban</option>
+<option value="2" id="ss2">Retrieving Hostname... (sg.sf2.titan.tf:27017)</option>
+<option value="7" id="ss7">Retrieving Hostname... (sg.hub.titan.tf:27015)</option>
+<option value="8" id="ss8">Retrieving Hostname... (sg.ma1.titan.tf:27000)</option>
+<option value="9" id="ss9">Retrieving Hostname... (sg.ma2.titan.tf:27000)</option>
+<option value="10" id="ss10">Retrieving Hostname... (sg.ma3.titan.tf:27000)</option>
+<option value="14" id="ss14">Retrieving Hostname... (sg.mvmubup.titan.tf:27000)</option>
+<option value="17" id="ss17">Retrieving Hostname... (sg.mvmx1000.titan.tf:27040)</option>
+<option value="22" id="ss22">Retrieving Hostname... (de.ma.titan.tf:27000)</option>
+<option value="23" id="ss23">Retrieving Hostname... (de.mvmx1000.titan.tf:27000)</option>
+<option value="24" id="ss24">Retrieving Hostname... (ny.ma.titan.tf:27015)</option>
+<option value="40" id="ss40">Retrieving Hostname... (download.titan.tf:11111)</option>
+<option value="41" id="ss41">Retrieving Hostname... (lab.titan.tf:27015)</option>
+<option value="42" id="ss42">Retrieving Hostname... (fi.ma.titan.tf:27015:27015)</option>
+<option value="43" id="ss43">Retrieving Hostname... (va.ma.titan.tf:27015:27015)</option>
+<option value="44" id="ss44">Retrieving Hostname... (ny.ma.mvmx1000.titan.tf:27015)</option>
+<option value="45" id="ss45">Retrieving Hostname... (sg.ff2.titan.tf:27016)</option>
+<option value="46" id="ss46">Retrieving Hostname... (sg.ma0.titan.tf:27050)</option>
+<option value="47" id="ss47">Retrieving Hostname... (sg.classwars.titan.tf:27018)</option>
+<option value="48" id="ss48">Retrieving Hostname... (sg.orangex10.titan.tf:27028)</option>
+<option value="49" id="ss49">Retrieving Hostname... (sg.upgrades.titan.tf:27030)</option>
+</select>
+</td>
+</tr>
+<tr>
+<td colspan="4"><input type="button" onclick="if (!window.__cfRLUnblockHandlers) return false; search_bans();" name="searchbtn" class="btn ok searchbtn" onmouseover="if (!window.__cfRLUnblockHandlers) return false; ButtonOver(&quot;searchbtn&quot;)" onmouseout="if (!window.__cfRLUnblockHandlers) return false; ButtonOver(&quot;searchbtn&quot;)" id="searchbtn" value="Search" data-cf-modified-bbe0aa9d318ef3f8568d9f3b- /></td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<script type="bbe0aa9d318ef3f8568d9f3b-text/javascript">xajax_ServerHostPlayers('2', 'id', 'ss2', '', '', false, 200);xajax_ServerHostPlayers('7', 'id', 'ss7', '', '', false, 200);xajax_ServerHostPlayers('8', 'id', 'ss8', '', '', false, 200);xajax_ServerHostPlayers('9', 'id', 'ss9', '', '', false, 200);xajax_ServerHostPlayers('10', 'id', 'ss10', '', '', false, 200);xajax_ServerHostPlayers('14', 'id', 'ss14', '', '', false, 200);xajax_ServerHostPlayers('17', 'id', 'ss17', '', '', false, 200);xajax_ServerHostPlayers('22', 'id', 'ss22', '', '', false, 200);xajax_ServerHostPlayers('23', 'id', 'ss23', '', '', false, 200);xajax_ServerHostPlayers('24', 'id', 'ss24', '', '', false, 200);xajax_ServerHostPlayers('40', 'id', 'ss40', '', '', false, 200);xajax_ServerHostPlayers('41', 'id', 'ss41', '', '', false, 200);xajax_ServerHostPlayers('42', 'id', 'ss42', '', '', false, 200);xajax_ServerHostPlayers('43', 'id', 'ss43', '', '', false, 200);xajax_ServerHostPlayers('44', 'id', 'ss44', '', '', false, 200);xajax_ServerHostPlayers('45', 'id', 'ss45', '', '', false, 200);xajax_ServerHostPlayers('46', 'id', 'ss46', '', '', false, 200);xajax_ServerHostPlayers('47', 'id', 'ss47', '', '', false, 200);xajax_ServerHostPlayers('48', 'id', 'ss48', '', '', false, 200);xajax_ServerHostPlayers('49', 'id', 'ss49', '', '', false, 200);</script>
+<script type="bbe0aa9d318ef3f8568d9f3b-text/javascript">InitAccordion('tr.sea_open', 'div.panel', 'mainwrapper');</script><script type="bbe0aa9d318ef3f8568d9f3b-text/javascript">
+function switch_length(opt)
+{
+    if (opt.options[opt.selectedIndex].value=='other') {
+        $('other_length').setStyle('display', 'block');
+        $('other_length').focus();
+        $('length').setStyle('width', '20px');
+    } else {
+        $('other_length').setStyle('display', 'none');
+        $('length').setStyle('width', '210px');
+    }
+}
+</script>
+<br/>
+<div id="banlist-nav"><a href="index.php?p=banlist&hideinactive=true" title="Hide inactive">Hide inactive</a> | <i>Total Bans: 142</i></div>
+<div id="banlist">
+<table width="100%" cellspacing="0" cellpadding="0" align="center" class="listtable">
+<tr>
+<td width="12%" height="16" class="listtable_top" align="center"><b>MOD/Country</b></td>
+<td width="14%" height="16" class="listtable_top" align="center"><b>Date</b></td>
+<td height="16" class="listtable_top"><b>Player</b></td>
+<td width="20%" height="16" class="listtable_top"><b>Admin</b></td>
+<td width="10%" height="16" class="listtable_top" align="center"><b>Length</b></td>
+</tr>
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Friday, 12 May 2023 4:15:57 PM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+narlock
+</div>
+</td>
+<td height="16" class="listtable_1">
+lecubon
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+narlock
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:1:713749043
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:1427498087]" target="_blank">[U:1:1427498087]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561199387763815" target="_blank">76561199387763815</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Friday, 12 May 2023 4:15:57 PM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">Not applicable.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Cheating</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+lecubon
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1">
+Web Ban
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Wednesday, 10 May 2023 9:41:34 PM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+cheeze
+</div>
+</td>
+<td height="16" class="listtable_1">
+lecubon
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+cheeze
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:0:209110833
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:418221666]" target="_blank">[U:1:418221666]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561198378487394" target="_blank">76561198378487394</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Wednesday, 10 May 2023 9:41:34 PM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">Not applicable.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Aimbot</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+lecubon
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1">
+Web Ban
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Thursday, 13 Apr 2023 10:08:00 PM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+szalazarlaszl<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4a250a332b22252564323330">[email&#160;protected]</a>
+</div>
+</td>
+<td height="16" class="listtable_1">
+lecubon
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2b58514a474a514a59474a585147446b524a43444405535251">[email&#160;protected]</a>
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:0:605444038
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:1210888076]" target="_blank">[U:1:1210888076]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561199171153804" target="_blank">76561199171153804</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Thursday, 13 Apr 2023 10:08:00 PM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">Not applicable.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Cheating</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+lecubon
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1">
+Web Ban
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Thursday, 13 Apr 2023 10:02:50 PM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+Pastalov
+</div>
+</td>
+<td height="16" class="listtable_1">
+lecubon
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+Pastalov
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:0:647623392
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:1295246784]" target="_blank">[U:1:1295246784]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561199255512512" target="_blank">76561199255512512</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Thursday, 13 Apr 2023 10:02:50 PM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">Not applicable.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Cheating</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+lecubon
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1">
+Web Ban
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Saturday, 8 Apr 2023 4:34:19 AM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+Zerefoex
+</div>
+</td>
+<td height="16" class="listtable_1">
+lecubon
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+Zerefoex
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:1:527612455
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:1055224911]" target="_blank">[U:1:1055224911]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561199015490639" target="_blank">76561199015490639</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Saturday, 8 Apr 2023 4:34:19 AM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">Not applicable.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Cheating</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+lecubon
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1">
+Web Ban
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Sunday, 19 Mar 2023 2:50:14 AM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+gardontar
+</div>
+</td>
+<td height="16" class="listtable_1">
+mrmemeguy
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">12 hr (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+gardontar
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:1:104831662
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:209663325]" target="_blank">[U:1:209663325]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561198169929053" target="_blank">76561198169929053</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Sunday, 19 Mar 2023 2:50:14 AM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">12 hr (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Sunday, 19 Mar 2023 2:50:14 PM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">spamming votekick on other players</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+mrmemeguy
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1">
+Web Ban
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(7, 'id', 'host_155');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/gb.jpg" alt="GB" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Wednesday, 25 Jan 2023 8:56:33 PM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+DoesHotter
+</div>
+</td>
+<td height="16" class="listtable_1">
+lecubon
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+DoesHotter
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:0:756452862
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:1512905724]" target="_blank">[U:1:1512905724]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561199473171452" target="_blank">76561199473171452</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Wednesday, 25 Jan 2023 8:56:33 PM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">Not applicable.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Aimbot</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+lecubon
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_155">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/fi.jpg" alt="FI" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Wednesday, 4 Jan 2023 12:01:31 AM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+Nistpot
+</div>
+</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">Admin deleted</font></i>
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">1 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+Nistpot
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:0:209243248
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:418486496]" target="_blank">[U:1:418486496]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561198378752224" target="_blank">76561198378752224</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Wednesday, 4 Jan 2023 12:01:31 AM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">1 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">Admin deleted.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Wednesday, 4 Jan 2023 12:02:31 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1"></td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">Admin deleted.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1">
+Web Ban
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">2 <a href="index.php?p=banlist&searchText=STEAM_0:0:209243248&Submit" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> (search) </a></td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (4)</td>
+<td height="16" class="listtable_1">
+<span title="Server: sg.ma1.titan.tf:27000, Date: Wednesday, 4 Jan 2023 5:16:11 AM">nistpot</span>, <span title="Server: sg.ma1.titan.tf:27000, Date: Wednesday, 4 Jan 2023 6:53:20 AM">nistpot</span>, <span title="Server: sg.ma1.titan.tf:27000, Date: Wednesday, 4 Jan 2023 4:50:45 PM">nistpot</span>, <span title="Server: sg.ma1.titan.tf:27000, Date: Wednesday, 4 Jan 2023 11:53:51 PM">nistpot</span>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(8, 'id', 'host_153');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/cl.jpg" alt="CL" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Tuesday, 3 Jan 2023 10:30:31 AM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+niko bellic
+</div>
+</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">20 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+niko bellic
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:0:606356855
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:1212713710]" target="_blank">[U:1:1212713710]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561199172979438" target="_blank">76561199172979438</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Tuesday, 3 Jan 2023 10:30:31 AM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">20 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Tuesday, 3 Jan 2023 10:50:31 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Gamevoting (nistpot)(Harrassment)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_153">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (6)</td>
+<td height="16" class="listtable_1">
+<span title="Server: sg.ma1.titan.tf:27000, Date: Tuesday, 3 Jan 2023 10:40:02 AM">niko bellic</span>, <span title="Server: sg.ma1.titan.tf:27000, Date: Tuesday, 3 Jan 2023 10:41:42 AM">niko bellic</span>, <span title="Server: sg.ma1.titan.tf:27000, Date: Tuesday, 3 Jan 2023 10:42:13 AM">niko bellic</span>, <span title="Server: sg.ma2.titan.tf:27000, Date: Tuesday, 3 Jan 2023 10:30:51 AM">niko bellic</span>, <span title="Server: sg.ma2.titan.tf:27000, Date: Tuesday, 3 Jan 2023 10:36:35 AM">niko bellic</span>, <span title="Server: sg.ma2.titan.tf:27000, Date: Tuesday, 3 Jan 2023 10:47:05 AM">niko bellic</span>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/bg.jpg" alt="BG" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Saturday, 31 Dec 2022 1:02:30 AM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+Engineering_Reich
+</div>
+</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">Admin deleted</font></i>
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">1 hr (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+Engineering_Reich
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:1:576721306
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:1153442613]" target="_blank">[U:1:1153442613]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561199113708341" target="_blank">76561199113708341</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Saturday, 31 Dec 2022 1:02:30 AM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">1 hr (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">Admin deleted.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Saturday, 31 Dec 2022 2:02:30 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Do not votekick players without a valid reason. </td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">Admin deleted.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1">
+Web Ban
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (3)</td>
+<td height="16" class="listtable_1">
+<span title="Server: sg.ma2.titan.tf:27000, Date: Saturday, 31 Dec 2022 1:03:41 AM">Engineering_Reich</span>, <span title="Server: sg.ma2.titan.tf:27000, Date: Saturday, 31 Dec 2022 1:04:15 AM">Engineering_Reich</span>, <span title="Server: sg.ma2.titan.tf:27000, Date: Saturday, 31 Dec 2022 1:04:35 AM">Engineering_Reich</span>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/fi.jpg" alt="FI" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Saturday, 31 Dec 2022 12:55:59 AM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+Nistpot
+</div>
+</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">Admin deleted</font></i>
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">1 hr (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+Nistpot
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:0:209243248
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:418486496]" target="_blank">[U:1:418486496]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561198378752224" target="_blank">76561198378752224</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Saturday, 31 Dec 2022 12:55:59 AM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">1 hr (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">Admin deleted.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Saturday, 31 Dec 2022 1:55:59 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Do not trigger votebans against people without a valid reason. You will be automatically unbanned after given period. </td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">Admin deleted.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1">
+Web Ban
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">2 <a href="index.php?p=banlist&searchText=STEAM_0:0:209243248&Submit" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> (search) </a></td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (1)</td>
+<td height="16" class="listtable_1">
+<span title="Server: sg.ma2.titan.tf:27000, Date: Saturday, 31 Dec 2022 12:59:32 AM">nistpot</span>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(9, 'id', 'host_150');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/de.jpg" alt="DE" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Saturday, 31 Dec 2022 12:54:25 AM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+Shinobi
+</div>
+</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">1 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+Shinobi
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:1:580527903
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:1161055807]" target="_blank">[U:1:1161055807]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561199121321535" target="_blank">76561199121321535</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Saturday, 31 Dec 2022 12:54:25 AM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">1 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Saturday, 31 Dec 2022 12:55:25 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1"></td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_150">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(9, 'id', 'host_149');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/gb.jpg" alt="GB" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Saturday, 31 Dec 2022 12:26:23 AM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+Slipsy
+</div>
+</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">1 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+Slipsy
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:0:190654470
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:381308940]" target="_blank">[U:1:381308940]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561198341574668" target="_blank">76561198341574668</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Saturday, 31 Dec 2022 12:26:23 AM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">1 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Saturday, 31 Dec 2022 12:27:23 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1"></td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_149">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (1)</td>
+<td height="16" class="listtable_1">
+<span title="Server: sg.ma2.titan.tf:27000, Date: Saturday, 31 Dec 2022 12:30:51 AM">Slipsy</span>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(9, 'id', 'host_148');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/de.jpg" alt="DE" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Saturday, 31 Dec 2022 12:21:04 AM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+Atlas
+</div>
+</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">20 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+Atlas
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:1:44215735
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:88431471]" target="_blank">[U:1:88431471]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561198048697199" target="_blank">76561198048697199</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Saturday, 31 Dec 2022 12:21:04 AM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">20 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Saturday, 31 Dec 2022 12:41:04 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Gamevoting (nistpot)(Cheating)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_148">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(9, 'id', 'host_147');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/pl.jpg" alt="PL" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Saturday, 31 Dec 2022 12:13:50 AM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+sielawsko13
+</div>
+</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">20 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+sielawsko13
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:0:531270307
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:1062540614]" target="_blank">[U:1:1062540614]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561199022806342" target="_blank">76561199022806342</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Saturday, 31 Dec 2022 12:13:50 AM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">20 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Saturday, 31 Dec 2022 12:33:50 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Gamevoting (Engineering_Reich)(Cheating)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_147">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(9, 'id', 'host_146');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/kz.jpg" alt="KZ" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Saturday, 31 Dec 2022 12:08:55 AM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+klawdeebtw
+</div>
+</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">20 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+klawdeebtw
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:1:567731793
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:1135463587]" target="_blank">[U:1:1135463587]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561199095729315" target="_blank">76561199095729315</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Saturday, 31 Dec 2022 12:08:55 AM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">20 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Saturday, 31 Dec 2022 12:28:55 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Gamevoting (Engineering_Reich)(Cheating)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_146">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(9, 'id', 'host_145');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/pl.jpg" alt="PL" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Saturday, 31 Dec 2022 12:04:03 AM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+GIANT PYRO
+</div>
+</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">20 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+GIANT PYRO
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:0:211421064
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:422842128]" target="_blank">[U:1:422842128]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561198383107856" target="_blank">76561198383107856</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Saturday, 31 Dec 2022 12:04:03 AM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">20 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Saturday, 31 Dec 2022 12:24:03 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Gamevoting (Engineering_Reich)(Cheating)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_145">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(9, 'id', 'host_144');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/my.jpg" alt="MY" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Friday, 30 Dec 2022 11:58:47 PM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+Jayreal
+</div>
+</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">20 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+Jayreal
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:1:222681648
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:445363297]" target="_blank">[U:1:445363297]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561198405629025" target="_blank">76561198405629025</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Friday, 30 Dec 2022 11:58:47 PM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">20 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Saturday, 31 Dec 2022 12:18:47 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Gamevoting (Engineering_Reich)(Cheating)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_144">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(9, 'id', 'host_143');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/br.jpg" alt="BR" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Friday, 30 Dec 2022 11:54:35 PM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+felipeangelo2003
+</div>
+</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">20 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+felipeangelo2003
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:0:617033688
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:1234067376]" target="_blank">[U:1:1234067376]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561199194333104" target="_blank">76561199194333104</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Friday, 30 Dec 2022 11:54:35 PM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">20 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Saturday, 31 Dec 2022 12:14:35 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Gamevoting (Engineering_Reich)(Cheating)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_143">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(9, 'id', 'host_142');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/pl.jpg" alt="PL" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Friday, 30 Dec 2022 11:50:11 PM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+gawronskirobert
+</div>
+</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">20 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+gawronskirobert
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:0:540823119
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:1081646238]" target="_blank">[U:1:1081646238]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561199041911966" target="_blank">76561199041911966</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Friday, 30 Dec 2022 11:50:11 PM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">20 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Saturday, 31 Dec 2022 12:10:11 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Gamevoting (Engineering_Reich)(Cheating)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_142">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (2)</td>
+<td height="16" class="listtable_1">
+<span title="Server: sg.hub.titan.tf:27015, Date: Friday, 30 Dec 2022 11:53:27 PM">gawronskirobert</span>, <span title="Server: sg.ma2.titan.tf:27000, Date: Friday, 30 Dec 2022 11:51:43 PM">gawronskirobert</span>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(8, 'id', 'host_141');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/gb.jpg" alt="GB" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Friday, 30 Dec 2022 9:25:09 AM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+DooDoo Bandit
+</div>
+</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">20 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+DooDoo Bandit
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:1:19154928
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:38309857]" target="_blank">[U:1:38309857]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561197998575585" target="_blank">76561197998575585</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Friday, 30 Dec 2022 9:25:09 AM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">20 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Friday, 30 Dec 2022 9:45:09 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Gamevoting (nistpot)(Cheating)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_141">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(8, 'id', 'host_140');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/us.jpg" alt="US" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Friday, 30 Dec 2022 8:30:08 AM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+TailsFan01
+</div>
+</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">20 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+TailsFan01
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:0:118812365
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:237624730]" target="_blank">[U:1:237624730]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561198197890458" target="_blank">76561198197890458</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Friday, 30 Dec 2022 8:30:08 AM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">20 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Friday, 30 Dec 2022 8:50:08 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Gamevoting (Engineering_Reich)(Cheating)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_140">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (1)</td>
+<td height="16" class="listtable_1">
+<span title="Server: sg.ma1.titan.tf:27000, Date: Friday, 30 Dec 2022 8:31:55 AM">TailsFan01</span>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(8, 'id', 'host_139');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/gb.jpg" alt="GB" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Friday, 30 Dec 2022 1:58:31 AM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+CheeseBurger:)
+</div>
+</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">20 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+CheeseBurger:)
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:0:81075382
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:162150764]" target="_blank">[U:1:162150764]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561198122416492" target="_blank">76561198122416492</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Friday, 30 Dec 2022 1:58:31 AM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">20 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Friday, 30 Dec 2022 2:18:31 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Gamevoting (nistpot)(Cheating)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_139">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (2)</td>
+<td height="16" class="listtable_1">
+<span title="Server: sg.ma1.titan.tf:27000, Date: Friday, 30 Dec 2022 1:58:53 AM">CheeseBurger:)</span>, <span title="Server: sg.ma1.titan.tf:27000, Date: Friday, 30 Dec 2022 2:06:47 AM">CheeseBurger:)</span>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(9, 'id', 'host_138');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/ru.jpg" alt="RU" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Friday, 30 Dec 2022 12:13:21 AM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+stolyarov.arseniy
+</div>
+</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">20 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+stolyarov.arseniy
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:1:611407641
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:1222815283]" target="_blank">[U:1:1222815283]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561199183081011" target="_blank">76561199183081011</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Friday, 30 Dec 2022 12:13:21 AM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">20 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Friday, 30 Dec 2022 12:33:21 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Gamevoting (nistpot)(Cheating)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_138">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(9, 'id', 'host_137');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/kz.jpg" alt="KZ" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Thursday, 29 Dec 2022 11:56:45 PM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+PARZEVAL
+</div>
+</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">20 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+PARZEVAL
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:1:574213500
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:1148427001]" target="_blank">[U:1:1148427001]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561199108692729" target="_blank">76561199108692729</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Thursday, 29 Dec 2022 11:56:45 PM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">20 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Friday, 30 Dec 2022 12:16:45 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Gamevoting (Engineering_Reich)(Cheating)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_137">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(9, 'id', 'host_136');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/hu.jpg" alt="HU" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Thursday, 29 Dec 2022 11:42:47 PM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+Mókus_Professzor
+</div>
+</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">20 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+Mókus_Professzor
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:1:187573010
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:375146021]" target="_blank">[U:1:375146021]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561198335411749" target="_blank">76561198335411749</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Thursday, 29 Dec 2022 11:42:47 PM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">20 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Friday, 30 Dec 2022 12:02:47 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Gamevoting (nistpot)(Cheating)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_136">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(9, 'id', 'host_135');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/hk.jpg" alt="HK" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Thursday, 29 Dec 2022 11:33:52 PM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+hunrybb
+</div>
+</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">20 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+hunrybb
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:0:738776456
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:1477552912]" target="_blank">[U:1:1477552912]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561199437818640" target="_blank">76561199437818640</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Thursday, 29 Dec 2022 11:33:52 PM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">20 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Thursday, 29 Dec 2022 11:53:52 PM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Gamevoting (nistpot)(Cheating)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_135">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (1)</td>
+<td height="16" class="listtable_1">
+<span title="Server: download.titan.tf:11111, Date: Thursday, 29 Dec 2022 11:37:00 PM">hunrybb</span>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(9, 'id', 'host_134');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/pl.jpg" alt="PL" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Thursday, 29 Dec 2022 11:28:35 PM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+↗Mr Joseph↖
+</div>
+</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">20 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+↗Mr Joseph↖
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:1:552289199
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:1104578399]" target="_blank">[U:1:1104578399]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561199064844127" target="_blank">76561199064844127</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Thursday, 29 Dec 2022 11:28:35 PM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">20 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Thursday, 29 Dec 2022 11:48:35 PM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Gamevoting (nistpot)(Cheating)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_134">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(9, 'id', 'host_133');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/gb.jpg" alt="GB" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Monday, 26 Dec 2022 7:24:17 AM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+Mike
+</div>
+</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">20 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+Mike
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:0:30732187
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:61464374]" target="_blank">[U:1:61464374]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561198021730102" target="_blank">76561198021730102</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Monday, 26 Dec 2022 7:24:17 AM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">20 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Monday, 26 Dec 2022 7:44:17 AM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">Gamevoting (Trickstabin&#039; Failure)(Spamming/Flooding)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_133">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">2 <a href="index.php?p=banlist&searchText=STEAM_0:0:30732187&Submit" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> (search) </a></td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr class="opener tbl_out" onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_out'" onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.className='tbl_hover'" onclick="if (!window.__cfRLUnblockHandlers) return false; xajax_ServerHostPlayers(7, 'id', 'host_132');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b->
+<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/th.jpg" alt="TH" border="0" align="absmiddle" /></td>
+<td height="16" align="center" class="listtable_1">Sunday, 3 Jul 2022 8:06:18 PM</td>
+<td height="16" class="listtable_1">
+<div style="float:left;">
+kill
+</div>
+</td>
+<td height="16" class="listtable_1">
+mrmemeguy
+</td>
+<td width="20%" height="16" align="center" class="listtable_1_unbanned">2 min (Expired)</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center">
+<div class="opener">
+<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+<tr>
+<td height="16" align="left" class="listtable_top" colspan="3">
+<b>Ban Details</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%" height="16" class="listtable_1">Player</td>
+<td height="16" class="listtable_1">
+kill
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> <i class="fas fa-video-slash fa-lg"></i> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam ID</td>
+<td height="16" class="listtable_1">
+STEAM_0:1:633732838
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/[U:1:1267465677]" target="_blank">[U:1:1267465677]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Steam Community</td>
+<td height="16" class="listtable_1">
+<a href="http://steamcommunity.com/profiles/76561199227731405" target="_blank">76561199227731405</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Invoked on</td>
+<td height="16" class="listtable_1">Sunday, 3 Jul 2022 8:06:18 PM</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banlength</td>
+<td height="16" class="listtable_1">2 min (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unban reason</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">no reason present</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+<td height="16" class="listtable_1">
+CONSOLE
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Expires on</td>
+<td height="16" class="listtable_1">
+Sunday, 3 Jul 2022 8:08:18 PM
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Reason</td>
+<td height="16" class="listtable_1">General Exploit of Game/Map/Server</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+<td height="16" class="listtable_1">
+mrmemeguy
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Banned from</td>
+<td height="16" class="listtable_1" id="host_132">
+Please Wait...
+</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Total Bans</td>
+<td height="16" class="listtable_1">No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+<td height="16" class="listtable_1">
+<i><font color="#677882">never</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+</table>
+<div id="banlist-nav">
+displaying&nbsp;0&nbsp;-&nbsp;30&nbsp;of&nbsp;142&nbsp;results | <b><a href="index.php?p=banlist&page=2" onclick="if (!window.__cfRLUnblockHandlers) return false; " target="_self" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-> next <i class="fas fa-arrow-right fa-lg"></i> </a></b>&nbsp;<select onchange="if (!window.__cfRLUnblockHandlers) return false; changePage(this,'B','','');" data-cf-modified-bbe0aa9d318ef3f8568d9f3b-><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
+</div>
+</div>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="bbe0aa9d318ef3f8568d9f3b-text/javascript">window.addEvent('domready', function(){
+            InitAccordion('tr.opener', 'div.opener', 'mainwrapper');
+            
+                        
+        });
+    </script>
+</div></div></div>
+<div id="footer">
+<div id="mainwrapper" style="text-align: center;">
+<a href="https://sbpp.github.io/" target="_blank"><img src="images/logos/sb.png" alt="SourceBans" border="0" /></a><br/>
+<div id="footqversion" style="line-height: 20px;"><a style="color: #C1C1C1" href="https://sbpp.github.io/" target="_blank">SourceBans++</a> 1.7.0 | Git: 1145</div>
+<span style="line-height: 20px;">Powered by <a href="https://www.sourcemod.net" target="_blank" style="color: #C1C1C1">SourceMod</a></span><br/>
+</div>
+</div>
+</div>
+<script type="bbe0aa9d318ef3f8568d9f3b-text/javascript">
+
+
+
+
+window.addEvent('domready', function(){
+
+	ProcessAdminTabs();
+
+    var Tips2 = new Tips($('.tip'), {
+        initialize:function(){
+            this.fx = new Fx.Style(this.toolTip, 'opacity', {duration: 300, wait: false}).set(0);
+        },
+        onShow: function(toolTip) {
+            this.fx.start(1);
+        },
+        onHide: function(toolTip) {
+            this.fx.start(0);
+        }
+    });
+    var Tips4 = new Tips($('.perm'), {
+        className: 'perm'
+    });
+});
+
+</script>
+<script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="bbe0aa9d318ef3f8568d9f3b-|49" defer></script></body>
+</html>
