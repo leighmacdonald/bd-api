@@ -205,6 +205,10 @@ func TestDreamFire(t *testing.T) {
 	testParser(t, NewDreamFireScraper(), 29, "index.php?p=banlist&page=2")
 }
 
+func TestSetti(t *testing.T) {
+	testParser(t, NewSettiScraper(), 25, "index.php?p=banlist&page=2")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)

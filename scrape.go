@@ -367,6 +367,11 @@ func NewDreamFireScraper() *Scraper {
 		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
+func NewSettiScraper() *Scraper {
+	return newScraper("setti", "https://pong.setti.info/sourcebans/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
+}
+
 type metaKey int
 
 const (
