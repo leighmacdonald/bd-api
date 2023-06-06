@@ -181,6 +181,10 @@ func TestTF2RO(t *testing.T) {
 	testParser(t, NewTF2ROScraper(), 21, "index.php?p=banlist&hideinactive=true")
 }
 
+func TestSameTeem(t *testing.T) {
+	testParser(t, NewSameTeemScraper(), 30, "index.php?p=banlist&page=2")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)

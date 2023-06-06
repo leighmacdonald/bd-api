@@ -337,6 +337,12 @@ func NewTF2ROScraper() *Scraper {
 		parseDefault, nextUrlLast, parseDefaultTime)
 }
 
+func NewSameTeemScraper() *Scraper {
+	// Not enough values to page yet...
+	return newScraper("sameteem", "https://sameteem.com/sourcebans/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
+}
+
 type metaKey int
 
 const (
