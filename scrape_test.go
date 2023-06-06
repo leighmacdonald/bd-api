@@ -129,6 +129,14 @@ func TestSavageServidores(t *testing.T) {
 	testParser(t, NewSavageServidoresScraper(), 29, "index.php?p=banlist&page=2")
 }
 
+func TestCSIServers(t *testing.T) {
+	testParser(t, NewCSIServersScraper(), 30, "index.php?p=banlist&page=2")
+}
+
+func TestLBGaming(t *testing.T) {
+	testParser(t, NewLBGamingScraper(), 30, "index.php?p=banlist&page=2")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)

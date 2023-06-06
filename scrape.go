@@ -272,6 +272,16 @@ func NewSavageServidoresScraper() *Scraper {
 		parseFluent, nextUrlFluent, parseDefaultTime)
 }
 
+func NewCSIServersScraper() *Scraper {
+	return newScraper("csiservers", "https://bans.csiservers.com/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseDefaultTime)
+}
+
+func NewLBGamingScraper() *Scraper {
+	return newScraper("lbgaming", "https://bans.lbgaming.co/", "index.php?p=banlist",
+		parseDefault, nextUrlLast, parseSkialTime)
+}
+
 type metaKey int
 
 const (
