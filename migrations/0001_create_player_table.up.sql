@@ -49,7 +49,7 @@ create table if not exists team
     name         text not null
 );
 
-create table sb_site
+create table if not exists sb_site
 (
     sb_site_id bigint
         constraint sb_site_pk
@@ -59,20 +59,20 @@ create table sb_site
 
 create index if not exists sb_site_uidx ON sb_site (name);
 
-create table sb_ban
+create table if not exists sb_ban
 (
     sb_ban_id  bigserial
         constraint sb_ban_pk
             primary key,
-    sb_site_id int    default not null
-        constraint player_fk
+    sb_site_id int       not null
+        constraint ban_site_fk
             references sb_site (sb_site_id) on delete cascade,
-    steam_id   bigint default not null
-        constraint player_fk
+    steam_id   bigint    not null
+        constraint ban_steam_fk
             references player (steam_id) on delete cascade,
     reason     text      not null,
     created_on timestamp not null,
-    length     bigint    not null,
+    duration   bigint    not null,
     permanent  boolean   not null
 );
 
