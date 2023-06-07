@@ -18,22 +18,26 @@ func main() {
 			logger.Panic("Failed to sync", zap.Error(errSync))
 		}
 	}()
-
-	var config Config
+	logger.Info("Starting...")
+	var config appConfig
 	if errConfig := readConfig("config.yml", &config); errConfig != nil {
 		logger.Panic("Failed to load config", zap.Error(errConfig))
 	}
-	if errSetKey := steamweb.SetKey(config.SteamApiKey); errSetKey != nil {
+	if errSetKey := steamweb.SetKey(config.SteamAPIKey); errSetKey != nil {
 		log.Panicf("Failed to set steam api key: %v\n", errSetKey)
 	}
-	if config.SteamApiKey == "" {
+	if config.SteamAPIKey == "" {
 		logger.Panic("Must set STEAM_API_KEY")
 	}
-	if errSetKey := steamweb.SetKey(config.SteamApiKey); errSetKey != nil {
+	if errSetKey := steamweb.SetKey(config.SteamAPIKey); errSetKey != nil {
 		logger.Panic("Failed to configure steam api key", zap.Error(errSetKey))
 	}
 
 	cache = newCaches(ctx, steamCacheTimeout, compCacheTimeout, steamCacheTimeout)
+
+	if false {
+		go startScraper(&config)
+	}
 
 	if errServe := http.ListenAndServe(config.ListenAddr, nil); errServe != nil {
 		log.Printf("HTTP Server returned error: %v", errServe)

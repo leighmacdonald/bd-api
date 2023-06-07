@@ -19,31 +19,31 @@ import (
 	"time"
 )
 
-type nextUrlFunc func(doc *goquery.Selection) string
+type nextURLFunc func(doc *goquery.Selection) string
 
 type parseTimeFunc func(s string) (time.Time, error)
 
-type parserFunc func(doc *goquery.Selection, nextUrl nextUrlFunc, timeParser parseTimeFunc) (string, []SBRecord, error)
+type parserFunc func(doc *goquery.Selection, nextUrl nextURLFunc, timeParser parseTimeFunc) (string, []sbRecord, error)
 
-func startScraper(config *Config) {
+func startScraper(config *appConfig) {
 
 	startProxies(config)
 	defer stopProxies()
 
-	for _, scraper := range []*Scraper{
-		NewSkialScraper(),
-		NewGFLScraper(),
-		NewSpaceShipScraper(),
-		NewLazyPurpleScraper(),
+	for _, scraper := range []*sbScraper{
+		newSkialScraper(),
+		newGFLScraper(),
+		newSpaceShipScraper(),
+		newLazyPurpleScraper(),
 	} {
 
 		if errProxies := setupProxies(scraper.Collector, config); errProxies != nil {
 			logger.Panic("Failed to setup proxies", zap.Error(errProxies))
 		}
 
-		go func(s *Scraper) {
-			if errScrape := s.Start(); errScrape != nil {
-				logger.Error("Scraper returned error", zap.Error(errScrape))
+		go func(s *sbScraper) {
+			if errScrape := s.start(); errScrape != nil {
+				logger.Error("sbScraper returned error", zap.Error(errScrape))
 			}
 		}(scraper)
 	}
@@ -54,7 +54,7 @@ type metaKey int
 const (
 	unknown metaKey = iota
 	player
-	steamId
+	steamID
 	steam2
 	steamComm
 	invokedOn
@@ -64,31 +64,31 @@ const (
 	last
 )
 
-type SBRecord struct {
+type sbRecord struct {
 	Name      string
-	SteamId   steamid.SID64
+	SteamID   steamid.SID64
 	Reason    string
 	CreatedOn time.Time
 	Length    time.Duration
 	Permanent bool
 }
 
-type Scraper struct {
+type sbScraper struct {
 	*colly.Collector
 	name      string
 	log       *zap.Logger
-	results   []SBRecord
+	results   []sbRecord
 	resultsMu sync.RWMutex
-	baseUrl   string
+	baseURL   string
 	startPath string
 	parser    parserFunc
-	nextUrl   nextUrlFunc
+	nextURL   nextURLFunc
 	parseTIme parseTimeFunc
 }
 
-func (scraper *Scraper) Start() error {
+func (scraper *sbScraper) start() error {
 	scraper.Collector.OnHTML("*", func(e *colly.HTMLElement) {
-		nextUrl, results, parseErr := parseDefault(e.DOM, scraper.nextUrl, scraper.parseTIme)
+		nextURL, results, parseErr := parseDefault(e.DOM, scraper.nextURL, scraper.parseTIme)
 		if parseErr != nil {
 			logger.Error("Parser returned error", zap.Error(parseErr))
 			return
@@ -96,9 +96,9 @@ func (scraper *Scraper) Start() error {
 		scraper.resultsMu.Lock()
 		scraper.results = append(scraper.results, results...)
 		scraper.resultsMu.Unlock()
-		if nextUrl != "" {
-			if errVisit := scraper.Visit(scraper.url(nextUrl)); errVisit != nil {
-				logger.Error("Failed to visit sub url", zap.Error(errVisit), zap.String("url", nextUrl))
+		if nextURL != "" {
+			if errVisit := scraper.Visit(scraper.url(nextURL)); errVisit != nil {
+				logger.Error("Failed to visit sub url", zap.Error(errVisit), zap.String("url", nextURL))
 				return
 			}
 		}
@@ -110,18 +110,18 @@ func (scraper *Scraper) Start() error {
 	return nil
 }
 
-func newScraper(name string, baseUrl string, startPath string, parser parserFunc, nextUrl nextUrlFunc, parseTime parseTimeFunc) *Scraper {
-	u, errUrl := url.Parse(baseUrl)
-	if errUrl != nil {
-		logger.Panic("Failed to parse base url", zap.Error(errUrl))
+func newScraper(name string, baseURL string, startPath string, parser parserFunc, nextURL nextURLFunc, parseTime parseTimeFunc) *sbScraper {
+	u, errURL := url.Parse(baseURL)
+	if errURL != nil {
+		logger.Panic("Failed to parse base url", zap.Error(errURL))
 	}
 
-	scraper := Scraper{
-		baseUrl:   baseUrl,
+	scraper := sbScraper{
+		baseURL:   baseURL,
 		name:      name,
 		startPath: startPath,
 		parser:    parser,
-		nextUrl:   nextUrl,
+		nextURL:   nextURL,
 		parseTIme: parseTime,
 		log:       logger.Named(name),
 		Collector: colly.NewCollector(
@@ -149,325 +149,325 @@ func newScraper(name string, baseUrl string, startPath string, parser parserFunc
 	return &scraper
 }
 
-func (scraper *Scraper) url(path string) string {
-	return scraper.baseUrl + path
+func (scraper *sbScraper) url(path string) string {
+	return scraper.baseURL + path
 }
 
-func NewSkialScraper() *Scraper {
+func newSkialScraper() *sbScraper {
 	return newScraper(
 		"skial",
 		"https://www.skial.com/sourcebans/",
 		"index.php?p=banlist",
 		parseDefault,
-		nextUrlFirst,
+		nextURLFirst,
 		parseSkialTime,
 	)
 }
 
-func NewGFLScraper() *Scraper {
+func newGFLScraper() *sbScraper {
 	return newScraper("gfl", "https://sourcebans.gflclan.com/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewSpaceShipScraper() *Scraper {
+func newSpaceShipScraper() *sbScraper {
 	return newScraper("spaceship", "https://sappho.io/bans/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewUGCScraper() *Scraper {
+func newUGCScraper() *sbScraper {
 	return newScraper("ugc", "https://sb.ugc-gaming.net/", "index.php?p=banlist",
-		parseFluent, nextUrlFluent, parseDefaultTime)
+		parseFluent, nextURLFluent, parseDefaultTime)
 }
 
-func NewSirPleaseScraper() *Scraper {
+func newSirPleaseScraper() *sbScraper {
 	return newScraper("sirplease", "https://sirplease.gg/", "index.php?p=banlist",
-		parseFluent, nextUrlFluent, parseDefaultTime)
+		parseFluent, nextURLFluent, parseDefaultTime)
 }
 
-func NewVidyaGaemsScraper() *Scraper {
+func newVidyaGaemsScraper() *sbScraper {
 	return newScraper("vidyagaems", "https://www.vidyagaems.net/", "index.php?p=banlist",
-		parseFluent, nextUrlFluent, parseTrailYear)
+		parseFluent, nextURLFluent, parseTrailYear)
 }
 
-func NewOwlTFScraper() *Scraper {
+func newOwlTFScraper() *sbScraper {
 	return newScraper("owl", "https://kingpandagamer.xyz/sb/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewZMBrasilScraper() *Scraper {
+func newZMBrasilScraper() *sbScraper {
 	return newScraper("zmbrasil", "http://bans.zmbrasil.com.br/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSkialTime)
+		parseDefault, nextURLLast, parseSkialTime)
 }
 
-func NewScrapTFScraper() *Scraper {
+func newScrapTFScraper() *sbScraper {
 	return newScraper("scraptf", "https://bans.scrap.tf/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewWonderlandTFScraper() *Scraper {
+func newWonderlandTFScraper() *sbScraper {
 	return newScraper("wonderland", "https://bans.wonderland.tf/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseWonderlandTime)
+		parseDefault, nextURLLast, parseWonderlandTime)
 }
 
-func NewLazyPurpleScraper() *Scraper {
+func newLazyPurpleScraper() *sbScraper {
 	return newScraper("lazypurple", "https://www.lazypurple.com/sourcebans/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewFirePoweredScraper() *Scraper {
+func newFirePoweredScraper() *sbScraper {
 	return newScraper("firepowered", "https://firepoweredgaming.com/sourcebanspp/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSkialTime)
+		parseDefault, nextURLLast, parseSkialTime)
 }
 
-func NewHarpoonScraper() *Scraper {
+func newHarpoonScraper() *sbScraper {
 	return newScraper("harpoongaming", "https://bans.harpoongaming.com/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewPandaScraper() *Scraper {
+func newPandaScraper() *sbScraper {
 	return newScraper("panda", "https://bans.panda-community.com/", "index.php?p=banlist",
-		parseFluent, nextUrlFluent, parseDefaultTime)
+		parseFluent, nextURLFluent, parseDefaultTime)
 }
 
-func NewNeonHeightsScraper() *Scraper {
+func newNeonHeightsScraper() *sbScraper {
 	return newScraper("neonheights", "https://neonheights.xyz/bans/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSkialTime)
+		parseDefault, nextURLLast, parseSkialTime)
 }
 
-func NewPancakesScraper() *Scraper {
+func newPancakesScraper() *sbScraper {
 	return newScraper("pancakes", "https://pancakes.tf/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parsePancakesTime)
+		parseDefault, nextURLLast, parsePancakesTime)
 }
 
-func NewLOOSScraper() *Scraper {
+func newLOOSScraper() *sbScraper {
 	return newScraper("loos", "https://looscommunity.com/bans/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewPubsTFScraper() *Scraper {
+func newPubsTFScraper() *sbScraper {
 	return newScraper("pubstf", "https://bans.pubs.tf/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSkialTime)
+		parseDefault, nextURLLast, parseSkialTime)
 }
 
-func NewServiliveClScraper() *Scraper {
+func newServiliveClScraper() *sbScraper {
 	return newScraper("servilivecl", "https://sourcebans.servilive.cl/", "index.php?p=banlist",
-		parseFluent, nextUrlFluent, parseDefaultTimeMonthFirst)
+		parseFluent, nextURLFluent, parseDefaultTimeMonthFirst)
 }
 
-func NewCutiePieScraper() *Scraper {
+func newCutiePieScraper() *sbScraper {
 	return newScraper("cutiepie", "https://bans.cutiepie.tf/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
-func NewSGGamingScraper() *Scraper {
+func newSGGamingScraper() *sbScraper {
 	return newScraper("sggaming", "https://sg-gaming.net/bans/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSGGamingTime)
+		parseDefault, nextURLLast, parseSGGamingTime)
 }
 
-func NewApeModeScraper() *Scraper {
+func newApeModeScraper() *sbScraper {
 	return newScraper("apemode", "https://sourcebans.apemode.tf/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSkialTime)
+		parseDefault, nextURLLast, parseSkialTime)
 }
 
-func NewMaxDBScraper() *Scraper {
+func newMaxDBScraper() *sbScraper {
 	return newScraper("maxdb", "https://bans.maxdb.net/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewSvdosBrothersScraper() *Scraper {
+func newSvdosBrothersScraper() *sbScraper {
 	return newScraper("svdosbrothers", "https://bans.svdosbrothers.com/", "index.php?p=banlist",
-		parseFluent, nextUrlFluent, parseSVDos)
+		parseFluent, nextURLFluent, parseSVDos)
 }
 
-func NewElectricScraper() *Scraper {
+func newElectricScraper() *sbScraper {
 	return newScraper("electric", "http://168.181.184.179/", "index.php?p=banlist",
-		parseFluent, nextUrlFluent, parseDefaultTime)
+		parseFluent, nextURLFluent, parseDefaultTime)
 }
 
-func NewGlobalParadiseScraper() *Scraper {
+func newGlobalParadiseScraper() *sbScraper {
 	return newScraper("globalparadise", "https://bans.theglobalparadise.org/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewSavageServidoresScraper() *Scraper {
+func newSavageServidoresScraper() *sbScraper {
 	return newScraper("savageservidores", "https://bans.savageservidores.com/", "index.php?p=banlist",
-		parseFluent, nextUrlFluent, parseDefaultTime)
+		parseFluent, nextURLFluent, parseDefaultTime)
 }
 
-func NewCSIServersScraper() *Scraper {
+func newCSIServersScraper() *sbScraper {
 	return newScraper("csiservers", "https://bans.csiservers.com/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewLBGamingScraper() *Scraper {
+func newLBGamingScraper() *sbScraper {
 	return newScraper("lbgaming", "https://bans.lbgaming.co/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSkialTime)
+		parseDefault, nextURLLast, parseSkialTime)
 }
 
-func NewFluxTFScraper() *Scraper {
+func newFluxTFScraper() *sbScraper {
 	return newScraper("fluxtf", "https://bans.flux.tf/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseFluxTime)
+		parseDefault, nextURLLast, parseFluxTime)
 }
 
-func NewDarkPyroScraper() *Scraper {
+func newDarkPyroScraper() *sbScraper {
 	return newScraper("darkpyro", "https://bans.darkpyrogaming.com/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDarkPyroTime)
+		parseDefault, nextURLLast, parseDarkPyroTime)
 }
 
-func NewOpstOnlineScraper() *Scraper {
+func newOpstOnlineScraper() *sbScraper {
 	return newScraper("opstonline", "https://www.opstonline.com/bans/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSkialTime)
+		parseDefault, nextURLLast, parseSkialTime)
 }
 
-func NewBouncyBallScraper() *Scraper {
+func newBouncyBallScraper() *sbScraper {
 	return newScraper("bouncyball", "https://www.bouncyball.eu/bans2/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSkialTime)
+		parseDefault, nextURLLast, parseSkialTime)
 }
 
-func NewFurryPoundScraper() *Scraper {
+func newFurryPoundScraper() *sbScraper {
 	return newScraper("furrypound", "http://sourcebans.thefurrypound.org/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseFurryPoundTime)
+		parseDefault, nextURLLast, parseFurryPoundTime)
 }
 
-func NewRetroServersScraper() *Scraper {
+func newRetroServersScraper() *sbScraper {
 	return newScraper("retroservers", "https://bans.retroservers.net/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewSwapShopScraper() *Scraper {
+func newSwapShopScraper() *sbScraper {
 	return newScraper("swapshop", "http://tf2swapshop.com/sourcebans/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSkialTime)
+		parseDefault, nextURLLast, parseSkialTime)
 }
 
-func NewECJScraper() *Scraper {
+func newECJScraper() *sbScraper {
 	return newScraper("ecj", "https://ecj.tf/sourcebans/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSkialTime)
+		parseDefault, nextURLLast, parseSkialTime)
 }
 
-func NewJumpAcademyScraper() *Scraper {
+func newJumpAcademyScraper() *sbScraper {
 	return newScraper("jumpacademy", "https://bans.jumpacademy.tf/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewTF2ROScraper() *Scraper {
+func newTF2ROScraper() *sbScraper {
 	// Not enough values to page yet...
 	return newScraper("tf2ro", "https://bans.tf2ro.com/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewSameTeemScraper() *Scraper {
+func newSameTeemScraper() *sbScraper {
 	return newScraper("sameteem", "https://sameteem.com/sourcebans/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewPowerFPSScraper() *Scraper {
+func newPowerFPSScraper() *sbScraper {
 	return newScraper("powerfps", "https://bans.powerfps.com/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSkialTime)
+		parseDefault, nextURLLast, parseSkialTime)
 }
 
-func New7MauScraper() *Scraper {
+func new7MauScraper() *sbScraper {
 	return newScraper("7mau", "https://7-mau.com/server/", "index.php?p=banlist",
-		parseFluent, nextUrlFluent, parseDefaultTime)
+		parseFluent, nextURLFluent, parseDefaultTime)
 }
 
-func NewGhostCapScraper() *Scraper {
+func newGhostCapScraper() *sbScraper {
 	return newScraper("ghostcap", "https://sourcebans.ghostcap.com/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewSpectreScraper() *Scraper {
+func newSpectreScraper() *sbScraper {
 	return newScraper("spectre", "https://spectre.gg/bans/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewDreamFireScraper() *Scraper {
+func newDreamFireScraper() *sbScraper {
 	return newScraper("dreamfire", "https://sourcebans.dreamfire.fr/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewSettiScraper() *Scraper {
+func newSettiScraper() *sbScraper {
 	return newScraper("setti", "https://pong.setti.info/sourcebans/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewGunServerScraper() *Scraper {
+func newGunServerScraper() *sbScraper {
 	return newScraper("gunserver", "https://gunserver.ru/sourcebans/", "index.php?p=banlist",
-		parseDefault, nextUrlFirst, parseGunServer)
+		parseDefault, nextURLFirst, parseGunServer)
 }
 
-func NewHellClanScraper() *Scraper {
+func newHellClanScraper() *sbScraper {
 	return newScraper("hellclan", "https://hellclan.co.uk/sourcebans/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseHellClanTime)
+		parseDefault, nextURLLast, parseHellClanTime)
 }
 
-func NewSneaksScraper() *Scraper {
+func newSneaksScraper() *sbScraper {
 	return newScraper("sneaks", "https://bans.snksrv.com/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSneakTime)
+		parseDefault, nextURLLast, parseSneakTime)
 }
 
-func NewNideScraper() *Scraper {
+func newNideScraper() *sbScraper {
 	return newScraper("nide", "https://bans.nide.gg/", "index.php?p=banlist",
-		parseFluent, nextUrlFluent, parseDefaultTime)
+		parseFluent, nextURLFluent, parseDefaultTime)
 }
 
-func NewAstraManiaScraper() *Scraper {
+func newAstraManiaScraper() *sbScraper {
 	return newScraper("astramania", "https://astramania.ro/sban2/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseTrailYear)
+		parseDefault, nextURLLast, parseTrailYear)
 }
 
-func NewTF2MapsScraper() *Scraper {
+func newTF2MapsScraper() *sbScraper {
 	return newScraper("tf2maps", "https://bans.tf2maps.net/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewVaticanCityScraper() *Scraper {
+func newVaticanCityScraper() *sbScraper {
 	return newScraper("vaticancity", "https://www.the-vaticancity.com/sourcebans/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSkialTime)
+		parseDefault, nextURLLast, parseSkialTime)
 }
 
-func NewLazyNeerScraper() *Scraper {
+func newLazyNeerScraper() *sbScraper {
 	return newScraper("lazyneer", "https://www.lazyneer.com/SourceBans/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSkialAltTime)
+		parseDefault, nextURLLast, parseSkialAltTime)
 }
 
-func NewTheVilleScraper() *Scraper {
+func newTheVilleScraper() *sbScraper {
 	return newScraper("theville", "https://www.theville.org/sourcebans/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSkialTime)
+		parseDefault, nextURLLast, parseSkialTime)
 }
 
-func NewOreonScraper() *Scraper {
+func newOreonScraper() *sbScraper {
 	return newScraper("oreon", "https://www.tf2-oreon.fr/sourceban/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSkialTime)
+		parseDefault, nextURLLast, parseSkialTime)
 }
 
-func NewTriggerHappyScraper() *Scraper {
+func newTriggerHappyScraper() *sbScraper {
 	return newScraper("triggerhappy", "https://triggerhappygamers.com/sourcebans/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseTriggerHappyTime)
+		parseDefault, nextURLLast, parseTriggerHappyTime)
 }
 
-func NewDefuseRoScraper() *Scraper {
+func newDefuseRoScraper() *sbScraper {
 	return newScraper("defusero", "https://bans.defusero.org/", "index.php?p=banlist",
-		parseFluent, nextUrlFluent, parseDefaultTime)
+		parseFluent, nextURLFluent, parseDefaultTime)
 }
 
-func NewTawernaScraper() *Scraper {
+func newTawernaScraper() *sbScraper {
 	return newScraper("tawerna", "https://sb.tawerna.tf/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseSkialTime)
+		parseDefault, nextURLLast, parseSkialTime)
 }
 
-func NewTitanScraper() *Scraper {
+func newTitanScraper() *sbScraper {
 	return newScraper("titan", "https://bans.titan.tf/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseTitanTime)
+		parseDefault, nextURLLast, parseTitanTime)
 }
 
-func NewDiscFFScraper() *Scraper {
+func newDiscFFScraper() *sbScraper {
 	return newScraper("discff", "http://disc-ff.site.nfoservers.com/sourcebanstf2/", "index.php?p=banlist",
-		parseDefault, nextUrlLast, parseDefaultTime)
+		parseDefault, nextURLLast, parseDefaultTime)
 }
 
-func NewOtakuScraper() *Scraper {
-	return newScraper("otaku", "https://bans.otaku.tf/bans", "",
-		parseDefault, nextUrlLast, parseOtakuTime)
-}
+//func NewOtakuScraper() *sbScraper {
+//	return newScraper("otaku", "https://bans.otaku.tf/bans", "",
+//		parseDefault, nextURLLast, parseOtakuTime)
+//}
 
 // 05-17-23 03:07
 func parseSkialTime(s string) (time.Time, error) {
@@ -554,7 +554,7 @@ func parseDefaultTimeMonthFirst(s string) (time.Time, error) {
 	if s == "Not applicable." {
 		return time.Time{}, nil
 	}
-	return time.Parse("2006-02-01 15:04:05", s)
+	return time.Parse("2006-01-02 15:04:05", s)
 }
 
 // Thu, May 11, 2023 7:14 PM
@@ -566,12 +566,12 @@ func parsePancakesTime(s string) (time.Time, error) {
 }
 
 // Thu, May 11, 2023 7:14 PM
-func parseOtakuTime(s string) (time.Time, error) {
-	if s == "Not applicable." || s == "never, this is permanent" {
-		return time.Time{}, nil
-	}
-	return time.Parse("Jan-2-2006 15:04:05", s)
-}
+//func parseOtakuTime(s string) (time.Time, error) {
+//	if s == "Not applicable." || s == "never, this is permanent" {
+//		return time.Time{}, nil
+//	}
+//	return time.Parse("Jan-2-2006 15:04:05", s)
+//}
 
 // Thu, May 11, 2023 7:14 PM
 func parseTitanTime(s string) (time.Time, error) {
@@ -619,31 +619,31 @@ func parseWonderlandTime(s string) (time.Time, error) {
 	return time.Parse("January 2, 2006 (15:04)", s)
 }
 
-func nextUrlFluent(doc *goquery.Selection) string {
+func nextURLFluent(doc *goquery.Selection) string {
 	nextPage, _ := doc.Find(".pagination a[href]").First().Attr("href")
 	return nextPage
 }
 
-func nextUrlFirst(doc *goquery.Selection) string {
+func nextURLFirst(doc *goquery.Selection) string {
 	nextPage, _ := doc.Find("#banlist-nav a[href]").First().Attr("href")
 	return nextPage
 }
 
-func nextUrlLast(doc *goquery.Selection) string {
+func nextURLLast(doc *goquery.Selection) string {
 	nextPage, _ := doc.Find("#banlist-nav a[href]").Last().Attr("href")
 	return nextPage
 }
 
 // https://github.com/brhndursun/SourceBans-StarTheme
-func parseStar(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTimeFunc) (string, []SBRecord, error) {
-	panic("todo")
-}
+//func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc) (string, []sbRecord, error) {
+//	panic("todo")
+//}
 
 // https://github.com/aXenDeveloper/sourcebans-web-theme-fluent
-func parseFluent(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTimeFunc) (string, []SBRecord, error) {
+func parseFluent(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc) (string, []sbRecord, error) {
 	var (
-		bans   []SBRecord
-		curBan SBRecord
+		bans   []sbRecord
+		curBan sbRecord
 	)
 	doc.Find("ul.ban_list_detal li").Each(func(i int, selection *goquery.Selection) {
 		child := selection.Children()
@@ -659,7 +659,7 @@ func parseFluent(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTim
 				logger.Error("Failed to parse sid", zap.Error(errSid))
 				return
 			}
-			curBan.SteamId = sid64
+			curBan.SteamID = sid64
 		case "invoked on":
 			t, errTime := parseTime(value)
 			if errTime != nil {
@@ -670,13 +670,13 @@ func parseFluent(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTim
 		case "ban length":
 			lowerVal := strings.ToLower(value)
 			if strings.Contains(lowerVal, "unbanned") {
-				curBan.SteamId = 0 // invalidate it
-			} else if "permanent" == lowerVal {
+				curBan.SteamID = 0 // invalidate it
+			} else if lowerVal == "permanent" {
 				curBan.Permanent = true
 			}
 			curBan.Length = 0
 		case "expires on":
-			if curBan.Permanent || !curBan.SteamId.Valid() {
+			if curBan.Permanent || !curBan.SteamID.Valid() {
 				return
 			}
 			t, errTime := parseTime(value)
@@ -687,19 +687,19 @@ func parseFluent(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTim
 			curBan.Length = t.Sub(curBan.CreatedOn)
 		case "reason":
 			curBan.Reason = value
-			if curBan.SteamId.Valid() {
+			if curBan.SteamID.Valid() {
 				bans = append(bans, curBan)
 			}
-			curBan = SBRecord{}
+			curBan = sbRecord{}
 		}
 	})
 	return urlFunc(doc), bans, nil
 }
 
-func parseDefault(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTimeFunc) (string, []SBRecord, error) {
+func parseDefault(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc) (string, []sbRecord, error) {
 	var (
-		bans     []SBRecord
-		curBan   SBRecord
+		bans     []sbRecord
+		curBan   sbRecord
 		curState = unknown
 		isValue  bool
 	)
@@ -712,7 +712,7 @@ func parseDefault(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTi
 				curState = player
 				isValue = true
 			case "steam id":
-				curState = steamId
+				curState = steamID
 				isValue = true
 			case "steam2":
 				curState = steam2
@@ -746,7 +746,7 @@ func parseDefault(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTi
 					logger.Error("Failed to parse sid", zap.Error(errSid))
 					return
 				}
-				curBan.SteamId = sid64
+				curBan.SteamID = sid64
 			case invokedOn:
 				t, errTime := parseTime(txt)
 				if errTime != nil {
@@ -757,8 +757,8 @@ func parseDefault(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTi
 			case banLength:
 				lowerVal := strings.ToLower(txt)
 				if strings.Contains(lowerVal, "unbanned") {
-					curBan.SteamId = 0 // invalidate it
-				} else if "permanent" == lowerVal {
+					curBan.SteamID = 0 // invalidate it
+				} else if lowerVal == "permanent" {
 					curBan.Permanent = true
 				}
 				curBan.Length = 0
@@ -774,10 +774,10 @@ func parseDefault(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTi
 				curBan.Length = t.Sub(curBan.CreatedOn)
 			case reason:
 				curBan.Reason = txt
-				if curBan.SteamId.Valid() {
+				if curBan.SteamID.Valid() {
 					bans = append(bans, curBan)
 				}
-				curBan = SBRecord{}
+				curBan = sbRecord{}
 				curState = last
 			}
 			curState = unknown
@@ -788,9 +788,9 @@ func parseDefault(doc *goquery.Selection, urlFunc nextUrlFunc, parseTime parseTi
 }
 
 type megaScatterNode struct {
-	Id                  string `json:"id"`
-	Id3                 string `json:"id3"`
-	Id1                 string `json:"id1"`
+	ID                  string `json:"id"`
+	ID3                 string `json:"id3"`
+	ID1                 string `json:"id1"`
 	Label               string `json:"label"`
 	BorderWidthSelected int    `json:"borderWidthSelected"`
 	Shape               string `json:"shape"`
@@ -807,7 +807,7 @@ type megaScatterNode struct {
 	Aliases []string `json:"-"`
 }
 
-func parseMegaScatter(bodyReader io.Reader) ([]SBRecord, error) {
+func parseMegaScatter(bodyReader io.Reader) ([]sbRecord, error) {
 	body, errBody := io.ReadAll(bodyReader)
 	if errBody != nil {
 		return nil, errBody
@@ -824,7 +824,7 @@ func parseMegaScatter(bodyReader io.Reader) ([]SBRecord, error) {
 	replacer2 := regexp.MustCompile(`]},\s]$`)
 	pass3 := replacer2.ReplaceAllString(pass2, "]}]")
 
-	fmt.Println(string(pass3[0:1024]))
+	fmt.Println(pass3[0:1024])
 
 	fmt.Println(string(pass3[len(match[1])-2048]))
 
@@ -832,8 +832,8 @@ func parseMegaScatter(bodyReader io.Reader) ([]SBRecord, error) {
 	_, _ = io.WriteString(o, pass3)
 	_ = o.Close()
 	var msNodes []megaScatterNode
-	if errJson := json.Unmarshal([]byte(pass3), &msNodes); errJson != nil {
-		return nil, errJson
+	if errJSON := json.Unmarshal([]byte(pass3), &msNodes); errJSON != nil {
+		return nil, errJSON
 	}
 	return nil, nil
 }

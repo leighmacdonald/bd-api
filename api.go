@@ -24,7 +24,7 @@ func init() {
 	http.HandleFunc("/summary", getHandler(handleGetSummary()))
 	http.HandleFunc("/profile", getHandler(handleGetProfile()))
 	http.HandleFunc("/kick", onPostKick)
-	http.HandleFunc(profilesSlugUrl, getHandler(handleGetProfiles()))
+	http.HandleFunc(profilesSlugURL, getHandler(handleGetProfiles()))
 }
 
 func onPostKick(w http.ResponseWriter, _ *http.Request) {
@@ -164,9 +164,9 @@ func handleGetProfile() func(http.ResponseWriter, *http.Request) {
 	}
 }
 
-const profilesSlugUrl = "/profiles/"
+const profilesSlugURL = "/profiles/"
 
-func logHttpErr(w http.ResponseWriter, message string, err error, statusCode int) {
+func logHTTPErr(w http.ResponseWriter, message string, err error, statusCode int) {
 	http.Error(w, "Failed to generate json", statusCode)
 	logger.Error(message, zap.Error(err))
 }
@@ -180,15 +180,15 @@ func handleGetProfiles() func(http.ResponseWriter, *http.Request) {
 	lexer := lexers.Get("json")
 	write := func(w http.ResponseWriter, format string, args ...any) bool {
 		if _, errWrite := fmt.Fprintf(w, format, args...); errWrite != nil {
-			logHttpErr(w, "Failed to write response body", errWrite, http.StatusInternalServerError)
+			logHTTPErr(w, "Failed to write response body", errWrite, http.StatusInternalServerError)
 			return false
 		}
 		return true
 	}
 	return func(w http.ResponseWriter, req *http.Request) {
 		var slug string
-		if strings.HasPrefix(req.URL.Path, profilesSlugUrl) {
-			slug = req.URL.Path[len(profilesSlugUrl):]
+		if strings.HasPrefix(req.URL.Path, profilesSlugURL) {
+			slug = req.URL.Path[len(profilesSlugURL):]
 		}
 		if slug == "" {
 			http.Error(w, "Invalid SID", http.StatusNotFound)
@@ -203,30 +203,30 @@ func handleGetProfiles() func(http.ResponseWriter, *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 		var profile Profile
 		if errProfile := loadProfile(sid64, &profile); errProfile != nil {
-			logHttpErr(w, "Failed to load profile", errProfile, http.StatusInternalServerError)
+			logHTTPErr(w, "Failed to load profile", errProfile, http.StatusInternalServerError)
 			return
 		}
-		jsonBody, errJson := json.MarshalIndent(profile, "", "    ")
-		if errJson != nil {
-			logHttpErr(w, "Failed to generate json", errJson, http.StatusInternalServerError)
+		jsonBody, errJSON := json.MarshalIndent(profile, "", "    ")
+		if errJSON != nil {
+			logHTTPErr(w, "Failed to generate json", errJSON, http.StatusInternalServerError)
 			return
 		}
 		iterator, errTokenize := lexer.Tokenise(nil, string(jsonBody))
 		if errTokenize != nil {
-			logHttpErr(w, "Failed to tokenise json", errJson, http.StatusInternalServerError)
+			logHTTPErr(w, "Failed to tokenise json", errJSON, http.StatusInternalServerError)
 			return
 		}
 		if !write(w, `<!DOCTYPE html><html><head><title>%s</title></head><body><style> body {background-color: #272822;}`, profile.Summary.PersonaName) {
 			return
 		}
 		if errWrite := formatter.WriteCSS(w, style); errWrite != nil {
-			logHttpErr(w, "Failed to generate HTML", errWrite, http.StatusInternalServerError)
+			logHTTPErr(w, "Failed to generate HTML", errWrite, http.StatusInternalServerError)
 		}
 		if !write(w, `</style>`) {
 			return
 		}
 		if errFormat := formatter.Format(w, style, iterator); errFormat != nil {
-			logHttpErr(w, "Failed to format json", errFormat, http.StatusInternalServerError)
+			logHTTPErr(w, "Failed to format json", errFormat, http.StatusInternalServerError)
 			return
 		}
 		write(w, `</body></html>`)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/armon/go-socks5"
+	"github.com/leighmacdonald/steamweb"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/ssh"
@@ -18,9 +19,9 @@ type proxyConfig struct {
 	signer     ssh.Signer
 }
 
-type Config struct {
+type appConfig struct {
 	ListenAddr     string         `yaml:"listen_addr"`
-	SteamApiKey    string         `yaml:"steam_api_key"`
+	SteamAPIKey    string         `yaml:"steam_api_key"`
 	DSN            string         `yaml:"dsn"`
 	Proxies        []*proxyConfig `yaml:"proxies"`
 	PrivateKeyPath string         `yaml:"private_key_path"`
@@ -50,7 +51,7 @@ func makeSigner(keyPath string) (ssh.Signer, error) {
 	return signer, nil
 }
 
-func readConfig(configFile string, config *Config) error {
+func readConfig(configFile string, config *appConfig) error {
 	cf, errCf := os.Open(configFile)
 	if errCf != nil {
 		return errCf
@@ -65,6 +66,11 @@ func readConfig(configFile string, config *Config) error {
 	}
 	for _, cfg := range config.Proxies {
 		cfg.signer = signer
+	}
+	if key, found := os.LookupEnv("STEAM_API_KEY"); found && key != "" {
+		if errKey := steamweb.SetKey(key); errKey != nil {
+			return errKey
+		}
 	}
 	return nil
 }

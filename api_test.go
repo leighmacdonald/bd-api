@@ -5,17 +5,11 @@ import (
 	"fmt"
 	"github.com/leighmacdonald/steamweb"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
-
-func testLogger() *zap.Logger {
-	l, _ := zap.NewDevelopment()
-	return l
-}
 
 func TestGetBans(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/bans?steam_id=%d", testIDb4nny), nil)

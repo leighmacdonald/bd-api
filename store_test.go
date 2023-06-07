@@ -15,16 +15,13 @@ import (
 
 func TestMain(m *testing.M) {
 	testCtx := context.Background()
-	dbName := fmt.Sprintf("test-db-%d", time.Now().Second())
-	username := "gbans-test"
-	password := "gbans-test"
-
+	username, password, dbName := "bdapi-test", "bdapi-test", "bdapi-test"
 	container, errContainer := postgres.RunContainer(
 		testCtx,
 		testcontainers.WithImage("docker.io/postgres:15-bullseye"),
 		postgres.WithDatabase(dbName),
-		postgres.WithUsername("gbans-test"),
-		postgres.WithPassword("gbans-test"),
+		postgres.WithUsername(username),
+		postgres.WithPassword(password),
 		testcontainers.WithWaitStrategy(wait.
 			ForLog("database system is ready to accept connections").
 			WithOccurrence(2).
@@ -36,7 +33,7 @@ func TestMain(m *testing.M) {
 	}
 	//host, _ := container.Host(context.Background())
 	port, _ := container.MappedPort(context.Background(), "5432")
-	config := Config{
+	config := appConfig{
 		DSN: fmt.Sprintf("postgresql://%s:%s@localhost:%s/%s", username, password, port.Port(), dbName),
 	}
 	defer func() {
@@ -44,13 +41,10 @@ func TestMain(m *testing.M) {
 			logger.Error("Failed to terminate test container")
 		}
 	}()
-	s, errStore := newStore(config.DSN)
+	_, errStore := newStore(testCtx, config.DSN)
 	if errStore != nil {
 		logger.Error("Failed to setup test db", zap.Error(errStore))
 		os.Exit(2)
-	}
-	if errMigrate := s.migrate(); errMigrate != nil {
-		logger.Fatal("Failed to migrate test database", zap.Error(errMigrate))
 	}
 	m.Run()
 }

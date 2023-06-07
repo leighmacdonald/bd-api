@@ -1,9 +1,9 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"embed"
-	sq "github.com/Masterminds/squirrel"
 	"github.com/golang-migrate/migrate/v4"
 	pgxMigrate "github.com/golang-migrate/migrate/v4/database/pgx"
 	"github.com/golang-migrate/migrate/v4/source/httpfs"
@@ -16,22 +16,22 @@ import (
 
 var (
 	// ErrNoResult is returned on successful queries which return no rows
-	errNoResult = errors.New("No results found")
+	//errNoResult = errors.New("No results found")
 	// ErrDuplicate is returned when a duplicate row result is attempted to be inserted
-	errDuplicate = errors.New("Duplicate entity")
+	//errDuplicate = errors.New("Duplicate entity")
 	// Use $ for pg based queries
-	sb = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	//sb = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 	//go:embed migrations
 	migrations embed.FS
 )
 
-func newStore(dsn string) (*Store, error) {
+func newStore(ctx context.Context, dsn string) (*pgStore, error) {
 	log := logger.Named("db")
 	cfg, errConfig := pgxpool.ParseConfig(dsn)
 	if errConfig != nil {
 		return nil, errors.Errorf("Unable to parse config: %v", errConfig)
 	}
-	database := Store{
+	database := pgStore{
 		logger: log,
 		dsn:    dsn,
 	}
@@ -53,17 +53,14 @@ func newStore(dsn string) (*Store, error) {
 	return &database, nil
 }
 
-type MetaProfile struct {
-}
-
-type Store struct {
+type pgStore struct {
 	dsn    string
 	logger *zap.Logger
 	pool   *pgxpool.Pool
 }
 
 // Migrate database schema
-func (database *Store) migrate() error {
+func (database *pgStore) migrate() error {
 	instance, errOpen := sql.Open("pgx", database.dsn)
 	if errOpen != nil {
 		return errors.Wrapf(errOpen, "Failed to open database for migration")
@@ -81,9 +78,9 @@ func (database *Store) migrate() error {
 		return errors.Wrapf(errMigrate, "failed to create migration driver")
 	}
 	defer logCloser(driver)
-	source, errHttpFS := httpfs.New(http.FS(migrations), "migrations")
-	if errHttpFS != nil {
-		return errHttpFS
+	source, errHTTPFs := httpfs.New(http.FS(migrations), "migrations")
+	if errHTTPFs != nil {
+		return errHTTPFs
 	}
 	migrator, errMigrateInstance := migrate.NewWithInstance("iofs", source, "pgx", driver)
 	if errMigrateInstance != nil {

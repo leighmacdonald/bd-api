@@ -7,16 +7,17 @@ require (
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/alecthomas/chroma v0.10.0
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
-	github.com/go-playground/locales v0.14.1
 	github.com/gocolly/colly v1.2.0
 	github.com/golang-migrate/migrate/v4 v4.16.1
 	github.com/jackc/pgx/v4 v4.18.1
 	github.com/jellydator/ttlcache/v3 v3.0.1
-	github.com/leighmacdonald/rgl v0.0.0-20230520123636-bf957cc6c948
+	github.com/leighmacdonald/rgl v0.0.0-20230605080734-80a392af27d1
 	github.com/leighmacdonald/steamid/v2 v2.2.0
 	github.com/leighmacdonald/steamweb v0.0.4
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.3
+	github.com/testcontainers/testcontainers-go v0.20.1
+	github.com/testcontainers/testcontainers-go/modules/postgres v0.20.1
 	go.uber.org/zap v1.24.0
 	golang.org/x/crypto v0.9.0
 	golang.org/x/net v0.10.0
@@ -73,8 +74,6 @@ require (
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	github.com/sirupsen/logrus v1.9.2 // indirect
 	github.com/temoto/robotstxt v1.1.2 // indirect
-	github.com/testcontainers/testcontainers-go v0.20.1 // indirect
-	github.com/testcontainers/testcontainers-go/modules/postgres v0.20.1 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/goleak v1.1.12 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
