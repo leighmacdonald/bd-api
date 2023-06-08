@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	sq "github.com/Masterminds/squirrel"
 	"github.com/golang-migrate/migrate/v4"
 	pgxMigrate "github.com/golang-migrate/migrate/v4/database/pgx"
 	"github.com/golang-migrate/migrate/v4/source/httpfs"
@@ -21,7 +22,7 @@ var (
 	// ErrDuplicate is returned when a duplicate row result is attempted to be inserted
 	//errDuplicate = errors.New("Duplicate entity")
 	// Use $ for pg based queries
-	//sb = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	sb = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 	//go:embed migrations
 	migrations embed.FS
 )
@@ -61,8 +62,8 @@ type pgStore struct {
 }
 
 // Migrate database schema
-func (database *pgStore) migrate() error {
-	instance, errOpen := sql.Open("pgx", database.dsn)
+func (db *pgStore) migrate() error {
+	instance, errOpen := sql.Open("pgx", db.dsn)
 	if errOpen != nil {
 		return errors.Wrapf(errOpen, "Failed to open database for migration")
 	}
@@ -144,4 +145,101 @@ type sbBanRecord struct {
 	Duration  time.Duration `json:"duration"`
 	Permanent bool          `json:"permanent"`
 	timeStamped
+}
+
+func (db *pgStore) sbSiteSave(ctx context.Context, s *sbSite) error {
+	s.UpdatedOn = time.Now()
+	if s.SiteID > 0 {
+		s.CreatedOn = time.Now()
+		query, args, errSQL := sb.
+			Insert("sb_site").
+			Columns("name", "updated_on", "created_on").
+			Values(s.Name, s.UpdatedOn, s.CreatedOn).
+			Suffix("RETURNING sb_site_id").
+			ToSql()
+		if errSQL != nil {
+			return errSQL
+		}
+		if errQuery := db.pool.QueryRow(ctx, query, args...).Scan(&s.SiteID); errQuery != nil {
+			return errQuery
+		}
+	} else {
+		query, args, errSQL := sb.
+			Update("sb_site").
+			Set("name", s.Name).
+			Set("updated_on", s.UpdatedOn).
+			ToSql()
+		if errSQL != nil {
+			return errSQL
+		}
+		if _, errQuery := db.pool.Exec(ctx, query, args...); errQuery != nil {
+			return errQuery
+		}
+	}
+	return nil
+}
+
+func (db *pgStore) sbSiteGet(ctx context.Context, siteId int, site *sbSite) error {
+	query, args, errSQL := sb.
+		Select("sb_site_id", "name", "updated_on", "created_on").
+		From("sb_site").
+		Where(sq.Eq{"sb_site_id": siteId}).
+		ToSql()
+	if errSQL != nil {
+		return errSQL
+	}
+	if errQuery := db.pool.QueryRow(ctx, query, args...).Scan(&site.SiteID, &site.Name, &site.UpdatedOn, &site.CreatedOn); errQuery != nil {
+		return errQuery
+	}
+	return nil
+}
+
+func (db *pgStore) sbSiteDelete(ctx context.Context, siteId int) error {
+	query, args, errSQL := sb.
+		Delete("sb_site").
+		Where(sq.Eq{"sb_site_id": siteId}).
+		ToSql()
+	if errSQL != nil {
+		return errSQL
+	}
+	if _, errQuery := db.pool.Exec(ctx, query, args...); errQuery != nil {
+		return errQuery
+	}
+	return nil
+}
+
+func (db *pgStore) sbBanSave(ctx context.Context, s *sbBanRecord) error {
+	s.UpdatedOn = time.Now()
+	if s.BanID > 0 {
+		s.CreatedOn = time.Now()
+		query, args, errSQL := sb.
+			Insert("sb_ban").
+			Columns("sb_site_id", "steam_id", "reason", "created_on", "duration", "permanent").
+			Values(s.SiteID, s.SteamID, s.Reason, s.CreatedOn, s.Duration, s.Permanent).
+			Suffix("RETURNING sb_ban_id").
+			ToSql()
+		if errSQL != nil {
+			return errSQL
+		}
+		if errQuery := db.pool.QueryRow(ctx, query, args...).Scan(&s.BanID); errQuery != nil {
+			return errQuery
+		}
+	} else {
+		query, args, errSQL := sb.
+			Update("sb_site").
+			Set("sb_site_id", s.SiteID).
+			Set("steam_id", s.SteamID).
+			Set("reason", s.Reason).
+			Set("created_on", s.CreatedOn).
+			Set("duration", s.Duration).
+			Set("permanent", s.Permanent).
+			ToSql()
+		if errSQL != nil {
+			return errSQL
+		}
+		if _, errQuery := db.pool.Exec(ctx, query, args...); errQuery != nil {
+			return errQuery
+		}
+	}
+	return nil
 }
