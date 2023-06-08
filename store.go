@@ -8,6 +8,7 @@ import (
 	pgxMigrate "github.com/golang-migrate/migrate/v4/database/pgx"
 	"github.com/golang-migrate/migrate/v4/source/httpfs"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"net/http"
@@ -87,4 +88,60 @@ func (database *pgStore) migrate() error {
 		return errors.Wrapf(errMigrateInstance, "Failed to migrator up")
 	}
 	return migrator.Up()
+}
+
+type timeStamped struct {
+	UpdatedOn time.Time `json:"steam_updated_on"`
+	CreatedOn time.Time `json:"created_on"`
+}
+
+type playerRecord struct {
+	SteamID                  string    `json:"steam_id"`
+	CommunityVisibilityState int       `json:"community_visibility_state"`
+	ProfileState             int       `json:"profile_state"`
+	PersonaName              string    `json:"persona_name"`
+	Vanity                   string    `json:"vanity"`
+	AvatarHash               string    `json:"avatar_hash"`
+	PersonaState             int       `json:"persona_state"`
+	RealName                 string    `json:"real_name"`
+	TimeCreated              int       `json:"time_created"`
+	LocCountryCode           string    `json:"loc_country_code"`
+	LocStateCode             string    `json:"loc_state_code"`
+	LocCityID                int       `json:"loc_city_id"`
+	CommunityBanned          bool      `json:"community_banned"`
+	VacBanned                bool      `json:"vac_banned"`
+	GameBans                 int       `json:"game_bans"`
+	EconomyBanned            int       `json:"economy_banned"`
+	LogsTfCount              int       `json:"logs_tf_count"`
+	UGCUpdatedOn             time.Time `json:"ugc_updated_on"`
+	RGLUpdatedOn             time.Time `json:"rgl_updated_on"`
+	ETF2LUpdatedOn           time.Time `json:"etf2l_updated_on"`
+	LogsTFUpdatedOn          time.Time `json:"logs_tf_updated_on"`
+	timeStamped
+}
+
+//type leagueRecord struct {
+//	LeagueID   int       `json:"league_id"`
+//	LeagueName string    `json:"league_name"`
+//	UpdatedOn  time.Time `json:"Updated_on"`
+//	CreatedOn  time.Time `json:"created_on"`
+//}
+//
+//type teamRecord struct {
+//}
+
+type sbSite struct {
+	SiteID int    `json:"site_id"`
+	Name   string `json:"name"`
+	timeStamped
+}
+
+type sbBanRecord struct {
+	BanID     int           `json:"ban_id"`
+	SiteID    string        `json:"site_id"`
+	SteamID   steamid.SID64 `json:"steam_id"`
+	Reason    string        `json:"reason"`
+	Duration  time.Duration `json:"duration"`
+	Permanent bool          `json:"permanent"`
+	timeStamped
 }

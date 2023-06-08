@@ -4,17 +4,17 @@ create table if not exists player
 (
     steam_id                 bigint
         constraint player_pk primary key,
-    communityvisibilitystate int default 0 not null,
-    profilestate             int           not null,
+    community_visibility_state int default 0 not null,
+    profile_state             int           not null,
     persona_name             text          not null,
     vanity                   text          not null,
-    avatarhash               text          not null,
-    personastate             int           not null,
-    realname                 text          not null,
-    timecreated              int           not null,
-    loccountrycode           text          not null,
-    locstatecode             text          not null,
-    loccityid                int           not null,
+    avatar_hash               text          not null,
+    persona_state             int           not null,
+    real_name                 text          not null,
+    time_created              int           not null,
+    loc_country_code           text          not null,
+    loc_state_code             text          not null,
+    loc_city_id                int           not null,
     community_banned         boolean       not null,
     vac_banned               boolean       not null,
     game_bans                int           not null,
@@ -33,12 +33,13 @@ create table if not exists league
     league_id   int
         constraint league_pk primary key,
     league_name text unique,
+    updated_on  timestamp default now() not null,
     created_on  timestamp default now() not null
 );
 
 create table if not exists team
 (
-    season_id    bigint primary key,
+    team_id    bigint primary key,
     steam_id     bigint references player,
     league_id    int  not null
         constraint team_league_fk
@@ -54,7 +55,9 @@ create table if not exists sb_site
     sb_site_id bigint
         constraint sb_site_pk
             primary key,
-    name       text not null
+    name       text not null,
+    updated_on  timestamp default now() not null,
+    created_on  timestamp default now() not null
 );
 
 create index if not exists sb_site_uidx ON sb_site (name);
