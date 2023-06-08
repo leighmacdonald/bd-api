@@ -29,7 +29,7 @@ create table if not exists player
 
 create table if not exists league
 (
-    league_id   int primary key,
+    league_id   serial primary key,
     league_name text unique,
     updated_on  timestamp default now() not null,
     created_on  timestamp default now() not null
@@ -50,8 +50,7 @@ create table if not exists team
 
 create table if not exists sb_site
 (
-    sb_site_id bigint
-        constraint sb_site_pk
+    sb_site_id serial
             primary key,
     name       text                    not null,
     updated_on timestamp default now() not null,

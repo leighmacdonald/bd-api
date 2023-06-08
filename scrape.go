@@ -26,21 +26,76 @@ type parseTimeFunc func(s string) (time.Time, error)
 type parserFunc func(doc *goquery.Selection, nextUrl nextURLFunc, timeParser parseTimeFunc) (string, []sbRecord, error)
 
 func startScraper(config *appConfig) {
-
+	scrapers := []*sbScraper{
+		new7MauScraper(),
+		newApeModeScraper(),
+		newAstraManiaScraper(),
+		newBouncyBallScraper(),
+		newCSIServersScraper(),
+		newCutiePieScraper(),
+		newDarkPyroScraper(),
+		newDefuseRoScraper(),
+		newDiscFFScraper(),
+		newDreamFireScraper(),
+		newECJScraper(),
+		newElectricScraper(),
+		newFirePoweredScraper(),
+		newFluxTFScraper(),
+		newFurryPoundScraper(),
+		newGFLScraper(),
+		newGhostCapScraper(),
+		newGlobalParadiseScraper(),
+		newGunServerScraper(),
+		newHarpoonScraper(),
+		newHellClanScraper(),
+		newJumpAcademyScraper(),
+		newLBGamingScraper(),
+		newLOOSScraper(),
+		newLazyNeerScraper(),
+		newLazyPurpleScraper(),
+		newMaxDBScraper(),
+		newNeonHeightsScraper(),
+		newNideScraper(),
+		newOpstOnlineScraper(),
+		newOreonScraper(),
+		newOwlTFScraper(),
+		newPancakesScraper(),
+		newPandaScraper(),
+		newPowerFPSScraper(),
+		newPubsTFScraper(),
+		newRetroServersScraper(),
+		newSGGamingScraper(),
+		newSameTeemScraper(),
+		newSavageServidoresScraper(),
+		newScrapTFScraper(),
+		newServiliveClScraper(),
+		newSettiScraper(),
+		newSirPleaseScraper(),
+		newSkialScraper(),
+		newSneaksScraper(),
+		newSpaceShipScraper(),
+		newSpectreScraper(),
+		newSvdosBrothersScraper(),
+		newSwapShopScraper(),
+		newTF2MapsScraper(),
+		newTF2ROScraper(),
+		newTawernaScraper(),
+		newTheVilleScraper(),
+		newTitanScraper(),
+		newTriggerHappyScraper(),
+		newUGCScraper(),
+		newVaticanCityScraper(),
+		newVidyaGaemsScraper(),
+		newWonderlandTFScraper(),
+		newZMBrasilScraper(),
+	}
 	startProxies(config)
 	defer stopProxies()
 
-	for _, scraper := range []*sbScraper{
-		newSkialScraper(),
-		newGFLScraper(),
-		newSpaceShipScraper(),
-		newLazyPurpleScraper(),
-	} {
-
+	for _, scraper := range scrapers {
 		if errProxies := setupProxies(scraper.Collector, config); errProxies != nil {
 			logger.Panic("Failed to setup proxies", zap.Error(errProxies))
 		}
-
 		go func(s *sbScraper) {
 			if errScrape := s.start(); errScrape != nil {
 				logger.Error("sbScraper returned error", zap.Error(errScrape))
@@ -704,7 +759,6 @@ func parseDefault(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTi
 		isValue  bool
 	)
 	doc.Find("#banlist .listtable table tr td").Each(func(i int, selection *goquery.Selection) {
-		// "#banlist table table tr td
 		txt := strings.TrimSpace(selection.Text())
 		if !isValue {
 			switch strings.ToLower(txt) {

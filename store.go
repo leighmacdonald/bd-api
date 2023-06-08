@@ -137,6 +137,18 @@ type sbSite struct {
 	timeStamped
 }
 
+func newSBSite(name string) sbSite {
+	t0 := time.Now()
+	return sbSite{
+		SiteID: 0,
+		Name:   name,
+		timeStamped: timeStamped{
+			UpdatedOn: t0,
+			CreatedOn: t0,
+		},
+	}
+}
+
 type sbBanRecord struct {
 	BanID     int           `json:"ban_id"`
 	SiteID    string        `json:"site_id"`
@@ -149,7 +161,7 @@ type sbBanRecord struct {
 
 func (db *pgStore) sbSiteSave(ctx context.Context, s *sbSite) error {
 	s.UpdatedOn = time.Now()
-	if s.SiteID > 0 {
+	if s.SiteID <= 0 {
 		s.CreatedOn = time.Now()
 		query, args, errSQL := sb.
 			Insert("sb_site").

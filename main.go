@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	ctx = context.Background()
+	ctx := context.Background()
 	defer func() {
 		logger.Info("Shutting down")
 		if errSync := logger.Sync(); errSync != nil {
@@ -33,11 +33,23 @@ func main() {
 		logger.Panic("Failed to configure steam api key", zap.Error(errSetKey))
 	}
 
+	if !exists(cacheDir) {
+		if errMkDir := os.MkdirAll(cacheDir, 0755); errMkDir != nil {
+			log.Fatal("Failed to create cache dir", zap.String("dir", cacheDir), zap.Error(errMkDir))
+		}
+	}
+
 	cache = newCaches(ctx, steamCacheTimeout, compCacheTimeout, steamCacheTimeout)
 
 	if false {
 		go startScraper(&config)
 	}
+
+	http.HandleFunc("/bans", getHandler(handleGetBans()))
+	http.HandleFunc("/summary", getHandler(handleGetSummary()))
+	http.HandleFunc("/profile", getHandler(handleGetProfile()))
+	http.HandleFunc("/kick", onPostKick)
+	http.HandleFunc(profilesSlugURL, getHandler(handleGetProfiles(ctx)))
 
 	if errServe := http.ListenAndServe(config.ListenAddr, nil); errServe != nil {
 		log.Printf("HTTP Server returned error: %v", errServe)
@@ -45,8 +57,8 @@ func main() {
 }
 
 var (
-	cache    caches
-	ctx      context.Context
+	cache caches
+
 	logger   *zap.Logger
 	cacheDir = "./.cache/"
 )
@@ -57,13 +69,6 @@ func init() {
 		panic(errLogger)
 	}
 	logger = newLogger
-
-	if !exists(cacheDir) {
-		if errMkDir := os.MkdirAll(cacheDir, 0755); errMkDir != nil {
-			log.Fatal("Failed to create cache dir", zap.String("dir", cacheDir), zap.Error(errMkDir))
-		}
-	}
-	cache = newCaches(ctx, steamCacheTimeout, compCacheTimeout, steamCacheTimeout)
 
 	reLOGSResults = regexp.MustCompile(`<p>(\d+|\d+,\d+)\sresults</p>`)
 	//reETF2L = regexp.MustCompile(`.org/forum/user/(\d+)`)

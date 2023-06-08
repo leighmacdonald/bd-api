@@ -13,6 +13,8 @@ import (
 	"time"
 )
 
+var testStore *pgStore
+
 func TestMain(m *testing.M) {
 	testCtx := context.Background()
 	username, password, dbName := "bdapi-test", "bdapi-test", "bdapi-test"
@@ -41,14 +43,22 @@ func TestMain(m *testing.M) {
 			logger.Error("Failed to terminate test container")
 		}
 	}()
-	_, errStore := newStore(testCtx, config.DSN)
+	newTestStore, errStore := newStore(testCtx, config.DSN)
 	if errStore != nil {
 		logger.Error("Failed to setup test db", zap.Error(errStore))
 		os.Exit(2)
 	}
+	testStore = newTestStore
 	m.Run()
 }
 
-func TestStore(t *testing.T) {
-	require.True(t, false)
+func TestSBSite(t *testing.T) {
+	var s sbSite
+	require.Error(t, testStore.sbSiteGet(context.Background(), 99999, &s))
+	s2 := newSBSite("test-site")
+	require.NoError(t, testStore.sbSiteSave(context.Background(), &s2))
+	var s3 sbSite
+	require.NoError(t, testStore.sbSiteGet(context.Background(), s2.SiteID, &s3))
+	require.Equal(t, s2.Name, s3.Name)
+	require.Equal(t, s2.UpdatedOn.Second(), s3.UpdatedOn.Second())
 }

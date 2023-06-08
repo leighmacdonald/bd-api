@@ -19,14 +19,6 @@ import (
 	"time"
 )
 
-func init() {
-	http.HandleFunc("/bans", getHandler(handleGetBans()))
-	http.HandleFunc("/summary", getHandler(handleGetSummary()))
-	http.HandleFunc("/profile", getHandler(handleGetProfile()))
-	http.HandleFunc("/kick", onPostKick)
-	http.HandleFunc(profilesSlugURL, getHandler(handleGetProfiles()))
-}
-
 func onPostKick(w http.ResponseWriter, _ *http.Request) {
 	if _, errWrite := fmt.Fprintf(w, ""); errWrite != nil {
 		log.Printf("failed to write response body: %v\n", errWrite)
@@ -60,12 +52,12 @@ func handleGetSummary() func(http.ResponseWriter, *http.Request) {
 func handleGetBans() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		steamIDQuery := req.URL.Query().Get("steam_id")
-		steamID, steamIDErr := steamid.SID64FromString(steamIDQuery)
+		sid, steamIDErr := steamid.SID64FromString(steamIDQuery)
 		if steamIDErr != nil {
 			http.Error(w, "Invalid steam id", http.StatusBadRequest)
 			return
 		}
-		item := cache.bans.Get(steamID)
+		item := cache.bans.Get(sid)
 		sendItem(w, req, item.Value())
 	}
 }
@@ -171,7 +163,7 @@ func logHTTPErr(w http.ResponseWriter, message string, err error, statusCode int
 	logger.Error(message, zap.Error(err))
 }
 
-func handleGetProfiles() func(http.ResponseWriter, *http.Request) {
+func handleGetProfiles(ctx context.Context) func(http.ResponseWriter, *http.Request) {
 	style := styles.Get("monokai")
 	if style == nil {
 		style = styles.Fallback
