@@ -37,10 +37,8 @@ func initScrapers(ctx context.Context, db *pgStore, scrapers []*sbScraper) error
 					continue
 				}
 				return errors.Wrap(errPg, "Database error")
-			} else {
-				return errors.Wrap(errSave, "Unknown error")
 			}
-
+			return errors.Wrap(errSave, "Unknown error")
 		}
 	}
 	return nil

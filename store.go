@@ -377,12 +377,26 @@ func newSBSite(name string) sbSite {
 
 type sbBanRecord struct {
 	BanID     int           `json:"ban_id"`
-	SiteID    string        `json:"site_id"`
+	SiteID    int           `json:"site_id"`
 	SteamID   steamid.SID64 `json:"steam_id"`
 	Reason    string        `json:"reason"`
 	Duration  time.Duration `json:"duration"`
 	Permanent bool          `json:"permanent"`
 	timeStamped
+}
+
+func (site sbSite) newRecord(sid64 steamid.SID64, reason string, timeStamp time.Time, duration time.Duration, perm bool) sbBanRecord {
+	return sbBanRecord{
+		SiteID:    site.SiteID,
+		SteamID:   sid64,
+		Reason:    reason,
+		Duration:  duration,
+		Permanent: perm,
+		timeStamped: timeStamped{
+			UpdatedOn: timeStamp,
+			CreatedOn: timeStamp,
+		},
+	}
 }
 
 func (db *pgStore) sbSiteSave(ctx context.Context, s *sbSite) error {
@@ -417,11 +431,11 @@ func (db *pgStore) sbSiteSave(ctx context.Context, s *sbSite) error {
 	return nil
 }
 
-func (db *pgStore) sbSiteGet(ctx context.Context, siteId int, site *sbSite) error {
+func (db *pgStore) sbSiteGet(ctx context.Context, siteID int, site *sbSite) error {
 	query, args, errSQL := sb.
 		Select("sb_site_id", "name", "updated_on", "created_on").
 		From("sb_site").
-		Where(sq.Eq{"sb_site_id": siteId}).
+		Where(sq.Eq{"sb_site_id": siteID}).
 		ToSql()
 	if errSQL != nil {
 		return errSQL
@@ -432,10 +446,10 @@ func (db *pgStore) sbSiteGet(ctx context.Context, siteId int, site *sbSite) erro
 	return nil
 }
 
-func (db *pgStore) sbSiteDelete(ctx context.Context, siteId int) error {
+func (db *pgStore) sbSiteDelete(ctx context.Context, siteID int) error {
 	query, args, errSQL := sb.
 		Delete("sb_site").
-		Where(sq.Eq{"sb_site_id": siteId}).
+		Where(sq.Eq{"sb_site_id": siteID}).
 		ToSql()
 	if errSQL != nil {
 		return errSQL
@@ -448,7 +462,7 @@ func (db *pgStore) sbSiteDelete(ctx context.Context, siteId int) error {
 
 func (db *pgStore) sbBanSave(ctx context.Context, s *sbBanRecord) error {
 	s.UpdatedOn = time.Now()
-	if s.BanID > 0 {
+	if s.BanID <= 0 {
 		s.CreatedOn = time.Now()
 		query, args, errSQL := sb.
 			Insert("sb_ban").

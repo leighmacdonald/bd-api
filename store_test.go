@@ -9,6 +9,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 	"go.uber.org/zap"
 	"testing"
+	"time"
 )
 
 var testStore *pgStore
@@ -47,7 +48,7 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
-func TestSBSite(t *testing.T) {
+func TestSourceBans(t *testing.T) {
 	var s sbSite
 	require.Error(t, testStore.sbSiteGet(context.Background(), 99999, &s))
 	s2 := newSBSite("test-site")
@@ -56,6 +57,19 @@ func TestSBSite(t *testing.T) {
 	require.NoError(t, testStore.sbSiteGet(context.Background(), s2.SiteID, &s3))
 	require.Equal(t, s2.Name, s3.Name)
 	require.Equal(t, s2.UpdatedOn.Second(), s3.UpdatedOn.Second())
+
+	pr := newPlayerRecord(testIDCamper)
+	pr.PersonaName = "blah"
+	pr.Vanity = "poop3r"
+	require.NoError(t, testStore.playerRecordSave(context.Background(), &pr))
+
+	t0 := time.Now().AddDate(-1, 0, 0)
+	t1 := t0.AddDate(0, 1, 0)
+	recA := s3.newRecord(testIDCamper, "test", t0, t1.Sub(t0), false)
+	require.NoError(t, testStore.sbBanSave(context.Background(), &recA))
+
+	require.NoError(t, testStore.sbSiteDelete(context.Background(), s3.SiteID))
+	require.Error(t, testStore.sbSiteGet(context.Background(), s3.SiteID, &s))
 }
 
 func TestPlayerRecord(t *testing.T) {
