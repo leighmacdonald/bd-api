@@ -8,6 +8,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	pgxMigrate "github.com/golang-migrate/migrate/v4/database/pgx"
 	"github.com/golang-migrate/migrate/v4/source/httpfs"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/pkg/errors"
@@ -96,29 +97,176 @@ type timeStamped struct {
 	CreatedOn time.Time `json:"created_on"`
 }
 
+type playerNameRecord struct {
+	NameID      int64         `json:"name_id"`
+	SteamID     steamid.SID64 `json:"steam_id"`
+	PersonaName string        `json:"persona_name"`
+	CreatedOn   time.Time     `json:"created_on"`
+}
+
+type playerAvatarRecord struct {
+	NameID     int64         `json:"name_id"`
+	SteamID    steamid.SID64 `json:"steam_id"`
+	AvatarHash string        `json:"avatar_hash"`
+	CreatedOn  time.Time     `json:"created_on"`
+}
+
+type playerVanityRecord struct {
+	NameID    int64         `json:"name_id"`
+	SteamID   steamid.SID64 `json:"steam_id"`
+	Vanity    string        `json:"vanity"`
+	CreatedOn time.Time     `json:"created_on"`
+}
+
 type playerRecord struct {
-	SteamID                  string    `json:"steam_id"`
-	CommunityVisibilityState int       `json:"community_visibility_state"`
-	ProfileState             int       `json:"profile_state"`
-	PersonaName              string    `json:"persona_name"`
-	Vanity                   string    `json:"vanity"`
-	AvatarHash               string    `json:"avatar_hash"`
-	PersonaState             int       `json:"persona_state"`
-	RealName                 string    `json:"real_name"`
-	TimeCreated              int       `json:"time_created"`
-	LocCountryCode           string    `json:"loc_country_code"`
-	LocStateCode             string    `json:"loc_state_code"`
-	LocCityID                int       `json:"loc_city_id"`
-	CommunityBanned          bool      `json:"community_banned"`
-	VacBanned                bool      `json:"vac_banned"`
-	GameBans                 int       `json:"game_bans"`
-	EconomyBanned            int       `json:"economy_banned"`
-	LogsTfCount              int       `json:"logs_tf_count"`
-	UGCUpdatedOn             time.Time `json:"ugc_updated_on"`
-	RGLUpdatedOn             time.Time `json:"rgl_updated_on"`
-	ETF2LUpdatedOn           time.Time `json:"etf2l_updated_on"`
-	LogsTFUpdatedOn          time.Time `json:"logs_tf_updated_on"`
+	SteamID                  steamid.SID64 `json:"steam_id"`
+	CommunityVisibilityState int           `json:"community_visibility_state"`
+	ProfileState             int           `json:"profile_state"`
+	PersonaName              string        `json:"persona_name"`
+	Vanity                   string        `json:"vanity"`
+	AvatarHash               string        `json:"avatar_hash"`
+	PersonaState             int           `json:"persona_state"`
+	RealName                 string        `json:"real_name"`
+	TimeCreated              int           `json:"time_created"`
+	LocCountryCode           string        `json:"loc_country_code"`
+	LocStateCode             string        `json:"loc_state_code"`
+	LocCityID                int           `json:"loc_city_id"`
+	CommunityBanned          bool          `json:"community_banned"`
+	VacBanned                bool          `json:"vac_banned"`
+	GameBans                 int           `json:"game_bans"`
+	EconomyBanned            int           `json:"economy_banned"`
+	LogsTFCount              int           `json:"logs_tf_count"`
+	UGCUpdatedOn             time.Time     `json:"ugc_updated_on"`
+	RGLUpdatedOn             time.Time     `json:"rgl_updated_on"`
+	ETF2LUpdatedOn           time.Time     `json:"etf2l_updated_on"`
+	LogsTFUpdatedOn          time.Time     `json:"logs_tf_updated_on"`
+	isNewRecord              bool
 	timeStamped
+}
+
+const defaultAvatar = "fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb"
+
+func newPlayerRecord(sid64 steamid.SID64) playerRecord {
+	t0 := time.Now()
+	return playerRecord{
+		SteamID:     sid64,
+		isNewRecord: true,
+		AvatarHash:  defaultAvatar,
+		timeStamped: timeStamped{
+			UpdatedOn: t0,
+			CreatedOn: t0,
+		}}
+}
+
+func playerNameSave(ctx context.Context, tx pgx.Tx, r *playerRecord) error {
+	query, args, errSQL := sb.Insert("player_names").Columns("steam_id", "persona_name").Values(r.SteamID, r.PersonaName).ToSql()
+	if errSQL != nil {
+		return errSQL
+	}
+	if _, errName := tx.Exec(ctx, query, args...); errName != nil {
+		return errName
+	}
+	return nil
+}
+
+func playerAvatarSave(ctx context.Context, tx pgx.Tx, r *playerRecord) error {
+	query, args, errSQL := sb.Insert("player_avatars").Columns("steam_id", "avatar_hash").Values(r.SteamID, r.AvatarHash).ToSql()
+	if errSQL != nil {
+		return errSQL
+	}
+	if _, errName := tx.Exec(ctx, query, args...); errName != nil {
+		return errName
+	}
+	return nil
+}
+
+func playerVanitySave(ctx context.Context, tx pgx.Tx, r *playerRecord) error {
+	query, args, errSQL := sb.Insert("player_vanity").Columns("steam_id", "vanity").Values(r.SteamID, r.Vanity).ToSql()
+	if errSQL != nil {
+		return errSQL
+	}
+	if _, errName := tx.Exec(ctx, query, args...); errName != nil {
+		return errName
+	}
+	return nil
+}
+
+func (db *pgStore) playerRecordSave(ctx context.Context, r *playerRecord) error {
+	tx, errTx := db.pool.BeginTx(ctx, pgx.TxOptions{})
+	if errTx != nil {
+		return errTx
+	}
+	defer func() {
+		if errRollback := tx.Rollback(ctx); errRollback != nil {
+			logger.Error("Failed to rollback player tx", zap.Error(errRollback))
+		}
+	}()
+	if r.isNewRecord {
+		query, args, errSQL := sb.
+			Insert("player").
+			Columns("steam_id", "community_visibility_state", "profile_state", "persona_name", "vanity",
+				"avatar_hash", "persona_state", "real_name", "time_created", "loc_country_code", "loc_state_code", "loc_city_id",
+				"community_banned", "vac_banned", "game_bans", "economy_banned", "logs_tf_count", "ugc_updated_on", "rgl_updated_on",
+				"etf2l_updated_on", "logs_tf_updated_on", "updated_on", "created_on").
+			Values(r.SteamID, r.CommunityVisibilityState, r.ProfileState, r.PersonaName, r.Vanity,
+				r.AvatarHash, r.PersonaState, r.RealName, r.TimeCreated, r.LocCountryCode, r.LocStateCode, r.LocCityID,
+				r.CommunityBanned, r.VacBanned, r.GameBans, r.EconomyBanned, r.LogsTFCount, r.UGCUpdatedOn, r.RGLUpdatedOn,
+				r.ETF2LUpdatedOn, r.LogsTFUpdatedOn, r.UpdatedOn, r.CreatedOn).
+			ToSql()
+		if errSQL != nil {
+			return errSQL
+		}
+		if _, errExec := tx.Exec(ctx, query, args...); errExec != nil {
+			return errExec
+		}
+		r.isNewRecord = false
+		if errName := playerNameSave(ctx, tx, r); errName != nil {
+			return errName
+		}
+		if errVanity := playerVanitySave(ctx, tx, r); errVanity != nil {
+			return errVanity
+		}
+		if errAvatar := playerAvatarSave(ctx, tx, r); errAvatar != nil {
+			return errAvatar
+		}
+	} else {
+		query, args, errSQL := sb.
+			Update("player").
+			Set("steam_id", r.SteamID).
+			Set("community_visibility_state", r.CommunityVisibilityState).
+			Set("profile_state", r.ProfileState).
+			Set("persona_name", r.PersonaName).
+			Set("vanity", r.Vanity).
+			Set("avatar_hash", r.AvatarHash).
+			Set("persona_state", r.PersonaState).
+			Set("real_name", r.RealName).
+			Set("time_created", r.TimeCreated).
+			Set("loc_country_code", r.LocCountryCode).
+			Set("loc_state_code", r.LocStateCode).
+			Set("loc_city_id", r.LocCityID).
+			Set("community_banned", r.CommunityBanned).
+			Set("vac_banned", r.VacBanned).
+			Set("game_bans", r.GameBans).
+			Set("economy_banned", r.EconomyBanned).
+			Set("logs_tf_count", r.LogsTFCount).
+			Set("ugc_updated_on", r.UGCUpdatedOn).
+			Set("rgl_updated_on", r.RGLUpdatedOn).
+			Set("etf2l_updated_on", r.ETF2LUpdatedOn).
+			Set("logs_tf_updated_on", r.LogsTFUpdatedOn).
+			Set("updated_on", r.UpdatedOn).
+			Where(sq.Eq{"steam_id": r.SteamID}).
+			ToSql()
+		if errSQL != nil {
+			return errSQL
+		}
+		if _, errExec := tx.Exec(ctx, query, args...); errExec != nil {
+			return errExec
+		}
+	}
+	if errCommit := tx.Commit(ctx); errCommit != nil {
+		logger.Error("Failed to commit player tx", zap.Error(errCommit))
+	}
+	return nil
 }
 
 //type leagueRecord struct {

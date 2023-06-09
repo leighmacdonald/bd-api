@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"regexp"
 )
 
 func main() {
@@ -46,26 +45,12 @@ func main() {
 
 	cache = newCaches(ctx, steamCacheTimeout, compCacheTimeout, steamCacheTimeout)
 
-	scrapers := []*sbScraper{
-		new7MauScraper(), newApeModeScraper(), newAstraManiaScraper(), newBouncyBallScraper(), newCSIServersScraper(),
-		newCutiePieScraper(), newDarkPyroScraper(), newDefuseRoScraper(), newDiscFFScraper(), newDreamFireScraper(),
-		newECJScraper(), newElectricScraper(), newFirePoweredScraper(), newFluxTFScraper(), newFurryPoundScraper(),
-		newGFLScraper(), newGhostCapScraper(), newGlobalParadiseScraper(), newGunServerScraper(), newHarpoonScraper(),
-		newHellClanScraper(), newJumpAcademyScraper(), newLBGamingScraper(), newLOOSScraper(), newLazyNeerScraper(),
-		newLazyPurpleScraper(), newMaxDBScraper(), newNeonHeightsScraper(), newNideScraper(), newOpstOnlineScraper(),
-		newOreonScraper(), newOwlTFScraper(), newPancakesScraper(), newPandaScraper(), newPowerFPSScraper(),
-		newPubsTFScraper(), newRetroServersScraper(), newSGGamingScraper(), newSameTeemScraper(), newSavageServidoresScraper(),
-		newScrapTFScraper(), newServiliveClScraper(), newSettiScraper(), newSirPleaseScraper(), newSkialScraper(),
-		newSneaksScraper(), newSpaceShipScraper(), newSpectreScraper(), newSvdosBrothersScraper(), newSwapShopScraper(),
-		newTF2MapsScraper(), newTF2ROScraper(), newTawernaScraper(), newTheVilleScraper(), newTitanScraper(),
-		newTriggerHappyScraper(), newUGCScraper(), newVaticanCityScraper(), newVidyaGaemsScraper(), newWonderlandTFScraper(),
-		newZMBrasilScraper(),
-	}
-	if errInitScrapers := initScraper(ctx, db, scrapers); errInitScrapers != nil {
+	scrapers := createScrapers()
+	if errInitScrapers := initScrapers(ctx, db, scrapers); errInitScrapers != nil {
 		logger.Fatal("Failed to initialize scrapers", zap.Error(errInitScrapers))
 	}
 	if false {
-		go startScraper(&config, scrapers)
+		go startScrapers(&config, scrapers)
 	}
 
 	http.HandleFunc("/bans", getHandler(handleGetBans()))
@@ -91,9 +76,4 @@ func init() {
 		panic(errLogger)
 	}
 	logger = newLogger
-
-	reLOGSResults = regexp.MustCompile(`<p>(\d+|\d+,\d+)\sresults</p>`)
-	//reETF2L = regexp.MustCompile(`.org/forum/user/(\d+)`)
-	reUGCRank = regexp.MustCompile(`Season (\d+) (\D+) (\S+)`)
-
 }

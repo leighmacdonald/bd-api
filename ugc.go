@@ -17,7 +17,7 @@ const (
 	ugc4sHeader = "TF2 4vs4 Medals"
 )
 
-var reUGCRank *regexp.Regexp
+var reUGCRank = regexp.MustCompile(`Season (\d+) (\D+) (\S+)`)
 
 func getUGC(ctx context.Context, steam steamid.SID64) ([]Season, error) {
 	resp, err := get(ctx,

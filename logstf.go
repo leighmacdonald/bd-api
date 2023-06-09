@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-var reLOGSResults *regexp.Regexp
+var reLOGSResults = regexp.MustCompile(`<p>(\d+|\d+,\d+)\sresults</p>`)
 
 func getLogsTF(ctx context.Context, steamid steamid.SID64) (int64, error) {
 	resp, err := get(ctx, fmt.Sprintf("https://logs.tf/profile/%d", steamid.Int64()), nil)

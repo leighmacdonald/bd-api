@@ -28,7 +28,7 @@ type parseTimeFunc func(s string) (time.Time, error)
 
 type parserFunc func(doc *goquery.Selection, nextUrl nextURLFunc, timeParser parseTimeFunc) (string, []sbRecord, error)
 
-func initScraper(ctx context.Context, db *pgStore, scrapers []*sbScraper) error {
+func initScrapers(ctx context.Context, db *pgStore, scrapers []*sbScraper) error {
 	for _, scraper := range scrapers {
 		s := sbSite{Name: scraper.name}
 		if errSave := db.sbSiteSave(ctx, &s); errSave != nil {
@@ -46,7 +46,7 @@ func initScraper(ctx context.Context, db *pgStore, scrapers []*sbScraper) error 
 	return nil
 }
 
-func startScraper(config *appConfig, scrapers []*sbScraper) {
+func startScrapers(config *appConfig, scrapers []*sbScraper) {
 	startProxies(config)
 	defer stopProxies()
 
@@ -97,6 +97,24 @@ type sbScraper struct {
 	parser    parserFunc
 	nextURL   nextURLFunc
 	parseTIme parseTimeFunc
+}
+
+func createScrapers() []*sbScraper {
+	return []*sbScraper{
+		new7MauScraper(), newApeModeScraper(), newAstraManiaScraper(), newBouncyBallScraper(), newCSIServersScraper(),
+		newCutiePieScraper(), newDarkPyroScraper(), newDefuseRoScraper(), newDiscFFScraper(), newDreamFireScraper(),
+		newECJScraper(), newElectricScraper(), newFirePoweredScraper(), newFluxTFScraper(), newFurryPoundScraper(),
+		newGFLScraper(), newGhostCapScraper(), newGlobalParadiseScraper(), newGunServerScraper(), newHarpoonScraper(),
+		newHellClanScraper(), newJumpAcademyScraper(), newLBGamingScraper(), newLOOSScraper(), newLazyNeerScraper(),
+		newLazyPurpleScraper(), newMaxDBScraper(), newNeonHeightsScraper(), newNideScraper(), newOpstOnlineScraper(),
+		newOreonScraper(), newOwlTFScraper(), newPancakesScraper(), newPandaScraper(), newPowerFPSScraper(),
+		newPubsTFScraper(), newRetroServersScraper(), newSGGamingScraper(), newSameTeemScraper(), newSavageServidoresScraper(),
+		newScrapTFScraper(), newServiliveClScraper(), newSettiScraper(), newSirPleaseScraper(), newSkialScraper(),
+		newSneaksScraper(), newSpaceShipScraper(), newSpectreScraper(), newSvdosBrothersScraper(), newSwapShopScraper(),
+		newTF2MapsScraper(), newTF2ROScraper(), newTawernaScraper(), newTheVilleScraper(), newTitanScraper(),
+		newTriggerHappyScraper(), newUGCScraper(), newVaticanCityScraper(), newVidyaGaemsScraper(), newWonderlandTFScraper(),
+		newZMBrasilScraper(),
+	}
 }
 
 func (scraper *sbScraper) start() error {

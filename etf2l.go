@@ -9,6 +9,8 @@ import (
 	"sort"
 )
 
+//var reETF2L = regexp.MustCompile(`.org/forum/user/(\d+)`)
+
 type comp struct {
 	Category    string `json:"category"`
 	Competition string `json:"competition"`

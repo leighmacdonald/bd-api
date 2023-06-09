@@ -62,3 +62,8 @@ func TestSBSite(t *testing.T) {
 	require.Equal(t, s2.Name, s3.Name)
 	require.Equal(t, s2.UpdatedOn.Second(), s3.UpdatedOn.Second())
 }
+
+func TestPlayerRecord(t *testing.T) {
+	pr := newPlayerRecord(76561197961279983)
+	require.NoError(t, testStore.playerRecordSave(context.Background(), &pr))
+}

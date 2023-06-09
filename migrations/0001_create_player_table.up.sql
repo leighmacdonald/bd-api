@@ -27,6 +27,36 @@ create table if not exists player
     created_on                 timestamp     not null
 );
 
+create table if not exists player_names
+(
+    name_id      bigint primary key,
+    steam_id   bigint    not null
+        constraint player_name_fk
+            references player (steam_id) on delete cascade,
+    persona_name text                    not null,
+    created_on   timestamp default now() not null
+);
+
+create table if not exists player_avatars
+(
+    name_id     bigint primary key,
+    steam_id   bigint    not null
+        constraint player_hash_fk
+            references player (steam_id) on delete cascade,
+    avatar_hash text                    not null,
+    created_on  timestamp default now() not null
+);
+
+create table if not exists player_vanity
+(
+    name_id    bigint primary key,
+    steam_id   bigint    not null
+        constraint player_vanity_fk
+            references player (steam_id) on delete cascade,
+    vanity     text                    not null,
+    created_on timestamp default now() not null
+);
+
 create table if not exists league
 (
     league_id   serial primary key,
