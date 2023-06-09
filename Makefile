@@ -31,6 +31,9 @@ check_deps:
 	go install golang.org/x/lint/golint@latest
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 
+dev_db:
+	docker compose -f docker-compose-dev.yml up --force-recreate -V postgres
+
 test:
 	go test ./...
 
