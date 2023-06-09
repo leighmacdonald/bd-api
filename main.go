@@ -39,10 +39,33 @@ func main() {
 		}
 	}
 
+	db, errDB := newStore(ctx, config.DSN)
+	if errDB != nil {
+		logger.Fatal("Failed to connect to database", zap.Error(errDB))
+	}
+
 	cache = newCaches(ctx, steamCacheTimeout, compCacheTimeout, steamCacheTimeout)
 
+	scrapers := []*sbScraper{
+		new7MauScraper(), newApeModeScraper(), newAstraManiaScraper(), newBouncyBallScraper(), newCSIServersScraper(),
+		newCutiePieScraper(), newDarkPyroScraper(), newDefuseRoScraper(), newDiscFFScraper(), newDreamFireScraper(),
+		newECJScraper(), newElectricScraper(), newFirePoweredScraper(), newFluxTFScraper(), newFurryPoundScraper(),
+		newGFLScraper(), newGhostCapScraper(), newGlobalParadiseScraper(), newGunServerScraper(), newHarpoonScraper(),
+		newHellClanScraper(), newJumpAcademyScraper(), newLBGamingScraper(), newLOOSScraper(), newLazyNeerScraper(),
+		newLazyPurpleScraper(), newMaxDBScraper(), newNeonHeightsScraper(), newNideScraper(), newOpstOnlineScraper(),
+		newOreonScraper(), newOwlTFScraper(), newPancakesScraper(), newPandaScraper(), newPowerFPSScraper(),
+		newPubsTFScraper(), newRetroServersScraper(), newSGGamingScraper(), newSameTeemScraper(), newSavageServidoresScraper(),
+		newScrapTFScraper(), newServiliveClScraper(), newSettiScraper(), newSirPleaseScraper(), newSkialScraper(),
+		newSneaksScraper(), newSpaceShipScraper(), newSpectreScraper(), newSvdosBrothersScraper(), newSwapShopScraper(),
+		newTF2MapsScraper(), newTF2ROScraper(), newTawernaScraper(), newTheVilleScraper(), newTitanScraper(),
+		newTriggerHappyScraper(), newUGCScraper(), newVaticanCityScraper(), newVidyaGaemsScraper(), newWonderlandTFScraper(),
+		newZMBrasilScraper(),
+	}
+	if errInitScrapers := initScraper(ctx, db, scrapers); errInitScrapers != nil {
+		logger.Fatal("Failed to initialize scrapers", zap.Error(errInitScrapers))
+	}
 	if false {
-		go startScraper(&config)
+		go startScraper(&config, scrapers)
 	}
 
 	http.HandleFunc("/bans", getHandler(handleGetBans()))
@@ -57,8 +80,7 @@ func main() {
 }
 
 var (
-	cache caches
-
+	cache    caches
 	logger   *zap.Logger
 	cacheDir = "./.cache/"
 )

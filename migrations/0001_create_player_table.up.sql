@@ -51,8 +51,8 @@ create table if not exists team
 create table if not exists sb_site
 (
     sb_site_id serial
-            primary key,
-    name       text                    not null,
+        primary key,
+    name       text unique             not null,
     updated_on timestamp default now() not null,
     created_on timestamp default now() not null
 );

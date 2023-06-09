@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/debug"
 	"github.com/gocolly/colly/extensions"
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -25,70 +28,25 @@ type parseTimeFunc func(s string) (time.Time, error)
 
 type parserFunc func(doc *goquery.Selection, nextUrl nextURLFunc, timeParser parseTimeFunc) (string, []sbRecord, error)
 
-func startScraper(config *appConfig) {
-	scrapers := []*sbScraper{
-		new7MauScraper(),
-		newApeModeScraper(),
-		newAstraManiaScraper(),
-		newBouncyBallScraper(),
-		newCSIServersScraper(),
-		newCutiePieScraper(),
-		newDarkPyroScraper(),
-		newDefuseRoScraper(),
-		newDiscFFScraper(),
-		newDreamFireScraper(),
-		newECJScraper(),
-		newElectricScraper(),
-		newFirePoweredScraper(),
-		newFluxTFScraper(),
-		newFurryPoundScraper(),
-		newGFLScraper(),
-		newGhostCapScraper(),
-		newGlobalParadiseScraper(),
-		newGunServerScraper(),
-		newHarpoonScraper(),
-		newHellClanScraper(),
-		newJumpAcademyScraper(),
-		newLBGamingScraper(),
-		newLOOSScraper(),
-		newLazyNeerScraper(),
-		newLazyPurpleScraper(),
-		newMaxDBScraper(),
-		newNeonHeightsScraper(),
-		newNideScraper(),
-		newOpstOnlineScraper(),
-		newOreonScraper(),
-		newOwlTFScraper(),
-		newPancakesScraper(),
-		newPandaScraper(),
-		newPowerFPSScraper(),
-		newPubsTFScraper(),
-		newRetroServersScraper(),
-		newSGGamingScraper(),
-		newSameTeemScraper(),
-		newSavageServidoresScraper(),
-		newScrapTFScraper(),
-		newServiliveClScraper(),
-		newSettiScraper(),
-		newSirPleaseScraper(),
-		newSkialScraper(),
-		newSneaksScraper(),
-		newSpaceShipScraper(),
-		newSpectreScraper(),
-		newSvdosBrothersScraper(),
-		newSwapShopScraper(),
-		newTF2MapsScraper(),
-		newTF2ROScraper(),
-		newTawernaScraper(),
-		newTheVilleScraper(),
-		newTitanScraper(),
-		newTriggerHappyScraper(),
-		newUGCScraper(),
-		newVaticanCityScraper(),
-		newVidyaGaemsScraper(),
-		newWonderlandTFScraper(),
-		newZMBrasilScraper(),
+func initScraper(ctx context.Context, db *pgStore, scrapers []*sbScraper) error {
+	for _, scraper := range scrapers {
+		s := sbSite{Name: scraper.name}
+		if errSave := db.sbSiteSave(ctx, &s); errSave != nil {
+			if errPg, ok := errSave.(*pgconn.PgError); ok {
+				if errPg.Code == pgerrcode.UniqueViolation {
+					continue
+				}
+				return errors.Wrap(errPg, "Database error")
+			} else {
+				return errors.Wrap(errSave, "Unknown error")
+			}
+
+		}
 	}
+	return nil
+}
+
+func startScraper(config *appConfig, scrapers []*sbScraper) {
 	startProxies(config)
 	defer stopProxies()
 
