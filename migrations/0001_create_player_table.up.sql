@@ -17,7 +17,7 @@ create table if not exists player
     community_banned           boolean       not null,
     vac_banned                 boolean       not null,
     game_bans                  int           not null,
-    economy_ban                int           not null,
+    economy_banned             int           not null,
     logstf_count               int           not null,
     ugc_updated_on             timestamp     not null,
     rgl_updated_on             timestamp     not null,
@@ -30,7 +30,7 @@ create table if not exists player
 create table if not exists player_names
 (
     name_id      bigint primary key,
-    steam_id   bigint    not null
+    steam_id     bigint                  not null
         constraint player_name_fk
             references player (steam_id) on delete cascade,
     persona_name text                    not null,
@@ -39,8 +39,8 @@ create table if not exists player_names
 
 create table if not exists player_avatars
 (
-    name_id     bigint primary key,
-    steam_id   bigint    not null
+    avatar_id     bigint primary key,
+    steam_id    bigint                  not null
         constraint player_hash_fk
             references player (steam_id) on delete cascade,
     avatar_hash text                    not null,
@@ -49,8 +49,8 @@ create table if not exists player_avatars
 
 create table if not exists player_vanity
 (
-    name_id    bigint primary key,
-    steam_id   bigint    not null
+    vanity_id    bigint primary key,
+    steam_id   bigint                  not null
         constraint player_vanity_fk
             references player (steam_id) on delete cascade,
     vanity     text                    not null,
