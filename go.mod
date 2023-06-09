@@ -9,7 +9,8 @@ require (
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
 	github.com/gocolly/colly v1.2.0
 	github.com/golang-migrate/migrate/v4 v4.16.1
-	github.com/jackc/pgx/v4 v4.18.1
+	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
+	github.com/jackc/pgx/v5 v5.3.1
 	github.com/jellydator/ttlcache/v3 v3.0.1
 	github.com/leighmacdonald/rgl v0.0.0-20230605080734-80a392af27d1
 	github.com/leighmacdonald/steamid/v2 v2.2.0
@@ -29,7 +30,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/antchfx/htmlquery v1.3.0 // indirect
-	github.com/antchfx/xmlquery v1.3.15 // indirect
+	github.com/antchfx/xmlquery v1.3.16 // indirect
 	github.com/antchfx/xpath v1.2.4 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.0 // indirect
 	github.com/containerd/containerd v1.6.19 // indirect
@@ -50,13 +51,13 @@ require (
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.14.0 // indirect
-	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgproto3/v2 v2.3.2 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/pgtype v1.14.0 // indirect
-	github.com/jackc/puddle v1.3.0 // indirect
+	github.com/jackc/pgx/v4 v4.18.1 // indirect
+	github.com/jackc/puddle/v2 v2.2.0 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/klauspost/compress v1.15.9 // indirect
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect

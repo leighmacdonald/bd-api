@@ -8,7 +8,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	pgxMigrate "github.com/golang-migrate/migrate/v4/database/pgx"
 	"github.com/golang-migrate/migrate/v4/source/httpfs"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -47,7 +47,7 @@ func newStore(ctx context.Context, dsn string) (*pgStore, error) {
 		database.logger.Info("Migration completed successfully")
 	}
 
-	dbConn, errConnectConfig := pgxpool.ConnectConfig(ctx, cfg)
+	dbConn, errConnectConfig := pgxpool.NewWithConfig(ctx, cfg)
 	if errConnectConfig != nil {
 		return nil, errors.Wrap(errConnectConfig, "Failed to connect to database")
 	}
