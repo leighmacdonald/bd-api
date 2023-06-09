@@ -8,9 +8,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"go.uber.org/zap"
-	"os"
 	"testing"
-	"time"
 )
 
 var testStore *pgStore
@@ -26,12 +24,10 @@ func TestMain(m *testing.M) {
 		postgres.WithPassword(password),
 		testcontainers.WithWaitStrategy(wait.
 			ForLog("database system is ready to accept connections").
-			WithOccurrence(2).
-			WithStartupTimeout(5*time.Second)),
+			WithOccurrence(2)),
 	)
 	if errContainer != nil {
 		logger.Fatal("Failed to setup test db", zap.Error(errContainer))
-		os.Exit(2)
 	}
 	//host, _ := container.Host(context.Background())
 	port, _ := container.MappedPort(context.Background(), "5432")
@@ -45,8 +41,7 @@ func TestMain(m *testing.M) {
 	}()
 	newTestStore, errStore := newStore(testCtx, config.DSN)
 	if errStore != nil {
-		logger.Error("Failed to setup test db", zap.Error(errStore))
-		os.Exit(2)
+		logger.Fatal("Failed to setup test db", zap.Error(errStore))
 	}
 	testStore = newTestStore
 	m.Run()
@@ -65,5 +60,39 @@ func TestSBSite(t *testing.T) {
 
 func TestPlayerRecord(t *testing.T) {
 	pr := newPlayerRecord(76561197961279983)
+	pr.PersonaName = "blah"
+	pr.Vanity = "123"
 	require.NoError(t, testStore.playerRecordSave(context.Background(), &pr))
+	names, errNames := testStore.playerGetNames(context.Background(), pr.SteamID)
+	require.NoError(t, errNames)
+	nameOk := false
+	for _, name := range names {
+		if name.PersonaName == pr.PersonaName {
+			nameOk = true
+			break
+		}
+	}
+	require.True(t, nameOk, "Name not found")
+
+	vNameOk := false
+	vNames, errVNames := testStore.playerGetVanityNames(context.Background(), pr.SteamID)
+	require.NoError(t, errVNames)
+	for _, name := range vNames {
+		if name.Vanity == pr.Vanity {
+			vNameOk = true
+			break
+		}
+	}
+	require.True(t, vNameOk, "Vanity not found")
+
+	avatarOk := false
+	avatars, errAvatars := testStore.playerGetAvatars(context.Background(), pr.SteamID)
+	require.NoError(t, errAvatars)
+	for _, name := range avatars {
+		if name.AvatarHash == pr.AvatarHash {
+			avatarOk = true
+			break
+		}
+	}
+	require.True(t, avatarOk, "Avatar not found")
 }

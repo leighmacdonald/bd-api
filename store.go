@@ -105,14 +105,14 @@ type playerNameRecord struct {
 }
 
 type playerAvatarRecord struct {
-	NameID     int64         `json:"name_id"`
+	AvatarID   int64         `json:"avatar_id"`
 	SteamID    steamid.SID64 `json:"steam_id"`
 	AvatarHash string        `json:"avatar_hash"`
 	CreatedOn  time.Time     `json:"created_on"`
 }
 
 type playerVanityRecord struct {
-	NameID    int64         `json:"name_id"`
+	VanityID  int64         `json:"name_id"`
 	SteamID   steamid.SID64 `json:"steam_id"`
 	Vanity    string        `json:"vanity"`
 	CreatedOn time.Time     `json:"created_on"`
@@ -135,7 +135,7 @@ type playerRecord struct {
 	VacBanned                bool          `json:"vac_banned"`
 	GameBans                 int           `json:"game_bans"`
 	EconomyBanned            int           `json:"economy_banned"`
-	LogsTFCount              int           `json:"logs_tf_count"`
+	LogsTFCount              int           `json:"logstf_count"`
 	UGCUpdatedOn             time.Time     `json:"ugc_updated_on"`
 	RGLUpdatedOn             time.Time     `json:"rgl_updated_on"`
 	ETF2LUpdatedOn           time.Time     `json:"etf2l_updated_on"`
@@ -181,6 +181,9 @@ func playerAvatarSave(ctx context.Context, tx pgx.Tx, r *playerRecord) error {
 }
 
 func playerVanitySave(ctx context.Context, tx pgx.Tx, r *playerRecord) error {
+	if r.Vanity == "" {
+		return nil
+	}
 	query, args, errSQL := sb.Insert("player_vanity").Columns("steam_id", "vanity").Values(r.SteamID, r.Vanity).ToSql()
 	if errSQL != nil {
 		return errSQL
@@ -189,6 +192,81 @@ func playerVanitySave(ctx context.Context, tx pgx.Tx, r *playerRecord) error {
 		return errName
 	}
 	return nil
+}
+
+func (db *pgStore) playerGetNames(ctx context.Context, sid64 steamid.SID64) ([]playerNameRecord, error) {
+	query, args, errSQL := sb.
+		Select("name_id", "persona_name", "created_on").
+		From("player_names").
+		Where(sq.Eq{"steam_id": sid64}).
+		ToSql()
+	if errSQL != nil {
+		return nil, errSQL
+	}
+	rows, errQuery := db.pool.Query(ctx, query, args...)
+	if errQuery != nil {
+		return nil, errQuery
+	}
+	defer rows.Close()
+	var records []playerNameRecord
+	for rows.Next() {
+		r := playerNameRecord{SteamID: sid64}
+		if errScan := rows.Scan(&r.NameID, &r.PersonaName, &r.CreatedOn); errScan != nil {
+			return nil, errScan
+		}
+		records = append(records, r)
+	}
+	return records, nil
+}
+
+func (db *pgStore) playerGetAvatars(ctx context.Context, sid64 steamid.SID64) ([]playerAvatarRecord, error) {
+	query, args, errSQL := sb.
+		Select("avatar_id", "avatar_hash", "created_on").
+		From("player_avatars").
+		Where(sq.Eq{"steam_id": sid64}).
+		ToSql()
+	if errSQL != nil {
+		return nil, errSQL
+	}
+	rows, errQuery := db.pool.Query(ctx, query, args...)
+	if errQuery != nil {
+		return nil, errQuery
+	}
+	defer rows.Close()
+	var records []playerAvatarRecord
+	for rows.Next() {
+		r := playerAvatarRecord{SteamID: sid64}
+		if errScan := rows.Scan(&r.AvatarID, &r.AvatarHash, &r.CreatedOn); errScan != nil {
+			return nil, errScan
+		}
+		records = append(records, r)
+	}
+	return records, nil
+}
+
+func (db *pgStore) playerGetVanityNames(ctx context.Context, sid64 steamid.SID64) ([]playerVanityRecord, error) {
+	query, args, errSQL := sb.
+		Select("vanity_id", "vanity", "created_on").
+		From("player_vanity").
+		Where(sq.Eq{"steam_id": sid64}).
+		ToSql()
+	if errSQL != nil {
+		return nil, errSQL
+	}
+	rows, errQuery := db.pool.Query(ctx, query, args...)
+	if errQuery != nil {
+		return nil, errQuery
+	}
+	defer rows.Close()
+	var records []playerVanityRecord
+	for rows.Next() {
+		r := playerVanityRecord{SteamID: sid64}
+		if errScan := rows.Scan(&r.VanityID, &r.Vanity, &r.CreatedOn); errScan != nil {
+			return nil, errScan
+		}
+		records = append(records, r)
+	}
+	return records, nil
 }
 
 func (db *pgStore) playerRecordSave(ctx context.Context, r *playerRecord) error {
@@ -206,8 +284,8 @@ func (db *pgStore) playerRecordSave(ctx context.Context, r *playerRecord) error 
 			Insert("player").
 			Columns("steam_id", "community_visibility_state", "profile_state", "persona_name", "vanity",
 				"avatar_hash", "persona_state", "real_name", "time_created", "loc_country_code", "loc_state_code", "loc_city_id",
-				"community_banned", "vac_banned", "game_bans", "economy_banned", "logs_tf_count", "ugc_updated_on", "rgl_updated_on",
-				"etf2l_updated_on", "logs_tf_updated_on", "updated_on", "created_on").
+				"community_banned", "vac_banned", "game_bans", "economy_banned", "logstf_count", "ugc_updated_on", "rgl_updated_on",
+				"etf2l_updated_on", "logstf_updated_on", "steam_updated_on", "created_on").
 			Values(r.SteamID, r.CommunityVisibilityState, r.ProfileState, r.PersonaName, r.Vanity,
 				r.AvatarHash, r.PersonaState, r.RealName, r.TimeCreated, r.LocCountryCode, r.LocStateCode, r.LocCityID,
 				r.CommunityBanned, r.VacBanned, r.GameBans, r.EconomyBanned, r.LogsTFCount, r.UGCUpdatedOn, r.RGLUpdatedOn,
@@ -248,11 +326,11 @@ func (db *pgStore) playerRecordSave(ctx context.Context, r *playerRecord) error 
 			Set("vac_banned", r.VacBanned).
 			Set("game_bans", r.GameBans).
 			Set("economy_banned", r.EconomyBanned).
-			Set("logs_tf_count", r.LogsTFCount).
+			Set("logstf_count", r.LogsTFCount).
 			Set("ugc_updated_on", r.UGCUpdatedOn).
 			Set("rgl_updated_on", r.RGLUpdatedOn).
 			Set("etf2l_updated_on", r.ETF2LUpdatedOn).
-			Set("logs_tf_updated_on", r.LogsTFUpdatedOn).
+			Set("logstf_updated_on", r.LogsTFUpdatedOn).
 			Set("updated_on", r.UpdatedOn).
 			Where(sq.Eq{"steam_id": r.SteamID}).
 			ToSql()

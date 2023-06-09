@@ -29,7 +29,7 @@ create table if not exists player
 
 create table if not exists player_names
 (
-    name_id      bigint primary key,
+    name_id      bigserial primary key,
     steam_id     bigint                  not null
         constraint player_name_fk
             references player (steam_id) on delete cascade,
@@ -39,7 +39,7 @@ create table if not exists player_names
 
 create table if not exists player_avatars
 (
-    avatar_id     bigint primary key,
+    avatar_id   bigserial primary key,
     steam_id    bigint                  not null
         constraint player_hash_fk
             references player (steam_id) on delete cascade,
@@ -49,7 +49,7 @@ create table if not exists player_avatars
 
 create table if not exists player_vanity
 (
-    vanity_id    bigint primary key,
+    vanity_id  bigserial primary key,
     steam_id   bigint                  not null
         constraint player_vanity_fk
             references player (steam_id) on delete cascade,
