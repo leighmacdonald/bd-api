@@ -27,7 +27,7 @@ type nextURLFunc func(doc *goquery.Selection) string
 
 type parseTimeFunc func(s string) (time.Time, error)
 
-type parserFunc func(doc *goquery.Selection, nextUrl nextURLFunc, timeParser parseTimeFunc) (string, []sbRecord, error)
+type parserFunc func(doc *goquery.Selection, nextUrl nextURLFunc, timeParser parseTimeFunc, scraperName string) (string, []sbRecord, error)
 
 func initScrapers(ctx context.Context, db *pgStore, scrapers []*sbScraper) error {
 	for _, scraper := range scrapers {
@@ -49,11 +49,11 @@ func startScrapers(config *appConfig, scrapers []*sbScraper) {
 	startProxies(config)
 	defer stopProxies()
 
-	for _, scraper := range scrapers {
-		if errProxies := setupProxies(scraper.Collector, config); errProxies != nil {
-			logger.Panic("Failed to setup proxies", zap.Error(errProxies))
-		}
-	}
+	//for _, scraper := range scrapers {
+	//	if errProxies := setupProxies(scraper.Collector, config); errProxies != nil {
+	//		logger.Panic("Failed to setup proxies", zap.Error(errProxies))
+	//	}
+	//}
 	for _, scraper := range scrapers {
 		go func(s *sbScraper) {
 			if errScrape := s.start(); errScrape != nil {
@@ -122,7 +122,7 @@ func createScrapers() []*sbScraper {
 func (scraper *sbScraper) start() error {
 	scraper.log.Info("Starting sourcebans scraper", zap.String("theme", scraper.theme))
 	scraper.Collector.OnHTML("body", func(e *colly.HTMLElement) {
-		nextURL, results, parseErr := scraper.parser(e.DOM, scraper.nextURL, scraper.parseTIme)
+		nextURL, results, parseErr := scraper.parser(e.DOM, scraper.nextURL, scraper.parseTIme, scraper.name)
 		if parseErr != nil {
 			logger.Error("Parser returned error", zap.Error(parseErr))
 			return
@@ -169,7 +169,6 @@ func (log *scrapeLogger) Event(e *debug.Event) {
 		args = append(args, zap.String("type", e.Type))
 		log.logger.Debug("Scraped url", args...)
 	}
-
 }
 
 func newScraper(name string, baseURL string, startPath string, parser parserFunc, nextURL nextURLFunc, parseTime parseTimeFunc) *sbScraper {
@@ -220,6 +219,462 @@ func newScraper(name string, baseURL string, startPath string, parser parserFunc
 
 func (scraper *sbScraper) url(path string) string {
 	return scraper.baseURL + path
+}
+
+// 05-17-23 03:07
+func parseSkialTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("01-02-06 15:04", s)
+}
+
+// 05-17-23 03:07
+func parseSkialAltTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("06-01-02 15:04", s)
+}
+
+// 05-17-23 03:07
+func parseGunServer(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("02.01.2006 15:04", s)
+}
+
+// 17/05/23 - 03:07:05
+func parseSVDos(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("02/01/06 - 15:04:05", s)
+}
+
+// 17/05/23 - 03:07:05
+func parseTriggerHappyTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("02/01/2006 15:04:05", s)
+}
+
+// 17/05/23 03:07 PM
+func parseDarkPyroTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("01/02/06 15:04 PM", s)
+}
+
+// 17-05-2023 03:07:05
+func parseTrailYear(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("02-01-2006 15:04:05", s)
+}
+
+// 17-05-2023 03:07:05
+func parseHellClanTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("02-01-2006 15:04 MST", s)
+}
+
+// 05-31-2023 9:57 PM CDT
+func parseSneakTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("01-02-2006 15:04 PM MST", s)
+}
+
+// 24-06-2023 11:15:11 IST
+func parseAMSGamingTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("02-01-2006 15:04:05 MST", s)
+}
+
+// 2023-05-17 03:07:05
+func parseDefaultTime(s string) (time.Time, error) {
+	if s == "Not applicable." {
+		return time.Time{}, nil
+	}
+	return time.Parse("2006-01-02 15:04:05", s)
+}
+
+// 2023-17-05 03:07:05  / 2023-26-05 10:56:53
+func parseDefaultTimeMonthFirst(s string) (time.Time, error) {
+	if s == "Not applicable." {
+		return time.Time{}, nil
+	}
+	return time.Parse("2006-02-01 15:04:05", s)
+}
+
+// Thu, May 11, 2023 7:14 PM    / Fri, Jun 2, 2023 6:40 PM
+func parsePancakesTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "never, this is permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("Mon, Jan 2, 2006 15:04 PM", s)
+}
+
+// Thu, May 11, 2023 7:14 PM
+//func parseOtakuTime(s string) (time.Time, error) {
+//	if s == "Not applicable." || s == "never, this is permanent" {
+//		return time.Time{}, nil
+//	}
+//	return time.Parse("Jan-2-2006 15:04:05", s)
+//}
+
+// Thu, May 11, 2023 7:14 PM
+func parseTitanTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "never, this is permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("Monday, 2 Jan 2006 15:04:05 PM", s)
+}
+
+// May 11, 2023 7:14 PM
+func parseSGGamingTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "never, this is permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("Jan 02, 2006 15:04 PM", s)
+}
+
+// May 11, 2023 7:14 PM   / June 7, 2022, 1:15 am
+func parseFurryPoundTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "never, this is permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("January _2, 2006, 15:04 pm", s)
+}
+
+// Sunday 11th of May 2023 7:14:05 PM
+func parseFluxTime(s string) (time.Time, error) {
+	rx := regexp.MustCompile(`\s(\d+)(st|nd|rd|th)\s`)
+	t := rx.ReplaceAllString(s, " $1 ")
+	if s == "Not applicable." || s == "never, this is permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("Monday _2 of January 2006 15:04:05 PM", t)
+}
+
+// May 17th, 2023 (6:56)
+func parseWonderlandTime(s string) (time.Time, error) {
+	if s == "Not applicable." {
+		return time.Time{}, nil
+	}
+	for _, k := range []string{"st", "nd", "rd", "th"} {
+		s = strings.Replace(s, k, "", -1)
+	}
+	return time.Parse("January 2, 2006 (15:04)", s)
+}
+
+func nextURLFluent(doc *goquery.Selection) string {
+	nextPage := ""
+	nodes := doc.Find(".pagination a[href]")
+	nodes.EachWithBreak(func(i int, selection *goquery.Selection) bool {
+		v := selection.Text()
+		if strings.Contains(strings.ToLower(v), "next") {
+			nextPage, _ = selection.Attr("href")
+			return false
+		}
+		return true
+	})
+	return nextPage
+}
+
+func nextURLFirst(doc *goquery.Selection) string {
+	nextPage, _ := doc.Find("#banlist-nav a[href]").First().Attr("href")
+	return nextPage
+}
+
+func nextURLLast(doc *goquery.Selection) string {
+	nextPage, _ := doc.Find("#banlist-nav a[href]").Last().Attr("href")
+	if !strings.Contains(nextPage, "page=") {
+		return ""
+	}
+	return nextPage
+}
+
+// https://github.com/brhndursun/SourceBans-StarTheme
+func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, error) {
+	var (
+		bans   []sbRecord
+		curBan sbRecord
+	)
+	doc.Find("div").Each(func(_ int, selection *goquery.Selection) {
+		idAttr, ok := selection.Attr("id")
+		if !ok {
+			return
+		}
+		if !strings.HasPrefix(idAttr, "expand_") {
+			return
+		}
+		selection.Find("tbody tr").Each(func(i int, selection *goquery.Selection) {
+			if i == 0 {
+				return
+			}
+			children := selection.Children()
+			if len(children.Nodes) == 3 {
+				curBan.Name = strings.TrimSpace(children.First().Next().Text())
+				return
+			}
+			first := children.First()
+			second := children.Last()
+			key := strings.TrimSpace(strings.ToLower(first.Contents().Text()))
+			value := strings.TrimSpace(second.Contents().Text())
+			switch key {
+			case "steam community":
+				pts := strings.Split(value, " ")
+				sid64, errSid := steamid.StringToSID64(pts[0])
+				if errSid != nil {
+					logger.Error("Failed to parse sid", zap.Error(errSid), zap.String("scraper", scraperName))
+					return
+				}
+				curBan.SteamID = sid64
+			case "invoked on":
+				t, errTime := parseTime(value)
+				if errTime != nil {
+					logger.Error("Failed to parse invoke time", zap.Error(errTime), zap.String("scraper", scraperName))
+					return
+				}
+				curBan.CreatedOn = t
+			case "ban length":
+				lowerVal := strings.ToLower(value)
+				if strings.Contains(lowerVal, "unbanned") {
+					curBan.SteamID = 0 // invalidate it
+				} else if lowerVal == "permanent" {
+					curBan.Permanent = true
+				}
+				curBan.Length = 0
+			case "expires on":
+				if curBan.Permanent || !curBan.SteamID.Valid() {
+					return
+				}
+				t, errTime := parseTime(value)
+				if errTime != nil {
+					logger.Error("Failed to parse expire time", zap.Error(errTime))
+					return
+				}
+				curBan.Length = t.Sub(curBan.CreatedOn)
+			case "reason":
+				curBan.Reason = value
+				if curBan.SteamID.Valid() {
+					bans = append(bans, curBan)
+				}
+				curBan = sbRecord{}
+			}
+		})
+
+	})
+	return urlFunc(doc), bans, nil
+}
+
+// https://github.com/aXenDeveloper/sourcebans-web-theme-fluent
+func parseFluent(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, error) {
+	var (
+		bans   []sbRecord
+		curBan sbRecord
+	)
+	doc.Find("ul.ban_list_detal li").Each(func(i int, selection *goquery.Selection) {
+		child := selection.Children()
+		key := strings.TrimSpace(strings.ToLower(child.First().Contents().Text()))
+		value := strings.TrimSpace(child.Last().Contents().Text())
+		switch key {
+		case "player":
+			curBan.Name = value
+		case "steam community":
+			pts := strings.Split(value, " ")
+			sid64, errSid := steamid.StringToSID64(pts[0])
+			if errSid != nil {
+				logger.Error("Failed to parse sid", zap.Error(errSid), zap.String("scraper", scraperName))
+				return
+			}
+			curBan.SteamID = sid64
+		case "invoked on":
+			t, errTime := parseTime(value)
+			if errTime != nil {
+				logger.Error("Failed to parse invoke time", zap.Error(errTime), zap.String("scraper", scraperName))
+				return
+			}
+			curBan.CreatedOn = t
+		case "ban length":
+			lowerVal := strings.ToLower(value)
+			if strings.Contains(lowerVal, "unbanned") {
+				curBan.SteamID = 0 // invalidate it
+			} else if lowerVal == "permanent" {
+				curBan.Permanent = true
+			}
+			curBan.Length = 0
+		case "expires on":
+			if curBan.Permanent || !curBan.SteamID.Valid() {
+				return
+			}
+			t, errTime := parseTime(value)
+			if errTime != nil {
+				logger.Error("Failed to parse expire time", zap.Error(errTime))
+				return
+			}
+			curBan.Length = t.Sub(curBan.CreatedOn)
+		case "reason":
+			curBan.Reason = value
+			if curBan.SteamID.Valid() {
+				bans = append(bans, curBan)
+			}
+			curBan = sbRecord{}
+		}
+	})
+	return urlFunc(doc), bans, nil
+}
+
+func parseDefault(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, error) {
+	var (
+		bans     []sbRecord
+		curBan   sbRecord
+		curState = unknown
+		isValue  bool
+	)
+	doc.Find("#banlist .listtable table tr td").Each(func(i int, selection *goquery.Selection) {
+		txt := strings.TrimSpace(selection.Text())
+		if !isValue {
+			switch strings.ToLower(txt) {
+			case "player":
+				curState = player
+				isValue = true
+			case "steam id":
+				curState = steamID
+				isValue = true
+			case "steam2":
+				curState = steam2
+				isValue = true
+			case "steam community":
+				curState = steamComm
+				isValue = true
+			case "invoked on":
+				curState = invokedOn
+				isValue = true
+			case "banlength":
+				curState = banLength
+				isValue = true
+			case "expires on":
+				curState = expiresOn
+				isValue = true
+			case "reason":
+				curState = reason
+				isValue = true
+			}
+		} else {
+			isValue = false
+			switch curState {
+			case player:
+				curBan.Name = txt
+
+			case steamComm:
+				pts := strings.Split(txt, " ")
+				sid64, errSid := steamid.StringToSID64(pts[0])
+				if errSid != nil {
+					logger.Error("Failed to parse sid", zap.Error(errSid), zap.String("scraper", scraperName))
+					return
+				}
+				curBan.SteamID = sid64
+			case invokedOn:
+				t, errTime := parseTime(txt)
+				if errTime != nil {
+					logger.Error("Failed to parse invoke time", zap.Error(errTime), zap.String("scraper", scraperName))
+					return
+				}
+				curBan.CreatedOn = t
+			case banLength:
+				lowerVal := strings.ToLower(txt)
+				if strings.Contains(lowerVal, "unbanned") {
+					curBan.SteamID = 0 // invalidate it
+				} else if lowerVal == "permanent" {
+					curBan.Permanent = true
+				}
+				curBan.Length = 0
+			case expiresOn:
+				if curBan.Permanent {
+					return
+				}
+				t, errTime := parseTime(txt)
+				if errTime != nil {
+					logger.Error("Failed to parse expire time", zap.Error(errTime))
+					return
+				}
+				curBan.Length = t.Sub(curBan.CreatedOn)
+			case reason:
+				curBan.Reason = txt
+				if curBan.SteamID.Valid() {
+					bans = append(bans, curBan)
+				}
+				curBan = sbRecord{}
+				curState = last
+			}
+			curState = unknown
+		}
+
+	})
+	return urlFunc(doc), bans, nil
+}
+
+type megaScatterNode struct {
+	ID                  string `json:"id"`
+	ID3                 string `json:"id3"`
+	ID1                 string `json:"id1"`
+	Label               string `json:"label"`
+	BorderWidthSelected int    `json:"borderWidthSelected"`
+	Shape               string `json:"shape"`
+	Color               struct {
+		Border     string `json:"border"`
+		Background string `json:"background"`
+		Highlight  struct {
+			Border     string `json:"border"`
+			Background string `json:"background"`
+		} `json:"highlight"`
+	} `json:"color"`
+	X       float64  `json:"x"`
+	Y       float64  `json:"y"`
+	Aliases []string `json:"-"`
+}
+
+func parseMegaScatter(bodyReader io.Reader) ([]sbRecord, error) {
+	body, errBody := io.ReadAll(bodyReader)
+	if errBody != nil {
+		return nil, errBody
+	}
+	rx := regexp.MustCompile(`(?s)var nodes = new vis.DataSet\((\[.+?])\);`)
+	match := rx.FindStringSubmatch(string(body))
+	if len(match) == 0 {
+		return nil, errors.New("Failed to match data")
+	}
+	pass1 := strings.Replace(match[1], "'", "", -1)
+	replacer := regexp.MustCompile(`\s(\S+?):\s`)
+	pass2 := replacer.ReplaceAllString(pass1, "\"$1\": ")
+
+	replacer2 := regexp.MustCompile(`]},\s]$`)
+	pass3 := replacer2.ReplaceAllString(pass2, "]}]")
+
+	fmt.Println(pass3[0:1024])
+
+	fmt.Println(string(pass3[len(match[1])-2048]))
+
+	o, _ := os.Create("temp.json")
+	_, _ = io.WriteString(o, pass3)
+	_ = o.Close()
+	var msNodes []megaScatterNode
+	if errJSON := json.Unmarshal([]byte(pass3), &msNodes); errJSON != nil {
+		return nil, errJSON
+	}
+	return nil, nil
 }
 
 func newSkialScraper() *sbScraper {
@@ -528,387 +983,13 @@ func newDiscFFScraper() *sbScraper {
 		parseDefault, nextURLLast, parseDefaultTime)
 }
 
+// TODO Has unique theme...
 //func NewOtakuScraper() *sbScraper {
 //	return newScraper("otaku", "https://bans.otaku.tf/bans", "",
 //		parseDefault, nextURLLast, parseOtakuTime)
 //}
 
-// 05-17-23 03:07
-func parseSkialTime(s string) (time.Time, error) {
-	if s == "Not applicable." || s == "Permanent" {
-		return time.Time{}, nil
-	}
-	return time.Parse("01-02-06 15:04", s)
-}
-
-// 05-17-23 03:07
-func parseSkialAltTime(s string) (time.Time, error) {
-	if s == "Not applicable." || s == "Permanent" {
-		return time.Time{}, nil
-	}
-	return time.Parse("06-01-02 15:04", s)
-}
-
-// 05-17-23 03:07
-func parseGunServer(s string) (time.Time, error) {
-	if s == "Not applicable." || s == "Permanent" {
-		return time.Time{}, nil
-	}
-	return time.Parse("02.01.2006 15:04", s)
-}
-
-// 17/05/23 - 03:07:05
-func parseSVDos(s string) (time.Time, error) {
-	if s == "Not applicable." || s == "Permanent" {
-		return time.Time{}, nil
-	}
-	return time.Parse("02/01/06 - 15:04:05", s)
-}
-
-// 17/05/23 - 03:07:05
-func parseTriggerHappyTime(s string) (time.Time, error) {
-	if s == "Not applicable." || s == "Permanent" {
-		return time.Time{}, nil
-	}
-	return time.Parse("02/01/2006 15:04:05", s)
-}
-
-// 17/05/23 03:07 PM
-func parseDarkPyroTime(s string) (time.Time, error) {
-	if s == "Not applicable." || s == "Permanent" {
-		return time.Time{}, nil
-	}
-	return time.Parse("02/01/06 15:04 PM", s)
-}
-
-// 17-05-2023 03:07:05
-func parseTrailYear(s string) (time.Time, error) {
-	if s == "Not applicable." || s == "Permanent" {
-		return time.Time{}, nil
-	}
-	return time.Parse("02-01-2006 15:04:05", s)
-}
-
-// 17-05-2023 03:07:05
-func parseHellClanTime(s string) (time.Time, error) {
-	if s == "Not applicable." || s == "Permanent" {
-		return time.Time{}, nil
-	}
-	return time.Parse("02-01-2006 15:04 MST", s)
-}
-
-// 17-05-2023 03:07:05
-func parseSneakTime(s string) (time.Time, error) {
-	if s == "Not applicable." || s == "Permanent" {
-		return time.Time{}, nil
-	}
-	return time.Parse("02-01-2006 15:04 PM MST", s)
-}
-
-// 2023-05-17 03:07:05
-func parseDefaultTime(s string) (time.Time, error) {
-	if s == "Not applicable." {
-		return time.Time{}, nil
-	}
-	return time.Parse("2006-01-02 15:04:05", s)
-}
-
-// 2023-17-05 03:07:05
-func parseDefaultTimeMonthFirst(s string) (time.Time, error) {
-	if s == "Not applicable." {
-		return time.Time{}, nil
-	}
-	return time.Parse("2006-01-02 15:04:05", s)
-}
-
-// Thu, May 11, 2023 7:14 PM
-func parsePancakesTime(s string) (time.Time, error) {
-	if s == "Not applicable." || s == "never, this is permanent" {
-		return time.Time{}, nil
-	}
-	return time.Parse("Mon, Jan 02, 2006 15:04 PM", s)
-}
-
-// Thu, May 11, 2023 7:14 PM
-//func parseOtakuTime(s string) (time.Time, error) {
-//	if s == "Not applicable." || s == "never, this is permanent" {
-//		return time.Time{}, nil
-//	}
-//	return time.Parse("Jan-2-2006 15:04:05", s)
-//}
-
-// Thu, May 11, 2023 7:14 PM
-func parseTitanTime(s string) (time.Time, error) {
-	if s == "Not applicable." || s == "never, this is permanent" {
-		return time.Time{}, nil
-	}
-	return time.Parse("Monday, 2 Jan 2006 15:04:05 PM", s)
-}
-
-// May 11, 2023 7:14 PM
-func parseSGGamingTime(s string) (time.Time, error) {
-	if s == "Not applicable." || s == "never, this is permanent" {
-		return time.Time{}, nil
-	}
-	return time.Parse("Jan 02, 2006 15:04 PM", s)
-}
-
-// May 11, 2023 7:14 PM   / June 7, 2022, 1:15 am
-func parseFurryPoundTime(s string) (time.Time, error) {
-	if s == "Not applicable." || s == "never, this is permanent" {
-		return time.Time{}, nil
-	}
-	return time.Parse("January _2, 2006, 15:04 pm", s)
-}
-
-// Sunday 11th of May 2023 7:14:05 PM
-func parseFluxTime(s string) (time.Time, error) {
-	if s == "Not applicable." || s == "never, this is permanent" {
-		return time.Time{}, nil
-	}
-	for _, k := range []string{"st ", "nd ", "rd ", "th "} {
-		s = strings.Replace(s, k, " ", -1)
-	}
-	return time.Parse("Monday _2 of January 2006 15:04:05 PM", s)
-}
-
-// May 17th, 2023 (6:56)
-func parseWonderlandTime(s string) (time.Time, error) {
-	if s == "Not applicable." {
-		return time.Time{}, nil
-	}
-	for _, k := range []string{"st", "nd", "rd", "th"} {
-		s = strings.Replace(s, k, "", -1)
-	}
-	return time.Parse("January 2, 2006 (15:04)", s)
-}
-
-func nextURLFluent(doc *goquery.Selection) string {
-	nextPage := ""
-	nodes := doc.Find(".pagination a[href]")
-	nodes.EachWithBreak(func(i int, selection *goquery.Selection) bool {
-		v := selection.Text()
-		if strings.Contains(strings.ToLower(v), "next") {
-			nextPage, _ = selection.Attr("href")
-			return false
-		}
-		return true
-	})
-	return nextPage
-}
-
-func nextURLFirst(doc *goquery.Selection) string {
-	nextPage, _ := doc.Find("#banlist-nav a[href]").First().Attr("href")
-	return nextPage
-}
-
-func nextURLLast(doc *goquery.Selection) string {
-	nextPage, _ := doc.Find("#banlist-nav a[href]").Last().Attr("href")
-	if !strings.Contains(nextPage, "page=") {
-		return ""
-	}
-	return nextPage
-}
-
-// https://github.com/brhndursun/SourceBans-StarTheme
-//func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc) (string, []sbRecord, error) {
-//	panic("todo")
-//}
-
-// https://github.com/aXenDeveloper/sourcebans-web-theme-fluent
-func parseFluent(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc) (string, []sbRecord, error) {
-	var (
-		bans   []sbRecord
-		curBan sbRecord
-	)
-	doc.Find("ul.ban_list_detal li").Each(func(i int, selection *goquery.Selection) {
-		child := selection.Children()
-		key := strings.TrimSpace(strings.ToLower(child.First().Contents().Text()))
-		value := strings.TrimSpace(child.Last().Contents().Text())
-		switch key {
-		case "player":
-			curBan.Name = value
-		case "steam community":
-			pts := strings.Split(value, " ")
-			sid64, errSid := steamid.StringToSID64(pts[0])
-			if errSid != nil {
-				logger.Error("Failed to parse sid", zap.Error(errSid))
-				return
-			}
-			curBan.SteamID = sid64
-		case "invoked on":
-			t, errTime := parseTime(value)
-			if errTime != nil {
-				logger.Error("Failed to parse invoke time", zap.Error(errTime))
-				return
-			}
-			curBan.CreatedOn = t
-		case "ban length":
-			lowerVal := strings.ToLower(value)
-			if strings.Contains(lowerVal, "unbanned") {
-				curBan.SteamID = 0 // invalidate it
-			} else if lowerVal == "permanent" {
-				curBan.Permanent = true
-			}
-			curBan.Length = 0
-		case "expires on":
-			if curBan.Permanent || !curBan.SteamID.Valid() {
-				return
-			}
-			t, errTime := parseTime(value)
-			if errTime != nil {
-				logger.Error("Failed to parse expire time", zap.Error(errTime))
-				return
-			}
-			curBan.Length = t.Sub(curBan.CreatedOn)
-		case "reason":
-			curBan.Reason = value
-			if curBan.SteamID.Valid() {
-				bans = append(bans, curBan)
-			}
-			curBan = sbRecord{}
-		}
-	})
-	return urlFunc(doc), bans, nil
-}
-
-func parseDefault(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc) (string, []sbRecord, error) {
-	var (
-		bans     []sbRecord
-		curBan   sbRecord
-		curState = unknown
-		isValue  bool
-	)
-	doc.Find("#banlist .listtable table tr td").Each(func(i int, selection *goquery.Selection) {
-		txt := strings.TrimSpace(selection.Text())
-		if !isValue {
-			switch strings.ToLower(txt) {
-			case "player":
-				curState = player
-				isValue = true
-			case "steam id":
-				curState = steamID
-				isValue = true
-			case "steam2":
-				curState = steam2
-				isValue = true
-			case "steam community":
-				curState = steamComm
-				isValue = true
-			case "invoked on":
-				curState = invokedOn
-				isValue = true
-			case "banlength":
-				curState = banLength
-				isValue = true
-			case "expires on":
-				curState = expiresOn
-				isValue = true
-			case "reason":
-				curState = reason
-				isValue = true
-			}
-		} else {
-			isValue = false
-			switch curState {
-			case player:
-				curBan.Name = txt
-
-			case steamComm:
-				pts := strings.Split(txt, " ")
-				sid64, errSid := steamid.StringToSID64(pts[0])
-				if errSid != nil {
-					logger.Error("Failed to parse sid", zap.Error(errSid))
-					return
-				}
-				curBan.SteamID = sid64
-			case invokedOn:
-				t, errTime := parseTime(txt)
-				if errTime != nil {
-					logger.Error("Failed to parse invoke time", zap.Error(errTime))
-					return
-				}
-				curBan.CreatedOn = t
-			case banLength:
-				lowerVal := strings.ToLower(txt)
-				if strings.Contains(lowerVal, "unbanned") {
-					curBan.SteamID = 0 // invalidate it
-				} else if lowerVal == "permanent" {
-					curBan.Permanent = true
-				}
-				curBan.Length = 0
-			case expiresOn:
-				if curBan.Permanent {
-					return
-				}
-				t, errTime := parseTime(txt)
-				if errTime != nil {
-					logger.Error("Failed to parse expire time", zap.Error(errTime))
-					return
-				}
-				curBan.Length = t.Sub(curBan.CreatedOn)
-			case reason:
-				curBan.Reason = txt
-				if curBan.SteamID.Valid() {
-					bans = append(bans, curBan)
-				}
-				curBan = sbRecord{}
-				curState = last
-			}
-			curState = unknown
-		}
-
-	})
-	return urlFunc(doc), bans, nil
-}
-
-type megaScatterNode struct {
-	ID                  string `json:"id"`
-	ID3                 string `json:"id3"`
-	ID1                 string `json:"id1"`
-	Label               string `json:"label"`
-	BorderWidthSelected int    `json:"borderWidthSelected"`
-	Shape               string `json:"shape"`
-	Color               struct {
-		Border     string `json:"border"`
-		Background string `json:"background"`
-		Highlight  struct {
-			Border     string `json:"border"`
-			Background string `json:"background"`
-		} `json:"highlight"`
-	} `json:"color"`
-	X       float64  `json:"x"`
-	Y       float64  `json:"y"`
-	Aliases []string `json:"-"`
-}
-
-func parseMegaScatter(bodyReader io.Reader) ([]sbRecord, error) {
-	body, errBody := io.ReadAll(bodyReader)
-	if errBody != nil {
-		return nil, errBody
-	}
-	rx := regexp.MustCompile(`(?s)var nodes = new vis.DataSet\((\[.+?])\);`)
-	match := rx.FindStringSubmatch(string(body))
-	if len(match) == 0 {
-		return nil, errors.New("Failed to match data")
-	}
-	pass1 := strings.Replace(match[1], "'", "", -1)
-	replacer := regexp.MustCompile(`\s(\S+?):\s`)
-	pass2 := replacer.ReplaceAllString(pass1, "\"$1\": ")
-
-	replacer2 := regexp.MustCompile(`]},\s]$`)
-	pass3 := replacer2.ReplaceAllString(pass2, "]}]")
-
-	fmt.Println(pass3[0:1024])
-
-	fmt.Println(string(pass3[len(match[1])-2048]))
-
-	o, _ := os.Create("temp.json")
-	_, _ = io.WriteString(o, pass3)
-	_ = o.Close()
-	var msNodes []megaScatterNode
-	if errJSON := json.Unmarshal([]byte(pass3), &msNodes); errJSON != nil {
-		return nil, errJSON
-	}
-	return nil, nil
+func newAMSGamingScraper() *sbScraper {
+	return newScraper("amsgaming", "https://bans.amsgaming.in/", "index.php?p=banlist",
+		parseStar, nextURLLast, parseAMSGamingTime)
 }

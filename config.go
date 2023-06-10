@@ -26,6 +26,7 @@ type appConfig struct {
 	SourcebansScraperEnabled bool           `yaml:"sourcebans_scraper_enabled"`
 	Proxies                  []*proxyConfig `yaml:"proxies"`
 	PrivateKeyPath           string         `yaml:"private_key_path"`
+	EnableCache              bool           `yaml:"enable_cache"`
 }
 
 func makeSigner(keyPath string) (ssh.Signer, error) {

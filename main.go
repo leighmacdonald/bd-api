@@ -70,7 +70,8 @@ var (
 )
 
 func init() {
-	newLogger, errLogger := zap.NewProduction()
+	logCfg := zap.NewProductionConfig()
+	newLogger, errLogger := logCfg.Build()
 	if errLogger != nil {
 		panic(errLogger)
 	}

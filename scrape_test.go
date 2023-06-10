@@ -16,7 +16,7 @@ func testParser(t *testing.T, scraper *sbScraper, count int, nextPage string) {
 	doc, errDoc := goquery.NewDocumentFromReader(testBody)
 	require.NoError(t, errDoc)
 
-	next, results, errParse := scraper.parser(doc.Selection, scraper.nextURL, scraper.parseTIme)
+	next, results, errParse := scraper.parser(doc.Selection, scraper.nextURL, scraper.parseTIme, scraper.name)
 	require.NoError(t, errParse)
 	require.Equal(t, count, len(results))
 	require.Equal(t, nextPage, next)
@@ -273,6 +273,10 @@ func TestDiscFF(t *testing.T) {
 //	testParser(t, NewOtakuScraper(), 30, "index.php?p=banlist&page=2")
 //}
 
+func TestAMSGaming(t *testing.T) {
+	testParser(t, newAMSGamingScraper(), 30, "index.php?p=banlist&page=2")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)
@@ -301,6 +305,12 @@ func TestParsePancakesTime(t *testing.T) {
 	perm, ePerm := parsePancakesTime("never, this is permanent")
 	require.NoError(t, ePerm)
 	require.Equal(t, time.Time{}, perm)
+}
+
+func TestParseFluxTFTime(t *testing.T) {
+	parsed, e := parseFluxTime("Tuesday 30th of August 2022 08:30:45 PM")
+	require.NoError(t, e)
+	require.Equal(t, time.Date(2022, time.August, 30, 20, 30, 45, 0, time.UTC), parsed)
 }
 
 func TestParseMegaScatter(t *testing.T) {
