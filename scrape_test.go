@@ -311,3 +311,9 @@ func TestParseMegaScatter(t *testing.T) {
 	require.NoError(t, errBans)
 	require.True(t, len(bans) > 100)
 }
+
+func TestOWLLive(t *testing.T) {
+	s := newAstraManiaScraper()
+	require.NoError(t, s.start())
+	require.True(t, len(s.results) > 2000)
+}

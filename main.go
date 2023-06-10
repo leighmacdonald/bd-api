@@ -44,15 +44,14 @@ func main() {
 	}
 
 	cache = newCaches(ctx, steamCacheTimeout, compCacheTimeout, steamCacheTimeout)
-
-	scrapers := createScrapers()
-	if errInitScrapers := initScrapers(ctx, db, scrapers); errInitScrapers != nil {
-		logger.Fatal("Failed to initialize scrapers", zap.Error(errInitScrapers))
-	}
-	if false {
+	if config.SourcebansScraperEnabled {
+		scrapers := createScrapers()
+		if errInitScrapers := initScrapers(ctx, db, scrapers); errInitScrapers != nil {
+			logger.Fatal("Failed to initialize scrapers", zap.Error(errInitScrapers))
+		}
 		go startScrapers(&config, scrapers)
-	}
 
+	}
 	http.HandleFunc("/bans", getHandler(handleGetBans()))
 	http.HandleFunc("/summary", getHandler(handleGetSummary()))
 	http.HandleFunc("/profile", getHandler(handleGetProfile()))

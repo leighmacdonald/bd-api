@@ -16,6 +16,7 @@ import (
 	"io"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
@@ -52,6 +53,8 @@ func startScrapers(config *appConfig, scrapers []*sbScraper) {
 		if errProxies := setupProxies(scraper.Collector, config); errProxies != nil {
 			logger.Panic("Failed to setup proxies", zap.Error(errProxies))
 		}
+	}
+	for _, scraper := range scrapers {
 		go func(s *sbScraper) {
 			if errScrape := s.start(); errScrape != nil {
 				logger.Error("sbScraper returned error", zap.Error(errScrape))
@@ -87,6 +90,7 @@ type sbRecord struct {
 type sbScraper struct {
 	*colly.Collector
 	name      string
+	theme     string
 	log       *zap.Logger
 	results   []sbRecord
 	resultsMu sync.RWMutex
@@ -116,8 +120,9 @@ func createScrapers() []*sbScraper {
 }
 
 func (scraper *sbScraper) start() error {
-	scraper.Collector.OnHTML("*", func(e *colly.HTMLElement) {
-		nextURL, results, parseErr := parseDefault(e.DOM, scraper.nextURL, scraper.parseTIme)
+	scraper.log.Info("Starting sourcebans scraper", zap.String("theme", scraper.theme))
+	scraper.Collector.OnHTML("body", func(e *colly.HTMLElement) {
+		nextURL, results, parseErr := scraper.parser(e.DOM, scraper.nextURL, scraper.parseTIme)
 		if parseErr != nil {
 			logger.Error("Parser returned error", zap.Error(parseErr))
 			return
@@ -126,8 +131,10 @@ func (scraper *sbScraper) start() error {
 		scraper.results = append(scraper.results, results...)
 		scraper.resultsMu.Unlock()
 		if nextURL != "" {
-			if errVisit := scraper.Visit(scraper.url(nextURL)); errVisit != nil {
-				logger.Error("Failed to visit sub url", zap.Error(errVisit), zap.String("url", nextURL))
+			next := scraper.url(nextURL)
+			scraper.log.Info("Visiting next url", zap.String("url", next))
+			if errVisit := e.Request.Visit(next); errVisit != nil {
+				scraper.log.Error("Failed to visit sub url", zap.Error(errVisit), zap.String("url", nextURL))
 				return
 			}
 		}
@@ -139,27 +146,60 @@ func (scraper *sbScraper) start() error {
 	return nil
 }
 
+type scrapeLogger struct {
+	logger *zap.Logger
+	start  time.Time
+}
+
+func (log *scrapeLogger) Init() error {
+	log.start = time.Now()
+	return nil
+}
+
+func (log *scrapeLogger) Event(e *debug.Event) {
+	args := []zap.Field{zap.Uint32("col_id", e.CollectorID), zap.Uint32("req_id", e.RequestID), zap.Duration("duration", time.Since(log.start))}
+	u, ok := e.Values["url"]
+	if ok {
+		args = append(args, zap.String("url", u))
+	}
+	switch e.Type {
+	case "error":
+		log.logger.Error("Error scraping url", args...)
+	default:
+		args = append(args, zap.String("type", e.Type))
+		log.logger.Debug("Scraped url", args...)
+	}
+
+}
+
 func newScraper(name string, baseURL string, startPath string, parser parserFunc, nextURL nextURLFunc, parseTime parseTimeFunc) *sbScraper {
 	u, errURL := url.Parse(baseURL)
 	if errURL != nil {
 		logger.Panic("Failed to parse base url", zap.Error(errURL))
 	}
-
+	debugLogger := scrapeLogger{logger: logger}
 	scraper := sbScraper{
 		baseURL:   baseURL,
 		name:      name,
+		theme:     "default",
 		startPath: startPath,
 		parser:    parser,
 		nextURL:   nextURL,
 		parseTIme: parseTime,
 		log:       logger.Named(name),
+
 		Collector: colly.NewCollector(
-			colly.Debugger(&debug.LogDebugger{}),
+			colly.UserAgent("bd"),
+			colly.CacheDir(filepath.Join(cacheDir, "scrapers")),
+			colly.Debugger(&debugLogger),
 			colly.AllowedDomains(u.Hostname()),
-			colly.Async(true),
-			colly.MaxDepth(2),
+			//colly.Async(true),
+			//colly.MaxDepth(2),
 		),
 	}
+	scraper.OnRequest(func(r *colly.Request) {
+		scraper.log.Debug("Visiting", zap.String("url", r.URL.String()))
+	})
 
 	extensions.RandomUserAgent(scraper.Collector)
 
@@ -168,11 +208,11 @@ func newScraper(name string, baseURL string, startPath string, parser parserFunc
 		Parallelism: 2,
 		RandomDelay: 5 * time.Second,
 	}); errLimit != nil {
-		logger.Panic("Failed to set limit", zap.Error(errLimit))
+		scraper.log.Panic("Failed to set limit", zap.Error(errLimit))
 	}
 
 	scraper.OnError(func(r *colly.Response, err error) {
-		logger.Error("Request error", zap.String("url", r.Request.URL.String()), zap.Error(err))
+		scraper.log.Error("Request error", zap.String("url", r.Request.URL.String()), zap.Error(err))
 	})
 
 	return &scraper
@@ -183,13 +223,8 @@ func (scraper *sbScraper) url(path string) string {
 }
 
 func newSkialScraper() *sbScraper {
-	return newScraper(
-		"skial",
-		"https://www.skial.com/sourcebans/",
-		"index.php?p=banlist",
-		parseDefault,
-		nextURLFirst,
-		parseSkialTime,
+	return newScraper("skial", "https://www.skial.com/sourcebans/", "index.php?p=banlist",
+		parseDefault, nextURLFirst, parseSkialTime,
 	)
 }
 
@@ -649,7 +684,16 @@ func parseWonderlandTime(s string) (time.Time, error) {
 }
 
 func nextURLFluent(doc *goquery.Selection) string {
-	nextPage, _ := doc.Find(".pagination a[href]").First().Attr("href")
+	nextPage := ""
+	nodes := doc.Find(".pagination a[href]")
+	nodes.EachWithBreak(func(i int, selection *goquery.Selection) bool {
+		v := selection.Text()
+		if strings.Contains(strings.ToLower(v), "next") {
+			nextPage, _ = selection.Attr("href")
+			return false
+		}
+		return true
+	})
 	return nextPage
 }
 
@@ -660,6 +704,9 @@ func nextURLFirst(doc *goquery.Selection) string {
 
 func nextURLLast(doc *goquery.Selection) string {
 	nextPage, _ := doc.Find("#banlist-nav a[href]").Last().Attr("href")
+	if !strings.Contains(nextPage, "page=") {
+		return ""
+	}
 	return nextPage
 }
 

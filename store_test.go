@@ -17,7 +17,7 @@ var testStore *pgStore
 func TestMain(m *testing.M) {
 	testCtx := context.Background()
 	username, password, dbName := "bdapi-test", "bdapi-test", "bdapi-test"
-	container, errContainer := postgres.RunContainer(
+	cont, errContainer := postgres.RunContainer(
 		testCtx,
 		testcontainers.WithImage("docker.io/postgres:15-bullseye"),
 		postgres.WithDatabase(dbName),
@@ -30,13 +30,13 @@ func TestMain(m *testing.M) {
 	if errContainer != nil {
 		logger.Fatal("Failed to setup test db", zap.Error(errContainer))
 	}
-	//host, _ := container.Host(context.Background())
-	port, _ := container.MappedPort(context.Background(), "5432")
+	//host, _ := cont.Host(context.Background())
+	port, _ := cont.MappedPort(context.Background(), "5432")
 	config := appConfig{
 		DSN: fmt.Sprintf("postgresql://%s:%s@localhost:%s/%s", username, password, port.Port(), dbName),
 	}
 	defer func() {
-		if errTerm := container.Terminate(testCtx); errTerm != nil {
+		if errTerm := cont.Terminate(testCtx); errTerm != nil {
 			logger.Error("Failed to terminate test container")
 		}
 	}()

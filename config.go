@@ -20,11 +20,12 @@ type proxyConfig struct {
 }
 
 type appConfig struct {
-	ListenAddr     string         `yaml:"listen_addr"`
-	SteamAPIKey    string         `yaml:"steam_api_key"`
-	DSN            string         `yaml:"dsn"`
-	Proxies        []*proxyConfig `yaml:"proxies"`
-	PrivateKeyPath string         `yaml:"private_key_path"`
+	ListenAddr               string         `yaml:"listen_addr"`
+	SteamAPIKey              string         `yaml:"steam_api_key"`
+	DSN                      string         `yaml:"dsn"`
+	SourcebansScraperEnabled bool           `yaml:"sourcebans_scraper_enabled"`
+	Proxies                  []*proxyConfig `yaml:"proxies"`
+	PrivateKeyPath           string         `yaml:"private_key_path"`
 }
 
 func makeSigner(keyPath string) (ssh.Signer, error) {
