@@ -263,6 +263,14 @@ func parseGunServer(s string) (time.Time, error) {
 	return time.Parse("02.01.2006 15:04", s)
 }
 
+// 08.06.2023 в 21:21
+func parseProGamesZetTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("02.01.2006 в 15:04", s)
+}
+
 // 17/05/23 - 03:07:05
 func parseSVDos(s string) (time.Time, error) {
 	if s == "Not applicable." || s == "Permanent" {
@@ -423,11 +431,120 @@ func nextURLLast(doc *goquery.Selection) string {
 	return nextPage
 }
 
-// TODO only a few sites use this?
+var keyMap = map[string]string{
+	"community links":     "community links",
+	"был выдан":           "invoked on",
+	"datum a čas udělení": "invoked on",
+	"invoked on":          "invoked on",
+	"steam community":     "steam community",
+	"steam komunitní":     "steam community",
+	"délka":               "ban length",
+	"banlength":           "ban length",
+	"ban length":          "ban length",
+	"длительность":        "ban length",
+	"vyprší":              "expires on",
+	"будет снят":          "expires on",
+	"expires on":          "expires on",
+	"причина разбана":     "reason unbanned",
+	"důvod":               "reason",
+	"reason":              "reason",
+	"разбанен админом":    "unbanned by",
+	"причина бана":        "reason",
+	"игрок":               "player",
+	"player":              "player",
+}
+
+var spaceRm = regexp.MustCompile(`\s+`)
+
+func normKey(s string) string {
+	return strings.ReplaceAll(spaceRm.ReplaceAllString(strings.TrimSpace(strings.ToLower(s)), " "), "\n", "")
+}
+
+func getMappedKey(s string) (string, bool) {
+	mappedKey, found := keyMap[s]
+	if !found {
+		return "", false
+	}
+	return mappedKey, true
+}
+
 // https://github.com/SB-MaterialAdmin/Web/tree/stable-dev
-//func parseMaterial(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, error) {
-//	panic("uninplemented")
-//}
+func parseMaterial(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, error) {
+	var (
+		bans   []sbRecord
+		curBan sbRecord
+	)
+	doc.Find("div.opener .card-body").Each(func(_ int, selection *goquery.Selection) {
+		selection.First().Children().Children().Each(func(i int, selection *goquery.Selection) {
+			children := selection.First().Children()
+			first := children.First()
+			second := children.Last()
+			key := normKey(first.Contents().Text())
+			value := strings.TrimSpace(second.Contents().Text())
+			mappedKey, ok := getMappedKey(key)
+			if !ok {
+				return
+			}
+			switch mappedKey {
+			case "player":
+				curBan.Name = value
+			case "community links":
+				nv, foundKey := second.Children().First().Attr("href")
+				if !foundKey {
+					return
+				}
+				pcs := strings.Split(nv, "/")
+				sid64, errSid := steamid.StringToSID64(pcs[4])
+				if errSid != nil {
+					logger.Error("Failed to parse sid", zap.Error(errSid), zap.String("scraper", scraperName))
+					return
+				}
+				curBan.SteamID = sid64
+			case "steam community":
+				pts := strings.Split(value, " ")
+				sid64, errSid := steamid.StringToSID64(pts[0])
+				if errSid != nil {
+					logger.Error("Failed to parse sid", zap.Error(errSid), zap.String("scraper", scraperName))
+					return
+				}
+				curBan.SteamID = sid64
+			case "invoked on":
+				t, errTime := parseTime(value)
+				if errTime != nil {
+					logger.Error("Failed to parse invoke time", zap.Error(errTime), zap.String("scraper", scraperName))
+					return
+				}
+				curBan.CreatedOn = t
+			case "ban length":
+				lowerVal := strings.ToLower(value)
+				if strings.Contains(lowerVal, "unbanned") {
+					curBan.SteamID = 0 // invalidate it
+				} else if lowerVal == "permanent" || lowerVal == "навсегда" {
+					curBan.Permanent = true
+				}
+				curBan.Length = 0
+			case "expires on":
+				if curBan.Permanent || !curBan.SteamID.Valid() {
+					return
+				}
+				t, errTime := parseTime(value)
+				if errTime != nil {
+					logger.Error("Failed to parse expire time", zap.Error(errTime))
+					return
+				}
+				curBan.Length = t.Sub(curBan.CreatedOn)
+			case "reason":
+				curBan.Reason = value
+				if curBan.SteamID.Valid() {
+					bans = append(bans, curBan)
+				}
+				curBan = sbRecord{}
+			}
+		})
+
+	})
+	return urlFunc(doc), bans, nil
+}
 
 // https://github.com/brhndursun/SourceBans-StarTheme
 func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, error) {
@@ -454,12 +571,16 @@ func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeF
 			}
 			first := children.First()
 			second := children.Last()
-			key := strings.TrimSpace(strings.ToLower(first.Contents().Text()))
+			key := normKey(first.Contents().Text())
 			value := strings.TrimSpace(second.Contents().Text())
-			switch key {
+			mappedKey, found := getMappedKey(key)
+			if !found {
+				return
+			}
+			switch mappedKey {
 			case "community links":
-				nv, found := second.Children().First().Attr("href")
-				if !found {
+				nv, foundHREF := second.Children().First().Attr("href")
+				if !foundHREF {
 					return
 				}
 				pcs := strings.Split(nv, "/")
@@ -469,8 +590,6 @@ func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeF
 					return
 				}
 				curBan.SteamID = sid64
-			case "steam komunitní":
-				fallthrough
 			case "steam community":
 				pts := strings.Split(value, " ")
 				sid64, errSid := steamid.StringToSID64(pts[0])
@@ -488,10 +607,6 @@ func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeF
 					return
 				}
 				curBan.CreatedOn = t
-			case "délka":
-				fallthrough
-			case "banlength":
-				fallthrough
 			case "ban length":
 				lowerVal := strings.ToLower(value)
 				if strings.Contains(lowerVal, "unbanned") {
@@ -500,8 +615,6 @@ func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeF
 					curBan.Permanent = true
 				}
 				curBan.Length = 0
-			case "vyprší":
-				fallthrough
 			case "expires on":
 				if curBan.Permanent || !curBan.SteamID.Valid() {
 					return
@@ -535,9 +648,13 @@ func parseFluent(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTim
 	)
 	doc.Find("ul.ban_list_detal li").Each(func(i int, selection *goquery.Selection) {
 		child := selection.Children()
-		key := strings.TrimSpace(strings.ToLower(child.First().Contents().Text()))
+		key := normKey(child.First().Contents().Text())
 		value := strings.TrimSpace(child.Last().Contents().Text())
-		switch key {
+		mappedKey, found := getMappedKey(key)
+		if !found {
+			return
+		}
+		switch mappedKey {
 		case "player":
 			curBan.Name = value
 		case "steam community":
@@ -1080,4 +1197,9 @@ func newMagyarhnsScraper() *sbScraper {
 func newGamesTownScraper() *sbScraper {
 	return newScraper("gamestown", "https://banlist.games-town.eu/", "index.php?p=banlist",
 		parseStar, nextURLLast, parseTrailYear)
+}
+
+func newProGamesZetScraper() *sbScraper {
+	return newScraper("progameszet", "https://bans.progameszet.ru/", "index.php?p=banlist",
+		parseMaterial, nextURLLast, parseProGamesZetTime)
 }

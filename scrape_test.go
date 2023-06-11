@@ -309,6 +309,10 @@ func TestGamesTown(t *testing.T) {
 	testParser(t, newGamesTownScraper(), 29, "index.php?p=banlist&page=2")
 }
 
+func TestProGamesZet(t *testing.T) {
+	testParser(t, newProGamesZetScraper(), 20, "index.php?p=banlist&page=2")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)
