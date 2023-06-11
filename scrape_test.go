@@ -277,6 +277,10 @@ func TestAMSGaming(t *testing.T) {
 	testParser(t, newAMSGamingScraper(), 30, "index.php?p=banlist&page=2")
 }
 
+func TestBaitedCommunity(t *testing.T) {
+	testParser(t, newBaitedCommunityScraper(), 28, "index.php?p=banlist&page=2")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)

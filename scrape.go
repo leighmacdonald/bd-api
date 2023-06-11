@@ -121,6 +121,7 @@ func createScrapers() []*sbScraper {
 
 func (scraper *sbScraper) start() error {
 	scraper.log.Info("Starting sourcebans scraper", zap.String("theme", scraper.theme))
+	lastUrl := ""
 	scraper.Collector.OnHTML("body", func(e *colly.HTMLElement) {
 		nextURL, results, parseErr := scraper.parser(e.DOM, scraper.nextURL, scraper.parseTIme, scraper.name)
 		if parseErr != nil {
@@ -130,7 +131,7 @@ func (scraper *sbScraper) start() error {
 		scraper.resultsMu.Lock()
 		scraper.results = append(scraper.results, results...)
 		scraper.resultsMu.Unlock()
-		if nextURL != "" {
+		if nextURL != "" && nextURL != lastUrl {
 			next := scraper.url(nextURL)
 			scraper.log.Info("Visiting next url", zap.String("url", next))
 			if errVisit := e.Request.Visit(next); errVisit != nil {
@@ -138,6 +139,7 @@ func (scraper *sbScraper) start() error {
 				return
 			}
 		}
+		lastUrl = nextURL
 	})
 	if errVisit := scraper.Visit(scraper.url(scraper.startPath)); errVisit != nil {
 		return errVisit
@@ -227,6 +229,14 @@ func parseSkialTime(s string) (time.Time, error) {
 		return time.Time{}, nil
 	}
 	return time.Parse("01-02-06 15:04", s)
+}
+
+// 05-17-23 03:07
+func parseBaitedTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("01-02-2006 15:04", s)
 }
 
 // 05-17-23 03:07
@@ -448,6 +458,8 @@ func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeF
 					return
 				}
 				curBan.CreatedOn = t
+			case "banlength":
+				fallthrough
 			case "ban length":
 				lowerVal := strings.ToLower(value)
 				if strings.Contains(lowerVal, "unbanned") {
@@ -992,4 +1004,9 @@ func newDiscFFScraper() *sbScraper {
 func newAMSGamingScraper() *sbScraper {
 	return newScraper("amsgaming", "https://bans.amsgaming.in/", "index.php?p=banlist",
 		parseStar, nextURLLast, parseAMSGamingTime)
+}
+
+func newBaitedCommunityScraper() *sbScraper {
+	return newScraper("baitedcommunity", "https://bans.baitedcommunity.com/", "index.php?p=banlist",
+		parseStar, nextURLLast, parseBaitedTime)
 }
