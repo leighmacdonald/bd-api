@@ -1043,3 +1043,8 @@ func newBachuruServasScraper() *sbScraper {
 	return newScraper("bachuruservas", "https://bachuruservas.lt/sb/", "index.php?p=banlist",
 		parseStar, nextURLLast, parseBachuruServasTime)
 }
+
+func newBierwieseScraper() *sbScraper {
+	return newScraper("bierwiese", "http://94.249.194.218/sb/", "index.php?p=banlist",
+		parseStar, nextURLLast, parseSkialTime)
+}
