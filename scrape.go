@@ -1070,3 +1070,8 @@ func newMagyarhnsScraper() *sbScraper {
 	return newScraper("magyarhns", "https://magyarhns.hu/sourcebans/", "index.php?p=banlist",
 		parseStar, nextURLLast, parseSkialTime)
 }
+
+func newGamesTownScraper() *sbScraper {
+	return newScraper("gamestown", "https://banlist.games-town.eu/", "index.php?p=banlist",
+		parseStar, nextURLLast, parseTrailYear)
+}
