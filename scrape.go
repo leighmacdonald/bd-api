@@ -451,6 +451,18 @@ func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeF
 			key := strings.TrimSpace(strings.ToLower(first.Contents().Text()))
 			value := strings.TrimSpace(second.Contents().Text())
 			switch key {
+			case "community links":
+				nv, found := second.Children().First().Attr("href")
+				if !found {
+					return
+				}
+				pcs := strings.Split(nv, "/")
+				sid64, errSid := steamid.StringToSID64(pcs[4])
+				if errSid != nil {
+					logger.Error("Failed to parse sid", zap.Error(errSid), zap.String("scraper", scraperName))
+					return
+				}
+				curBan.SteamID = sid64
 			case "steam komunitní":
 				fallthrough
 			case "steam community":
@@ -1046,5 +1058,10 @@ func newBachuruServasScraper() *sbScraper {
 
 func newBierwieseScraper() *sbScraper {
 	return newScraper("bierwiese", "http://94.249.194.218/sb/", "index.php?p=banlist",
+		parseStar, nextURLLast, parseSkialTime)
+}
+
+func newAceKillScraper() *sbScraper {
+	return newScraper("acekill", "https://sourcebans.acekill.pl/", "index.php?p=banlist",
 		parseStar, nextURLLast, parseSkialTime)
 }
