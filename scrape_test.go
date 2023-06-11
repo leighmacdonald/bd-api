@@ -301,6 +301,10 @@ func TestAceKillCommunity(t *testing.T) {
 	testParser(t, newAceKillScraper(), 30, "index.php?p=banlist&page=2")
 }
 
+func TestMagyarhns(t *testing.T) {
+	testParser(t, newMagyarhnsScraper(), 27, "index.php?p=banlist&page=2")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)

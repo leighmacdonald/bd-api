@@ -1065,3 +1065,8 @@ func newAceKillScraper() *sbScraper {
 	return newScraper("acekill", "https://sourcebans.acekill.pl/", "index.php?p=banlist",
 		parseStar, nextURLLast, parseSkialTime)
 }
+
+func newMagyarhnsScraper() *sbScraper {
+	return newScraper("magyarhns", "https://magyarhns.hu/sourcebans/", "index.php?p=banlist",
+		parseStar, nextURLLast, parseSkialTime)
+}

@@ -1,0 +1,4860 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<title>MagyarHNS SourceBans</title>
+		<link rel="Shortcut Icon" href="themes/star/images/favicon.ico" />
+		<link rel="stylesheet" href="themes/star/css/materialdesign/css/materialdesignicons.min.css">
+		<script type="text/javascript" src="./scripts/sourcebans.js"></script>
+		<link href="themes/star/css/style.css" rel="stylesheet" type="text/css" />
+		<style>
+			:root {
+  --primary:#308ee0;
+  --secondary:#e5e5e5;
+  --success:#00ce68;
+  --info:#8862e0;
+  --warning:#ffaf00;
+  --danger:#e65251;
+  --light:#f3f5f6;
+  --dark:#424964;
+  --main-bg:#272c33;
+  --main-color:#929ca0;
+  --main-border:#3e4356;
+
+  --link-hover:white;
+
+  --nav-link-color:#b3bbc6;
+  --nav-link-color-hover:white;
+  --nav-link-bg:none;
+  --nav-link-bg-hover:none;
+
+  --wrapper-bg:#383f48;
+
+  --breadcrumb-bg:#424964;
+
+  --nav-grad-left:#000000;
+  --nav-grad-right:#ea0000;
+}
+body *:not([class*="btn"]){
+	border-color:#3e4356 !important;
+}
+.mce-btn{
+	border-color:#b1b1b1 !important;
+}
+body{
+	color:var(--main-color);
+	background-color:var(--main-bg);
+}
+
+.navbar.default-layout .navbar-brand-wrapper{
+	background:var(--main-bg);
+}
+.sidebar{
+	background:var(--main-bg); 
+}
+.sidebar .nav .nav-item .nav-link{
+	color:var(--nav-link-color);
+}
+.sidebar .nav .nav-item.active{
+	background:none;
+}
+.sidebar .nav .nav-item.active > .nav-link{
+	color:var(--primary);
+}
+.sidebar .nav .nav-item.active:before,.sidebar-themes .nav .nav-item:before{
+	background: var(--primary);
+}
+.sidebar .nav:not(.sub-menu) > .nav-item:hover:not(.nav-profile) > .nav-link{
+	color:var(--nav-link-color-hover);
+	background:var(--nav-link-bg);
+}
+.sidebar .nav .nav-item:hover .nav-link .menu-icon{
+	color:var(--nav-link-color-hover);
+}
+.nav-pills .nav-item .nav-link{
+	color:var(--main-color);
+}
+
+.content-wrapper{
+	background: var(--wrapper-bg);
+}
+
+.breadcrumb{
+	color:#fff;
+	background-color:var(--breadcrumb-bg) !important; 
+}
+
+.purchace-popup > div > span{
+	background: var(--main-bg);
+}
+.purchace-popup > div > span p{
+	color:var(--main-color);
+}
+
+.card{
+	background-color: var(--main-bg);
+}
+.card-title{
+	color:white;
+}
+.table-striped tbody tr:nth-of-type(odd){
+	background: rgba(0,0,0,0.05);
+}
+.table-hover tbody tr:hover{
+	background: rgba(0,0,0,0.1);
+}
+.table .table{
+	background:none;
+}
+.footer{
+	background: var(--main-bg);
+}
+
+.form-control{
+	background: rgba(255,255,255,0.05);
+	color:var(--main-color);
+	border-color:var(--main-border);
+}
+.form-control:focus{
+	color:var(--main-color);
+	background: rgba(255,255,255,0.1);
+}
+.form-check .form-check-label input:checked + .input-helper:before, .form-radio label input:checked + .input-helper:before{
+	background: none;
+}
+
+div.btn.btn-inverse-light,
+div.btn.btn-inverse-light:hover{
+	background-color:rgba(255,255,255,0.05);
+	color:var(--main-color);
+	border-color:var(--main-border);
+}
+
+.nav-pills.nav-pills-primary .nav-item .nav-link.active, .nav-pills.nav-pills-primary .nav-item .nav-link.active:focus, .nav-pills.nav-pills-primary .nav-item .nav-link:hover{
+	background-color: #3aaaff !important;
+	box-shadow:0 4px 20px 0 rgba(179,187,198,.14), 0 7px 10px -5px #3aaaff66;
+}
+
+.dropdown-menu {
+	background-color:#383f48;
+}
+body .dropdown-menu *, body .dropdown-menu {
+	border-color:rgba(0,0,0,0.4) !important;
+}
+.dropdown-menu a {
+	color:var(--main-color);
+}
+.dropdown-item:hover, .dropdown-item:focus{
+	color:white;
+	background-color: unset;
+}
+
+#dialog-placement{
+  background:var(--main-bg);
+  box-shadow: 0px 0px 20px 14px rgb(48, 142, 224, 0.1);
+}
+
+a:hover{
+	color:var(--link-hover);
+}
+
+.navbar.default-layout{
+	background:linear-gradient(120deg, var(--nav-grad-left) 250px, var(--nav-grad-right));
+}
+.footer a,a{
+	color:var(--primary);
+}
+.nav-pills.nav-pills-primary .nav-item .nav-link.active, .nav-pills.nav-pills-primary .nav-item .nav-link.active:focus, .nav-pills.nav-pills-primary .nav-item .nav-link:hover{
+	color:#FFFFFF;
+}
+.form-check .form-check-label input:checked + .input-helper:after{
+	color:var(--primary);
+}
+.list-arrow li:before{
+	color:var(--primary);
+}
+.form-check .form-check-label .input-helper:before, .form-radio label input + .input-helper:before{
+	border-color:var(--primary) !important;
+}
+[id*="noplayer"] h2{
+	color:white !important;
+}
+/* Additional Fix For Buttons And More */
+
+.btn-primary:focus,
+.btn-primary.focus,
+.btn-primary:not(:disabled):not(.disabled):active:focus,
+.btn-primary:not(:disabled):not(.disabled).active:focus,
+.show>.btn-primary.dropdown-toggle:focus,
+.btn-outline-primary:focus,
+.btn-outline-primary.focus,
+.btn-outline-primary:not(:disabled):not(.disabled):active:focus,
+.btn-outline-primary:not(:disabled):not(.disabled).active:focus,
+.show>.btn-outline-primary.dropdown-toggle:focus {
+	box-shadow: 0 0 0 0.2rem rgb(48, 142, 224, 0.5);
+}
+.btn.btn-primary {
+	color:#FFFFFF;
+}
+.btn-primary:hover {
+	color:#FFFFFF;
+    background-color: #22639d;
+    border-color: #1f5b8f;
+}
+.btn-primary:not(:disabled):not(.disabled):active,
+.btn-primary:not(:disabled):not(.disabled).active,
+.show > .btn-primary.dropdown-toggle {
+	background-color: #1f5b8f;
+	border-color: #1b507d;
+}
+.nav-pills.nav-pills-primary .nav-item .nav-link.active,
+.nav-pills.nav-pills-primary .nav-item .nav-link.active:focus,
+.nav-pills.nav-pills-primary .nav-item .nav-link:hover {
+	box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgb(48, 142, 224, 0.4);
+}
+
+.bg-inverse-primary {
+	background: rgb(48, 142, 224, 0.2);
+}
+
+.badge-inverse-primary {
+	background: rgb(48, 142, 224, 0.3);
+}
+
+.btn-inverse-primary {
+	background-color: rgb(48, 142, 224, 0.2);
+	border-color: rgb(48, 142, 224, 0);
+}
+
+.btn-inverse-primary.focus,
+.btn-inverse-primary:focus {
+	box-shadow: 0 0 0 3px rgb(48, 142, 224, 0.5);
+}
+
+.btn-inverse-outline-primary {
+	border-color: rgb(48, 142, 224, 0.2);
+}
+
+.btn-inverse-outline-primary:hover {
+	background-color: rgb(48, 142, 224, 0.2);
+	border-color: rgb(48, 142, 224, 0.2);
+}
+
+.btn-inverse-outline-primary.focus,
+.btn-inverse-outline-primary:focus {
+	box-shadow: 0 0 0 3px rgb(48, 142, 224, 0.5);
+}
+
+.card-inverse-primary {
+	background: rgb(48, 142, 224, 0.2);
+}
+
+.badge-primary[href]:hover, .badge-primary[href]:focus {
+    background-color: #1f5b8f !important;
+}
+
+a.bg-primary:hover, a.bg-primary:focus,
+button.bg-primary:hover,
+button.bg-primary:focus {
+  background-color: #1f5b8f !important; }
+a.text-primary:hover, a.text-primary:focus {
+  color: #1f5b8f !important; }
+
+.btn-secondary:focus,
+.btn-secondary.focus,
+.btn-secondary:not(:disabled):not(.disabled):active:focus,
+.btn-secondary:not(:disabled):not(.disabled).active:focus,
+.show>.btn-secondary.dropdown-toggle:focus,
+.btn-outline-secondary:focus,
+.btn-outline-secondary.focus,
+.btn-outline-secondary:not(:disabled):not(.disabled):active:focus,
+.btn-outline-secondary:not(:disabled):not(.disabled).active:focus,
+.show>.btn-outline-secondary.dropdown-toggle:focus {
+	box-shadow: 0 0 0 0.2rem rgb(229, 229, 229, 0.5);
+}
+.btn.btn-secondary {
+	color:#383F48;
+}
+.btn-secondary:hover {
+	color:#383F48;
+    background-color: #a0a0a0;
+    border-color: #939393;
+}
+.btn-secondary:not(:disabled):not(.disabled):active,
+.btn-secondary:not(:disabled):not(.disabled).active,
+.show > .btn-secondary.dropdown-toggle {
+	background-color: #939393;
+	border-color: #808080;
+}
+.nav-pills.nav-pills-secondary .nav-item .nav-link.active,
+.nav-pills.nav-pills-secondary .nav-item .nav-link.active:focus,
+.nav-pills.nav-pills-secondary .nav-item .nav-link:hover {
+	box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgb(229, 229, 229, 0.4);
+}
+
+.bg-inverse-secondary {
+	background: rgb(229, 229, 229, 0.2);
+}
+
+.badge-inverse-secondary {
+	background: rgb(229, 229, 229, 0.3);
+}
+
+.btn-inverse-secondary {
+	background-color: rgb(229, 229, 229, 0.2);
+	border-color: rgb(229, 229, 229, 0);
+}
+
+.btn-inverse-secondary.focus,
+.btn-inverse-secondary:focus {
+	box-shadow: 0 0 0 3px rgb(229, 229, 229, 0.5);
+}
+
+.btn-inverse-outline-secondary {
+	border-color: rgb(229, 229, 229, 0.2);
+}
+
+.btn-inverse-outline-secondary:hover {
+	background-color: rgb(229, 229, 229, 0.2);
+	border-color: rgb(229, 229, 229, 0.2);
+}
+
+.btn-inverse-outline-secondary.focus,
+.btn-inverse-outline-secondary:focus {
+	box-shadow: 0 0 0 3px rgb(229, 229, 229, 0.5);
+}
+
+.card-inverse-secondary {
+	background: rgb(229, 229, 229, 0.2);
+}
+
+.badge-secondary[href]:hover, .badge-secondary[href]:focus {
+    background-color: #939393 !important;
+}
+
+a.bg-secondary:hover, a.bg-secondary:focus,
+button.bg-secondary:hover,
+button.bg-secondary:focus {
+  background-color: #939393 !important; }
+a.text-secondary:hover, a.text-secondary:focus {
+  color: #939393 !important; }
+
+.btn-success:focus,
+.btn-success.focus,
+.btn-success:not(:disabled):not(.disabled):active:focus,
+.btn-success:not(:disabled):not(.disabled).active:focus,
+.show>.btn-success.dropdown-toggle:focus,
+.btn-outline-success:focus,
+.btn-outline-success.focus,
+.btn-outline-success:not(:disabled):not(.disabled):active:focus,
+.btn-outline-success:not(:disabled):not(.disabled).active:focus,
+.show>.btn-outline-success.dropdown-toggle:focus {
+	box-shadow: 0 0 0 0.2rem rgb(0, 206, 104, 0.5);
+}
+.btn.btn-success {
+	color:#383F48;
+}
+.btn-success:hover {
+	color:#FFFFFF;
+    background-color: #009049;
+    border-color: #008443;
+}
+.btn-success:not(:disabled):not(.disabled):active,
+.btn-success:not(:disabled):not(.disabled).active,
+.show > .btn-success.dropdown-toggle {
+	background-color: #008443;
+	border-color: #00733a;
+}
+.nav-pills.nav-pills-success .nav-item .nav-link.active,
+.nav-pills.nav-pills-success .nav-item .nav-link.active:focus,
+.nav-pills.nav-pills-success .nav-item .nav-link:hover {
+	box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgb(0, 206, 104, 0.4);
+}
+
+.bg-inverse-success {
+	background: rgb(0, 206, 104, 0.2);
+}
+
+.badge-inverse-success {
+	background: rgb(0, 206, 104, 0.3);
+}
+
+.btn-inverse-success {
+	background-color: rgb(0, 206, 104, 0.2);
+	border-color: rgb(0, 206, 104, 0);
+}
+
+.btn-inverse-success.focus,
+.btn-inverse-success:focus {
+	box-shadow: 0 0 0 3px rgb(0, 206, 104, 0.5);
+}
+
+.btn-inverse-outline-success {
+	border-color: rgb(0, 206, 104, 0.2);
+}
+
+.btn-inverse-outline-success:hover {
+	background-color: rgb(0, 206, 104, 0.2);
+	border-color: rgb(0, 206, 104, 0.2);
+}
+
+.btn-inverse-outline-success.focus,
+.btn-inverse-outline-success:focus {
+	box-shadow: 0 0 0 3px rgb(0, 206, 104, 0.5);
+}
+
+.card-inverse-success {
+	background: rgb(0, 206, 104, 0.2);
+}
+
+.badge-success[href]:hover, .badge-success[href]:focus {
+    background-color: #008443 !important;
+}
+
+a.bg-success:hover, a.bg-success:focus,
+button.bg-success:hover,
+button.bg-success:focus {
+  background-color: #008443 !important; }
+a.text-success:hover, a.text-success:focus {
+  color: #008443 !important; }
+
+.btn-info:focus,
+.btn-info.focus,
+.btn-info:not(:disabled):not(.disabled):active:focus,
+.btn-info:not(:disabled):not(.disabled).active:focus,
+.show>.btn-info.dropdown-toggle:focus,
+.btn-outline-info:focus,
+.btn-outline-info.focus,
+.btn-outline-info:not(:disabled):not(.disabled):active:focus,
+.btn-outline-info:not(:disabled):not(.disabled).active:focus,
+.show>.btn-outline-info.dropdown-toggle:focus {
+	box-shadow: 0 0 0 0.2rem rgb(136, 98, 224, 0.5);
+}
+.btn.btn-info {
+	color:#FFFFFF;
+}
+.btn-info:hover {
+	color:#FFFFFF;
+    background-color: #5f459d;
+    border-color: #573f8f;
+}
+.btn-info:not(:disabled):not(.disabled):active,
+.btn-info:not(:disabled):not(.disabled).active,
+.show > .btn-info.dropdown-toggle {
+	background-color: #573f8f;
+	border-color: #4c377d;
+}
+.nav-pills.nav-pills-info .nav-item .nav-link.active,
+.nav-pills.nav-pills-info .nav-item .nav-link.active:focus,
+.nav-pills.nav-pills-info .nav-item .nav-link:hover {
+	box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgb(136, 98, 224, 0.4);
+}
+
+.bg-inverse-info {
+	background: rgb(136, 98, 224, 0.2);
+}
+
+.badge-inverse-info {
+	background: rgb(136, 98, 224, 0.3);
+}
+
+.btn-inverse-info {
+	background-color: rgb(136, 98, 224, 0.2);
+	border-color: rgb(136, 98, 224, 0);
+}
+
+.btn-inverse-info.focus,
+.btn-inverse-info:focus {
+	box-shadow: 0 0 0 3px rgb(136, 98, 224, 0.5);
+}
+
+.btn-inverse-outline-info {
+	border-color: rgb(136, 98, 224, 0.2);
+}
+
+.btn-inverse-outline-info:hover {
+	background-color: rgb(136, 98, 224, 0.2);
+	border-color: rgb(136, 98, 224, 0.2);
+}
+
+.btn-inverse-outline-info.focus,
+.btn-inverse-outline-info:focus {
+	box-shadow: 0 0 0 3px rgb(136, 98, 224, 0.5);
+}
+
+.card-inverse-info {
+	background: rgb(136, 98, 224, 0.2);
+}
+
+.badge-info[href]:hover, .badge-info[href]:focus {
+    background-color: #573f8f !important;
+}
+
+a.bg-info:hover, a.bg-info:focus,
+button.bg-info:hover,
+button.bg-info:focus {
+  background-color: #573f8f !important; }
+a.text-info:hover, a.text-info:focus {
+  color: #573f8f !important; }
+
+.btn-warning:focus,
+.btn-warning.focus,
+.btn-warning:not(:disabled):not(.disabled):active:focus,
+.btn-warning:not(:disabled):not(.disabled).active:focus,
+.show>.btn-warning.dropdown-toggle:focus,
+.btn-outline-warning:focus,
+.btn-outline-warning.focus,
+.btn-outline-warning:not(:disabled):not(.disabled):active:focus,
+.btn-outline-warning:not(:disabled):not(.disabled).active:focus,
+.show>.btn-outline-warning.dropdown-toggle:focus {
+	box-shadow: 0 0 0 0.2rem rgb(255, 175, 0, 0.5);
+}
+.btn.btn-warning {
+	color:#383F48;
+}
+.btn-warning:hover {
+	color:#FFFFFF;
+    background-color: #b37b00;
+    border-color: #a37000;
+}
+.btn-warning:not(:disabled):not(.disabled):active,
+.btn-warning:not(:disabled):not(.disabled).active,
+.show > .btn-warning.dropdown-toggle {
+	background-color: #a37000;
+	border-color: #8f6200;
+}
+.nav-pills.nav-pills-warning .nav-item .nav-link.active,
+.nav-pills.nav-pills-warning .nav-item .nav-link.active:focus,
+.nav-pills.nav-pills-warning .nav-item .nav-link:hover {
+	box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgb(255, 175, 0, 0.4);
+}
+
+.bg-inverse-warning {
+	background: rgb(255, 175, 0, 0.2);
+}
+
+.badge-inverse-warning {
+	background: rgb(255, 175, 0, 0.3);
+}
+
+.btn-inverse-warning {
+	background-color: rgb(255, 175, 0, 0.2);
+	border-color: rgb(255, 175, 0, 0);
+}
+
+.btn-inverse-warning.focus,
+.btn-inverse-warning:focus {
+	box-shadow: 0 0 0 3px rgb(255, 175, 0, 0.5);
+}
+
+.btn-inverse-outline-warning {
+	border-color: rgb(255, 175, 0, 0.2);
+}
+
+.btn-inverse-outline-warning:hover {
+	background-color: rgb(255, 175, 0, 0.2);
+	border-color: rgb(255, 175, 0, 0.2);
+}
+
+.btn-inverse-outline-warning.focus,
+.btn-inverse-outline-warning:focus {
+	box-shadow: 0 0 0 3px rgb(255, 175, 0, 0.5);
+}
+
+.card-inverse-warning {
+	background: rgb(255, 175, 0, 0.2);
+}
+
+.badge-warning[href]:hover, .badge-warning[href]:focus {
+    background-color: #a37000 !important;
+}
+
+a.bg-warning:hover, a.bg-warning:focus,
+button.bg-warning:hover,
+button.bg-warning:focus {
+  background-color: #a37000 !important; }
+a.text-warning:hover, a.text-warning:focus {
+  color: #a37000 !important; }
+
+.btn-danger:focus,
+.btn-danger.focus,
+.btn-danger:not(:disabled):not(.disabled):active:focus,
+.btn-danger:not(:disabled):not(.disabled).active:focus,
+.show>.btn-danger.dropdown-toggle:focus,
+.btn-outline-danger:focus,
+.btn-outline-danger.focus,
+.btn-outline-danger:not(:disabled):not(.disabled):active:focus,
+.btn-outline-danger:not(:disabled):not(.disabled).active:focus,
+.show>.btn-outline-danger.dropdown-toggle:focus {
+	box-shadow: 0 0 0 0.2rem rgb(230, 82, 81, 0.5);
+}
+.btn.btn-danger {
+	color:#FFFFFF;
+}
+.btn-danger:hover {
+	color:#FFFFFF;
+    background-color: #a13939;
+    border-color: #933434;
+}
+.btn-danger:not(:disabled):not(.disabled):active,
+.btn-danger:not(:disabled):not(.disabled).active,
+.show > .btn-danger.dropdown-toggle {
+	background-color: #933434;
+	border-color: #812e2d;
+}
+.nav-pills.nav-pills-danger .nav-item .nav-link.active,
+.nav-pills.nav-pills-danger .nav-item .nav-link.active:focus,
+.nav-pills.nav-pills-danger .nav-item .nav-link:hover {
+	box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgb(230, 82, 81, 0.4);
+}
+
+.bg-inverse-danger {
+	background: rgb(230, 82, 81, 0.2);
+}
+
+.badge-inverse-danger {
+	background: rgb(230, 82, 81, 0.3);
+}
+
+.btn-inverse-danger {
+	background-color: rgb(230, 82, 81, 0.2);
+	border-color: rgb(230, 82, 81, 0);
+}
+
+.btn-inverse-danger.focus,
+.btn-inverse-danger:focus {
+	box-shadow: 0 0 0 3px rgb(230, 82, 81, 0.5);
+}
+
+.btn-inverse-outline-danger {
+	border-color: rgb(230, 82, 81, 0.2);
+}
+
+.btn-inverse-outline-danger:hover {
+	background-color: rgb(230, 82, 81, 0.2);
+	border-color: rgb(230, 82, 81, 0.2);
+}
+
+.btn-inverse-outline-danger.focus,
+.btn-inverse-outline-danger:focus {
+	box-shadow: 0 0 0 3px rgb(230, 82, 81, 0.5);
+}
+
+.card-inverse-danger {
+	background: rgb(230, 82, 81, 0.2);
+}
+
+.badge-danger[href]:hover, .badge-danger[href]:focus {
+    background-color: #933434 !important;
+}
+
+a.bg-danger:hover, a.bg-danger:focus,
+button.bg-danger:hover,
+button.bg-danger:focus {
+  background-color: #933434 !important; }
+a.text-danger:hover, a.text-danger:focus {
+  color: #933434 !important; }
+
+.btn-light:focus,
+.btn-light.focus,
+.btn-light:not(:disabled):not(.disabled):active:focus,
+.btn-light:not(:disabled):not(.disabled).active:focus,
+.show>.btn-light.dropdown-toggle:focus,
+.btn-outline-light:focus,
+.btn-outline-light.focus,
+.btn-outline-light:not(:disabled):not(.disabled):active:focus,
+.btn-outline-light:not(:disabled):not(.disabled).active:focus,
+.show>.btn-outline-light.dropdown-toggle:focus {
+	box-shadow: 0 0 0 0.2rem rgb(243, 245, 246, 0.5);
+}
+.btn.btn-light {
+	color:#383F48;
+}
+.btn-light:hover {
+	color:#383F48;
+    background-color: #aaacac;
+    border-color: #9c9d9d;
+}
+.btn-light:not(:disabled):not(.disabled):active,
+.btn-light:not(:disabled):not(.disabled).active,
+.show > .btn-light.dropdown-toggle {
+	background-color: #9c9d9d;
+	border-color: #88898a;
+}
+.nav-pills.nav-pills-light .nav-item .nav-link.active,
+.nav-pills.nav-pills-light .nav-item .nav-link.active:focus,
+.nav-pills.nav-pills-light .nav-item .nav-link:hover {
+	box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgb(243, 245, 246, 0.4);
+}
+
+.bg-inverse-light {
+	background: rgb(243, 245, 246, 0.2);
+}
+
+.badge-inverse-light {
+	background: rgb(243, 245, 246, 0.3);
+}
+
+.btn-inverse-light {
+	background-color: rgb(243, 245, 246, 0.2);
+	border-color: rgb(243, 245, 246, 0);
+}
+
+.btn-inverse-light.focus,
+.btn-inverse-light:focus {
+	box-shadow: 0 0 0 3px rgb(243, 245, 246, 0.5);
+}
+
+.btn-inverse-outline-light {
+	border-color: rgb(243, 245, 246, 0.2);
+}
+
+.btn-inverse-outline-light:hover {
+	background-color: rgb(243, 245, 246, 0.2);
+	border-color: rgb(243, 245, 246, 0.2);
+}
+
+.btn-inverse-outline-light.focus,
+.btn-inverse-outline-light:focus {
+	box-shadow: 0 0 0 3px rgb(243, 245, 246, 0.5);
+}
+
+.card-inverse-light {
+	background: rgb(243, 245, 246, 0.2);
+}
+
+.badge-light[href]:hover, .badge-light[href]:focus {
+    background-color: #9c9d9d !important;
+}
+
+a.bg-light:hover, a.bg-light:focus,
+button.bg-light:hover,
+button.bg-light:focus {
+  background-color: #9c9d9d !important; }
+a.text-light:hover, a.text-light:focus {
+  color: #9c9d9d !important; }
+
+.btn-dark:focus,
+.btn-dark.focus,
+.btn-dark:not(:disabled):not(.disabled):active:focus,
+.btn-dark:not(:disabled):not(.disabled).active:focus,
+.show>.btn-dark.dropdown-toggle:focus,
+.btn-outline-dark:focus,
+.btn-outline-dark.focus,
+.btn-outline-dark:not(:disabled):not(.disabled):active:focus,
+.btn-outline-dark:not(:disabled):not(.disabled).active:focus,
+.show>.btn-outline-dark.dropdown-toggle:focus {
+	box-shadow: 0 0 0 0.2rem rgb(66, 73, 100, 0.5);
+}
+.btn.btn-dark {
+	color:#FFFFFF;
+}
+.btn-dark:hover {
+	color:#FFFFFF;
+    background-color: #2e3346;
+    border-color: #2a2f40;
+}
+.btn-dark:not(:disabled):not(.disabled):active,
+.btn-dark:not(:disabled):not(.disabled).active,
+.show > .btn-dark.dropdown-toggle {
+	background-color: #2a2f40;
+	border-color: #252938;
+}
+.nav-pills.nav-pills-dark .nav-item .nav-link.active,
+.nav-pills.nav-pills-dark .nav-item .nav-link.active:focus,
+.nav-pills.nav-pills-dark .nav-item .nav-link:hover {
+	box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgb(66, 73, 100, 0.4);
+}
+
+.bg-inverse-dark {
+	background: rgb(66, 73, 100, 0.2);
+}
+
+.badge-inverse-dark {
+	background: rgb(66, 73, 100, 0.3);
+}
+
+.btn-inverse-dark {
+	background-color: rgb(66, 73, 100, 0.2);
+	border-color: rgb(66, 73, 100, 0);
+}
+
+.btn-inverse-dark.focus,
+.btn-inverse-dark:focus {
+	box-shadow: 0 0 0 3px rgb(66, 73, 100, 0.5);
+}
+
+.btn-inverse-outline-dark {
+	border-color: rgb(66, 73, 100, 0.2);
+}
+
+.btn-inverse-outline-dark:hover {
+	background-color: rgb(66, 73, 100, 0.2);
+	border-color: rgb(66, 73, 100, 0.2);
+}
+
+.btn-inverse-outline-dark.focus,
+.btn-inverse-outline-dark:focus {
+	box-shadow: 0 0 0 3px rgb(66, 73, 100, 0.5);
+}
+
+.card-inverse-dark {
+	background: rgb(66, 73, 100, 0.2);
+}
+
+.badge-dark[href]:hover, .badge-dark[href]:focus {
+    background-color: #2a2f40 !important;
+}
+
+a.bg-dark:hover, a.bg-dark:focus,
+button.bg-dark:hover,
+button.bg-dark:focus {
+  background-color: #2a2f40 !important; }
+a.text-dark:hover, a.text-dark:focus {
+  color: #2a2f40 !important; }
+
+
+
+		</style>
+		<script src="themes/star/js/jqueryBase.js"></script>
+		<link rel="stylesheet" href="themes/star/css/aos.css" />
+		<script src="themes/star/js/aos.js"></script>
+		<script type="text/javascript" src="./scripts/mootools.js"></script>
+		<script type="text/javascript" src="./scripts/contextMenoo.js"></script>
+		
+			<script type="text/javascript">
+var xajaxRequestUri="./index.php";
+var xajaxDebug=false;
+var xajaxStatusMessages=false;
+var xajaxWaitCursor=true;
+var xajaxDefinedGet=0;
+var xajaxDefinedPost=1;
+var xajaxLoaded=false;
+function xajax_Plogin(){return xajax.call("Plogin", arguments, 1);}
+function xajax_ServerHostPlayers(){return xajax.call("ServerHostPlayers", arguments, 1);}
+function xajax_ServerHostProperty(){return xajax.call("ServerHostProperty", arguments, 1);}
+function xajax_ServerHostPlayers_list(){return xajax.call("ServerHostPlayers_list", arguments, 1);}
+function xajax_ServerPlayers(){return xajax.call("ServerPlayers", arguments, 1);}
+function xajax_LostPassword(){return xajax.call("LostPassword", arguments, 1);}
+function xajax_RefreshServer(){return xajax.call("RefreshServer", arguments, 1);}
+	</script>
+	<script type="text/javascript" src="scripts/xajax.js"></script>
+	<script type="text/javascript">
+window.setTimeout(function () { if (!xajaxLoaded) { alert('Error: the xajax Javascript file could not be included. Perhaps the URL is incorrect?\nURL: scripts/xajax.js'); } }, 6000);
+	</script>
+
+	</head>
+	<body onload="NavListFix()">
+		<div class="container-scroller">
+			<nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+				<div class="text-center navbar-brand-wrapper d-flex align-items-top justify-content-center">
+					<a class="navbar-brand brand-logo" href="index.php">
+					<img src="images/logos/hns.png" alt="SourceBans Logo" />
+					</a>
+					<a class="navbar-brand brand-logo-mini" href="index.php">
+					<img src="images/logos/hns-mini.png" alt="SourceBans Logo" onError="this.onerror=null;this.src='themes/star/images/sb-large-mini.png';" />
+					</a>
+				</div>
+				<div class="navbar-menu-wrapper d-flex align-items-center">
+					<ul class="navbar-nav navbar-nav-right">
+						<li class="nav-item dropdown">
+							<a class="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#" data-toggle="dropdown">
+							<i class="mdi mdi-magnify"></i>
+							</a>
+							<div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" aria-labelledby="notificationDropdown">
+								<form method="get" action="index.php" id="banform">
+									<input type="hidden" name="p" value="banlist" />
+									<a class="dropdown-item">
+										<p class="mb-0 font-weight-normal float-left">Search Bans...
+										</p>
+									</a>
+									<a class="dropdown-item preview-item">
+										<div class="preview-thumbnail" onclick="document.getElementById('banform').submit();" style="cursor:pointer;">
+											<div class="preview-icon bg-danger">
+												<i class="mdi mdi-do-not-disturb mx-0"></i>
+											</div>
+										</div>
+										<div class="preview-item-content">
+											<input type="text" name="searchText" class="form-control" placeholder="Search Bans..." style="width:190px;">
+										</div>
+									</a>
+								</form>
+								<div class="dropdown-divider"></div>
+								<form method="get" action="index.php" id="commform">
+									<input type="hidden" name="p" value="commslist" />
+									<a class="dropdown-item">
+										<p class="mb-0 font-weight-normal float-left">Search Comms...
+										</p>
+									</a>
+									<a class="dropdown-item preview-item">
+										<div class="preview-thumbnail" onclick="document.getElementById('commform').submit();" style="cursor:pointer;">
+											<div class="preview-icon bg-info">
+												<i class="mdi mdi-microphone-off mx-0"></i>
+											</div>
+										</div>
+										<div class="preview-item-content">
+											<input type="text" name="searchText" class="form-control" placeholder="Search Comms..." style="width:190px;">
+										</div>
+									</a>
+								</form>
+								<div class="dropdown-divider"></div>
+							</div>
+						</li>
+																							</ul>
+					<button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+					<span class="mdi mdi-menu"></span>
+					</button>
+				</div>
+			</nav>
+		</div>
+		<div class="container-fluid page-body-wrapper">
+		<nav class="sidebar sidebar-offcanvas" id="sidebar">
+		<ul class="nav" id="js_fixme">
+		<li class="nav-item nav-profile">
+			<div class="nav-link">
+								<button onclick="location.href='index.php?p=login';" class="btn btn-success btn-block">Login
+				</button>
+							</div>
+		</li>	<li  class="nav-item">
+		<a href="index.php?p=home" class="tip" title="Dashboard :: This page shows an overview of your bans and servers." target="_self">Dashboard </a>
+</li>	<li  class="nav-item">
+		<a href="index.php?p=servers" class="tip" title="Servers :: All of your servers and their status can be viewed here" target="_self">Servers </a>
+</li>	<li  class="nav-item active">
+		<a href="index.php?p=banlist" class="tip" title="Bans :: All of the bans in the database can be viewed from here." target="_self">Bans </a>
+</li>	<li  class="nav-item">
+		<a href="index.php?p=commslist" class="tip" title="Comms :: All of the communication bans (such as chat gags and voice mutes) in the database can be viewed from here." target="_self">Comms </a>
+</li>	<li  class="nav-item">
+		<a href="index.php?p=submit" class="tip" title="Report Player :: You can submit a demo or screenshot of a suspected cheater here. It will then be up for review by one of the admins" target="_self">Report Player </a>
+</li>	<li  class="nav-item">
+		<a href="index.php?p=protest" class="tip" title="Appeal Ban :: Here you can appeal your ban. And prove your case as to why you should be unbanned." target="_self">Appeal Ban </a>
+</li>
+        </ul>
+      </nav>
+<script>
+	var elements = document.getElementById("js_fixme").getElementsByTagName("li");
+    
+    for(var i=1; i<elements.length; i++)
+	{
+        var hrf= elements[i].getElementsByTagName("a")[0].getAttribute("href");
+        elements[i].getElementsByTagName("a")[0].setAttribute("class", "nav-link");
+        if(hrf.includes("home"))
+        	elements[i].getElementsByTagName("a")[0].innerHTML="<i class=\"menu-icon mdi mdi-television\"></i><span class=\"menu-title\">"+elements[i].getElementsByTagName("a")[0].innerHTML+"</span>";
+        else if(hrf.includes("servers"))
+        	elements[i].getElementsByTagName("a")[0].innerHTML="<i class=\"menu-icon mdi mdi-server\"></i><span class=\"menu-title\">"+elements[i].getElementsByTagName("a")[0].innerHTML+"</span>";
+        else if(hrf.includes("banlist"))
+        	elements[i].getElementsByTagName("a")[0].innerHTML="<i class=\"menu-icon mdi mdi-do-not-disturb\"></i><span class=\"menu-title\">"+elements[i].getElementsByTagName("a")[0].innerHTML+"</span>";
+        else if(hrf.includes("commslist"))
+        	elements[i].getElementsByTagName("a")[0].innerHTML="<i class=\"menu-icon mdi mdi-microphone-off\"></i><span class=\"menu-title\">"+elements[i].getElementsByTagName("a")[0].innerHTML+"</span>";
+        else if(hrf.includes("submit"))
+        	elements[i].getElementsByTagName("a")[0].innerHTML="<i class=\"menu-icon mdi mdi-alert\"></i><span class=\"menu-title\">"+elements[i].getElementsByTagName("a")[0].innerHTML+"</span>";
+        else if(hrf.includes("protest"))
+        	elements[i].getElementsByTagName("a")[0].innerHTML="<i class=\"menu-icon mdi mdi-lock-open\"></i><span class=\"menu-title\">"+elements[i].getElementsByTagName("a")[0].innerHTML+"</span>";
+        else if(hrf.includes("admin"))
+        	elements[i].getElementsByTagName("a")[0].innerHTML="<i class=\"menu-icon mdi mdi-settings\"></i><span class=\"menu-title\">"+elements[i].getElementsByTagName("a")[0].innerHTML+"</span>";
+    }
+</script>
+<div class="main-panel">
+	<div class="content-wrapper"><div id="msg-red-debug" style="display:none;" >
+	<i><img src="./images/warning.png" alt="Warning" /></i>
+	<b>Debug</b>
+	<br />
+	<div id="debug-text">
+	</div>
+</div>
+<div id="dialog-placement" style="vertical-align:middle;display:none;opacity:0;text-align:center;width:892px;margin:0 auto;position:fixed !important;position:absolute;overflow:hidden;top:10px;left:100px;">
+	<table width="460px" id="dialog-holder" class="dialog-holder" border="0" cellspacing="0" cellpadding="0" >
+		<tbody width="460px">
+			<tr>
+				<td class="dialog-topleft"></td>
+				<td class="dialog-border"></td>
+				<td class="dialog-topright"></td>
+			</tr>
+			<tr>
+				<td class="dialog-border"></td>
+				<td class="box-content">
+					<div id="dragbar" style="cursor:pointer">
+						<ilayer width="100%" onSelectStart="return false">
+							<layer width="100%" onMouseover="dragswitch=1;if (ns4) drag_drop_ns(dialog-placement)" onMouseout="dragswitch=0">
+								<h2 align="left" id="dialog-title" class="ok"></h2>
+							</layer>
+						</ilayer>
+					</div>
+					<div class="dialog-content" align="left">
+						<div class="dialog-body">
+							<div class="clearfix">
+								<div style="float: left; margin-right: 15px;" id="dialog-icon" class="icon-info">&nbsp;</div>
+								<div style="width:360px;float: right; padding-bottom: 5px; font-size: 11px;" id="dialog-content-text"></div>
+							</div>
+						</div>
+						<div class="dialog-control" id="dialog-control">    
+						</div>
+					</div>
+				</td>
+				<td class="dialog-border"></td>
+			</tr>
+			<tr>
+				<td class="dialog-bottomleft"></td>
+				<td class="dialog-border"></td>
+				<td class="dialog-bottomright"></td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+<div id="content_title">
+	<b>Bans</b>
+</div>
+<nav aria-label="breadcrumb">
+	<ol id="breadcrumb" class="breadcrumb bg-light">
+	</ol>
+</nav>
+<div id="content"><script type="text/javascript">$("breadcrumb").setHTML("&raquo; <a href='index.php?p=home'>Home</a> &raquo; <b>Bans</b>");</script><div class="row">
+	<div class="col-lg-12 grid-margin">
+		<div class="card">
+			<div class="card-body">
+				<h4 class="lead">Banlist Overview <a class="btn btn-outline-primary btn-rounded btn-fw" style="width:20px;height:20px;padding:0px;line-height:18px;" href="index.php?p=banlist&hideinactive=true" title="Hide Inactive">Hide Inactive</a></h4>
+				<p>Total Bans: 2794</p>
+				<div class="row">
+	<div class="col-lg-6 mx-auto pt-3">
+		<p class="text-center">
+			<button class="btn btn-inverse-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+			<i class="mdi mdi-magnify"></i>Advanced Search
+			</button>
+		</p>
+		
+		<style>
+			div input.form-control{margin-top: 8px;}
+			div select.form-control{margin-top: 5px;}
+		</style>
+		
+		<div class="collapse box-shadow-delayed" id="collapseExample">
+			<div class="row mx-5">
+				<div class="form-radio col-sm-3">
+					<label class="form-check-label">
+					<input type="radio" class="form-check-input" name="search_type" id="name" value="name"> Nickname
+					</label>
+				</div>
+				<div class="col-sm-9">
+					<input class="form-control" type="text" id="nick" value="" onmouseup="$('name').checked = true">
+				</div>
+			</div>
+			<div class="row mx-5">
+				<div class="form-radio col-sm-3">
+					<label class="form-check-label">
+					<input type="radio" class="form-check-input" name="search_type" id="steam_" value="radiobutton"> Steam ID
+					</label>
+				</div>
+				<div class="col-sm-9 row">
+					<div class="col-sm-5">
+						<input class="form-control" type="text" id="steamid" value="" onmouseup="$('steam_').checked = true">
+					</div>
+					<div class="col-sm-7">
+						<select class="form-control" id="steam_match" onmouseup="$('steam_').checked = true">
+							<option value="0" selected>Exact Match</option>
+							<option value="1">Partial Match</option>
+						</select>
+					</div>
+				</div>
+			</div>
+						<div class="row mx-5">
+				<div class="form-radio col-sm-3">
+					<label class="form-check-label">
+					<input type="radio" class="form-check-input" name="search_type" id="reason_" value="radiobutton"> Reason
+					</label>
+				</div>
+				<div class="col-sm-9">
+					<input class="form-control" type="text" id="ban_reason" value="" onmouseup="$('reason_').checked = true">
+				</div>
+			</div>
+			<div class="row mx-5">
+				<div class="form-radio col-sm-3">
+					<label class="form-check-label">
+					<input type="radio" class="form-check-input" name="search_type" id="date" value="radiobutton"> Date
+					</label>
+				</div>
+				<div class="col-sm-9 row">
+					<div class="col-sm-4"><input class="form-control" type="text" id="day" placeholder="DD" maxlength="2" onmouseup="$('date').checked = true"></div>
+					<div class="col-sm-4"><input class="form-control" type="text" id="month" placeholder="MM" maxlength="2" onmouseup="$('date').checked = true"></div>
+					<div class="col-sm-4"><input class="form-control" type="text" id="year" placeholder="YY" maxlength="4" onmouseup="$('date').checked = true"></div>
+				</div>
+			</div>
+			<div class="row mx-5">
+				<div class="form-radio col-sm-3">
+					<label class="form-check-label">
+					<input type="radio" class="form-check-input" name="search_type" id="length_" value="radiobutton"> Length
+					</label>
+				</div>
+				<div class="col-sm-9 row">
+					<div class="col-sm-2">
+						<select class="form-control" id="length_type" onmouseup="$('length_').checked = true">
+							<option value="e" selected title="equal to">=</option>
+							<option value="h" title="greater">&gt;</option>
+							<option value="l" title="smaller">&lt;</option>
+							<option value="eh" title="equal to or greater">&gt;=</option>
+							<option value="el" title="equal to or smaller">&lt;=</option>
+						</select>
+					</div>
+					<div class="col-sm-10 row">
+						<div class="col-7">
+							<select class="form-control" id="length" onmouseup="$('length_').checked = true" onchange="switch_length(this);$('length').setStyle('width', '210px');" onmouseover="if(this.options[this.selectedIndex].value=='other')$('length').setStyle('width', '210px');if(this.options[this.selectedIndex].value=='other')this.focus();" style="width:210px">
+								<option value="0">Permanent</option>
+								<optgroup label="minutes">
+									<option value="1">1 minute</option>
+									<option value="5">5 minutes</option>
+									<option value="10">10 minutes</option>
+									<option value="15">15 minutes</option>
+									<option value="30">30 minutes</option>
+									<option value="45">45 minutes</option>
+								</optgroup>
+								<optgroup label="hours">
+									<option value="60">1 hour</option>
+									<option value="120">2 hours</option>
+									<option value="180">3 hours</option>
+									<option value="240">4 hours</option>
+									<option value="480">8 hours</option>
+									<option value="720">12 hours</option>
+								</optgroup>
+								<optgroup label="days">
+									<option value="1440">1 day</option>
+									<option value="2880">2 days</option>
+									<option value="4320">3 days</option>
+									<option value="5760">4 days</option>
+									<option value="7200">5 days</option>
+									<option value="8640">6 days</option>
+								</optgroup>
+								<optgroup label="weeks">
+									<option value="10080">1 week</option>
+									<option value="20160">2 weeks</option>
+									<option value="30240">3 weeks</option>
+								</optgroup>
+								<optgroup label="months">
+									<option value="40320">1 month</option>
+									<option value="80640">2 months</option>
+									<option value="120960">3 months</option>
+									<option value="241920">6 months</option>
+									<option value="483840">12 months</option>
+								</optgroup>
+								<option value="other">Other length in minutes</option>
+							</select>
+						</div>
+						<div class="col-5">
+							<input type="text" class="form-control" id="other_length" name="other_length" onmouseup="$('length_').checked = true" style="display:none;">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row mx-5">
+				<div class="form-radio col-sm-3">
+					<label class="form-check-label">
+					<input type="radio" class="form-check-input" name="search_type" id="ban_type_" value="radiobutton"> Type
+					</label>
+				</div>
+				<div class="col-sm-9">
+					<select class="form-control" id="ban_type" onmouseup="$('ban_type_').checked = true">
+						<option value="0" selected>Steam ID</option>
+						<option value="1">IP Address</option>
+					</select>
+				</div>
+			</div>
+						<div class="row mx-5">
+				<div class="form-radio col-sm-3">
+					<label class="form-check-label">
+					<input type="radio" class="form-check-input" name="search_type" id="admin" value="radiobutton"> Admin
+					</label>
+				</div>
+				<div class="col-sm-9">
+					<select class="form-control" id="ban_admin" onmouseup="$('admin').checked = true">
+												<option label="Adam" value="84">Adam</option>
+												<option label="B4rn1" value="92">B4rn1</option>
+												<option label="balika" value="29">balika</option>
+												<option label="Ballai" value="3">Ballai</option>
+												<option label="CONSOLE" value="0">CONSOLE</option>
+												<option label="Csala" value="27">Csala</option>
+												<option label="Daniel" value="36">Daniel</option>
+												<option label="Danii" value="82">Danii</option>
+												<option label="Ervin" value="1">Ervin</option>
+												<option label="Gabriella" value="72">Gabriella</option>
+												<option label="Galagony" value="83">Galagony</option>
+												<option label="Isti" value="76">Isti</option>
+												<option label="istWan" value="95">istWan</option>
+												<option label="KillStr3ak" value="19">KillStr3ak</option>
+												<option label="Kolbász" value="45">Kolbász</option>
+												<option label="Larion" value="75">Larion</option>
+												<option label="Ninja" value="85">Ninja</option>
+												<option label="pingu" value="91">pingu</option>
+												<option label="SaySorry" value="37">SaySorry</option>
+												<option label="SGGround" value="93">SGGround</option>
+												<option label="Vucsyyy" value="46">Vucsyyy</option>
+												<option label="Zanide" value="94">Zanide</option>
+											</select>
+				</div>
+			</div>
+						<div class="row mx-5">
+				<div class="form-radio col-sm-3">
+					<label class="form-check-label">
+					<input type="radio" class="form-check-input" name="search_type" id="where_banned" value="radiobutton"> Server
+					</label>
+				</div>
+				<div class="col-sm-9">
+					<select class="form-control" id="server" onmouseup="$('where_banned').checked = true">
+						<option label="Web Ban" value="0">Web Ban</option>
+												<option value="1" id="ss1">Retrieving Hostname... (217.144.54.240:27015)</option>
+											</select>
+				</div>
+			</div>
+						<div class="row mx-5 pb-3">
+				<div class="col-sm-3">
+				</div>
+				<div class="col-sm-9">
+					<input type='button' onclick="search_bans();" name='searchbtn' class='btn ok searchbtn btn-success' onmouseover='ButtonOver("searchbtn")' onmouseout='ButtonOver("searchbtn")' id='searchbtn' value='Search' />
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">xajax_ServerHostPlayers('1', 'id', 'ss1', '', '', false, 200);</script><script type="text/javascript">
+function switch_length(opt)
+{
+    if (opt.options[opt.selectedIndex].value=='other') {
+        $('other_length').setStyle('display', 'block');
+        $('other_length').focus();
+        $('length').setStyle('width', '20px');
+    } else {
+        $('other_length').setStyle('display', 'none');
+        $('length').setStyle('width', '210px');
+    }
+}
+</script>
+								<div id="banlist" class="table-responsive">
+					<div class="col-12 my-2 text-xl-right text-lg-left">
+						<div id="banlist-nav" class="btn btn-inverse-light  btn-rounded btn-fw p-1 p-md-2 p-xl-2">
+							displaying&nbsp;0&nbsp;-&nbsp;30&nbsp;of&nbsp;2794&nbsp;results  <b><a href="index.php?p=banlist&page=2" onclick="" target="_self">next <img border="0" alt="next" src="images/right.png" style="vertical-align:middle;" /> </a></b>&nbsp;<select onchange="changePage(this,'B','','');"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option><option value="32">32</option><option value="33">33</option><option value="34">34</option><option value="35">35</option><option value="36">36</option><option value="37">37</option><option value="38">38</option><option value="39">39</option><option value="40">40</option><option value="41">41</option><option value="42">42</option><option value="43">43</option><option value="44">44</option><option value="45">45</option><option value="46">46</option><option value="47">47</option><option value="48">48</option><option value="49">49</option><option value="50">50</option><option value="51">51</option><option value="52">52</option><option value="53">53</option><option value="54">54</option><option value="55">55</option><option value="56">56</option><option value="57">57</option><option value="58">58</option><option value="59">59</option><option value="60">60</option><option value="61">61</option><option value="62">62</option><option value="63">63</option><option value="64">64</option><option value="65">65</option><option value="66">66</option><option value="67">67</option><option value="68">68</option><option value="69">69</option><option value="70">70</option><option value="71">71</option><option value="72">72</option><option value="73">73</option><option value="74">74</option><option value="75">75</option><option value="76">76</option><option value="77">77</option><option value="78">78</option><option value="79">79</option><option value="80">80</option><option value="81">81</option><option value="82">82</option><option value="83">83</option><option value="84">84</option><option value="85">85</option><option value="86">86</option><option value="87">87</option><option value="88">88</option><option value="89">89</option><option value="90">90</option><option value="91">91</option><option value="92">92</option><option value="93">93</option><option value="94">94</option></select>  													</div>
+					</div>
+					<table class="table table-hover tbl-sm">
+						<thead>
+							<tr>
+																<th width="12%" class="text-center">MOD/Country</th>
+								<th width="14%" class="text-center">Date</th>
+								<th>Player</th>
+																<th width="15%">Admin</th>
+																								<th width="10%" class="text-right">Length</th>
+								<th width="200px" class="text-center">Remaining Progress</th>
+															</tr>
+						</thead>
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2870" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2870');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/hu.png" alt="HU" border="0" align="absmiddle" /></td>
+						<td align="center">06-10-23 19:43</td>
+						<td>
+							<div style="float:left;">
+																Szabolcsi kupakoló
+															</div>
+																				</td>
+												<td>
+														CONSOLE
+													</td>
+						
+						<td  align="right"  class="listtable_1_permanent">
+															<label class="badge badge-danger">
+														Permanent </label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2870" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								Szabolcsi kupakoló
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="11" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:0:776524857
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1553049714]" target="_blank">[U:1:1553049714]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199513315442" target="_blank">76561199513315442</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >06-10-23 19:43</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >Permanent </td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								<i><font color="#677882">Not applicable.</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >silent strafe</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2870">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2869" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2869');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/tr.png" alt="TR" border="0" align="absmiddle" /></td>
+						<td align="center">06-09-23 14:23</td>
+						<td>
+							<div style="float:left;">
+																kill yourself
+															</div>
+																				</td>
+												<td>
+														CONSOLE
+													</td>
+						
+						<td  align="right"  class="listtable_1_permanent">
+															<label class="badge badge-danger">
+														Permanent </label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2869" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								kill yourself
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="11" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:1:776387159
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1552774319]" target="_blank">[U:1:1552774319]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199513040047" target="_blank">76561199513040047</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >06-09-23 14:23</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >Permanent </td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								<i><font color="#677882">Not applicable.</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >[SourceSleuth] Duplicate account</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2869">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2868" aria-expanded="false" aria-controls="collapseExample"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/zz.png" alt="Unknown Country" border="0" align="absmiddle" /></td>
+						<td align="center">06-08-23 16:39</td>
+						<td>
+							<div style="float:left;">
+																K1ll3r
+															</div>
+																				</td>
+												<td>
+														istWan
+													</td>
+						
+						<td  align="right"  class="listtable_1_unbanned">
+															<label class="badge badge-success">
+														2 hr (Expired)</label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2868" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								K1ll3r
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="13" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_0:0:587636937
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1175273874]" target="_blank">[U:1:1175273874]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199135539602" target="_blank">76561199135539602</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >06-08-23 16:39</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >2 hr (Expired)</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Unban reason</td>
+											<td >
+																								<i><font color="#677882">no reason present</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Unbanned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								06-08-23 18:39
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >Kilép keresöből</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								istWan
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td  >
+																						Web Ban
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2867" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2867');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/hu.png" alt="HU" border="0" align="absmiddle" /></td>
+						<td align="center">06-08-23 15:48</td>
+						<td>
+							<div style="float:left;">
+																Bob
+															</div>
+																				</td>
+												<td>
+														Larion
+													</td>
+						
+						<td  align="right"  class="listtable_1_permanent">
+															<label class="badge badge-danger">
+														Permanent </label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2867" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								Bob
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="11" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:1:776265504
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1552531009]" target="_blank">[U:1:1552531009]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199512796737" target="_blank">76561199512796737</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >06-08-23 15:48</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >Permanent </td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								<i><font color="#677882">Not applicable.</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >Pörgő</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								Larion
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2867">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2866" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2866');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/hu.png" alt="HU" border="0" align="absmiddle" /></td>
+						<td align="center">06-08-23 10:38</td>
+						<td>
+							<div style="float:left;">
+																Nobb ZUHN
+															</div>
+																				</td>
+												<td>
+														CONSOLE
+													</td>
+						
+						<td  align="right"  class="listtable_1_permanent">
+															<label class="badge badge-danger">
+														Permanent </label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2866" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								Nobb ZUHN
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="11" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:0:776245638
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1552491276]" target="_blank">[U:1:1552491276]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199512757004" target="_blank">76561199512757004</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >06-08-23 10:38</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >Permanent </td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								<i><font color="#677882">Not applicable.</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >Trollkods</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2866">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >2 <a href="index.php?p=banlist&searchText=STEAM_1:0:776245638&Submit" onclick="" target="_self">(search) </a></td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (3)</td>
+											<td >
+																								<span title="Server: 217.144.54.240:27015, Date: 06-09-23 11:33">Nobb ZUHN</span>, <span title="Server: 217.144.54.240:27015, Date: 06-10-23 13:34">Nobb ZUHN</span>, <span title="Server: 217.144.54.240:27015, Date: 06-10-23 21:35">Nobb ZUHN</span>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2865" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2865');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/hu.png" alt="HU" border="0" align="absmiddle" /></td>
+						<td align="center">06-08-23 10:30</td>
+						<td>
+							<div style="float:left;">
+																(1)matyi
+															</div>
+																				</td>
+												<td>
+														CONSOLE
+													</td>
+						
+						<td  align="right"  class="listtable_1_unbanned">
+															<label class="badge badge-success">
+														1 min (Expired)</label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2865" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								(1)matyi
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="13" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:0:776245638
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1552491276]" target="_blank">[U:1:1552491276]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199512757004" target="_blank">76561199512757004</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >06-08-23 10:30</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >1 min (Expired)</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Unban reason</td>
+											<td >
+																								<i><font color="#677882">no reason present</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Unbanned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								06-08-23 10:31
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >) 0 Trollkods</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2865">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >2 <a href="index.php?p=banlist&searchText=STEAM_1:0:776245638&Submit" onclick="" target="_self">(search) </a></td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2864" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2864');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/ro.png" alt="RO" border="0" align="absmiddle" /></td>
+						<td align="center">06-03-23 15:56</td>
+						<td>
+							<div style="float:left;">
+																oMeGa
+															</div>
+																				</td>
+												<td>
+														SGGround
+													</td>
+						
+						<td  align="right"  class="listtable_1_unbanned">
+															<label class="badge badge-success">
+														10 hr (Expired)</label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2864" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								oMeGa
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="13" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:0:425695614
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:851391228]" target="_blank">[U:1:851391228]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561198811656956" target="_blank">76561198811656956</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >06-03-23 15:56</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >10 hr (Expired)</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Unban reason</td>
+											<td >
+																								<i><font color="#677882">no reason present</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Unbanned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								06-04-23 01:56
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >anyazas</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								SGGround
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2864">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2863" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2863');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/tr.png" alt="TR" border="0" align="absmiddle" /></td>
+						<td align="center">06-03-23 08:56</td>
+						<td>
+							<div style="float:left;">
+																✞
+															</div>
+																				</td>
+												<td>
+														Zanide
+													</td>
+						
+						<td  align="right"  class="listtable_1_permanent">
+															<label class="badge badge-danger">
+														Permanent </label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2863" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								✞
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="11" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:0:773521541
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1547043082]" target="_blank">[U:1:1547043082]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199507308810" target="_blank">76561199507308810</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >06-03-23 08:56</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >Permanent </td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								<i><font color="#677882">Not applicable.</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >Bhop script használata.</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								Zanide
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2863">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2862" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2862');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/hu.png" alt="HU" border="0" align="absmiddle" /></td>
+						<td align="center">06-02-23 17:17</td>
+						<td>
+							<div style="float:left;">
+																DusanZalan2121
+															</div>
+																				</td>
+												<td>
+														istWan
+													</td>
+						
+						<td  align="right"  class="listtable_1_unbanned">
+															<label class="badge badge-success">
+														8 hr (Expired)</label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2862" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								DusanZalan2121
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="13" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:0:773047135
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1546094270]" target="_blank">[U:1:1546094270]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199506359998" target="_blank">76561199506359998</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >06-02-23 17:17</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >8 hr (Expired)</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Unban reason</td>
+											<td >
+																								<i><font color="#677882">no reason present</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Unbanned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								06-03-23 01:17
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >j ? ? t ? ?kos szid ? ? s, k ? ? z ? ? ss ? ?g rombol ? ? s</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								istWan
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2862">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2861" aria-expanded="false" aria-controls="collapseExample"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/zz.png" alt="Unknown Country" border="0" align="absmiddle" /></td>
+						<td align="center">06-01-23 15:59</td>
+						<td>
+							<div style="float:left;">
+																i dont speak russian
+															</div>
+																				</td>
+												<td>
+														Adam
+													</td>
+						
+						<td  align="right"  class="listtable_1_permanent">
+															<label class="badge badge-danger">
+														Permanent </label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2861" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								i dont speak russian
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="11" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_0:1:579191070
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1158382141]" target="_blank">[U:1:1158382141]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199118647869" target="_blank">76561199118647869</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >06-01-23 15:59</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >Permanent </td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								<i><font color="#677882">Not applicable.</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >Csalas</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								Adam
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td  >
+																						Web Ban
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2860" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2860');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/hu.png" alt="HU" border="0" align="absmiddle" /></td>
+						<td align="center">06-01-23 15:24</td>
+						<td>
+							<div style="float:left;">
+																☂️ Ur DaD????
+															</div>
+																				</td>
+												<td>
+														CONSOLE
+													</td>
+						
+						<td  align="right"  class="listtable_1_unbanned">
+															<label class="badge badge-primary">
+														Permanent (Unbanned)</label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2860" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								☂️ Ur DaD????
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="13" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:1:608794456
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1217588913]" target="_blank">[U:1:1217588913]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199177854641" target="_blank">76561199177854641</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >06-01-23 15:24</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >Permanent (Unbanned)</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Unban reason</td>
+											<td >
+																								teves
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Unbanned by Admin</td>
+											<td >
+																								Adam
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								<i><font color="#677882">Not applicable.</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >[SourceSleuth] Duplicate account</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2860">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2859" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2859');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/ro.png" alt="RO" border="0" align="absmiddle" /></td>
+						<td align="center">05-30-23 12:16</td>
+						<td>
+							<div style="float:left;">
+																ilikebigmen2052
+															</div>
+																				</td>
+												<td>
+														CONSOLE
+													</td>
+						
+						<td  align="right"  class="listtable_1_permanent">
+															<label class="badge badge-danger">
+														Permanent </label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2859" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								ilikebigmen2052
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="11" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:1:774059623
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1548119247]" target="_blank">[U:1:1548119247]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199508384975" target="_blank">76561199508384975</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >05-30-23 12:16</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >Permanent </td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								<i><font color="#677882">Not applicable.</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >SMAC 0.8.7.3: ConVar sv_competitive_minspec violation</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2859">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2858" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2858');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/ua.png" alt="UA" border="0" align="absmiddle" /></td>
+						<td align="center">05-28-23 13:24</td>
+						<td>
+							<div style="float:left;">
+																2roo
+															</div>
+																				</td>
+												<td>
+														CONSOLE
+													</td>
+						
+						<td  align="right"  class="listtable_1_permanent">
+															<label class="badge badge-danger">
+														Permanent </label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2858" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								2roo
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="11" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:0:568134979
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1136269958]" target="_blank">[U:1:1136269958]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199096535686" target="_blank">76561199096535686</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >05-28-23 13:24</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >Permanent </td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								<i><font color="#677882">Not applicable.</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >kilép t-ből és vissza ct-be</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2858">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (2)</td>
+											<td >
+																								<span title="Server: 217.144.54.240:27015, Date: 05-29-23 10:35">Skywalker Rudolf</span>, <span title="Server: 217.144.54.240:27015, Date: 05-30-23 13:08">Low2roo</span>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2857" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2857');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/pl.png" alt="PL" border="0" align="absmiddle" /></td>
+						<td align="center">05-25-23 12:35</td>
+						<td>
+							<div style="float:left;">
+																icE
+															</div>
+																				</td>
+												<td>
+														CONSOLE
+													</td>
+						
+						<td  align="right"  class="listtable_1_permanent">
+															<label class="badge badge-danger">
+														Permanent </label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2857" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								icE
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="11" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:1:711916318
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1423832637]" target="_blank">[U:1:1423832637]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199384098365" target="_blank">76561199384098365</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >05-25-23 12:35</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >Permanent </td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								<i><font color="#677882">Not applicable.</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >SMAC 0.8.7.3: ConVar cl_phys_timescale violation</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2857">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2856" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2856');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/hu.png" alt="HU" border="0" align="absmiddle" /></td>
+						<td align="center">05-22-23 16:30</td>
+						<td>
+							<div style="float:left;">
+																champion hun
+															</div>
+																				</td>
+												<td>
+														Zanide
+													</td>
+						
+						<td  align="right"  class="listtable_1_unbanned">
+															<label class="badge badge-success">
+														2 hr (Expired)</label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2856" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								champion hun
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="13" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:0:577115374
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1154230748]" target="_blank">[U:1:1154230748]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199114496476" target="_blank">76561199114496476</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >05-22-23 16:30</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >2 hr (Expired)</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Unban reason</td>
+											<td >
+																								<i><font color="#677882">no reason present</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Unbanned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								05-22-23 18:30
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >Ajtó spam.</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								Zanide
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2856">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (1)</td>
+											<td >
+																								<span title="Server: 217.144.54.240:27015, Date: 05-22-23 16:30">champion hun</span>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2855" aria-expanded="false" aria-controls="collapseExample"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/zz.png" alt="Unknown Country" border="0" align="absmiddle" /></td>
+						<td align="center">05-19-23 22:59</td>
+						<td>
+							<div style="float:left;">
+																999
+															</div>
+																				</td>
+												<td>
+														Zanide
+													</td>
+						
+						<td  align="right"  class="listtable_1_unbanned">
+															<label class="badge badge-primary">
+														Permanent (Unbanned)</label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2855" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								999
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="13" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_0:1:773557725
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1547115451]" target="_blank">[U:1:1547115451]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199507381179" target="_blank">76561199507381179</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >05-19-23 22:59</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >Permanent (Unbanned)</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Unban reason</td>
+											<td >
+																								Rossz steam id.
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Unbanned by Admin</td>
+											<td >
+																								Zanide
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								<i><font color="#677882">Not applicable.</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >Wallhack</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								Zanide
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td  >
+																						Web Ban
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2854" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2854');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/hu.png" alt="HU" border="0" align="absmiddle" /></td>
+						<td align="center">05-19-23 15:28</td>
+						<td>
+							<div style="float:left;">
+																vazz
+															</div>
+																				</td>
+												<td>
+														CONSOLE
+													</td>
+						
+						<td  align="right"  class="listtable_1_permanent">
+															<label class="badge badge-danger">
+														Permanent </label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2854" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								vazz
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="11" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:0:773819208
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1547638416]" target="_blank">[U:1:1547638416]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199507904144" target="_blank">76561199507904144</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >05-19-23 15:28</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >Permanent </td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								<i><font color="#677882">Not applicable.</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >[SourceSleuth] Duplicate account</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2854">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2853" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2853');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/hu.png" alt="HU" border="0" align="absmiddle" /></td>
+						<td align="center">05-18-23 15:58</td>
+						<td>
+							<div style="float:left;">
+																UnKnoWn_Uid
+															</div>
+																				</td>
+												<td>
+														CONSOLE
+													</td>
+						
+						<td  align="right"  class="listtable_1_permanent">
+															<label class="badge badge-danger">
+														Permanent </label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2853" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								UnKnoWn_Uid
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="11" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:1:772012630
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1544025261]" target="_blank">[U:1:1544025261]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199504290989" target="_blank">76561199504290989</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >05-18-23 15:58</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >Permanent </td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								<i><font color="#677882">Not applicable.</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >SMAC 0.8.7.3: ConVar fog_enable violation</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2853">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2852" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2852');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/hu.png" alt="HU" border="0" align="absmiddle" /></td>
+						<td align="center">05-18-23 14:37</td>
+						<td>
+							<div style="float:left;">
+																Exinity
+															</div>
+																				</td>
+												<td>
+														CONSOLE
+													</td>
+						
+						<td  align="right"  class="listtable_1_permanent">
+															<label class="badge badge-danger">
+														Permanent </label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2852" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								Exinity
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="11" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:1:773306925
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1546613851]" target="_blank">[U:1:1546613851]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199506879579" target="_blank">76561199506879579</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >05-18-23 14:37</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >Permanent </td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								<i><font color="#677882">Not applicable.</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >[SourceSleuth] Duplicate account</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2852">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (1)</td>
+											<td >
+																								<span title="Server: 217.144.54.240:27015, Date: 05-18-23 16:53">Exinity</span>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2851" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2851');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/hu.png" alt="HU" border="0" align="absmiddle" /></td>
+						<td align="center">05-15-23 20:32</td>
+						<td>
+							<div style="float:left;">
+																L4freesh لويس تايلور
+															</div>
+																				</td>
+												<td>
+														balika
+													</td>
+						
+						<td  align="right"  class="listtable_1_permanent">
+															<label class="badge badge-danger">
+														Permanent </label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2851" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								L4freesh لويس تايلور
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="11" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:1:187793613
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:375587227]" target="_blank">[U:1:375587227]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561198335852955" target="_blank">76561198335852955</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >05-15-23 20:32</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >Permanent </td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								<i><font color="#677882">Not applicable.</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >szia</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								balika
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2851">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >3 <a href="index.php?p=banlist&searchText=STEAM_1:1:187793613&Submit" onclick="" target="_self">(search) </a></td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (1)</td>
+											<td >
+																								<span title="Server: 217.144.54.240:27015, Date: 06-10-23 18:40">L4freesh HUN</span>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2850" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2850');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/hu.png" alt="HU" border="0" align="absmiddle" /></td>
+						<td align="center">05-15-23 15:52</td>
+						<td>
+							<div style="float:left;">
+																cinege
+															</div>
+																				</td>
+												<td>
+														Zanide
+													</td>
+						
+						<td  align="right"  class="listtable_1_permanent">
+															<label class="badge badge-danger">
+														Permanent </label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2850" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								cinege
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="11" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:1:769860290
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1539720581]" target="_blank">[U:1:1539720581]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199499986309" target="_blank">76561199499986309</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >05-15-23 15:52</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >Permanent </td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								<i><font color="#677882">Not applicable.</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >Bhop script, auto-trigger.</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								Zanide
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2850">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2849" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2849');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/rs.png" alt="RS" border="0" align="absmiddle" /></td>
+						<td align="center">05-15-23 13:08</td>
+						<td>
+							<div style="float:left;">
+																zsomborzsaki
+															</div>
+																				</td>
+												<td>
+														CONSOLE
+													</td>
+						
+						<td  align="right"  class="listtable_1_permanent">
+															<label class="badge badge-danger">
+														Permanent </label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2849" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								zsomborzsaki
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="11" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:0:772505066
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1545010132]" target="_blank">[U:1:1545010132]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199505275860" target="_blank">76561199505275860</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >05-15-23 13:08</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >Permanent </td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								<i><font color="#677882">Not applicable.</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >[SourceSleuth] Duplicate account</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2849">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2848" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2848');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/ro.png" alt="RO" border="0" align="absmiddle" /></td>
+						<td align="center">05-14-23 13:02</td>
+						<td>
+							<div style="float:left;">
+																frBoo
+															</div>
+																				</td>
+												<td>
+														Zanide
+													</td>
+						
+						<td  align="right"  class="listtable_1_permanent">
+															<label class="badge badge-danger">
+														Permanent </label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2848" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								frBoo
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="11" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:1:525951152
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1051902305]" target="_blank">[U:1:1051902305]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199012168033" target="_blank">76561199012168033</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >05-14-23 13:02</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >Permanent </td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								<i><font color="#677882">Not applicable.</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >Szerver szidása, admin szidása, trágád beszéd, infozás, trollkodás, közösség rombolás.</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								Zanide
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2848">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2847" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2847');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/ro.png" alt="RO" border="0" align="absmiddle" /></td>
+						<td align="center">05-14-23 13:02</td>
+						<td>
+							<div style="float:left;">
+																PatKanyTv/csversion
+															</div>
+																				</td>
+												<td>
+														Zanide
+													</td>
+						
+						<td  align="right"  class="listtable_1_permanent">
+															<label class="badge badge-danger">
+														Permanent </label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2847" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								PatKanyTv/csversion
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="11" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:0:772614912
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1545229824]" target="_blank">[U:1:1545229824]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199505495552" target="_blank">76561199505495552</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >05-14-23 13:02</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >Permanent </td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								<i><font color="#677882">Not applicable.</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >Szerver szidása, admin szidása, trágád beszéd, infozás, trollkodás, közösség rombolás.</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								Zanide
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2847">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (3)</td>
+											<td >
+																								<span title="Server: 217.144.54.240:27015, Date: 05-20-23 13:56">PatKanyTv/csversion</span>, <span title="Server: 217.144.54.240:27015, Date: 05-20-23 17:59">PatKanyTv/csversion</span>, <span title="Server: 217.144.54.240:27015, Date: 05-21-23 10:59">PatKanyTv/csversion</span>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2846" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2846');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/zz.png" alt="zz" border="0" align="absmiddle" /></td>
+						<td align="center">05-14-23 10:19</td>
+						<td>
+							<div style="float:left;">
+																csimpi ezredes
+															</div>
+																				</td>
+												<td>
+														istWan
+													</td>
+						
+						<td  align="right"  class="listtable_1_unbanned">
+															<label class="badge badge-success">
+														1 wk (Expired)</label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2846" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								csimpi ezredes
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="13" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:1:642243123
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1284486247]" target="_blank">[U:1:1284486247]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561199244751975" target="_blank">76561199244751975</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >05-14-23 10:19</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >1 wk (Expired)</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Unban reason</td>
+											<td >
+																								<i><font color="#677882">no reason present</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Unbanned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								05-21-23 10:19
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >moder ? ? tor szid ? ? s, kussoltat ? ? s, k ? ? z ? ? ss ? ?g rombol ? ? s</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								istWan
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2846">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (1)</td>
+											<td >
+																								<span title="Server: 217.144.54.240:27015, Date: 05-14-23 10:19">csimpi ezredes</span>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2845" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2845');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/ch.png" alt="CH" border="0" align="absmiddle" /></td>
+						<td align="center">05-12-23 20:05</td>
+						<td>
+							<div style="float:left;">
+																Focista
+															</div>
+																				</td>
+												<td>
+														Zanide
+													</td>
+						
+						<td  align="right"  class="listtable_1_unbanned">
+															<label class="badge badge-success">
+														1 wk (Expired)</label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2845" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								Focista
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="13" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:1:100460662
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:200921325]" target="_blank">[U:1:200921325]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561198161187053" target="_blank">76561198161187053</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >05-12-23 20:05</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >1 wk (Expired)</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Unban reason</td>
+											<td >
+																								<i><font color="#677882">no reason present</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Unbanned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								05-19-23 20:05
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >Nem megfelelő mikrofon használata, közöség rombolás, Trollkodás.</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								Zanide
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2845">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2844" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2844');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/hu.png" alt="HU" border="0" align="absmiddle" /></td>
+						<td align="center">05-12-23 20:05</td>
+						<td>
+							<div style="float:left;">
+																Lakatos Brendon
+															</div>
+																				</td>
+												<td>
+														Zanide
+													</td>
+						
+						<td  align="right"  class="listtable_1_unbanned">
+															<label class="badge badge-success">
+														1 wk (Expired)</label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2844" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								Lakatos Brendon
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="13" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:1:168491388
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:336982777]" target="_blank">[U:1:336982777]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561198297248505" target="_blank">76561198297248505</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >05-12-23 20:05</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >1 wk (Expired)</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Unban reason</td>
+											<td >
+																								<i><font color="#677882">no reason present</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Unbanned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								05-19-23 20:05
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >Nem megfelelő mikrofon használata, közöség rombolás, Trollkodás.</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								Zanide
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2844">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2843" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2843');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/hu.png" alt="HU" border="0" align="absmiddle" /></td>
+						<td align="center">05-10-23 17:28</td>
+						<td>
+							<div style="float:left;">
+																Zerox coke !#Russia!
+															</div>
+																				</td>
+												<td>
+														istWan
+													</td>
+						
+						<td  align="right"  class="listtable_1_unbanned">
+															<label class="badge badge-success">
+														2 hr (Expired)</label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2843" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								Zerox coke !#Russia!
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="13" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:0:221995300
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:443990600]" target="_blank">[U:1:443990600]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561198404256328" target="_blank">76561198404256328</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >05-10-23 17:28</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >2 hr (Expired)</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Unban reason</td>
+											<td >
+																								<i><font color="#677882">no reason present</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Unbanned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								05-10-23 19:28
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >kil ? ?p keres ? ? b ? ? l ( tban nem mukodik )</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								istWan
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2843">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (1)</td>
+											<td >
+																								<span title="Server: 217.144.54.240:27015, Date: 05-10-23 17:28">Zerox coke !#Russia!</span>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2842" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2842');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/hu.png" alt="HU" border="0" align="absmiddle" /></td>
+						<td align="center">05-10-23 17:27</td>
+						<td>
+							<div style="float:left;">
+																L4freesh لويس تايلور
+															</div>
+																				</td>
+												<td>
+														istWan
+													</td>
+						
+						<td  align="right"  class="listtable_1_unbanned">
+															<label class="badge badge-primary">
+														2 hr (Unbanned)</label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2842" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								L4freesh لويس تايلور
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="13" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:1:187793613
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:375587227]" target="_blank">[U:1:375587227]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561198335852955" target="_blank">76561198335852955</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >05-10-23 17:27</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >2 hr (Unbanned)</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Unban reason</td>
+											<td >
+																								<i><font color="#677882">no reason present</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Unbanned by Admin</td>
+											<td >
+																								istWan
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								05-10-23 19:27
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >kil ? ?p keres ? ? b ? ? l ( tban nem mukodik )</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								istWan
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2842">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >3 <a href="index.php?p=banlist&searchText=STEAM_1:1:187793613&Submit" onclick="" target="_self">(search) </a></td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+												<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_2841" aria-expanded="false" aria-controls="collapseExample"
+												onclick="xajax_ServerHostPlayers(1, 'id', 'host_2841');"
+												>
+												<td align="center" class="img-ss"><img src="themes/star/images/games/csgo.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/ro.png" alt="RO" border="0" align="absmiddle" /></td>
+						<td align="center">05-07-23 12:38</td>
+						<td>
+							<div style="float:left;">
+																????ⓒᵒČỖ_şҜяＲ????
+															</div>
+																				</td>
+												<td>
+														istWan
+													</td>
+						
+						<td  align="right"  class="listtable_1_unbanned">
+															<label class="badge badge-success">
+														2 hr (Expired)</label>
+						</td>
+												<td class="text-danger">
+
+							<div class="progress">
+																	<div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+																	</div>
+							</div>
+						</td>
+												</tr>
+						<!-- ###############[ Start Sliding Panel ]################## -->
+						<tr>
+							<td colspan="7" align="center" style="padding:0;">
+								<div class="collapse" id="expand_2841" data-parent="#banlist">
+									<table class="table tbl-sm" width="100%">
+										<tr>
+											<td align="left" class="listtable_top" colspan="3">
+												<b>Ban Details</b>
+											</td>
+										</tr>
+										<tr align="left">
+											<td width="30%" >Player</td>
+											<td >
+																								????ⓒᵒČỖ_şҜяＲ????
+																							</td>
+											<!-- ###############[ Start Admin Controls ]################## -->
+																						<td width="30%" rowspan="13" class="listtable_2 opener">
+												<div class="ban-edit">
+													<ul>
+														<li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+													</ul>
+												</div>
+											</td>
+																						<!-- ###############[ End Admin Controls ]##################### -->
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam ID</td>
+											<td >
+																								STEAM_1:1:503442528
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Steam3 ID</td>
+											<td >
+																								<a href="http://steamcommunity.com/profiles/[U:1:1006885057]" target="_blank">[U:1:1006885057]</a>
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Steam Community</td>
+											<td ><a href="http://steamcommunity.com/profiles/76561198967150785" target="_blank">76561198967150785</a></td>
+										</tr>
+																														<tr align="left">
+											<td width="20%" >Invoked on</td>
+											<td >05-07-23 12:38</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Banlength</td>
+											<td >2 hr (Expired)</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Unban reason</td>
+											<td >
+																								<i><font color="#677882">no reason present</font></i>
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Unbanned by Admin</td>
+											<td >
+																								CONSOLE
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Expires on</td>
+											<td >
+																								05-07-23 14:38
+																							</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Reason</td>
+											<td >nem keress</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned by Admin</td>
+											<td >
+																								istWan
+																							</td>
+										</tr>
+																				<tr align="left">
+											<td width="20%" >Banned from</td>
+											<td   id="host_2841">
+																						Please Wait...
+																						</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Total Bans</td>
+											<td >No previous bans</td>
+										</tr>
+										<tr align="left">
+											<td width="20%" >Blocked (0)</td>
+											<td >
+																								<i><font color="#677882">never</font></i>
+																							</td>
+										</tr>
+																			</table>
+								</div>
+							</td>
+						</tr>
+						<!-- ###############[ End Sliding Panel ]################## -->
+											</table>
+					<div class="col-12 my-2 text-xl-right text-lg-left">
+						<div id="banlist-nav" class="btn btn-inverse-light  btn-rounded btn-fw p-1 p-md-2 p-xl-2">
+							displaying&nbsp;0&nbsp;-&nbsp;30&nbsp;of&nbsp;2794&nbsp;results | <b><a href="index.php?p=banlist&page=2" onclick="" target="_self">next <img border="0" alt="next" src="images/right.png" style="vertical-align:middle;" /> </a></b>&nbsp;<select onchange="changePage(this,'B','','');"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option><option value="32">32</option><option value="33">33</option><option value="34">34</option><option value="35">35</option><option value="36">36</option><option value="37">37</option><option value="38">38</option><option value="39">39</option><option value="40">40</option><option value="41">41</option><option value="42">42</option><option value="43">43</option><option value="44">44</option><option value="45">45</option><option value="46">46</option><option value="47">47</option><option value="48">48</option><option value="49">49</option><option value="50">50</option><option value="51">51</option><option value="52">52</option><option value="53">53</option><option value="54">54</option><option value="55">55</option><option value="56">56</option><option value="57">57</option><option value="58">58</option><option value="59">59</option><option value="60">60</option><option value="61">61</option><option value="62">62</option><option value="63">63</option><option value="64">64</option><option value="65">65</option><option value="66">66</option><option value="67">67</option><option value="68">68</option><option value="69">69</option><option value="70">70</option><option value="71">71</option><option value="72">72</option><option value="73">73</option><option value="74">74</option><option value="75">75</option><option value="76">76</option><option value="77">77</option><option value="78">78</option><option value="79">79</option><option value="80">80</option><option value="81">81</option><option value="82">82</option><option value="83">83</option><option value="84">84</option><option value="85">85</option><option value="86">86</option><option value="87">87</option><option value="88">88</option><option value="89">89</option><option value="90">90</option><option value="91">91</option><option value="92">92</option><option value="93">93</option><option value="94">94</option></select>  													</div>
+					</div>
+										<div class="col-12 py-2 text-center no-wrap">
+						<a href="./exportbans.php?type=steam" title="Export Permanent SteamID Bans" class="btn btn-inverse-primary btn-rounded btn-fw">Export Permanent SteamID Bans</a>&nbsp;&nbsp;|&nbsp;
+						<a href="./exportbans.php?type=ip" title="Export Permanent IP Bans"class="btn btn-inverse-primary btn-rounded btn-fw">Export Permanent IP Bans</a>
+					</div>
+									</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	window.addEvent('domready', function(){
+		InitAccordion('tr.opener', 'div.opener', 'mainwrapper');
+		
+				
+		});
+		
+</script>
+
+			</div>
+		</div>
+		<footer class="footer">
+			<div class="container-fluid clearfix">
+				<span class="d-block text-center text-sm-left d-sm-inline-block">
+				<a href="https://sbpp.github.io/" target="_blank">SourceBans++</a> 1.6.4.
+				Powered by <a href="http://www.sourcemod.net" target="_blank">SourceMod</a>
+				</span><br>
+				<span class="d-block text-center text-sm-left d-sm-inline-block">Copyright © 2018
+				<a href="http://www.bootstrapdash.com/" target="_blank">Bootstrapdash</a>. All rights reserved.</span>
+				<span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-right">Hand-crafted & made with
+				<i class="mdi mdi-heart text-danger"></i><br>
+				"I dont think you want to know..." - <i>devicenull</i>
+				</span>
+			</div>
+		</footer>
+	</div>
+</div>
+<script src="themes/star/js/off-canvas.js"></script>
+<script src="themes/star/js/misc.js"></script>
+<script src="themes/star/js/countTo.js"></script>
+
+<script>
+	document.getElementById("content_title").remove();
+	function fixToolTip() {
+		setTimeout(
+		function() {
+			var tooltips = document.getElementsByClassName("tool-tip");
+			for(i=0;i<tooltips.length;i++)
+			{
+				tooltips[i].className+="tool-tip badge badge-primary";
+			}
+		}, 2000);
+	}
+	fixToolTip();
+	var bc=document.getElementById("breadcrumb");
+	var bc_explode = bc.innerHTML.split("»");
+	var newbc="";
+	for(i=1;i<bc_explode.length;i++)
+	{
+		newbc+="<li class=\"breadcrumb-item\">";
+		newbc+=bc_explode[i]
+		newbc+="</li>";
+		newbc = newbc.replace("<b>", "");
+		newbc = newbc.replace("</b>", "");
+	}
+	bc.innerHTML = newbc;
+	//document.getElementById("breadcrumb").remove();
+</script>
+<script>
+	AOS.init();
+</script>
+</div>
+<script type="text/javascript">
+var settab = ProcessAdminTabs();
+window.addEvent('domready', function(){
+        var Tips2 = new Tips($$('.tip'), {
+            initialize:function(){
+                this.fx = new Fx.Style(this.toolTip, 'opacity', {duration: 300, wait: false}).set(0);
+            },
+            onShow: function(toolTip) {
+                this.fx.start(1);
+            },
+            onHide: function(toolTip) {
+                this.fx.start(0);
+            }
+        });
+        var Tips4 = new Tips($$('.perm'), {
+            className: 'perm'
+        });
+    });
+$('nav').setHTML('');    $('content_title').setHTML('Ban List');
+
+
+        </script>
+<!--[if lt IE 7]>
+<script defer type="text/javascript" src="./scripts/pngfix.js"></script>
+<![endif]-->
+</body>
+</html>
