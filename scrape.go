@@ -232,6 +232,14 @@ func parseSkialTime(s string) (time.Time, error) {
 }
 
 // 05-17-23 03:07
+func parseBachuruServasTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("01-02-2006, 15:04", s)
+}
+
+// 05-17-23 03:07
 func parseBaitedTime(s string) (time.Time, error) {
 	if s == "Not applicable." || s == "Permanent" {
 		return time.Time{}, nil
@@ -1029,4 +1037,9 @@ func newCedaPugScraper() *sbScraper {
 func newGameSitesScraper() *sbScraper {
 	return newScraper("gamesites", "https://banlist.gamesites.cz/tf2/", "index.php?p=banlist",
 		parseStar, nextURLLast, parseSkialTime)
+}
+
+func newBachuruServasScraper() *sbScraper {
+	return newScraper("bachuruservas", "https://bachuruservas.lt/sb/", "index.php?p=banlist",
+		parseStar, nextURLLast, parseBachuruServasTime)
 }

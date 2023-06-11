@@ -22,3 +22,7 @@ proxies:
     remote_addr: sfo-1.us.kittyland.com:22
     local_addr: localhost:3001
 ```
+
+## Summary 
+
+![apis](https://imgs.xkcd.com/comics/standards.png)
