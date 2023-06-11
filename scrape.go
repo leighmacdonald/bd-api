@@ -443,6 +443,8 @@ func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeF
 			key := strings.TrimSpace(strings.ToLower(first.Contents().Text()))
 			value := strings.TrimSpace(second.Contents().Text())
 			switch key {
+			case "steam komunitní":
+				fallthrough
 			case "steam community":
 				pts := strings.Split(value, " ")
 				sid64, errSid := steamid.StringToSID64(pts[0])
@@ -451,6 +453,8 @@ func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeF
 					return
 				}
 				curBan.SteamID = sid64
+			case "datum a čas udělení":
+				fallthrough
 			case "invoked on":
 				t, errTime := parseTime(value)
 				if errTime != nil {
@@ -458,6 +462,8 @@ func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeF
 					return
 				}
 				curBan.CreatedOn = t
+			case "délka":
+				fallthrough
 			case "banlength":
 				fallthrough
 			case "ban length":
@@ -468,6 +474,8 @@ func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeF
 					curBan.Permanent = true
 				}
 				curBan.Length = 0
+			case "vyprší":
+				fallthrough
 			case "expires on":
 				if curBan.Permanent || !curBan.SteamID.Valid() {
 					return
@@ -478,6 +486,8 @@ func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeF
 					return
 				}
 				curBan.Length = t.Sub(curBan.CreatedOn)
+			case "důvod":
+				fallthrough
 			case "reason":
 				curBan.Reason = value
 				if curBan.SteamID.Valid() {
@@ -1013,5 +1023,10 @@ func newBaitedCommunityScraper() *sbScraper {
 
 func newCedaPugScraper() *sbScraper {
 	return newScraper("cedapug", "https://cedapug.com/sourcebans/", "index.php?p=banlist",
+		parseStar, nextURLLast, parseSkialTime)
+}
+
+func newGameSitesScraper() *sbScraper {
+	return newScraper("gamesites", "https://banlist.gamesites.cz/tf2/", "index.php?p=banlist",
 		parseStar, nextURLLast, parseSkialTime)
 }

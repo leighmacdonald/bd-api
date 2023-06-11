@@ -1,0 +1,4466 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>SourceBans</title>
+<link rel="Shortcut Icon" href="themes/star/images/favicon.ico" />
+<link rel="stylesheet" href="themes/star/css/materialdesign/css/materialdesignicons.min.css">
+<script type="text/javascript" src="./scripts/sourcebans.js"></script>
+<link href="themes/star/css/style.css?v=1.0.1" rel="stylesheet" type="text/css" />
+<style>
+			:root {
+  --primary:#308ee0;
+  --secondary:#e5e5e5;
+  --success:#00ce68;
+  --info:#8862e0;
+  --warning:#ffaf00;
+  --danger:#e65251;
+  --light:#f3f5f6;
+  --dark:#424964;
+  --main-bg:#272c33;
+  --main-color:#929ca0;
+  --main-border:#3e4356;
+
+  --link-hover:white;
+
+  --nav-link-color:#b3bbc6;
+  --nav-link-color-hover:white;
+  --nav-link-bg:none;
+  --nav-link-bg-hover:none;
+
+  --wrapper-bg:#383f48;
+
+  --breadcrumb-bg:#424964;
+
+  --nav-grad-left:#00e4d0;
+  --nav-grad-right:#5983e8;
+}
+
+a:hover{
+	color:#2672b3;
+}
+
+
+.navbar.default-layout{
+	background:linear-gradient(120deg, var(--nav-grad-left) 250px, var(--nav-grad-right));
+}
+.footer a,a{
+	color:var(--primary);
+}
+.nav-pills.nav-pills-primary .nav-item .nav-link.active, .nav-pills.nav-pills-primary .nav-item .nav-link.active:focus, .nav-pills.nav-pills-primary .nav-item .nav-link:hover{
+	color:#FFFFFF;
+}
+.form-check .form-check-label input:checked + .input-helper:after{
+	color:var(--primary);
+}
+.list-arrow li:before{
+	color:var(--primary);
+}
+.form-check .form-check-label .input-helper:before, .form-radio label input + .input-helper:before{
+	border-color:var(--primary) !important;
+}
+[id*="noplayer"] h2{
+	color:white !important;
+}
+/* Additional Fix For Buttons And More */
+
+.btn-primary:focus,
+.btn-primary.focus,
+.btn-primary:not(:disabled):not(.disabled):active:focus,
+.btn-primary:not(:disabled):not(.disabled).active:focus,
+.show>.btn-primary.dropdown-toggle:focus,
+.btn-outline-primary:focus,
+.btn-outline-primary.focus,
+.btn-outline-primary:not(:disabled):not(.disabled):active:focus,
+.btn-outline-primary:not(:disabled):not(.disabled).active:focus,
+.show>.btn-outline-primary.dropdown-toggle:focus {
+	box-shadow: 0 0 0 0.2rem rgb(48, 142, 224, 0.5);
+}
+.btn.btn-primary {
+	color:#FFFFFF;
+}
+.btn-primary:hover {
+	color:#FFFFFF;
+    background-color: #22639d;
+    border-color: #1f5b8f;
+}
+.btn-primary:not(:disabled):not(.disabled):active,
+.btn-primary:not(:disabled):not(.disabled).active,
+.show > .btn-primary.dropdown-toggle {
+	background-color: #1f5b8f;
+	border-color: #1b507d;
+}
+.nav-pills.nav-pills-primary .nav-item .nav-link.active,
+.nav-pills.nav-pills-primary .nav-item .nav-link.active:focus,
+.nav-pills.nav-pills-primary .nav-item .nav-link:hover {
+	box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgb(48, 142, 224, 0.4);
+}
+
+.bg-inverse-primary {
+	background: rgb(48, 142, 224, 0.2);
+}
+
+.badge-inverse-primary {
+	background: rgb(48, 142, 224, 0.3);
+}
+
+.btn-inverse-primary {
+	background-color: rgb(48, 142, 224, 0.2);
+	border-color: rgb(48, 142, 224, 0);
+}
+
+.btn-inverse-primary.focus,
+.btn-inverse-primary:focus {
+	box-shadow: 0 0 0 3px rgb(48, 142, 224, 0.5);
+}
+
+.btn-inverse-outline-primary {
+	border-color: rgb(48, 142, 224, 0.2);
+}
+
+.btn-inverse-outline-primary:hover {
+	background-color: rgb(48, 142, 224, 0.2);
+	border-color: rgb(48, 142, 224, 0.2);
+}
+
+.btn-inverse-outline-primary.focus,
+.btn-inverse-outline-primary:focus {
+	box-shadow: 0 0 0 3px rgb(48, 142, 224, 0.5);
+}
+
+.card-inverse-primary {
+	background: rgb(48, 142, 224, 0.2);
+}
+
+.badge-primary[href]:hover, .badge-primary[href]:focus {
+    background-color: #1f5b8f !important;
+}
+
+a.bg-primary:hover, a.bg-primary:focus,
+button.bg-primary:hover,
+button.bg-primary:focus {
+  background-color: #1f5b8f !important; }
+a.text-primary:hover, a.text-primary:focus {
+  color: #1f5b8f !important; }
+
+.btn-secondary:focus,
+.btn-secondary.focus,
+.btn-secondary:not(:disabled):not(.disabled):active:focus,
+.btn-secondary:not(:disabled):not(.disabled).active:focus,
+.show>.btn-secondary.dropdown-toggle:focus,
+.btn-outline-secondary:focus,
+.btn-outline-secondary.focus,
+.btn-outline-secondary:not(:disabled):not(.disabled):active:focus,
+.btn-outline-secondary:not(:disabled):not(.disabled).active:focus,
+.show>.btn-outline-secondary.dropdown-toggle:focus {
+	box-shadow: 0 0 0 0.2rem rgb(229, 229, 229, 0.5);
+}
+.btn.btn-secondary {
+	color:#383F48;
+}
+.btn-secondary:hover {
+	color:#383F48;
+    background-color: #a0a0a0;
+    border-color: #939393;
+}
+.btn-secondary:not(:disabled):not(.disabled):active,
+.btn-secondary:not(:disabled):not(.disabled).active,
+.show > .btn-secondary.dropdown-toggle {
+	background-color: #939393;
+	border-color: #808080;
+}
+.nav-pills.nav-pills-secondary .nav-item .nav-link.active,
+.nav-pills.nav-pills-secondary .nav-item .nav-link.active:focus,
+.nav-pills.nav-pills-secondary .nav-item .nav-link:hover {
+	box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgb(229, 229, 229, 0.4);
+}
+
+.bg-inverse-secondary {
+	background: rgb(229, 229, 229, 0.2);
+}
+
+.badge-inverse-secondary {
+	background: rgb(229, 229, 229, 0.3);
+}
+
+.btn-inverse-secondary {
+	background-color: rgb(229, 229, 229, 0.2);
+	border-color: rgb(229, 229, 229, 0);
+}
+
+.btn-inverse-secondary.focus,
+.btn-inverse-secondary:focus {
+	box-shadow: 0 0 0 3px rgb(229, 229, 229, 0.5);
+}
+
+.btn-inverse-outline-secondary {
+	border-color: rgb(229, 229, 229, 0.2);
+}
+
+.btn-inverse-outline-secondary:hover {
+	background-color: rgb(229, 229, 229, 0.2);
+	border-color: rgb(229, 229, 229, 0.2);
+}
+
+.btn-inverse-outline-secondary.focus,
+.btn-inverse-outline-secondary:focus {
+	box-shadow: 0 0 0 3px rgb(229, 229, 229, 0.5);
+}
+
+.card-inverse-secondary {
+	background: rgb(229, 229, 229, 0.2);
+}
+
+.badge-secondary[href]:hover, .badge-secondary[href]:focus {
+    background-color: #939393 !important;
+}
+
+a.bg-secondary:hover, a.bg-secondary:focus,
+button.bg-secondary:hover,
+button.bg-secondary:focus {
+  background-color: #939393 !important; }
+a.text-secondary:hover, a.text-secondary:focus {
+  color: #939393 !important; }
+
+.btn-success:focus,
+.btn-success.focus,
+.btn-success:not(:disabled):not(.disabled):active:focus,
+.btn-success:not(:disabled):not(.disabled).active:focus,
+.show>.btn-success.dropdown-toggle:focus,
+.btn-outline-success:focus,
+.btn-outline-success.focus,
+.btn-outline-success:not(:disabled):not(.disabled):active:focus,
+.btn-outline-success:not(:disabled):not(.disabled).active:focus,
+.show>.btn-outline-success.dropdown-toggle:focus {
+	box-shadow: 0 0 0 0.2rem rgb(0, 206, 104, 0.5);
+}
+.btn.btn-success {
+	color:#383F48;
+}
+.btn-success:hover {
+	color:#FFFFFF;
+    background-color: #009049;
+    border-color: #008443;
+}
+.btn-success:not(:disabled):not(.disabled):active,
+.btn-success:not(:disabled):not(.disabled).active,
+.show > .btn-success.dropdown-toggle {
+	background-color: #008443;
+	border-color: #00733a;
+}
+.nav-pills.nav-pills-success .nav-item .nav-link.active,
+.nav-pills.nav-pills-success .nav-item .nav-link.active:focus,
+.nav-pills.nav-pills-success .nav-item .nav-link:hover {
+	box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgb(0, 206, 104, 0.4);
+}
+
+.bg-inverse-success {
+	background: rgb(0, 206, 104, 0.2);
+}
+
+.badge-inverse-success {
+	background: rgb(0, 206, 104, 0.3);
+}
+
+.btn-inverse-success {
+	background-color: rgb(0, 206, 104, 0.2);
+	border-color: rgb(0, 206, 104, 0);
+}
+
+.btn-inverse-success.focus,
+.btn-inverse-success:focus {
+	box-shadow: 0 0 0 3px rgb(0, 206, 104, 0.5);
+}
+
+.btn-inverse-outline-success {
+	border-color: rgb(0, 206, 104, 0.2);
+}
+
+.btn-inverse-outline-success:hover {
+	background-color: rgb(0, 206, 104, 0.2);
+	border-color: rgb(0, 206, 104, 0.2);
+}
+
+.btn-inverse-outline-success.focus,
+.btn-inverse-outline-success:focus {
+	box-shadow: 0 0 0 3px rgb(0, 206, 104, 0.5);
+}
+
+.card-inverse-success {
+	background: rgb(0, 206, 104, 0.2);
+}
+
+.badge-success[href]:hover, .badge-success[href]:focus {
+    background-color: #008443 !important;
+}
+
+a.bg-success:hover, a.bg-success:focus,
+button.bg-success:hover,
+button.bg-success:focus {
+  background-color: #008443 !important; }
+a.text-success:hover, a.text-success:focus {
+  color: #008443 !important; }
+
+.btn-info:focus,
+.btn-info.focus,
+.btn-info:not(:disabled):not(.disabled):active:focus,
+.btn-info:not(:disabled):not(.disabled).active:focus,
+.show>.btn-info.dropdown-toggle:focus,
+.btn-outline-info:focus,
+.btn-outline-info.focus,
+.btn-outline-info:not(:disabled):not(.disabled):active:focus,
+.btn-outline-info:not(:disabled):not(.disabled).active:focus,
+.show>.btn-outline-info.dropdown-toggle:focus {
+	box-shadow: 0 0 0 0.2rem rgb(136, 98, 224, 0.5);
+}
+.btn.btn-info {
+	color:#FFFFFF;
+}
+.btn-info:hover {
+	color:#FFFFFF;
+    background-color: #5f459d;
+    border-color: #573f8f;
+}
+.btn-info:not(:disabled):not(.disabled):active,
+.btn-info:not(:disabled):not(.disabled).active,
+.show > .btn-info.dropdown-toggle {
+	background-color: #573f8f;
+	border-color: #4c377d;
+}
+.nav-pills.nav-pills-info .nav-item .nav-link.active,
+.nav-pills.nav-pills-info .nav-item .nav-link.active:focus,
+.nav-pills.nav-pills-info .nav-item .nav-link:hover {
+	box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgb(136, 98, 224, 0.4);
+}
+
+.bg-inverse-info {
+	background: rgb(136, 98, 224, 0.2);
+}
+
+.badge-inverse-info {
+	background: rgb(136, 98, 224, 0.3);
+}
+
+.btn-inverse-info {
+	background-color: rgb(136, 98, 224, 0.2);
+	border-color: rgb(136, 98, 224, 0);
+}
+
+.btn-inverse-info.focus,
+.btn-inverse-info:focus {
+	box-shadow: 0 0 0 3px rgb(136, 98, 224, 0.5);
+}
+
+.btn-inverse-outline-info {
+	border-color: rgb(136, 98, 224, 0.2);
+}
+
+.btn-inverse-outline-info:hover {
+	background-color: rgb(136, 98, 224, 0.2);
+	border-color: rgb(136, 98, 224, 0.2);
+}
+
+.btn-inverse-outline-info.focus,
+.btn-inverse-outline-info:focus {
+	box-shadow: 0 0 0 3px rgb(136, 98, 224, 0.5);
+}
+
+.card-inverse-info {
+	background: rgb(136, 98, 224, 0.2);
+}
+
+.badge-info[href]:hover, .badge-info[href]:focus {
+    background-color: #573f8f !important;
+}
+
+a.bg-info:hover, a.bg-info:focus,
+button.bg-info:hover,
+button.bg-info:focus {
+  background-color: #573f8f !important; }
+a.text-info:hover, a.text-info:focus {
+  color: #573f8f !important; }
+
+.btn-warning:focus,
+.btn-warning.focus,
+.btn-warning:not(:disabled):not(.disabled):active:focus,
+.btn-warning:not(:disabled):not(.disabled).active:focus,
+.show>.btn-warning.dropdown-toggle:focus,
+.btn-outline-warning:focus,
+.btn-outline-warning.focus,
+.btn-outline-warning:not(:disabled):not(.disabled):active:focus,
+.btn-outline-warning:not(:disabled):not(.disabled).active:focus,
+.show>.btn-outline-warning.dropdown-toggle:focus {
+	box-shadow: 0 0 0 0.2rem rgb(255, 175, 0, 0.5);
+}
+.btn.btn-warning {
+	color:#383F48;
+}
+.btn-warning:hover {
+	color:#FFFFFF;
+    background-color: #b37b00;
+    border-color: #a37000;
+}
+.btn-warning:not(:disabled):not(.disabled):active,
+.btn-warning:not(:disabled):not(.disabled).active,
+.show > .btn-warning.dropdown-toggle {
+	background-color: #a37000;
+	border-color: #8f6200;
+}
+.nav-pills.nav-pills-warning .nav-item .nav-link.active,
+.nav-pills.nav-pills-warning .nav-item .nav-link.active:focus,
+.nav-pills.nav-pills-warning .nav-item .nav-link:hover {
+	box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgb(255, 175, 0, 0.4);
+}
+
+.bg-inverse-warning {
+	background: rgb(255, 175, 0, 0.2);
+}
+
+.badge-inverse-warning {
+	background: rgb(255, 175, 0, 0.3);
+}
+
+.btn-inverse-warning {
+	background-color: rgb(255, 175, 0, 0.2);
+	border-color: rgb(255, 175, 0, 0);
+}
+
+.btn-inverse-warning.focus,
+.btn-inverse-warning:focus {
+	box-shadow: 0 0 0 3px rgb(255, 175, 0, 0.5);
+}
+
+.btn-inverse-outline-warning {
+	border-color: rgb(255, 175, 0, 0.2);
+}
+
+.btn-inverse-outline-warning:hover {
+	background-color: rgb(255, 175, 0, 0.2);
+	border-color: rgb(255, 175, 0, 0.2);
+}
+
+.btn-inverse-outline-warning.focus,
+.btn-inverse-outline-warning:focus {
+	box-shadow: 0 0 0 3px rgb(255, 175, 0, 0.5);
+}
+
+.card-inverse-warning {
+	background: rgb(255, 175, 0, 0.2);
+}
+
+.badge-warning[href]:hover, .badge-warning[href]:focus {
+    background-color: #a37000 !important;
+}
+
+a.bg-warning:hover, a.bg-warning:focus,
+button.bg-warning:hover,
+button.bg-warning:focus {
+  background-color: #a37000 !important; }
+a.text-warning:hover, a.text-warning:focus {
+  color: #a37000 !important; }
+
+.btn-danger:focus,
+.btn-danger.focus,
+.btn-danger:not(:disabled):not(.disabled):active:focus,
+.btn-danger:not(:disabled):not(.disabled).active:focus,
+.show>.btn-danger.dropdown-toggle:focus,
+.btn-outline-danger:focus,
+.btn-outline-danger.focus,
+.btn-outline-danger:not(:disabled):not(.disabled):active:focus,
+.btn-outline-danger:not(:disabled):not(.disabled).active:focus,
+.show>.btn-outline-danger.dropdown-toggle:focus {
+	box-shadow: 0 0 0 0.2rem rgb(230, 82, 81, 0.5);
+}
+.btn.btn-danger {
+	color:#FFFFFF;
+}
+.btn-danger:hover {
+	color:#FFFFFF;
+    background-color: #a13939;
+    border-color: #933434;
+}
+.btn-danger:not(:disabled):not(.disabled):active,
+.btn-danger:not(:disabled):not(.disabled).active,
+.show > .btn-danger.dropdown-toggle {
+	background-color: #933434;
+	border-color: #812e2d;
+}
+.nav-pills.nav-pills-danger .nav-item .nav-link.active,
+.nav-pills.nav-pills-danger .nav-item .nav-link.active:focus,
+.nav-pills.nav-pills-danger .nav-item .nav-link:hover {
+	box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgb(230, 82, 81, 0.4);
+}
+
+.bg-inverse-danger {
+	background: rgb(230, 82, 81, 0.2);
+}
+
+.badge-inverse-danger {
+	background: rgb(230, 82, 81, 0.3);
+}
+
+.btn-inverse-danger {
+	background-color: rgb(230, 82, 81, 0.2);
+	border-color: rgb(230, 82, 81, 0);
+}
+
+.btn-inverse-danger.focus,
+.btn-inverse-danger:focus {
+	box-shadow: 0 0 0 3px rgb(230, 82, 81, 0.5);
+}
+
+.btn-inverse-outline-danger {
+	border-color: rgb(230, 82, 81, 0.2);
+}
+
+.btn-inverse-outline-danger:hover {
+	background-color: rgb(230, 82, 81, 0.2);
+	border-color: rgb(230, 82, 81, 0.2);
+}
+
+.btn-inverse-outline-danger.focus,
+.btn-inverse-outline-danger:focus {
+	box-shadow: 0 0 0 3px rgb(230, 82, 81, 0.5);
+}
+
+.card-inverse-danger {
+	background: rgb(230, 82, 81, 0.2);
+}
+
+.badge-danger[href]:hover, .badge-danger[href]:focus {
+    background-color: #933434 !important;
+}
+
+a.bg-danger:hover, a.bg-danger:focus,
+button.bg-danger:hover,
+button.bg-danger:focus {
+  background-color: #933434 !important; }
+a.text-danger:hover, a.text-danger:focus {
+  color: #933434 !important; }
+
+.btn-light:focus,
+.btn-light.focus,
+.btn-light:not(:disabled):not(.disabled):active:focus,
+.btn-light:not(:disabled):not(.disabled).active:focus,
+.show>.btn-light.dropdown-toggle:focus,
+.btn-outline-light:focus,
+.btn-outline-light.focus,
+.btn-outline-light:not(:disabled):not(.disabled):active:focus,
+.btn-outline-light:not(:disabled):not(.disabled).active:focus,
+.show>.btn-outline-light.dropdown-toggle:focus {
+	box-shadow: 0 0 0 0.2rem rgb(243, 245, 246, 0.5);
+}
+.btn.btn-light {
+	color:#383F48;
+}
+.btn-light:hover {
+	color:#383F48;
+    background-color: #aaacac;
+    border-color: #9c9d9d;
+}
+.btn-light:not(:disabled):not(.disabled):active,
+.btn-light:not(:disabled):not(.disabled).active,
+.show > .btn-light.dropdown-toggle {
+	background-color: #9c9d9d;
+	border-color: #88898a;
+}
+.nav-pills.nav-pills-light .nav-item .nav-link.active,
+.nav-pills.nav-pills-light .nav-item .nav-link.active:focus,
+.nav-pills.nav-pills-light .nav-item .nav-link:hover {
+	box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgb(243, 245, 246, 0.4);
+}
+
+.bg-inverse-light {
+	background: rgb(243, 245, 246, 0.2);
+}
+
+.badge-inverse-light {
+	background: rgb(243, 245, 246, 0.3);
+}
+
+.btn-inverse-light {
+	background-color: rgb(243, 245, 246, 0.2);
+	border-color: rgb(243, 245, 246, 0);
+}
+
+.btn-inverse-light.focus,
+.btn-inverse-light:focus {
+	box-shadow: 0 0 0 3px rgb(243, 245, 246, 0.5);
+}
+
+.btn-inverse-outline-light {
+	border-color: rgb(243, 245, 246, 0.2);
+}
+
+.btn-inverse-outline-light:hover {
+	background-color: rgb(243, 245, 246, 0.2);
+	border-color: rgb(243, 245, 246, 0.2);
+}
+
+.btn-inverse-outline-light.focus,
+.btn-inverse-outline-light:focus {
+	box-shadow: 0 0 0 3px rgb(243, 245, 246, 0.5);
+}
+
+.card-inverse-light {
+	background: rgb(243, 245, 246, 0.2);
+}
+
+.badge-light[href]:hover, .badge-light[href]:focus {
+    background-color: #9c9d9d !important;
+}
+
+a.bg-light:hover, a.bg-light:focus,
+button.bg-light:hover,
+button.bg-light:focus {
+  background-color: #9c9d9d !important; }
+a.text-light:hover, a.text-light:focus {
+  color: #9c9d9d !important; }
+
+.btn-dark:focus,
+.btn-dark.focus,
+.btn-dark:not(:disabled):not(.disabled):active:focus,
+.btn-dark:not(:disabled):not(.disabled).active:focus,
+.show>.btn-dark.dropdown-toggle:focus,
+.btn-outline-dark:focus,
+.btn-outline-dark.focus,
+.btn-outline-dark:not(:disabled):not(.disabled):active:focus,
+.btn-outline-dark:not(:disabled):not(.disabled).active:focus,
+.show>.btn-outline-dark.dropdown-toggle:focus {
+	box-shadow: 0 0 0 0.2rem rgb(66, 73, 100, 0.5);
+}
+.btn.btn-dark {
+	color:#FFFFFF;
+}
+.btn-dark:hover {
+	color:#FFFFFF;
+    background-color: #2e3346;
+    border-color: #2a2f40;
+}
+.btn-dark:not(:disabled):not(.disabled):active,
+.btn-dark:not(:disabled):not(.disabled).active,
+.show > .btn-dark.dropdown-toggle {
+	background-color: #2a2f40;
+	border-color: #252938;
+}
+.nav-pills.nav-pills-dark .nav-item .nav-link.active,
+.nav-pills.nav-pills-dark .nav-item .nav-link.active:focus,
+.nav-pills.nav-pills-dark .nav-item .nav-link:hover {
+	box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgb(66, 73, 100, 0.4);
+}
+
+.bg-inverse-dark {
+	background: rgb(66, 73, 100, 0.2);
+}
+
+.badge-inverse-dark {
+	background: rgb(66, 73, 100, 0.3);
+}
+
+.btn-inverse-dark {
+	background-color: rgb(66, 73, 100, 0.2);
+	border-color: rgb(66, 73, 100, 0);
+}
+
+.btn-inverse-dark.focus,
+.btn-inverse-dark:focus {
+	box-shadow: 0 0 0 3px rgb(66, 73, 100, 0.5);
+}
+
+.btn-inverse-outline-dark {
+	border-color: rgb(66, 73, 100, 0.2);
+}
+
+.btn-inverse-outline-dark:hover {
+	background-color: rgb(66, 73, 100, 0.2);
+	border-color: rgb(66, 73, 100, 0.2);
+}
+
+.btn-inverse-outline-dark.focus,
+.btn-inverse-outline-dark:focus {
+	box-shadow: 0 0 0 3px rgb(66, 73, 100, 0.5);
+}
+
+.card-inverse-dark {
+	background: rgb(66, 73, 100, 0.2);
+}
+
+.badge-dark[href]:hover, .badge-dark[href]:focus {
+    background-color: #2a2f40 !important;
+}
+
+a.bg-dark:hover, a.bg-dark:focus,
+button.bg-dark:hover,
+button.bg-dark:focus {
+  background-color: #2a2f40 !important; }
+a.text-dark:hover, a.text-dark:focus {
+  color: #2a2f40 !important; }
+
+
+
+		</style>
+<script src="themes/star/js/jqueryBase.js"></script>
+<script type="text/javascript" src="./scripts/mootools.js"></script>
+<script type="text/javascript" src="./scripts/contextMenoo.js"></script>
+<script type="text/javascript">
+var xajaxRequestUri="./index.php";
+var xajaxDebug=false;
+var xajaxStatusMessages=false;
+var xajaxWaitCursor=true;
+var xajaxDefinedGet=0;
+var xajaxDefinedPost=1;
+var xajaxLoaded=false;
+function xajax_Plogin(){return xajax.call("Plogin", arguments, 1);}
+function xajax_ServerHostPlayers(){return xajax.call("ServerHostPlayers", arguments, 1);}
+function xajax_ServerHostProperty(){return xajax.call("ServerHostProperty", arguments, 1);}
+function xajax_ServerHostPlayers_list(){return xajax.call("ServerHostPlayers_list", arguments, 1);}
+function xajax_ServerPlayers(){return xajax.call("ServerPlayers", arguments, 1);}
+function xajax_LostPassword(){return xajax.call("LostPassword", arguments, 1);}
+function xajax_RefreshServer(){return xajax.call("RefreshServer", arguments, 1);}
+	</script>
+<script type="text/javascript" src="scripts/xajax.js"></script>
+<script type="text/javascript">
+window.setTimeout(function () { if (!xajaxLoaded) { alert('Error: the xajax Javascript file could not be included. Perhaps the URL is incorrect?\nURL: scripts/xajax.js'); } }, 6000);
+	</script>
+</head>
+<body onload="NavListFix()">
+<div class="container-scroller">
+<nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+<div class="text-center navbar-brand-wrapper d-flex align-items-top justify-content-center">
+<a class="navbar-brand brand-logo" href="index.php">
+<img src="images/logos/gamesites.png" alt="SourceBans Logo" />
+</a>
+<a class="navbar-brand brand-logo-mini" href="index.php">
+<img src="images/logos/gamesites-mini.png" alt="SourceBans Logo" onerror="this.onerror=null;this.src='themes/star/images/sb-large-mini.png';" />
+</a>
+</div>
+<div class="navbar-menu-wrapper d-flex align-items-center">
+<ul class="navbar-nav navbar-nav-right">
+<li class="nav-item dropdown">
+<a class="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#" data-toggle="dropdown">
+<i class="mdi mdi-magnify"></i>
+</a>
+<div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" aria-labelledby="notificationDropdown">
+<form method="get" action="index.php" id="banform">
+<input type="hidden" name="p" value="banlist" />
+<a class="dropdown-item">
+<p class="mb-0 font-weight-normal float-left">Hledat bany...
+</p>
+</a>
+<a class="dropdown-item preview-item">
+<div class="preview-thumbnail" onclick="document.getElementById('banform').submit();" style="cursor:pointer;">
+<div class="preview-icon bg-danger">
+<i class="mdi mdi-do-not-disturb mx-0"></i>
+</div>
+</div>
+<div class="preview-item-content">
+<input type="text" name="searchText" class="form-control" placeholder="Hledat ban..." style="width:190px;">
+</div>
+</a>
+</form>
+<div class="dropdown-divider"></div>
+<form method="get" action="index.php" id="commform">
+<input type="hidden" name="p" value="commslist" />
+<a class="dropdown-item">
+<p class="mb-0 font-weight-normal float-left">Hledat mute bany...
+</p>
+</a>
+<a class="dropdown-item preview-item">
+<div class="preview-thumbnail" onclick="document.getElementById('commform').submit();" style="cursor:pointer;">
+<div class="preview-icon bg-info">
+<i class="mdi mdi-microphone-off mx-0"></i>
+</div>
+</div>
+<div class="preview-item-content">
+<input type="text" name="searchText" class="form-control" placeholder="Hledat mute ban..." style="width:190px;">
+</div>
+</a>
+</form>
+<div class="dropdown-divider"></div>
+</div>
+</li>
+</ul>
+<button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+<span class="mdi mdi-menu"></span>
+</button>
+</div>
+</nav>
+</div>
+<div class="container-fluid page-body-wrapper">
+<nav class="sidebar sidebar-offcanvas" id="sidebar">
+<ul class="nav" id="js_fixme">
+<li class="nav-item nav-profile">
+<div class="nav-link">
+<button onclick="location.href='index.php?p=login';" class="btn btn-success btn-block">Login
+</button>
+</div>
+</li> <li class="nav-item">
+<a href="index.php?p=home" class="tip" title="Dashboard :: This page shows an overview of your bans and servers." target="_self">Dashboard </a>
+</li> <li class="nav-item">
+<a href="index.php?p=servers" class="tip" title="Servers :: All of your servers and their status can be viewed here" target="_self">Servers </a>
+</li> <li class="nav-item active">
+<a href="index.php?p=banlist" class="tip" title="Bans :: All of the bans in the database can be viewed from here." target="_self">Bans </a>
+</li> <li class="nav-item">
+<a href="index.php?p=commslist" class="tip" title="Comms :: All of the communication bans (such as chat gags and voice mutes) in the database can be viewed from here." target="_self">Comms </a>
+</li>
+</ul>
+</nav>
+<script>
+	var elements = document.getElementById("js_fixme").getElementsByTagName("li");
+
+    for(var i=1; i<elements.length; i++)
+	{
+        var hrf= elements[i].getElementsByTagName("a")[0].getAttribute("href");
+        elements[i].getElementsByTagName("a")[0].setAttribute("class", "nav-link");
+        if(hrf.includes("home"))
+        	elements[i].getElementsByTagName("a")[0].innerHTML="<i class=\"menu-icon mdi mdi-television\"></i><span class=\"menu-title\">Hlavní stránka</span>";
+        else if(hrf.includes("servers"))
+        	elements[i].getElementsByTagName("a")[0].remove();
+        else if(hrf.includes("banlist"))
+        	elements[i].getElementsByTagName("a")[0].innerHTML="<i class=\"menu-icon mdi mdi-do-not-disturb\"></i><span class=\"menu-title\">Herní bany</span>";
+        else if(hrf.includes("commslist"))
+        	elements[i].getElementsByTagName("a")[0].innerHTML="<i class=\"menu-icon mdi mdi-microphone-off\"></i><span class=\"menu-title\">Mute bany</span>";
+        else if(hrf.includes("submit"))
+        	elements[i].getElementsByTagName("a")[0].innerHTML="<i class=\"menu-icon mdi mdi-alert\"></i><span class=\"menu-title\">"+elements[i].getElementsByTagName("a")[0].innerHTML+"</span>";
+        else if(hrf.includes("protest"))
+        	elements[i].getElementsByTagName("a")[0].innerHTML="<i class=\"menu-icon mdi mdi-lock-open\"></i><span class=\"menu-title\">"+elements[i].getElementsByTagName("a")[0].innerHTML+"</span>";
+        else if(hrf.includes("admin"))
+        	elements[i].getElementsByTagName("a")[0].innerHTML="<i class=\"menu-icon mdi mdi-settings\"></i><span class=\"menu-title\">"+elements[i].getElementsByTagName("a")[0].innerHTML+"</span>";
+    }
+</script>
+<div class="main-panel">
+<div class="content-wrapper"><div id="msg-red-debug" style="display:none;">
+<i><img src="./images/warning.png" alt="Warning" /></i>
+<b>Debug</b>
+<br/>
+<div id="debug-text">
+</div>
+</div>
+<div id="dialog-placement" style="vertical-align:middle;display:none;opacity:0;text-align:center;width:892px;margin:0 auto;position:fixed !important;position:absolute;overflow:hidden;top:10px;left:100px;">
+<table width="460px" id="dialog-holder" class="dialog-holder" border="0" cellspacing="0" cellpadding="0">
+<tbody width="460px">
+<tr>
+<td class="dialog-topleft"></td>
+<td class="dialog-border"></td>
+<td class="dialog-topright"></td>
+</tr>
+<tr>
+<td class="dialog-border"></td>
+<td class="box-content">
+<div id="dragbar" style="cursor:pointer">
+<ilayer width="100%" onselectstart="return false">
+<layer width="100%" onmouseover="dragswitch=1;if (ns4) drag_drop_ns(dialog-placement)" onmouseout="dragswitch=0">
+<h2 align="left" id="dialog-title" class="ok"></h2>
+</layer>
+</ilayer>
+</div>
+<div class="dialog-content" align="left">
+<div class="dialog-body">
+<div class="clearfix">
+<div style="float: left; margin-right: 15px;" id="dialog-icon" class="icon-info">&nbsp;</div>
+<div style="width:360px;float: right; padding-bottom: 5px; font-size: 11px;" id="dialog-content-text"></div>
+</div>
+</div>
+<div class="dialog-control" id="dialog-control">
+</div>
+</div>
+</td>
+<td class="dialog-border"></td>
+</tr>
+<tr>
+<td class="dialog-bottomleft"></td>
+<td class="dialog-border"></td>
+<td class="dialog-bottomright"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="content_title">
+<b>Bans</b>
+</div>
+<nav aria-label="breadcrumb">
+<ol id="breadcrumb" class="breadcrumb bg-light">
+</ol>
+</nav>
+<div id="content"><script type="text/javascript">$("breadcrumb").setHTML("&raquo; <a href='index.php?p=home'>Home</a> &raquo; <b>Bans</b>");</script><div class="row">
+<div class="col-lg-12 grid-margin">
+<div class="card">
+<div class="card-body">
+<h4 class="lead">Přehled banů <a class="btn btn-outline-primary btn-rounded btn-fw" style="width:20px;height:20px;padding:0px;line-height:18px;" href="index.php?p=banlist&hideinactive=true" title="Skrýt neaktivní">Skrýt neaktivní</a></h4>
+<p>Celkem banů: 609</p>
+<div class="row">
+<div class="col-lg-6 mx-auto pt-3">
+<p class="text-center">
+<button class="btn btn-inverse-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+<i class="mdi mdi-magnify"></i>Pokročilé hledání
+</button>
+</p>
+<style>
+			div input.form-control{margin-top: 8px;}
+			div select.form-control{margin-top: 5px;}
+		</style>
+<div class="collapse box-shadow-delayed" id="collapseExample">
+<div class="row mx-5">
+<div class="form-radio col-sm-3">
+<label class="form-check-label">
+<input type="radio" class="form-check-input" name="search_type" id="name" value="name"> Přezdívka
+</label>
+</div>
+<div class="col-sm-9">
+<input class="form-control" type="text" id="nick" value onmouseup="$('name').checked = true">
+</div>
+</div>
+<div class="row mx-5">
+<div class="form-radio col-sm-3">
+<label class="form-check-label">
+<input type="radio" class="form-check-input" name="search_type" id="steam_" value="radiobutton"> Steam ID
+</label>
+</div>
+<div class="col-sm-9 row">
+<div class="col-sm-5">
+<input class="form-control" type="text" id="steamid" value onmouseup="$('steam_').checked = true">
+</div>
+<div class="col-sm-7">
+<select class="form-control" id="steam_match" onmouseup="$('steam_').checked = true">
+<option value="0" selected>Přesná shoda</option>
+<option value="1">Čáštečná shoda</option>
+</select>
+</div>
+</div>
+</div>
+<div class="row mx-5">
+<div class="form-radio col-sm-3">
+<label class="form-check-label">
+<input type="radio" class="form-check-input" name="search_type" id="reason_" value="radiobutton"> Důvod
+</label>
+</div>
+<div class="col-sm-9">
+<input class="form-control" type="text" id="ban_reason" value onmouseup="$('reason_').checked = true">
+</div>
+</div>
+<div class="row mx-5">
+<div class="form-radio col-sm-3">
+<label class="form-check-label">
+<input type="radio" class="form-check-input" name="search_type" id="date" value="radiobutton"> Datum
+</label>
+</div>
+<div class="col-sm-9 row">
+<div class="col-sm-4"><input class="form-control" type="text" id="day" placeholder="DD" maxlength="2" onmouseup="$('date').checked = true"></div>
+<div class="col-sm-4"><input class="form-control" type="text" id="month" placeholder="MM" maxlength="2" onmouseup="$('date').checked = true"></div>
+<div class="col-sm-4"><input class="form-control" type="text" id="year" placeholder="YY" maxlength="4" onmouseup="$('date').checked = true"></div>
+</div>
+</div>
+<div class="row mx-5">
+<div class="form-radio col-sm-3">
+<label class="form-check-label">
+<input type="radio" class="form-check-input" name="search_type" id="length_" value="radiobutton"> Délka
+</label>
+</div>
+<div class="col-sm-9 row">
+<div class="col-sm-2">
+<select class="form-control" id="length_type" onmouseup="$('length_').checked = true">
+<option value="e" selected title="equal to">=</option>
+<option value="h" title="greater">&gt;</option>
+<option value="l" title="smaller">&lt;</option>
+<option value="eh" title="equal to or greater">&gt;=</option>
+<option value="el" title="equal to or smaller">&lt;=</option>
+</select>
+</div>
+<div class="col-sm-10 row">
+<div class="col-7">
+<select class="form-control" id="length" onmouseup="$('length_').checked = true" onchange="switch_length(this);$('length').setStyle('width', '210px');" onmouseover="if(this.options[this.selectedIndex].value=='other')$('length').setStyle('width', '210px');if(this.options[this.selectedIndex].value=='other')this.focus();" style="width:210px">
+<option value="0">Permanentní</option>
+<optgroup label="minuty">
+<option value="1">1 minuta</option>
+<option value="5">5 minut</option>
+<option value="10">10 minut</option>
+<option value="15">15 minut</option>
+<option value="30">30 minut</option>
+<option value="45">45 minut</option>
+</optgroup>
+<optgroup label="hodiny">
+<option value="60">1 hodina</option>
+<option value="120">2 hodin</option>
+<option value="180">3 hodin</option>
+<option value="240">4 hodin</option>
+<option value="480">8 hodin</option>
+<option value="720">12 hodin</option>
+</optgroup>
+<optgroup label="dny">
+<option value="1440">1 den</option>
+<option value="2880">2 dní</option>
+<option value="4320">3 dní</option>
+<option value="5760">4 dní</option>
+<option value="7200">5 dní</option>
+<option value="8640">6 dní</option>
+</optgroup>
+<optgroup label="týdny">
+<option value="10080">1 týden</option>
+<option value="20160">2 týdny</option>
+<option value="30240">3 týdny</option>
+</optgroup>
+<optgroup label="měsíce">
+<option value="40320">1 měsíc</option>
+<option value="80640">2 měsíce</option>
+<option value="120960">3 měsíce</option>
+<option value="241920">6 měsíců</option>
+<option value="483840">12 měsíců</option>
+</optgroup>
+<option value="other">Jiná délka v minutách</option>
+</select>
+</div>
+<div class="col-5">
+<input type="text" class="form-control" id="other_length" name="other_length" onmouseup="$('length_').checked = true" style="display:none;">
+</div>
+</div>
+</div>
+</div>
+<div class="row mx-5">
+<div class="form-radio col-sm-3">
+<label class="form-check-label">
+<input type="radio" class="form-check-input" name="search_type" id="ban_type_" value="radiobutton"> Typ
+</label>
+</div>
+<div class="col-sm-9">
+<select class="form-control" id="ban_type" onmouseup="$('ban_type_').checked = true">
+<option value="0" selected>Steam ID</option>
+<option value="1">IP adresa</option>
+</select>
+</div>
+</div>
+<div class="row mx-5">
+<div class="form-radio col-sm-3">
+<label class="form-check-label">
+<input type="radio" class="form-check-input" name="search_type" id="admin" value="radiobutton"> Admin
+</label>
+</div>
+<div class="col-sm-9">
+<select class="form-control" id="ban_admin" onmouseup="$('admin').checked = true">
+<option label="Anccie" value="83">Anccie</option>
+<option label="Gustik" value="79">Gustik</option>
+<option label="Hsjw" value="86">Hsjw</option>
+<option label="Lachyy" value="75">Lachyy</option>
+<option label="Peta" value="74">Peta</option>
+<option label="Rave" value="77">Rave</option>
+<option label="Rejdž" value="87">Rejdž</option>
+<option label="Yoda" value="89">Yoda</option>
+</select>
+</div>
+</div>
+<div class="row mx-5">
+<div class="form-radio col-sm-3">
+<label class="form-check-label">
+<input type="radio" class="form-check-input" name="search_type" id="where_banned" value="radiobutton"> Server
+</label>
+</div>
+<div class="col-sm-9">
+<select class="form-control" id="server" onmouseup="$('where_banned').checked = true">
+<option label="Web Ban" value="0">Web Ban</option>
+<option value="1" id="ss1">Retrieving Hostname... (217.11.249.93:27719)</option>
+<option value="2" id="ss2">Retrieving Hostname... (217.11.249.93:27206)</option>
+<option value="3" id="ss3">Retrieving Hostname... (217.11.249.93:27580)</option>
+<option value="4" id="ss4">Retrieving Hostname... (217.11.249.93:27539)</option>
+</select>
+</div>
+</div>
+<div class="row mx-5 pb-3">
+<div class="col-sm-3">
+</div>
+<div class="col-sm-9">
+<input type="button" onclick="search_bans();" name="searchbtn" class="btn ok searchbtn btn-success" onmouseover="ButtonOver(&quot;searchbtn&quot;)" onmouseout="ButtonOver(&quot;searchbtn&quot;)" id="searchbtn" value="Hledat" />
+</div>
+</div>
+</div>
+</div>
+</div>
+<script type="text/javascript">xajax_ServerHostPlayers('1', 'id', 'ss1', '', '', false, 200);xajax_ServerHostPlayers('2', 'id', 'ss2', '', '', false, 200);xajax_ServerHostPlayers('3', 'id', 'ss3', '', '', false, 200);xajax_ServerHostPlayers('4', 'id', 'ss4', '', '', false, 200);</script><script type="text/javascript">
+function switch_length(opt)
+{
+    if (opt.options[opt.selectedIndex].value=='other') {
+        $('other_length').setStyle('display', 'block');
+        $('other_length').focus();
+        $('length').setStyle('width', '20px');
+    } else {
+        $('other_length').setStyle('display', 'none');
+        $('length').setStyle('width', '210px');
+    }
+}
+</script>
+<div id="banlist" class="table-responsive">
+<div class="col-12 my-2 text-xl-right text-lg-left">
+<div id="banlist-nav" class="btn btn-inverse-light  btn-rounded btn-fw p-1 p-md-2 p-xl-2">
+displaying&nbsp;0&nbsp;-&nbsp;30&nbsp;of&nbsp;609&nbsp;results <b><a href="index.php?p=banlist&page=2" onclick target="_self">next <img border="0" alt="next" src="images/right.png" style="vertical-align:middle;" /> </a></b>&nbsp;<select onchange="changePage(this,'B','','');"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option></select> </div>
+</div>
+<table class="table table-hover tbl-sm">
+<thead>
+<tr>
+<th width="12%" class="text-center">MOD/Země</th>
+<th width="14%" class="text-center">Datum a čas</th>
+<th>Player</th>
+<th width="15%">Admin</th>
+<th width="10%" class="text-right">Délka</th>
+<th width="200px" class="text-center">Přehled zbývající délky</th>
+</tr>
+</thead>
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_651" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_651');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/cz.png" alt="CZ" border="0" align="absmiddle" /></td>
+<td align="center">05-30-23 16:31</td>
+<td>
+<div style="float:left;">
+Magmut
+</div>
+</td>
+<td>
+<i><font color="#677882">Admin deleted</font></i>
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_651" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+Magmut
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:0:620766960
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1241533920]" target="_blank">[U:1:1241533920]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199201799648" target="_blank">76561199201799648</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>05-30-23 16:31</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>{darkred}[Gamesites.cz]{default} Obcházení banu</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+<i><font color="#677882">Admin smazán.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_651">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_650" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_650');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/cz.png" alt="CZ" border="0" align="absmiddle" /></td>
+<td align="center">05-24-23 21:39</td>
+<td>
+<div style="float:left;">
+KÃ˜RI
+</div>
+</td>
+<td>
+<i><font color="#677882">Admin deleted</font></i>
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_650" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+KÃ˜RI
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:1:522478225
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1044956451]" target="_blank">[U:1:1044956451]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199005222179" target="_blank">76561199005222179</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>05-24-23 21:39</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>{darkred}[Gamesites.cz]{default} ObchÃ¡zenÃ­ banu</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+<i><font color="#677882">Admin smazán.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_650">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_649" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_649');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/pl.png" alt="PL" border="0" align="absmiddle" /></td>
+<td align="center">05-24-23 15:49</td>
+<td>
+<div style="float:left;">
+grzegorzwal003
+</div>
+</td>
+<td>
+<i><font color="#677882">Admin deleted</font></i>
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_649" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+grzegorzwal003
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:0:774307010
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1548614020]" target="_blank">[U:1:1548614020]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199508879748" target="_blank">76561199508879748</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>05-24-23 15:49</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>{darkred}[Gamesites.cz]{default} Zduplikowane konto</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+<i><font color="#677882">Admin smazán.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_649">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_648" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_648');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/sk.png" alt="SK" border="0" align="absmiddle" /></td>
+<td align="center">05-12-23 17:24</td>
+<td>
+<div style="float:left;">
+fashion
+</div>
+</td>
+<td>
+Hsjw
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_648" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+fashion
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:0:702304173
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1404608346]" target="_blank">[U:1:1404608346]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199364874074" target="_blank">76561199364874074</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>05-12-23 17:24</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>[Cheat] Aimbot</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+Hsjw
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_648">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_647" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_647');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/cz.png" alt="CZ" border="0" align="absmiddle" /></td>
+<td align="center">05-04-23 22:10</td>
+<td>
+<div style="float:left;">
+JacOb
+</div>
+</td>
+<td>
+<i><font color="#677882">Admin deleted</font></i>
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_647" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+JacOb
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:1:231752061
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:463504123]" target="_blank">[U:1:463504123]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561198423769851" target="_blank">76561198423769851</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>05-04-23 22:10</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>{darkred}[Gamesites.cz]{default} Obcházení banu</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+<i><font color="#677882">Admin smazán.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_647">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_646" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_646');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/il.png" alt="IL" border="0" align="absmiddle" /></td>
+<td align="center">04-21-23 16:18</td>
+<td>
+<div style="float:left;">
+(1)pheonix
+</div>
+</td>
+<td>
+Hsjw
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_646" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+(1)pheonix
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:1:737809619
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1475619239]" target="_blank">[U:1:1475619239]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199435884967" target="_blank">76561199435884967</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>04-21-23 16:18</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>[Cheat] Wallhack</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+Hsjw
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_646">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_645" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_645');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/cz.png" alt="CZ" border="0" align="absmiddle" /></td>
+<td align="center">04-17-23 20:41</td>
+<td>
+<div style="float:left;">
+Michal | TRADEITgg
+</div>
+</td>
+<td>
+Hsjw
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_645" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+Michal | TRADEITgg
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:0:459744861
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:919489722]" target="_blank">[U:1:919489722]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561198879755450" target="_blank">76561198879755450</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>04-17-23 20:41</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>[Cheat] Aimbot</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+Hsjw
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_645">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (1)</td>
+<td>
+<span title="Server: 217.11.249.93:27539, Date: 04-22-23 21:40">Michal | TRADEITgg</span>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_644" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_644');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/pl.png" alt="PL" border="0" align="absmiddle" /></td>
+<td align="center">04-17-23 18:08</td>
+<td>
+<div style="float:left;">
+κ³⁶⁰¹
+</div>
+</td>
+<td>
+Hsjw
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_644" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+κ³⁶⁰¹
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:0:639273021
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1278546042]" target="_blank">[U:1:1278546042]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199238811770" target="_blank">76561199238811770</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>04-17-23 18:08</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>[Cheat] Aimbot</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+Hsjw
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_644">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_643" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_643');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/nl.png" alt="NL" border="0" align="absmiddle" /></td>
+<td align="center">04-17-23 17:52</td>
+<td>
+<div style="float:left;">
+reup777
+</div>
+</td>
+<td>
+Hsjw
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_643" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+reup777
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:1:725998453
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1451996907]" target="_blank">[U:1:1451996907]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199412262635" target="_blank">76561199412262635</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>04-17-23 17:52</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>[Cheat] Aimbot</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+Hsjw
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_643">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_642" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_642');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/bg.png" alt="BG" border="0" align="absmiddle" /></td>
+<td align="center">04-17-23 15:05</td>
+<td>
+<div style="float:left;">
+Black RAM
+</div>
+</td>
+<td>
+<i><font color="#677882">Admin deleted</font></i>
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_642" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+Black RAM
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:1:127013882
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:254027765]" target="_blank">[U:1:254027765]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561198214293493" target="_blank">76561198214293493</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>04-17-23 15:05</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>[Cheat] Aimbot</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+<i><font color="#677882">Admin smazán.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_642">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (6)</td>
+<td>
+<span title="Server: 217.11.249.93:27539, Date: 04-17-23 16:54">Black RAM</span>, <span title="Server: 217.11.249.93:27539, Date: 04-21-23 22:24">Cyrex‏</span>, <span title="Server: 217.11.249.93:27539, Date: 04-22-23 15:05">Black RAM</span>, <span title="Server: 217.11.249.93:27539, Date: 04-22-23 15:52">Рафаэль Куст‏</span>, <span title="Server: 217.11.249.93:27539, Date: 04-30-23 11:46">88</span>, <span title="Server: 217.11.249.93:27539, Date: 04-30-23 11:53">88</span>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_641" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_641');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/cz.png" alt="CZ" border="0" align="absmiddle" /></td>
+<td align="center">04-17-23 03:43</td>
+<td>
+<div style="float:left;">
+KS0X
+</div>
+</td>
+<td>
+<i><font color="#677882">Admin deleted</font></i>
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_641" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+KS0X
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:1:767635337
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1535270675]" target="_blank">[U:1:1535270675]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199495536403" target="_blank">76561199495536403</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>04-17-23 03:43</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>{darkred}[Gamesites.cz]{default} Duplicate account</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+<i><font color="#677882">Admin smazán.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_641">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_640" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_640');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/cz.png" alt="CZ" border="0" align="absmiddle" /></td>
+<td align="center">03-31-23 21:33</td>
+<td>
+<div style="float:left;">
+vladajeosas
+</div>
+</td>
+<td>
+Rave
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_640" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+vladajeosas
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:1:765111883
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1530223767]" target="_blank">[U:1:1530223767]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199490489495" target="_blank">76561199490489495</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>03-31-23 21:33</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>[Cheat] Aimbot</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+Rave
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_640">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_639" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_639');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/cz.png" alt="CZ" border="0" align="absmiddle" /></td>
+<td align="center">03-28-23 18:17</td>
+<td>
+<div style="float:left;">
+1529109884
+</div>
+</td>
+<td>
+<i><font color="#677882">Admin deleted</font></i>
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_639" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+1529109884
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:0:764554942
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1529109884]" target="_blank">[U:1:1529109884]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199489375612" target="_blank">76561199489375612</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>03-28-23 18:17</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>{darkred}[Gamesites.cz]{default} Obcházení banu</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+<i><font color="#677882">Admin smazán.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_639">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_638" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_638');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/cz.png" alt="CZ" border="0" align="absmiddle" /></td>
+<td align="center">03-27-23 18:49</td>
+<td>
+<div style="float:left;">
+JabkoÅ¾rÃ³t
+</div>
+</td>
+<td>
+Hsjw
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_638" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+JabkoÅ¾rÃ³t
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:0:628789370
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1257578740]" target="_blank">[U:1:1257578740]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199217844468" target="_blank">76561199217844468</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>03-27-23 18:49</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>[Cheat] Aimbot</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+Hsjw
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_638">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_637" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_637');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/cz.png" alt="CZ" border="0" align="absmiddle" /></td>
+<td align="center">03-10-23 15:23</td>
+<td>
+<div style="float:left;">
+max
+</div>
+</td>
+<td>
+<i><font color="#677882">Admin deleted</font></i>
+</td>
+<td align="right" class="listtable_1_unbanned">
+<label class="badge badge-success">
+2 wk (Expired)</label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_637" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+max
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:1:762471628
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1524943257]" target="_blank">[U:1:1524943257]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199485208985" target="_blank">76561199485208985</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>03-10-23 15:23</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>2 wk (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod unbanu</td>
+<td>
+<i><font color="#677882">nezadán</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Unban od admina</td>
+<td>
+<i><font color="#677882">Admin smazán.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+03-24-23 15:23
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>{darkred}[Gamesites.cz]{default} Duplicate account</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+<i><font color="#677882">Admin smazán.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_637">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_636" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_636');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/cz.png" alt="CZ" border="0" align="absmiddle" /></td>
+<td align="center">03-10-23 14:37</td>
+<td>
+<div style="float:left;">
+max
+</div>
+</td>
+<td>
+Hsjw
+</td>
+<td align="right" class="listtable_1_unbanned">
+<label class="badge badge-success">
+1 wk (Expired)</label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_636" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+max
+</td>
+
+<td width="30%" rowspan="13" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:0:762332729
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1524665458]" target="_blank">[U:1:1524665458]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199484931186" target="_blank">76561199484931186</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>03-10-23 14:37</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>1 wk (Expired)</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod unbanu</td>
+<td>
+<i><font color="#677882">nezadán</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Unban od admina</td>
+<td>
+<i><font color="#677882">Admin smazán.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+03-17-23 14:37
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>[Cheat] Bhop script</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+Hsjw
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_636">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (1)</td>
+<td>
+<span title="Server: 217.11.249.93:27539, Date: 03-10-23 14:38">max</span>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_635" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_635');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/us.png" alt="US" border="0" align="absmiddle" /></td>
+<td align="center">03-02-23 20:37</td>
+<td>
+<div style="float:left;">
+Jesus Christ®
+</div>
+</td>
+<td>
+Hsjw
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_635" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+Jesus Christ®
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:1:223700781
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:447401563]" target="_blank">[U:1:447401563]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561198407667291" target="_blank">76561198407667291</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>03-02-23 20:37</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>[Cheat] Aimbot</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+Hsjw
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_635">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_634" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_634');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/lt.png" alt="LT" border="0" align="absmiddle" /></td>
+<td align="center">02-25-23 23:30</td>
+<td>
+<div style="float:left;">
+Toasty
+</div>
+</td>
+<td>
+<i><font color="#677882">Admin deleted</font></i>
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_634" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+Toasty
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:0:537091108
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1074182216]" target="_blank">[U:1:1074182216]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199034447944" target="_blank">76561199034447944</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>02-25-23 23:30</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>{darkred}[Gamesites.cz]{default} Duplicate account</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+<i><font color="#677882">Admin smazán.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_634">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (1)</td>
+<td>
+<span title="Server: 217.11.249.93:27539, Date: 04-09-23 11:46">Toasty</span>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_633" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_633');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/lt.png" alt="LT" border="0" align="absmiddle" /></td>
+<td align="center">02-25-23 23:30</td>
+<td>
+<div style="float:left;">
+Statly
+</div>
+</td>
+<td>
+<i><font color="#677882">Admin deleted</font></i>
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_633" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+Statly
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:0:613481343
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1226962686]" target="_blank">[U:1:1226962686]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199187228414" target="_blank">76561199187228414</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>02-25-23 23:30</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>{darkred}[Gamesites.cz]{default} Duplicate account</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+<i><font color="#677882">Admin smazán.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_633">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_632" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_632');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/cz.png" alt="CZ" border="0" align="absmiddle" /></td>
+<td align="center">02-24-23 18:45</td>
+<td>
+<div style="float:left;">
+DuffyTorin
+</div>
+</td>
+<td>
+Hsjw
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_632" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+DuffyTorin
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:0:81391503
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:162783006]" target="_blank">[U:1:162783006]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561198123048734" target="_blank">76561198123048734</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>02-24-23 18:45</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>[Cheat] Aimbot</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+Hsjw
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_632">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>2 <a href="index.php?p=banlist&searchText=STEAM_0:0:81391503&Submit" onclick target="_self">(search) </a></td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (4)</td>
+<td>
+<span title="Server: 217.11.249.93:27539, Date: 02-24-23 19:03">DuffyTorin</span>, <span title="Server: 217.11.249.93:27539, Date: 02-26-23 00:52">KubriX159</span>, <span title="Server: 217.11.249.93:27539, Date: 03-08-23 19:54">Nero From Devil May Cry 5</span>, <span title="Server: 217.11.249.93:27539, Date: 04-06-23 14:46">DeadWeight</span>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_631" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_631');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/lt.png" alt="LT" border="0" align="absmiddle" /></td>
+<td align="center">02-23-23 19:08</td>
+<td>
+<div style="float:left;">
+Retard
+</div>
+</td>
+<td>
+Hsjw
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_631" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+Retard
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:0:441764113
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:883528226]" target="_blank">[U:1:883528226]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561198843793954" target="_blank">76561198843793954</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>02-23-23 19:08</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>[Cheat] Aimbot</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+Hsjw
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_631">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_630" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_630');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/ee.png" alt="EE" border="0" align="absmiddle" /></td>
+<td align="center">02-23-23 17:44</td>
+<td>
+<div style="float:left;">
+SkyHallowen
+</div>
+</td>
+<td>
+Hsjw
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_630" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+SkyHallowen
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:1:653834259
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1307668519]" target="_blank">[U:1:1307668519]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199267934247" target="_blank">76561199267934247</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>02-23-23 17:44</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>[Cheat] Aimbot</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+Hsjw
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_630">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_629" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_629');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/cz.png" alt="CZ" border="0" align="absmiddle" /></td>
+<td align="center">02-07-23 20:30</td>
+<td>
+<div style="float:left;">
+Lakatkos
+</div>
+</td>
+<td>
+<i><font color="#677882">Admin deleted</font></i>
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_629" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+Lakatkos
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:1:628229200
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1256458401]" target="_blank">[U:1:1256458401]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199216724129" target="_blank">76561199216724129</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>02-07-23 20:30</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>{darkred}[Gamesites.cz]{default} Duplicate account</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+<i><font color="#677882">Admin smazán.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_629">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_628" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_628');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/sk.png" alt="SK" border="0" align="absmiddle" /></td>
+<td align="center">02-06-23 13:30</td>
+<td>
+<div style="float:left;">
+LKgamesSK
+</div>
+</td>
+<td>
+<i><font color="#677882">Admin deleted</font></i>
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_628" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+LKgamesSK
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:1:511563692
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1023127385]" target="_blank">[U:1:1023127385]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561198983393113" target="_blank">76561198983393113</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>02-06-23 13:30</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>{darkred}[Gamesites.cz]{default} Obcházení banu</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+<i><font color="#677882">Admin smazán.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_628">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (3)</td>
+<td>
+<span title="Server: 217.11.249.93:27539, Date: 02-06-23 18:55">LKgamesSK</span>, <span title="Server: 217.11.249.93:27539, Date: 02-10-23 20:03">LKgamesSK</span>, <span title="Server: 217.11.249.93:27539, Date: 02-15-23 22:49">LKgamesSK</span>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_627" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_627');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/sk.png" alt="SK" border="0" align="absmiddle" /></td>
+<td align="center">02-05-23 12:29</td>
+<td>
+<div style="float:left;">
+Exration
+</div>
+</td>
+<td>
+Rejdž
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_627" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+Exration
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:0:756919370
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1513838740]" target="_blank">[U:1:1513838740]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199474104468" target="_blank">76561199474104468</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>02-05-23 12:29</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>[Cheat] Multihack</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+Rejdž
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_627">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_626" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_626');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/us.png" alt="US" border="0" align="absmiddle" /></td>
+<td align="center">01-12-23 19:17</td>
+<td>
+<div style="float:left;">
+YUMMY TECHNO BACON
+</div>
+</td>
+<td>
+Hsjw
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_626" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+YUMMY TECHNO BACON
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:0:738221464
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1476442928]" target="_blank">[U:1:1476442928]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199436708656" target="_blank">76561199436708656</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>01-12-23 19:17</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>[Cheat] Aimbot</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+Hsjw
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_626">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_625" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_625');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/cz.png" alt="CZ" border="0" align="absmiddle" /></td>
+<td align="center">01-04-23 19:13</td>
+<td>
+<div style="float:left;">
+Bored
+</div>
+</td>
+<td>
+Rave
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_625" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+Bored
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:1:753914857
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1507829715]" target="_blank">[U:1:1507829715]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199468095443" target="_blank">76561199468095443</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>01-04-23 19:13</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>[Cheat] Aimbot</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+Rave
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_625">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_624" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_624');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/pl.png" alt="PL" border="0" align="absmiddle" /></td>
+<td align="center">01-04-23 18:47</td>
+<td>
+<div style="float:left;">
+maraszbik
+</div>
+</td>
+<td>
+Hsjw
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_624" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+maraszbik
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:1:540732298
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1081464597]" target="_blank">[U:1:1081464597]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199041730325" target="_blank">76561199041730325</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>01-04-23 18:47</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>[Cheat] Aimbot</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+Hsjw
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_624">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_623" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_623');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/pl.png" alt="PL" border="0" align="absmiddle" /></td>
+<td align="center">01-03-23 18:00</td>
+<td>
+<div style="float:left;">
+izawal003
+</div>
+</td>
+<td>
+Hsjw
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_623" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+izawal003
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:0:753560684
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:1507121368]" target="_blank">[U:1:1507121368]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561199467387096" target="_blank">76561199467387096</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>01-03-23 18:00</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>[Cheat] Aimbot</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+Hsjw
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_623">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+<tr style="cursor:pointer;" data-toggle="collapse" data-target="#expand_622" aria-expanded="false" aria-controls="collapseExample" onclick="xajax_ServerHostPlayers(4, 'id', 'host_622');">
+<td align="center" class="img-ss"><img src="themes/star/images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="themes/star/images/country/cz.png" alt="CZ" border="0" align="absmiddle" /></td>
+<td align="center">01-02-23 14:17</td>
+<td>
+<div style="float:left;">
+180x
+</div>
+</td>
+<td>
+Hsjw
+</td>
+<td align="right" class="listtable_1_permanent">
+<label class="badge badge-danger">
+Permanent </label>
+</td>
+<td class="text-danger">
+<div class="progress">
+<div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" aria-width="100"></div>
+</div>
+</div>
+</td>
+</tr>
+
+<tr>
+<td colspan="7" align="center" style="padding:0;">
+<div class="collapse" id="expand_622" data-parent="#banlist">
+<table class="table tbl-sm" width="100%">
+<tr>
+<td align="left" class="listtable_top" colspan="3">
+<b>Detaily banu</b>
+</td>
+</tr>
+<tr align="left">
+<td width="30%">Hráč</td>
+<td>
+180x
+</td>
+
+<td width="30%" rowspan="11" class="listtable_2 opener">
+<div class="ban-edit">
+<ul>
+<li><a href="#" onclick target="_self"><img src="images/demo.png" border="0" alt style="vertical-align:middle" /> No Demos </a></li>
+</ul>
+</div>
+</td>
+
+</tr>
+<tr align="left">
+<td width="20%">Steam ID</td>
+<td>
+STEAM_0:0:69539760
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam3 ID</td>
+<td>
+<a href="http://steamcommunity.com/profiles/[U:1:139079520]" target="_blank">[U:1:139079520]</a>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Steam komunitní</td>
+<td><a href="http://steamcommunity.com/profiles/76561198099345248" target="_blank">76561198099345248</a></td>
+</tr>
+<tr align="left">
+<td width="20%">Datum a čas udělení</td>
+<td>01-02-23 14:17</td>
+</tr>
+<tr align="left">
+<td width="20%">Délka</td>
+<td>Permanent </td>
+</tr>
+<tr align="left">
+<td width="20%">Vyprší</td>
+<td>
+<i><font color="#677882">Nikdy nevyprší.</font></i>
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Důvod</td>
+<td>[Cheat] Aimbot</td>
+</tr>
+<tr align="left">
+<td width="20%">Zabanoval Admin</td>
+<td>
+Hsjw
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Místo banu</td>
+<td id="host_622">
+Prosím čekejte...
+</td>
+</tr>
+<tr align="left">
+<td width="20%">Celkem banů</td>
+<td>No previous bans</td>
+</tr>
+<tr align="left">
+<td width="20%">Bany (0)</td>
+<td>
+<i><font color="#677882">nikdy</font></i>
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+
+</table>
+<div class="col-12 my-2 text-xl-right text-lg-left">
+<div id="banlist-nav" class="btn btn-inverse-light  btn-rounded btn-fw p-1 p-md-2 p-xl-2">
+displaying&nbsp;0&nbsp;-&nbsp;30&nbsp;of&nbsp;609&nbsp;results | <b><a href="index.php?p=banlist&page=2" onclick target="_self">next <img border="0" alt="next" src="images/right.png" style="vertical-align:middle;" /> </a></b>&nbsp;<select onchange="changePage(this,'B','','');"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option></select> </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script type="text/javascript">
+	window.addEvent('domready', function(){
+		InitAccordion('tr.opener', 'div.opener', 'mainwrapper');
+		
+				
+		});
+		
+</script>
+</div>
+</div>
+<footer class="footer">
+<div class="container-fluid clearfix">
+<span class="d-block text-center text-sm-left d-sm-inline-block">
+<a href="https://sbpp.github.io/" target="_blank">SourceBans++</a> 1.6.4.
+Powered by <a href="http://www.sourcemod.net" target="_blank">SourceMod</a>
+</span><br>
+<span class="d-block text-center text-sm-left d-sm-inline-block">Copyright © 2018
+<a href="http://www.bootstrapdash.com/" target="_blank">Bootstrapdash</a>. All rights reserved.</span>
+<span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-right">Hand-crafted & made with
+<i class="mdi mdi-heart text-danger"></i><br>
+"Oh no! I've overflowed my balls!" - <i>Olly</i>
+</span>
+</div>
+</footer>
+</div>
+</div>
+<script src="themes/star/js/off-canvas.js"></script>
+<script src="themes/star/js/misc.js"></script>
+<script src="themes/star/js/countTo.js"></script>
+<script>
+	document.getElementById("content_title").remove();
+	function fixToolTip() {
+		setTimeout(
+		function() {
+			var tooltips = document.getElementsByClassName("tool-tip");
+			for(i=0;i<tooltips.length;i++)
+			{
+				tooltips[i].className+="tool-tip badge badge-primary";
+			}
+		}, 2000);
+	}
+	fixToolTip();
+	var bc=document.getElementById("breadcrumb");
+	var bc_explode = bc.innerHTML.split("»");
+	var newbc="";
+	for(i=1;i<bc_explode.length;i++)
+	{
+		newbc+="<li class=\"breadcrumb-item\">";
+		newbc+=bc_explode[i]
+		newbc+="</li>";
+		newbc = newbc.replace("<b>", "");
+		newbc = newbc.replace("</b>", "");
+	}
+	bc.innerHTML = newbc;
+	//document.getElementById("breadcrumb").remove();
+</script>
+<script>
+	AOS.init();
+</script>
+</div>
+<script type="text/javascript">
+var settab = ProcessAdminTabs();
+window.addEvent('domready', function(){
+        var Tips2 = new Tips($$('.tip'), {
+            initialize:function(){
+                this.fx = new Fx.Style(this.toolTip, 'opacity', {duration: 300, wait: false}).set(0);
+            },
+            onShow: function(toolTip) {
+                this.fx.start(1);
+            },
+            onHide: function(toolTip) {
+                this.fx.start(0);
+            }
+        });
+        var Tips4 = new Tips($$('.perm'), {
+            className: 'perm'
+        });
+    });
+$('nav').setHTML('');    $('content_title').setHTML('Ban List');
+
+
+        </script>
+<!--[if lt IE 7]>
+<script defer type="text/javascript" src="./scripts/pngfix.js"></script>
+<![endif]-->
+</body>
+</html>
