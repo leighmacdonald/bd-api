@@ -281,6 +281,10 @@ func TestBaitedCommunity(t *testing.T) {
 	testParser(t, newBaitedCommunityScraper(), 28, "index.php?p=banlist&page=2")
 }
 
+func TestCedaPugCommunity(t *testing.T) {
+	testParser(t, newCedaPugScraper(), 30, "index.php?p=banlist&page=2")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)

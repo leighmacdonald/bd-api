@@ -1010,3 +1010,8 @@ func newBaitedCommunityScraper() *sbScraper {
 	return newScraper("baitedcommunity", "https://bans.baitedcommunity.com/", "index.php?p=banlist",
 		parseStar, nextURLLast, parseBaitedTime)
 }
+
+func newCedaPugScraper() *sbScraper {
+	return newScraper("cedapug", "https://cedapug.com/sourcebans/", "index.php?p=banlist",
+		parseStar, nextURLLast, parseSkialTime)
+}
