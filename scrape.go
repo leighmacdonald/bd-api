@@ -423,6 +423,12 @@ func nextURLLast(doc *goquery.Selection) string {
 	return nextPage
 }
 
+// TODO only a few sites use this?
+// https://github.com/SB-MaterialAdmin/Web/tree/stable-dev
+//func parseMaterial(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, error) {
+//	panic("uninplemented")
+//}
+
 // https://github.com/brhndursun/SourceBans-StarTheme
 func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, error) {
 	var (
