@@ -1218,3 +1218,8 @@ func newPhoenixSourceScraper() *sbScraper {
 	return newScraper("phoenixsource", "https://phoenix-source.ru/sb/", "index.php?p=banlist",
 		parseMaterial, nextURLLast, parseProGamesZetTime)
 }
+
+func newSlavonServerScraper() *sbScraper {
+	return newScraper("slavonserver", "http://slavonserver.ru/ma/", "index.php?p=banlist",
+		parseMaterial, nextURLLast, parseProGamesZetTime)
+}
