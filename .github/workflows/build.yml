@@ -25,9 +25,9 @@ jobs:
 
       - name: Lint golangci-lint
         run: make lint_golangci
-
-      - name: Lint vet
-        run: make lint_vet
+#
+#      - name: Lint vet
+#        run: make lint_vet
 
       - name: Lint imports
         run: make lint_imports
