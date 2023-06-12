@@ -1208,3 +1208,8 @@ func newG44Scraper() *sbScraper {
 	return newScraper("g44", "http://bans.allmaps.g44.rocks/", "index.php?p=banlist",
 		parseMaterial, nextURLLast, parseProGamesZetTime)
 }
+
+func newCuteProjectScraper() *sbScraper {
+	return newScraper("cuteproject", "https://bans.cute-project.net/", "index.php?p=banlist",
+		parseMaterial, nextURLLast, parseProGamesZetTime)
+}
