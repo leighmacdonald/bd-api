@@ -1203,3 +1203,8 @@ func newProGamesZetScraper() *sbScraper {
 	return newScraper("progameszet", "https://bans.progameszet.ru/", "index.php?p=banlist",
 		parseMaterial, nextURLLast, parseProGamesZetTime)
 }
+
+func newG44Scraper() *sbScraper {
+	return newScraper("g44", "http://bans.allmaps.g44.rocks/", "index.php?p=banlist",
+		parseMaterial, nextURLLast, parseProGamesZetTime)
+}
