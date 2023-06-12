@@ -93,7 +93,7 @@ var errEmpty = errors.New("value empty")
 
 func (r *sbRecord) setPlayer(scraperName string, name string) bool {
 	if name == "" {
-		logger.Error("Failed to set player", zap.Error(errEmpty), zap.String("scraper", scraperName))
+		logger.Error("Failed to set player", zap.String("scraper", scraperName), zap.Error(errEmpty))
 		return false
 	}
 	r.Name = name
@@ -136,7 +136,7 @@ func (r *sbRecord) setExpiredOn(scraperName string, parseTime parseTimeFunc, val
 
 func (r *sbRecord) setReason(scraperName string, value string) bool {
 	if value == "" {
-		logger.Error("Reason is empty", zap.String("scraper", scraperName))
+		//logger.Error("Reason is empty", zap.String("scraper", scraperName))
 		return false
 	}
 	r.Reason = value
@@ -194,8 +194,9 @@ func createScrapers() []*sbScraper {
 }
 
 func (scraper *sbScraper) start() error {
-	scraper.log.Info("Starting sourcebans scraper", zap.String("theme", scraper.theme))
+	scraper.log.Info("Starting scrape job", zap.String("name", scraper.name), zap.String("theme", scraper.theme))
 	lastURL := ""
+	startTime := time.Now()
 	scraper.Collector.OnHTML("body", func(e *colly.HTMLElement) {
 		nextURL, results, parseErr := scraper.parser(e.DOM, scraper.nextURL, scraper.parseTIme, scraper.name)
 		if parseErr != nil {
@@ -207,18 +208,20 @@ func (scraper *sbScraper) start() error {
 		scraper.resultsMu.Unlock()
 		if nextURL != "" && nextURL != lastURL {
 			next := scraper.url(nextURL)
-			scraper.log.Info("Visiting next url", zap.String("url", next))
-			if errVisit := e.Request.Visit(next); errVisit != nil {
+			lastURL = nextURL
+			scraper.log.Debug("Visiting next url", zap.String("url", next))
+			if errVisit := e.Request.Visit(next); errVisit != nil && !errors.Is(errVisit, colly.ErrAlreadyVisited) {
 				scraper.log.Error("Failed to visit sub url", zap.Error(errVisit), zap.String("url", nextURL))
 				return
 			}
 		}
-		lastURL = nextURL
+
 	})
 	if errVisit := scraper.Visit(scraper.url(scraper.startPath)); errVisit != nil {
 		return errVisit
 	}
 	scraper.Wait()
+	scraper.log.Info("Completed scrape job", zap.String("name", scraper.name), zap.Duration("duration", time.Since(startTime)))
 	return nil
 }
 
@@ -318,7 +321,7 @@ func parseBaitedTime(s string) (time.Time, error) {
 	if s == "Not applicable." || s == "Permanent" {
 		return time.Time{}, nil
 	}
-	return time.Parse("01-02-2006 15:04", s)
+	return time.Parse("02-01-2006 15:04", s)
 }
 
 // 05-17-23 03:07

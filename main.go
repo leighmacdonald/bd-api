@@ -4,8 +4,6 @@ import (
 	"context"
 	"github.com/leighmacdonald/steamweb"
 	"go.uber.org/zap"
-	"log"
-	"net/http"
 	"os"
 )
 
@@ -23,7 +21,7 @@ func main() {
 		logger.Panic("Failed to load config", zap.Error(errConfig))
 	}
 	if errSetKey := steamweb.SetKey(config.SteamAPIKey); errSetKey != nil {
-		log.Panicf("Failed to set steam api key: %v\n", errSetKey)
+		logger.Panic("Failed to set steam api key:", zap.Error(errSetKey))
 	}
 	if config.SteamAPIKey == "" {
 		logger.Panic("Must set STEAM_API_KEY")
@@ -34,7 +32,7 @@ func main() {
 
 	if !exists(cacheDir) {
 		if errMkDir := os.MkdirAll(cacheDir, 0755); errMkDir != nil {
-			log.Fatal("Failed to create cache dir", zap.String("dir", cacheDir), zap.Error(errMkDir))
+			logger.Fatal("Failed to create cache dir", zap.String("dir", cacheDir), zap.Error(errMkDir))
 		}
 	}
 
@@ -43,28 +41,20 @@ func main() {
 		logger.Fatal("Failed to connect to database", zap.Error(errDB))
 	}
 
-	cache = newCaches(ctx, steamCacheTimeout, compCacheTimeout, steamCacheTimeout)
 	if config.SourcebansScraperEnabled {
 		scrapers := createScrapers()
 		if errInitScrapers := initScrapers(ctx, db, scrapers); errInitScrapers != nil {
 			logger.Fatal("Failed to initialize scrapers", zap.Error(errInitScrapers))
 		}
 		go startScrapers(&config, scrapers)
-
 	}
-	http.HandleFunc("/bans", getHandler(handleGetBans()))
-	http.HandleFunc("/summary", getHandler(handleGetSummary()))
-	http.HandleFunc("/profile", getHandler(handleGetProfile()))
-	http.HandleFunc("/kick", onPostKick)
-	http.HandleFunc(profilesSlugURL, getHandler(handleGetProfiles(ctx)))
 
-	if errServe := http.ListenAndServe(config.ListenAddr, nil); errServe != nil {
-		log.Printf("HTTP Server returned error: %v", errServe)
+	if errAPI := startAPI(ctx, config.ListenAddr); errAPI != nil {
+		logger.Error("HTTP server returned error", zap.Error(errAPI))
 	}
 }
 
 var (
-	cache    caches
 	logger   *zap.Logger
 	cacheDir = "./.cache/"
 )

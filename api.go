@@ -4,61 +4,64 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/alecthomas/chroma/formatters/html"
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/alecthomas/chroma/styles"
+	"github.com/gin-gonic/gin"
 	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/leighmacdonald/steamweb"
 	"go.uber.org/zap"
-	"log"
+	"html/template"
 	"net/http"
 	"sort"
-	"strings"
-	"sync"
 	"time"
 )
 
-func onPostKick(w http.ResponseWriter, _ *http.Request) {
-	if _, errWrite := fmt.Fprintf(w, ""); errWrite != nil {
-		log.Printf("failed to write response body: %v\n", errWrite)
-	}
-}
-
-func sendItem(w http.ResponseWriter, req *http.Request, item any) {
-	resp, jsonErr := json.Marshal(item)
-	if jsonErr != nil {
-		logger.Error("Failed to marshal json item", zap.Error(jsonErr))
-		http.Error(w, "Internal error", http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	http.ServeContent(w, req, "", time.Now(), bytes.NewReader(resp))
-}
-
-func handleGetSummary() func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, req *http.Request) {
-		steamIDQuery := req.URL.Query().Get("steam_id")
-		steamID, steamIDErr := steamid.SID64FromString(steamIDQuery)
-		if steamIDErr != nil || !steamID.Valid() {
-			http.Error(w, "Invalid steam id", http.StatusBadRequest)
+func handleGetSummary() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		steamIDQuery, ok := ctx.GetQuery("steam_id")
+		if !ok {
+			ctx.AbortWithStatus(http.StatusBadRequest)
 			return
 		}
-		item := cache.summary.Get(steamID)
-		sendItem(w, req, item.Value())
+		sid64, steamIDErr := steamid.SID64FromString(steamIDQuery)
+		if steamIDErr != nil || !sid64.Valid() {
+			ctx.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+		ids := steamid.Collection{sid64}
+		summaries, errSum := getSteamSummary(sid64)
+		if errSum != nil || len(ids) != len(summaries) {
+			logger.Error("Failed to fetch summary",
+				zap.Error(errSum), zap.Int64("steam_id", sid64.Int64()))
+			ctx.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+		ctx.JSON(http.StatusOK, summaries)
 	}
 }
 
-func handleGetBans() func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, req *http.Request) {
-		steamIDQuery := req.URL.Query().Get("steam_id")
+func handleGetBans() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		steamIDQuery, ok := ctx.GetQuery("steam_id")
+		if !ok {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, "Missing steam_id")
+			return
+		}
 		sid, steamIDErr := steamid.SID64FromString(steamIDQuery)
 		if steamIDErr != nil {
-			http.Error(w, "Invalid steam id", http.StatusBadRequest)
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, "Invalid steam_id")
 			return
 		}
-		item := cache.bans.Get(sid)
-		sendItem(w, req, item.Value())
+		ids := steamid.Collection{sid}
+		bans, errBans := steamweb.GetPlayerBans(ids)
+		if errBans != nil || len(ids) != len(bans) {
+			logger.Error("Failed to fetch player bans",
+				zap.Error(errBans), zap.Int64("steam_id", sid.Int64()))
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to fetch bans")
+			return
+		}
+		ctx.JSON(http.StatusOK, bans)
 	}
 }
 
@@ -72,156 +75,85 @@ type Profile struct {
 }
 
 func loadProfile(steamID steamid.SID64, profile *Profile) error {
-	var mu sync.RWMutex
-	wg := &sync.WaitGroup{}
-	wg.Add(7)
-	go func() {
-		defer wg.Done()
-		item := cache.bans.Get(steamID)
-		if item != nil {
-			profile.BanState = item.Value()
-		}
-	}()
-	go func() {
-		defer wg.Done()
-		item := cache.summary.Get(steamID)
-		if item != nil {
-			profile.Summary = item.Value()
-		}
-	}()
-	go func() {
-		defer wg.Done()
-		item := cache.logsTF.Get(steamID)
-		if item != nil {
-			profile.LogsCount = item.Value()
-		}
-	}()
-	go func() {
-		defer wg.Done()
-		item := cache.friends.Get(steamID)
-		if item != nil {
-			profile.Friends = item.Value()
-		}
-	}()
-	go func() {
-		defer wg.Done()
-		item := cache.etf2lSeasons.Get(steamID)
-		if item != nil {
-			mu.Lock()
-			profile.Seasons = append(profile.Seasons, item.Value()...)
-			mu.Unlock()
-		}
-
-	}()
-	go func() {
-		defer wg.Done()
-		item := cache.ugcSeasons.Get(steamID)
-		if item != nil {
-			mu.Lock()
-			profile.Seasons = append(profile.Seasons, item.Value()...)
-			mu.Unlock()
-		}
-	}()
-	go func() {
-		defer wg.Done()
-		item := cache.rglSeasons.Get(steamID)
-		if item != nil {
-			mu.Lock()
-			profile.Seasons = append(profile.Seasons, item.Value()...)
-			mu.Unlock()
-		}
-	}()
-	wg.Wait()
 	sort.Slice(profile.Seasons, func(i, j int) bool {
 		return profile.Seasons[i].DivisionInt < profile.Seasons[j].DivisionInt
 	})
 	return nil
 }
 
-func handleGetProfile() func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, req *http.Request) {
-		steamIDQuery := req.URL.Query().Get("steam_id")
-		steamID, steamIDErr := steamid.SID64FromString(steamIDQuery)
+func handleGetProfile() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		steamIDQuery, ok := ctx.GetQuery("steam_id")
+		if !ok {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, "Missing steam_id")
+			return
+		}
+		sid64, steamIDErr := steamid.SID64FromString(steamIDQuery)
 		if steamIDErr != nil {
-			http.Error(w, "Invalid steam id", http.StatusBadRequest)
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, "Invalid steam_id")
 			return
 		}
 		var profile Profile
-		if errProfile := loadProfile(steamID, &profile); errProfile != nil {
+		if errProfile := loadProfile(sid64, &profile); errProfile != nil {
 			logger.Error("Failed to load profile", zap.Error(errProfile))
-			http.Error(w, "Failed to load profile", http.StatusInternalServerError)
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to fetch profile")
 			return
 		}
-		sendItem(w, req, &profile)
+		ctx.JSON(http.StatusOK, profile)
 	}
 }
 
-const profilesSlugURL = "/profiles/"
-
-func logHTTPErr(w http.ResponseWriter, message string, err error, statusCode int) {
-	http.Error(w, "Failed to generate json", statusCode)
-	logger.Error(message, zap.Error(err))
-}
-
-func handleGetProfiles(ctx context.Context) func(http.ResponseWriter, *http.Request) {
+func handleGetProfiles() gin.HandlerFunc {
 	style := styles.Get("monokai")
 	if style == nil {
 		style = styles.Fallback
 	}
 	formatter := html.New(html.WithClasses(true))
 	lexer := lexers.Get("json")
-	write := func(w http.ResponseWriter, format string, args ...any) bool {
-		if _, errWrite := fmt.Fprintf(w, format, args...); errWrite != nil {
-			logHTTPErr(w, "Failed to write response body", errWrite, http.StatusInternalServerError)
-			return false
-		}
-		return true
+	type tmplArgs struct {
+		name string
+		css  template.HTML
+		body template.HTML
 	}
-	return func(w http.ResponseWriter, req *http.Request) {
-		var slug string
-		if strings.HasPrefix(req.URL.Path, profilesSlugURL) {
-			slug = req.URL.Path[len(profilesSlugURL):]
-		}
-		if slug == "" {
-			http.Error(w, "Invalid SID", http.StatusNotFound)
-			return
-		}
+
+	return func(ctx *gin.Context) {
+		slug := ctx.Param("steam_id")
 		lCtx, cancel := context.WithTimeout(ctx, time.Second*10)
 		defer cancel()
 		sid64, errSid := steamid.ResolveSID64(lCtx, slug)
 		if errSid != nil {
-			http.Error(w, "Invalid SID", http.StatusNotFound)
+			ctx.AbortWithStatusJSON(http.StatusNotFound, "not found")
+			return
 		}
-		w.Header().Set("Content-Type", "text/html")
 		var profile Profile
 		if errProfile := loadProfile(sid64, &profile); errProfile != nil {
-			logHTTPErr(w, "Failed to load profile", errProfile, http.StatusInternalServerError)
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to load profile")
 			return
 		}
 		jsonBody, errJSON := json.MarshalIndent(profile, "", "    ")
 		if errJSON != nil {
-			logHTTPErr(w, "Failed to generate json", errJSON, http.StatusInternalServerError)
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to generate json")
 			return
 		}
 		iterator, errTokenize := lexer.Tokenise(nil, string(jsonBody))
 		if errTokenize != nil {
-			logHTTPErr(w, "Failed to tokenise json", errJSON, http.StatusInternalServerError)
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to tokenise json")
 			return
 		}
-		if !write(w, `<!DOCTYPE html><html><head><title>%s</title></head><body><style> body {background-color: #272822;}`, profile.Summary.PersonaName) {
+		cssBuf := bytes.NewBuffer(nil)
+		if errWrite := formatter.WriteCSS(cssBuf, style); errWrite != nil {
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to generate HTML")
+		}
+		bodyBuf := bytes.NewBuffer(nil)
+		if errFormat := formatter.Format(bodyBuf, style, iterator); errFormat != nil {
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to format json")
 			return
 		}
-		if errWrite := formatter.WriteCSS(w, style); errWrite != nil {
-			logHTTPErr(w, "Failed to generate HTML", errWrite, http.StatusInternalServerError)
-		}
-		if !write(w, `</style>`) {
-			return
-		}
-		if errFormat := formatter.Format(w, style, iterator); errFormat != nil {
-			logHTTPErr(w, "Failed to format json", errFormat, http.StatusInternalServerError)
-			return
-		}
-		write(w, `</body></html>`)
+		ctx.HTML(http.StatusOK, "profiles", tmplArgs{
+			name: profile.Summary.PersonaName,
+			css:  template.HTML(cssBuf.String()),
+			body: template.HTML(bodyBuf.String()),
+		})
 	}
 }
 
@@ -233,4 +165,59 @@ func getHandler(wrappedFn func(http.ResponseWriter, *http.Request)) func(http.Re
 		}
 		wrappedFn(w, req)
 	}
+}
+
+func ErrorHandler(logger *zap.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Next()
+
+		for _, ginErr := range c.Errors {
+			logger.Error("Unhandled HTTP Error", zap.Error(ginErr))
+		}
+	}
+}
+
+func createRouter() *gin.Engine {
+	tmplProfiles, errTmpl := template.New("profiles").Parse(`
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{{ .name }}</title>
+	<style> body {background-color: #272822;} {{ .style }} </style>
+</head>
+<body>{{ .body }}</body>
+</html>`)
+	if errTmpl != nil {
+		logger.Panic("Failed to parse html template", zap.Error(errTmpl))
+	}
+
+	engine := gin.New()
+	engine.SetHTMLTemplate(tmplProfiles)
+	engine.Use(ErrorHandler(logger), gin.Recovery())
+	engine.GET("/bans", handleGetBans())
+	engine.GET("/summary", handleGetSummary())
+	engine.GET("/profile", handleGetProfile())
+	engine.GET("/profiles/:steam_id", handleGetProfiles())
+	return engine
+}
+
+func startAPI(ctx context.Context, addr string) error {
+	httpServer := &http.Server{
+		Addr:           addr,
+		Handler:        createRouter(),
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+	logger.Info("Service status changed", zap.String("state", "ready"))
+	defer logger.Info("Service status changed", zap.String("state", "stopped"))
+	go func() {
+		<-ctx.Done()
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+		defer cancel()
+		if errShutdown := httpServer.Shutdown(shutdownCtx); errShutdown != nil {
+			logger.Error("Error shutting down http service", zap.Error(errShutdown))
+		}
+	}()
+	return httpServer.ListenAndServe()
 }

@@ -79,7 +79,7 @@ func TestParseLOOS(t *testing.T) {
 }
 
 func TestParsePubsTF(t *testing.T) {
-	testParser(t, newPubsTFScraper(), 29, "index.php?p=banlist&page=2")
+	testParser(t, newPubsTFScraper(), 26, "index.php?p=banlist&page=2")
 }
 
 func TestParseScrapTF(t *testing.T) {

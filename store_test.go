@@ -14,7 +14,7 @@ import (
 
 var testStore *pgStore
 
-func TestMain(m *testing.M) {
+func TestStore(t *testing.T) {
 	testCtx := context.Background()
 	username, password, dbName := "bdapi-test", "bdapi-test", "bdapi-test"
 	cont, errContainer := postgres.RunContainer(
@@ -45,10 +45,11 @@ func TestMain(m *testing.M) {
 		logger.Fatal("Failed to setup test db", zap.Error(errStore))
 	}
 	testStore = newTestStore
-	m.Run()
+	testSourceBans(t)
+	testPlayerRecord(t)
 }
 
-func TestSourceBans(t *testing.T) {
+func testSourceBans(t *testing.T) {
 	var s sbSite
 	require.Error(t, testStore.sbSiteGet(context.Background(), 99999, &s))
 	s2 := newSBSite("test-site")
@@ -72,7 +73,7 @@ func TestSourceBans(t *testing.T) {
 	require.Error(t, testStore.sbSiteGet(context.Background(), s3.SiteID, &s))
 }
 
-func TestPlayerRecord(t *testing.T) {
+func testPlayerRecord(t *testing.T) {
 	pr := newPlayerRecord(76561197961279983)
 	pr.PersonaName = "blah"
 	pr.Vanity = "123"
