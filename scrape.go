@@ -46,14 +46,16 @@ func initScrapers(ctx context.Context, db *pgStore, scrapers []*sbScraper) error
 }
 
 func startScrapers(config *appConfig, scrapers []*sbScraper) {
-	startProxies(config)
-	defer stopProxies()
+	if config.ProxiesEnabled {
+		startProxies(config)
+		defer stopProxies()
 
-	//for _, scraper := range scrapers {
-	//	if errProxies := setupProxies(scraper.Collector, config); errProxies != nil {
-	//		logger.Panic("Failed to setup proxies", zap.Error(errProxies))
-	//	}
-	//}
+		for _, scraper := range scrapers {
+			if errProxies := setupProxies(scraper.Collector, config); errProxies != nil {
+				logger.Panic("Failed to setup proxies", zap.Error(errProxies))
+			}
+		}
+	}
 	for _, scraper := range scrapers {
 		go func(s *sbScraper) {
 			if errScrape := s.start(); errScrape != nil {

@@ -24,6 +24,7 @@ type appConfig struct {
 	SteamAPIKey              string         `yaml:"steam_api_key"`
 	DSN                      string         `yaml:"dsn"`
 	SourcebansScraperEnabled bool           `yaml:"sourcebans_scraper_enabled"`
+	ProxiesEnabled           bool           `json:"proxies_enabled"`
 	Proxies                  []*proxyConfig `yaml:"proxies"`
 	PrivateKeyPath           string         `yaml:"private_key_path"`
 	EnableCache              bool           `yaml:"enable_cache"`
