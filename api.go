@@ -75,6 +75,23 @@ type Profile struct {
 }
 
 func loadProfile(steamID steamid.SID64, profile *Profile) error {
+	sum, errSum := getSteamSummary(steamID)
+	if errSum != nil || len(sum) == 0 {
+		return errSum
+	}
+	profile.Summary = sum[0]
+	banState, errBanState := steamweb.GetPlayerBans(steamid.Collection{steamID})
+	if errBanState != nil || len(banState) == 0 {
+		return errBanState
+	}
+	profile.BanState = banState[0]
+
+	_, errFriends := getSteamFriends(steamID)
+	if errFriends != nil {
+		return errBanState
+	}
+	//profile.Friends = friends
+
 	sort.Slice(profile.Seasons, func(i, j int) bool {
 		return profile.Seasons[i].DivisionInt < profile.Seasons[j].DivisionInt
 	})
@@ -157,17 +174,7 @@ func handleGetProfiles() gin.HandlerFunc {
 	}
 }
 
-func getHandler(wrappedFn func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, req *http.Request) {
-		if req.Method != http.MethodGet {
-			http.Error(w, "Not found", http.StatusNotFound)
-			return
-		}
-		wrappedFn(w, req)
-	}
-}
-
-func ErrorHandler(logger *zap.Logger) gin.HandlerFunc {
+func apiErrorHandler(logger *zap.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
 
@@ -193,7 +200,7 @@ func createRouter() *gin.Engine {
 
 	engine := gin.New()
 	engine.SetHTMLTemplate(tmplProfiles)
-	engine.Use(ErrorHandler(logger), gin.Recovery())
+	engine.Use(apiErrorHandler(logger), gin.Recovery())
 	engine.GET("/bans", handleGetBans())
 	engine.GET("/summary", handleGetSummary())
 	engine.GET("/profile", handleGetProfile())

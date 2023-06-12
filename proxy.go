@@ -53,7 +53,6 @@ func startProxies(config *appConfig) {
 		}(serverCfg)
 	}
 	wg.Wait()
-
 }
 
 func stopProxies() {

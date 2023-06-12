@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/debug"
@@ -13,9 +11,7 @@ import (
 	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"io"
 	"net/url"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -789,56 +785,58 @@ func parseDefault(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTi
 	return urlFunc(doc), bans, nil
 }
 
-type megaScatterNode struct {
-	ID                  string `json:"id"`
-	ID3                 string `json:"id3"`
-	ID1                 string `json:"id1"`
-	Label               string `json:"label"`
-	BorderWidthSelected int    `json:"borderWidthSelected"`
-	Shape               string `json:"shape"`
-	Color               struct {
-		Border     string `json:"border"`
-		Background string `json:"background"`
-		Highlight  struct {
-			Border     string `json:"border"`
-			Background string `json:"background"`
-		} `json:"highlight"`
-	} `json:"color"`
-	X       float64  `json:"x"`
-	Y       float64  `json:"y"`
-	Aliases []string `json:"-"`
-}
+//
+//type megaScatterNode struct {
+//	ID                  string `json:"id"`
+//	ID3                 string `json:"id3"`
+//	ID1                 string `json:"id1"`
+//	Label               string `json:"label"`
+//	BorderWidthSelected int    `json:"borderWidthSelected"`
+//	Shape               string `json:"shape"`
+//	Color               struct {
+//		Border     string `json:"border"`
+//		Background string `json:"background"`
+//		Highlight  struct {
+//			Border     string `json:"border"`
+//			Background string `json:"background"`
+//		} `json:"highlight"`
+//	} `json:"color"`
+//	X       float64  `json:"x"`
+//	Y       float64  `json:"y"`
+//	Aliases []string `json:"-"`
+//}
 
-func parseMegaScatter(bodyReader io.Reader) ([]sbRecord, error) {
-	body, errBody := io.ReadAll(bodyReader)
-	if errBody != nil {
-		return nil, errBody
-	}
-	rx := regexp.MustCompile(`(?s)var nodes = new vis.DataSet\((\[.+?])\);`)
-	match := rx.FindStringSubmatch(string(body))
-	if len(match) == 0 {
-		return nil, errors.New("Failed to match data")
-	}
-	pass1 := strings.Replace(match[1], "'", "", -1)
-	replacer := regexp.MustCompile(`\s(\S+?):\s`)
-	pass2 := replacer.ReplaceAllString(pass1, "\"$1\": ")
-
-	replacer2 := regexp.MustCompile(`]},\s]$`)
-	pass3 := replacer2.ReplaceAllString(pass2, "]}]")
-
-	fmt.Println(pass3[0:1024])
-
-	fmt.Println(string(pass3[len(match[1])-2048]))
-
-	o, _ := os.Create("temp.json")
-	_, _ = io.WriteString(o, pass3)
-	_ = o.Close()
-	var msNodes []megaScatterNode
-	if errJSON := json.Unmarshal([]byte(pass3), &msNodes); errJSON != nil {
-		return nil, errJSON
-	}
-	return nil, nil
-}
+////nolint:golint,unused
+//func parseMegaScatter(bodyReader io.Reader) ([]sbRecord, error) {
+//	body, errBody := io.ReadAll(bodyReader)
+//	if errBody != nil {
+//		return nil, errBody
+//	}
+//	rx := regexp.MustCompile(`(?s)var nodes = new vis.DataSet\((\[.+?])\);`)
+//	match := rx.FindStringSubmatch(string(body))
+//	if len(match) == 0 {
+//		return nil, errors.New("Failed to match data")
+//	}
+//	pass1 := strings.Replace(match[1], "'", "", -1)
+//	replacer := regexp.MustCompile(`\s(\S+?):\s`)
+//	pass2 := replacer.ReplaceAllString(pass1, "\"$1\": ")
+//
+//	replacer2 := regexp.MustCompile(`]},\s]$`)
+//	pass3 := replacer2.ReplaceAllString(pass2, "]}]")
+//
+//	fmt.Println(pass3[0:1024])
+//
+//	fmt.Println(string(pass3[len(match[1])-2048]))
+//
+//	o, _ := os.Create("temp.json")
+//	_, _ = io.WriteString(o, pass3)
+//	_ = o.Close()
+//	var msNodes []megaScatterNode
+//	if errJSON := json.Unmarshal([]byte(pass3), &msNodes); errJSON != nil {
+//		return nil, errJSON
+//	}
+//	return nil, nil
+//}
 
 func newSkialScraper() *sbScraper {
 	return newScraper("skial", "https://www.skial.com/sourcebans/", "index.php?p=banlist",

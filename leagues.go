@@ -33,12 +33,13 @@ const (
 // League represents supported leagues
 type League string
 
-const (
-	leagueUGC   League = "ugc"
-	leagueESEA  League = "esea"
-	leagueETF2L League = "etf2l"
-	leagueRGL   League = "rgl"
-)
+//
+//const (
+//	leagueUGC   League = "ugc"
+//	leagueESEA  League = "esea"
+//	leagueETF2L League = "etf2l"
+//	leagueRGL   League = "rgl"
+//)
 
 // Season stores generalized league season data
 type Season struct {

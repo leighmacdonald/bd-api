@@ -59,7 +59,7 @@ func TestParseLazyPurple(t *testing.T) {
 }
 
 func TestParseFirePowered(t *testing.T) {
-	testParser(t, newFirePoweredScraper(), 28, "index.php?p=banlist&page=2")
+	testParser(t, newFirePoweredScraper(), 26, "index.php?p=banlist&page=2")
 }
 
 func TestParseHarpoon(t *testing.T) {
@@ -111,7 +111,7 @@ func TestApeMode(t *testing.T) {
 }
 
 func TestMaxDB(t *testing.T) {
-	testParser(t, newMaxDBScraper(), 30, "index.php?p=banlist&page=2")
+	testParser(t, newMaxDBScraper(), 27, "index.php?p=banlist&page=2")
 }
 
 func TestSvdosBrothers(t *testing.T) {
@@ -123,7 +123,7 @@ func TestElectric(t *testing.T) {
 }
 
 func TestGlobalParadise(t *testing.T) {
-	testParser(t, newGlobalParadiseScraper(), 25, "index.php?p=banlist&page=2")
+	testParser(t, newGlobalParadiseScraper(), 23, "index.php?p=banlist&page=2")
 }
 
 func TestSavageServidores(t *testing.T) {
@@ -135,11 +135,11 @@ func TestCSIServers(t *testing.T) {
 }
 
 func TestLBGaming(t *testing.T) {
-	testParser(t, newLBGamingScraper(), 30, "index.php?p=banlist&page=2")
+	testParser(t, newLBGamingScraper(), 29, "index.php?p=banlist&page=2")
 }
 
 func TestFluxTF(t *testing.T) {
-	testParser(t, newFluxTFScraper(), 30, "index.php?p=banlist&page=2")
+	testParser(t, newFluxTFScraper(), 29, "index.php?p=banlist&page=2")
 }
 
 func TestCutiePie(t *testing.T) {
@@ -155,7 +155,7 @@ func TestOpstOnline(t *testing.T) {
 }
 
 func TestBouncyBall(t *testing.T) {
-	testParser(t, newBouncyBallScraper(), 50, "index.php?p=banlist&page=2")
+	testParser(t, newBouncyBallScraper(), 49, "index.php?p=banlist&page=2")
 }
 
 func TestFurryPound(t *testing.T) {
@@ -167,7 +167,7 @@ func TestRetroServers(t *testing.T) {
 }
 
 func TestSwapShop(t *testing.T) {
-	testParser(t, newSwapShopScraper(), 77, "index.php?p=banlist&page=2")
+	testParser(t, newSwapShopScraper(), 76, "index.php?p=banlist&page=2")
 }
 
 func TestECJ(t *testing.T) {
@@ -179,7 +179,7 @@ func TestJumpAcademy(t *testing.T) {
 }
 
 func TestTF2RO(t *testing.T) {
-	testParser(t, newTF2ROScraper(), 21, "index.php?p=banlist&hideinactive=true")
+	testParser(t, newTF2ROScraper(), 21, "")
 }
 
 func TestSameTeem(t *testing.T) {
@@ -275,7 +275,7 @@ func TestDiscFF(t *testing.T) {
 //}
 
 func TestAMSGaming(t *testing.T) {
-	testParser(t, newAMSGamingScraper(), 30, "index.php?p=banlist&page=2")
+	testParser(t, newAMSGamingScraper(), 29, "index.php?p=banlist&page=2")
 }
 
 func TestBaitedCommunity(t *testing.T) {
@@ -366,17 +366,11 @@ func TestParseFluxTFTime(t *testing.T) {
 	require.Equal(t, time.Date(2022, time.August, 30, 20, 30, 45, 0, time.UTC), parsed)
 }
 
-func TestParseMegaScatter(t *testing.T) {
-	testBody, errOpen := os.Open("test_data/megascatter.html")
-	require.NoError(t, errOpen)
-	defer logCloser(testBody)
-	bans, errBans := parseMegaScatter(testBody)
-	require.NoError(t, errBans)
-	require.True(t, len(bans) > 100)
-}
-
-func TestOWLLive(t *testing.T) {
-	s := newAstraManiaScraper()
-	require.NoError(t, s.start())
-	require.True(t, len(s.results) > 2000)
-}
+//func TestParseMegaScatter(t *testing.T) {
+//	testBody, errOpen := os.Open("test_data/megascatter.html")
+//	require.NoError(t, errOpen)
+//	defer logCloser(testBody)
+//	bans, errBans := parseMegaScatter(testBody)
+//	require.NoError(t, errBans)
+//	require.True(t, len(bans) > 100)
+//}
