@@ -1213,3 +1213,8 @@ func newCuteProjectScraper() *sbScraper {
 	return newScraper("cuteproject", "https://bans.cute-project.net/", "index.php?p=banlist",
 		parseMaterial, nextURLLast, parseProGamesZetTime)
 }
+
+func newPhoenixSourceScraper() *sbScraper {
+	return newScraper("phoenixsource", "https://phoenix-source.ru/sb/", "index.php?p=banlist",
+		parseMaterial, nextURLLast, parseProGamesZetTime)
+}

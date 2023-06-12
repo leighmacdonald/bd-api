@@ -321,6 +321,10 @@ func TestCuteProject(t *testing.T) {
 	testParser(t, newCuteProjectScraper(), 30, "index.php?p=banlist&page=2")
 }
 
+func TestPhoenixSource(t *testing.T) {
+	testParser(t, newPhoenixSourceScraper(), 19, "index.php?p=banlist&page=2")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)
