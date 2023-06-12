@@ -21,24 +21,25 @@ func testParser(t *testing.T, scraper *sbScraper, count int, nextPage string) {
 	require.Equal(t, count, len(results))
 	require.Equal(t, nextPage, next)
 	for _, d := range results {
+		require.NotEqual(t, "", d.Name)
 		require.Truef(t, d.SteamID.Valid(), "Invalid steamid: %s", d.SteamID.String())
 	}
 }
 
 func TestParseSkial(t *testing.T) {
-	testParser(t, newSkialScraper(), 50, "index.php?p=banlist&page=2")
+	testParser(t, newSkialScraper(), 48, "index.php?p=banlist&page=2")
 }
 
 func TestParseUGC(t *testing.T) {
-	testParser(t, newUGCScraper(), 50, "index.php?p=banlist&page=2")
+	testParser(t, newUGCScraper(), 49, "index.php?p=banlist&page=2")
 }
 
 func TestParseWonderland(t *testing.T) {
-	testParser(t, newWonderlandTFScraper(), 23, "index.php?p=banlist&page=2")
+	testParser(t, newWonderlandTFScraper(), 22, "index.php?p=banlist&page=2")
 }
 
 func TestParseGFL(t *testing.T) {
-	testParser(t, newGFLScraper(), 30, "index.php?p=banlist&page=2")
+	testParser(t, newGFLScraper(), 28, "index.php?p=banlist&page=2")
 }
 
 func TestParsePancakes(t *testing.T) {
@@ -46,7 +47,7 @@ func TestParsePancakes(t *testing.T) {
 }
 
 func TestParseOWL(t *testing.T) {
-	testParser(t, newOwlTFScraper(), 30, "index.php?p=banlist&page=2")
+	testParser(t, newOwlTFScraper(), 22, "index.php?p=banlist&page=2")
 }
 
 func TestParseSpaceShip(t *testing.T) {

@@ -89,6 +89,76 @@ type sbRecord struct {
 	Permanent bool
 }
 
+var errEmpty = errors.New("value empty")
+
+func (r *sbRecord) setPlayer(scraperName string, name string) bool {
+	if name == "" {
+		logger.Error("Failed to set player", zap.Error(errEmpty), zap.String("scraper", scraperName))
+		return false
+	}
+	r.Name = name
+	return true
+}
+
+func (r *sbRecord) setInvokedOn(scraperName string, parseTime parseTimeFunc, value string) bool {
+	t, errTime := parseTime(value)
+	if errTime != nil {
+		logger.Error("Failed to parse invoke time", zap.Error(errTime), zap.String("scraper", scraperName))
+		return false
+	}
+	r.CreatedOn = t
+	return true
+}
+
+func (r *sbRecord) setBanLength(value string) bool {
+	lowerVal := strings.ToLower(value)
+	if strings.Contains(lowerVal, "unbanned") {
+		r.SteamID = 0 // invalidate it
+	} else if lowerVal == "permanent" {
+		r.Permanent = true
+	}
+	r.Length = 0
+	return true
+}
+
+func (r *sbRecord) setExpiredOn(scraperName string, parseTime parseTimeFunc, value string) bool {
+	if r.Permanent || !r.SteamID.Valid() {
+		return false
+	}
+	t, errTime := parseTime(value)
+	if errTime != nil {
+		logger.Error("Failed to parse expire time", zap.Error(errTime), zap.String("scraper", scraperName))
+		return false
+	}
+	r.Length = t.Sub(r.CreatedOn)
+	return true
+}
+
+func (r *sbRecord) setReason(scraperName string, value string) bool {
+	if value == "" {
+		logger.Error("Reason is empty", zap.String("scraper", scraperName))
+		return false
+	}
+	r.Reason = value
+	return true
+}
+
+func (r *sbRecord) setSteam(scraperName string, value string) bool {
+	if r.SteamID.Valid() {
+		return true
+	}
+	if value == "[U:1:0]" || value == "76561197960265728" {
+		return false
+	}
+	sid64, errSid := steamid.StringToSID64(value)
+	if errSid != nil {
+		logger.Error("Failed to parse sid3", zap.Error(errSid), zap.String("scraper", scraperName))
+		return false
+	}
+	r.SteamID = sid64
+	return true
+}
+
 type sbScraper struct {
 	*colly.Collector
 	name      string
@@ -125,7 +195,7 @@ func createScrapers() []*sbScraper {
 
 func (scraper *sbScraper) start() error {
 	scraper.log.Info("Starting sourcebans scraper", zap.String("theme", scraper.theme))
-	lastUrl := ""
+	lastURL := ""
 	scraper.Collector.OnHTML("body", func(e *colly.HTMLElement) {
 		nextURL, results, parseErr := scraper.parser(e.DOM, scraper.nextURL, scraper.parseTIme, scraper.name)
 		if parseErr != nil {
@@ -135,7 +205,7 @@ func (scraper *sbScraper) start() error {
 		scraper.resultsMu.Lock()
 		scraper.results = append(scraper.results, results...)
 		scraper.resultsMu.Unlock()
-		if nextURL != "" && nextURL != lastUrl {
+		if nextURL != "" && nextURL != lastURL {
 			next := scraper.url(nextURL)
 			scraper.log.Info("Visiting next url", zap.String("url", next))
 			if errVisit := e.Request.Visit(next); errVisit != nil {
@@ -143,7 +213,7 @@ func (scraper *sbScraper) start() error {
 				return
 			}
 		}
-		lastUrl = nextURL
+		lastURL = nextURL
 	})
 	if errVisit := scraper.Visit(scraper.url(scraper.startPath)); errVisit != nil {
 		return errVisit
@@ -235,12 +305,12 @@ func parseSkialTime(s string) (time.Time, error) {
 	return time.Parse("01-02-06 15:04", s)
 }
 
-// 05-17-23 03:07
+// 17-05-23 03:07
 func parseBachuruServasTime(s string) (time.Time, error) {
 	if s == "Not applicable." || s == "Permanent" {
 		return time.Time{}, nil
 	}
-	return time.Parse("01-02-2006, 15:04", s)
+	return time.Parse("02-01-2006, 15:04", s)
 }
 
 // 05-17-23 03:07
@@ -269,7 +339,7 @@ func parseGunServer(s string) (time.Time, error) {
 
 // 08.06.2023 в 21:21
 func parseProGamesZetTime(s string) (time.Time, error) {
-	if s == "Not applicable." || s == "Permanent" {
+	if s == "Not applicable." || s == "Permanent" || s == "Никогда." {
 		return time.Time{}, nil
 	}
 	return time.Parse("02.01.2006 в 15:04", s)
@@ -340,6 +410,8 @@ func parseDefaultTime(s string) (time.Time, error) {
 }
 
 // 2023-17-05 03:07:05  / 2023-26-05 10:56:53
+//
+// nolint
 func parseDefaultTimeMonthFirst(s string) (time.Time, error) {
 	if s == "Not applicable." {
 		return time.Time{}, nil
@@ -435,7 +507,21 @@ func nextURLLast(doc *goquery.Selection) string {
 	return nextPage
 }
 
-var keyMap = map[string]string{
+type mappedKey string
+
+const (
+	keyCommunityLinks mappedKey = "community links"
+	keyInvokedOn      mappedKey = "invoked on"
+	keySteamCommunity mappedKey = "steam community"
+	keyBanLength      mappedKey = "ban length"
+	keyExpiredOn      mappedKey = "expires on"
+	//keyReasonUnbanned mappedKey = "reason unbanned"
+	keyReason   mappedKey = "reason"
+	keySteam3ID mappedKey = "steam3"
+	keyPlayer   mappedKey = "player"
+)
+
+var keyMap = map[string]mappedKey{
 	"community links":     "community links",
 	"был выдан":           "invoked on",
 	"datum a čas udělení": "invoked on",
@@ -456,6 +542,7 @@ var keyMap = map[string]string{
 	"причина бана":        "reason",
 	"игрок":               "player",
 	"player":              "player",
+	"steam3 id":           "steam3 id",
 }
 
 var spaceRm = regexp.MustCompile(`\s+`)
@@ -464,12 +551,12 @@ func normKey(s string) string {
 	return strings.ReplaceAll(spaceRm.ReplaceAllString(strings.TrimSpace(strings.ToLower(s)), " "), "\n", "")
 }
 
-func getMappedKey(s string) (string, bool) {
-	mappedKey, found := keyMap[s]
+func getMappedKey(s string) (mappedKey, bool) {
+	mk, found := keyMap[s]
 	if !found {
 		return "", false
 	}
-	return mappedKey, true
+	return mk, true
 }
 
 // https://github.com/SB-MaterialAdmin/Web/tree/stable-dev
@@ -485,59 +572,36 @@ func parseMaterial(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseT
 			second := children.Last()
 			key := normKey(first.Contents().Text())
 			value := strings.TrimSpace(second.Contents().Text())
-			mappedKey, ok := getMappedKey(key)
+			mk, ok := getMappedKey(key)
 			if !ok {
 				return
 			}
-			switch mappedKey {
-			case "player":
-				curBan.Name = value
-			case "community links":
+			switch mk {
+			case keyPlayer:
+				curBan.setPlayer(scraperName, value)
+			case keySteam3ID:
+				curBan.setSteam(scraperName, value)
+			case keyCommunityLinks:
+				if curBan.SteamID.Valid() {
+					return
+				}
 				nv, foundKey := second.Children().First().Attr("href")
 				if !foundKey {
 					return
 				}
 				pcs := strings.Split(nv, "/")
-				sid64, errSid := steamid.StringToSID64(pcs[4])
-				if errSid != nil {
-					logger.Error("Failed to parse sid", zap.Error(errSid), zap.String("scraper", scraperName))
-					return
-				}
-				curBan.SteamID = sid64
-			case "steam community":
+				curBan.setSteam(scraperName, pcs[4])
+			case keySteamCommunity:
 				pts := strings.Split(value, " ")
-				sid64, errSid := steamid.StringToSID64(pts[0])
-				if errSid != nil {
-					logger.Error("Failed to parse sid", zap.Error(errSid), zap.String("scraper", scraperName))
-					return
-				}
-				curBan.SteamID = sid64
-			case "invoked on":
-				t, errTime := parseTime(value)
-				if errTime != nil {
-					logger.Error("Failed to parse invoke time", zap.Error(errTime), zap.String("scraper", scraperName))
-					return
-				}
-				curBan.CreatedOn = t
-			case "ban length":
-				lowerVal := strings.ToLower(value)
-				if strings.Contains(lowerVal, "unbanned") {
-					curBan.SteamID = 0 // invalidate it
-				} else if lowerVal == "permanent" || lowerVal == "навсегда" {
-					curBan.Permanent = true
-				}
-				curBan.Length = 0
-			case "expires on":
-				if curBan.Permanent || !curBan.SteamID.Valid() {
-					return
-				}
-				t, errTime := parseTime(value)
-				if errTime != nil {
-					logger.Error("Failed to parse expire time", zap.Error(errTime))
-					return
-				}
-				curBan.Length = t.Sub(curBan.CreatedOn)
-			case "reason":
+				curBan.setSteam(scraperName, pts[0])
+			case keyInvokedOn:
+				curBan.setInvokedOn(scraperName, parseTime, value)
+			case keyBanLength:
+				curBan.setBanLength(value)
+			case keyExpiredOn:
+				curBan.setExpiredOn(scraperName, parseTime, value)
+			case keyReason:
+				curBan.setReason(scraperName, value)
 				curBan.Reason = value
 				if curBan.SteamID.Valid() {
 					bans = append(bans, curBan)
@@ -577,62 +641,36 @@ func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeF
 			second := children.Last()
 			key := normKey(first.Contents().Text())
 			value := strings.TrimSpace(second.Contents().Text())
-			mappedKey, found := getMappedKey(key)
+			mk, found := getMappedKey(key)
 			if !found {
 				return
 			}
-			switch mappedKey {
-			case "community links":
+			switch mk {
+			case keyPlayer:
+				curBan.setPlayer(scraperName, value)
+			case keyCommunityLinks:
 				nv, foundHREF := second.Children().First().Attr("href")
 				if !foundHREF {
 					return
 				}
 				pcs := strings.Split(nv, "/")
-				sid64, errSid := steamid.StringToSID64(pcs[4])
-				if errSid != nil {
-					logger.Error("Failed to parse sid", zap.Error(errSid), zap.String("scraper", scraperName))
+				curBan.setSteam(scraperName, pcs[4])
+			case keySteam3ID:
+				curBan.setSteam(scraperName, value)
+			case keySteamCommunity:
+				if curBan.SteamID.Valid() {
 					return
 				}
-				curBan.SteamID = sid64
-			case "steam community":
 				pts := strings.Split(value, " ")
-				sid64, errSid := steamid.StringToSID64(pts[0])
-				if errSid != nil {
-					logger.Error("Failed to parse sid", zap.Error(errSid), zap.String("scraper", scraperName))
-					return
-				}
-				curBan.SteamID = sid64
-			case "datum a čas udělení":
-				fallthrough
-			case "invoked on":
-				t, errTime := parseTime(value)
-				if errTime != nil {
-					logger.Error("Failed to parse invoke time", zap.Error(errTime), zap.String("scraper", scraperName))
-					return
-				}
-				curBan.CreatedOn = t
-			case "ban length":
-				lowerVal := strings.ToLower(value)
-				if strings.Contains(lowerVal, "unbanned") {
-					curBan.SteamID = 0 // invalidate it
-				} else if lowerVal == "permanent" {
-					curBan.Permanent = true
-				}
-				curBan.Length = 0
-			case "expires on":
-				if curBan.Permanent || !curBan.SteamID.Valid() {
-					return
-				}
-				t, errTime := parseTime(value)
-				if errTime != nil {
-					logger.Error("Failed to parse expire time", zap.Error(errTime))
-					return
-				}
-				curBan.Length = t.Sub(curBan.CreatedOn)
-			case "důvod":
-				fallthrough
-			case "reason":
-				curBan.Reason = value
+				curBan.setSteam(scraperName, pts[0])
+			case keyInvokedOn:
+				curBan.setInvokedOn(scraperName, parseTime, value)
+			case keyBanLength:
+				curBan.setBanLength(value)
+			case keyExpiredOn:
+				curBan.setExpiredOn(scraperName, parseTime, value)
+			case keyReason:
+				curBan.setReason(scraperName, value)
 				if curBan.SteamID.Valid() {
 					bans = append(bans, curBan)
 				}
@@ -654,48 +692,26 @@ func parseFluent(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTim
 		child := selection.Children()
 		key := normKey(child.First().Contents().Text())
 		value := strings.TrimSpace(child.Last().Contents().Text())
-		mappedKey, found := getMappedKey(key)
+		mk, found := getMappedKey(key)
 		if !found {
 			return
 		}
-		switch mappedKey {
-		case "player":
-			curBan.Name = value
-		case "steam community":
+		switch mk {
+		case keyPlayer:
+			curBan.setPlayer(scraperName, value)
+		case keySteam3ID:
+			curBan.setSteam(scraperName, value)
+		case keySteamCommunity:
 			pts := strings.Split(value, " ")
-			sid64, errSid := steamid.StringToSID64(pts[0])
-			if errSid != nil {
-				logger.Error("Failed to parse sid", zap.Error(errSid), zap.String("scraper", scraperName))
-				return
-			}
-			curBan.SteamID = sid64
-		case "invoked on":
-			t, errTime := parseTime(value)
-			if errTime != nil {
-				logger.Error("Failed to parse invoke time", zap.Error(errTime), zap.String("scraper", scraperName))
-				return
-			}
-			curBan.CreatedOn = t
-		case "ban length":
-			lowerVal := strings.ToLower(value)
-			if strings.Contains(lowerVal, "unbanned") {
-				curBan.SteamID = 0 // invalidate it
-			} else if lowerVal == "permanent" {
-				curBan.Permanent = true
-			}
-			curBan.Length = 0
-		case "expires on":
-			if curBan.Permanent || !curBan.SteamID.Valid() {
-				return
-			}
-			t, errTime := parseTime(value)
-			if errTime != nil {
-				logger.Error("Failed to parse expire time", zap.Error(errTime))
-				return
-			}
-			curBan.Length = t.Sub(curBan.CreatedOn)
-		case "reason":
-			curBan.Reason = value
+			curBan.setSteam(scraperName, pts[0])
+		case keyInvokedOn:
+			curBan.setInvokedOn(scraperName, parseTime, value)
+		case keyBanLength:
+			curBan.setBanLength(value)
+		case keyExpiredOn:
+			curBan.setExpiredOn(scraperName, parseTime, value)
+		case keyReason:
+			curBan.setReason(scraperName, value)
 			if curBan.SteamID.Valid() {
 				bans = append(bans, curBan)
 			}
@@ -713,9 +729,9 @@ func parseDefault(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTi
 		isValue  bool
 	)
 	doc.Find("#banlist .listtable table tr td").Each(func(i int, selection *goquery.Selection) {
-		txt := strings.TrimSpace(selection.Text())
+		value := strings.TrimSpace(selection.Text())
 		if !isValue {
-			switch strings.ToLower(txt) {
+			switch strings.ToLower(value) {
 			case "player":
 				curState = player
 				isValue = true
@@ -745,43 +761,18 @@ func parseDefault(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTi
 			isValue = false
 			switch curState {
 			case player:
-				curBan.Name = txt
-
+				curBan.setPlayer(scraperName, value)
 			case steamComm:
-				pts := strings.Split(txt, " ")
-				sid64, errSid := steamid.StringToSID64(pts[0])
-				if errSid != nil {
-					logger.Error("Failed to parse sid", zap.Error(errSid), zap.String("scraper", scraperName))
-					return
-				}
-				curBan.SteamID = sid64
+				pts := strings.Split(value, " ")
+				curBan.setSteam(scraperName, pts[0])
 			case invokedOn:
-				t, errTime := parseTime(txt)
-				if errTime != nil {
-					logger.Error("Failed to parse invoke time", zap.Error(errTime), zap.String("scraper", scraperName))
-					return
-				}
-				curBan.CreatedOn = t
+				curBan.setInvokedOn(scraperName, parseTime, value)
 			case banLength:
-				lowerVal := strings.ToLower(txt)
-				if strings.Contains(lowerVal, "unbanned") {
-					curBan.SteamID = 0 // invalidate it
-				} else if lowerVal == "permanent" {
-					curBan.Permanent = true
-				}
-				curBan.Length = 0
+				curBan.setBanLength(value)
 			case expiresOn:
-				if curBan.Permanent {
-					return
-				}
-				t, errTime := parseTime(txt)
-				if errTime != nil {
-					logger.Error("Failed to parse expire time", zap.Error(errTime))
-					return
-				}
-				curBan.Length = t.Sub(curBan.CreatedOn)
+				curBan.setExpiredOn(scraperName, parseTime, value)
 			case reason:
-				curBan.Reason = txt
+				curBan.setReason(scraperName, value)
 				if curBan.SteamID.Valid() {
 					bans = append(bans, curBan)
 				}

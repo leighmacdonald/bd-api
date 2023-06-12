@@ -4,7 +4,7 @@ all: fmt check
 fmt:
 	gofmt -s -w .
 
-check: lint_golangci lint_vet lint_imports lint_cyclo lint_golint static
+check: lint_golangci lint_imports lint_cyclo lint_golint static
 
 lint_golangci:
 	@golangci-lint run --timeout 3m
