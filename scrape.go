@@ -103,19 +103,21 @@ type sbScraper struct {
 
 func createScrapers() []*sbScraper {
 	return []*sbScraper{
-		new7MauScraper(), newApeModeScraper(), newAstraManiaScraper(), newBouncyBallScraper(), newCSIServersScraper(),
-		newCutiePieScraper(), newDarkPyroScraper(), newDefuseRoScraper(), newDiscFFScraper(), newDreamFireScraper(),
-		newECJScraper(), newElectricScraper(), newFirePoweredScraper(), newFluxTFScraper(), newFurryPoundScraper(),
+		new7MauScraper(), newAceKillScraper(), newAMSGamingScraper(), newApeModeScraper(), newAstraManiaScraper(),
+		newBachuruServasScraper(), newBaitedCommunityScraper(), newBierwieseScraper(), newBouncyBallScraper(), newCedaPugScraper(),
+		newCSIServersScraper(), newCuteProjectScraper(), newCutiePieScraper(), newDarkPyroScraper(), newDefuseRoScraper(),
+		newDiscFFScraper(), newDreamFireScraper(), newECJScraper(), newElectricScraper(), newFirePoweredScraper(),
+		newFluxTFScraper(), newFurryPoundScraper(), newG44Scraper(), newGameSitesScraper(), newGamesTownScraper(),
 		newGFLScraper(), newGhostCapScraper(), newGlobalParadiseScraper(), newGunServerScraper(), newHarpoonScraper(),
 		newHellClanScraper(), newJumpAcademyScraper(), newLBGamingScraper(), newLOOSScraper(), newLazyNeerScraper(),
-		newLazyPurpleScraper(), newMaxDBScraper(), newNeonHeightsScraper(), newNideScraper(), newOpstOnlineScraper(),
-		newOreonScraper(), newOwlTFScraper(), newPancakesScraper(), newPandaScraper(), newPowerFPSScraper(),
-		newPubsTFScraper(), newRetroServersScraper(), newSGGamingScraper(), newSameTeemScraper(), newSavageServidoresScraper(),
-		newScrapTFScraper(), newServiliveClScraper(), newSettiScraper(), newSirPleaseScraper(), newSkialScraper(),
-		newSneaksScraper(), newSpaceShipScraper(), newSpectreScraper(), newSvdosBrothersScraper(), newSwapShopScraper(),
-		newTF2MapsScraper(), newTF2ROScraper(), newTawernaScraper(), newTheVilleScraper(), newTitanScraper(),
-		newTriggerHappyScraper(), newUGCScraper(), newVaticanCityScraper(), newVidyaGaemsScraper(), newWonderlandTFScraper(),
-		newZMBrasilScraper(),
+		newLazyPurpleScraper(), newMagyarhnsScraper(), newMaxDBScraper(), newNeonHeightsScraper(), newNideScraper(),
+		newOpstOnlineScraper(), newOreonScraper(), newOwlTFScraper(), newPancakesScraper(), newPandaScraper(),
+		newPhoenixSourceScraper(), newPowerFPSScraper(), newProGamesZetScraper(), newPubsTFScraper(), newRetroServersScraper(),
+		newSGGamingScraper(), newSameTeemScraper(), newSavageServidoresScraper(), newScrapTFScraper(), newServiliveClScraper(),
+		newSettiScraper(), newSirPleaseScraper(), newSkialScraper(), newSlavonServerScraper(), newSneaksScraper(),
+		newSpaceShipScraper(), newSpectreScraper(), newSvdosBrothersScraper(), newSwapShopScraper(), newTF2MapsScraper(),
+		newTF2ROScraper(), newTawernaScraper(), newTheVilleScraper(), newTitanScraper(), newTriggerHappyScraper(),
+		newUGCScraper(), newVaticanCityScraper(), newVidyaGaemsScraper(), newWonderlandTFScraper(), newZMBrasilScraper(),
 	}
 }
 
