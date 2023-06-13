@@ -16,7 +16,7 @@ func testParser(t *testing.T, scraper *sbScraper, count int, nextPage string) {
 	doc, errDoc := goquery.NewDocumentFromReader(testBody)
 	require.NoError(t, errDoc)
 
-	next, results, errParse := scraper.parser(doc.Selection, scraper.nextURL, scraper.parseTIme, scraper.name)
+	next, results, _, errParse := scraper.parser(doc.Selection, scraper.nextURL, scraper.parseTIme, scraper.name)
 	require.NoError(t, errParse)
 	require.Equal(t, count, len(results))
 	require.Equal(t, nextPage, next)

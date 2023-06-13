@@ -23,7 +23,7 @@ type nextURLFunc func(doc *goquery.Selection) string
 
 type parseTimeFunc func(s string) (time.Time, error)
 
-type parserFunc func(doc *goquery.Selection, nextUrl nextURLFunc, timeParser parseTimeFunc, scraperName string) (string, []sbRecord, error)
+type parserFunc func(doc *goquery.Selection, nextUrl nextURLFunc, timeParser parseTimeFunc, scraperName string) (string, []sbRecord, int, error)
 
 func initScrapers(ctx context.Context, db *pgStore, scrapers []*sbScraper) error {
 	for _, scraper := range scrapers {
@@ -60,21 +60,6 @@ func startScrapers(config *appConfig, scrapers []*sbScraper) {
 		}(scraper)
 	}
 }
-
-type metaKey int
-
-const (
-	unknown metaKey = iota
-	player
-	steamID
-	steam2
-	steamComm
-	invokedOn
-	banLength // "Permanent"
-	expiresOn // "Not applicable."
-	reason
-	last
-)
 
 type sbRecord struct {
 	Name      string
@@ -130,7 +115,7 @@ func (r *sbRecord) setExpiredOn(scraperName string, parseTime parseTimeFunc, val
 	return true
 }
 
-func (r *sbRecord) setReason(scraperName string, value string) bool {
+func (r *sbRecord) setReason(value string) bool {
 	if value == "" {
 		//logger.Error("Reason is empty", zap.String("scraper", scraperName))
 		return false
@@ -193,12 +178,14 @@ func (scraper *sbScraper) start() error {
 	scraper.log.Info("Starting scrape job", zap.String("name", scraper.name), zap.String("theme", scraper.theme))
 	lastURL := ""
 	startTime := time.Now()
+	totalErrorCount := 0
 	scraper.Collector.OnHTML("body", func(e *colly.HTMLElement) {
-		nextURL, results, parseErr := scraper.parser(e.DOM, scraper.nextURL, scraper.parseTIme, scraper.name)
+		nextURL, results, errorCount, parseErr := scraper.parser(e.DOM, scraper.nextURL, scraper.parseTIme, scraper.name)
 		if parseErr != nil {
 			logger.Error("Parser returned error", zap.Error(parseErr))
 			return
 		}
+		totalErrorCount += errorCount
 		scraper.resultsMu.Lock()
 		scraper.results = append(scraper.results, results...)
 		scraper.resultsMu.Unlock()
@@ -211,13 +198,12 @@ func (scraper *sbScraper) start() error {
 				return
 			}
 		}
-
 	})
 	if errVisit := scraper.Visit(scraper.url(scraper.startPath)); errVisit != nil {
 		return errVisit
 	}
 	scraper.Wait()
-	scraper.log.Info("Completed scrape job", zap.String("name", scraper.name), zap.Duration("duration", time.Since(startTime)))
+	scraper.log.Info("Completed scrape job", zap.String("name", scraper.name), zap.Int("skipped", totalErrorCount), zap.Duration("duration", time.Since(startTime)))
 	return nil
 }
 
@@ -559,10 +545,11 @@ func getMappedKey(s string) (mappedKey, bool) {
 }
 
 // https://github.com/SB-MaterialAdmin/Web/tree/stable-dev
-func parseMaterial(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, error) {
+func parseMaterial(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, int, error) {
 	var (
-		bans   []sbRecord
-		curBan sbRecord
+		bans      []sbRecord
+		curBan    sbRecord
+		skipCount int
 	)
 	doc.Find("div.opener .card-body").Each(func(_ int, selection *goquery.Selection) {
 		selection.First().Children().Children().Each(func(i int, selection *goquery.Selection) {
@@ -600,24 +587,27 @@ func parseMaterial(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseT
 			case keyExpiredOn:
 				curBan.setExpiredOn(scraperName, parseTime, value)
 			case keyReason:
-				curBan.setReason(scraperName, value)
+				curBan.setReason(value)
 				curBan.Reason = value
 				if curBan.SteamID.Valid() {
 					bans = append(bans, curBan)
+				} else {
+					skipCount++
 				}
 				curBan = sbRecord{}
 			}
 		})
 
 	})
-	return urlFunc(doc), bans, nil
+	return urlFunc(doc), bans, skipCount, nil
 }
 
 // https://github.com/brhndursun/SourceBans-StarTheme
-func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, error) {
+func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, int, error) {
 	var (
-		bans   []sbRecord
-		curBan sbRecord
+		bans      []sbRecord
+		curBan    sbRecord
+		skipCount int
 	)
 	doc.Find("div").Each(func(_ int, selection *goquery.Selection) {
 		idAttr, ok := selection.Attr("id")
@@ -669,23 +659,26 @@ func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeF
 			case keyExpiredOn:
 				curBan.setExpiredOn(scraperName, parseTime, value)
 			case keyReason:
-				curBan.setReason(scraperName, value)
+				curBan.setReason(value)
 				if curBan.SteamID.Valid() {
 					bans = append(bans, curBan)
+				} else {
+					skipCount++
 				}
 				curBan = sbRecord{}
 			}
 		})
 
 	})
-	return urlFunc(doc), bans, nil
+	return urlFunc(doc), bans, skipCount, nil
 }
 
 // https://github.com/aXenDeveloper/sourcebans-web-theme-fluent
-func parseFluent(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, error) {
+func parseFluent(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, int, error) {
 	var (
-		bans   []sbRecord
-		curBan sbRecord
+		bans      []sbRecord
+		curBan    sbRecord
+		skipCount int
 	)
 	doc.Find("ul.ban_list_detal li").Each(func(i int, selection *goquery.Selection) {
 		child := selection.Children()
@@ -710,79 +703,75 @@ func parseFluent(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTim
 		case keyExpiredOn:
 			curBan.setExpiredOn(scraperName, parseTime, value)
 		case keyReason:
-			curBan.setReason(scraperName, value)
+			curBan.setReason(value)
 			if curBan.SteamID.Valid() {
 				bans = append(bans, curBan)
+			} else {
+				skipCount++
 			}
 			curBan = sbRecord{}
 		}
 	})
-	return urlFunc(doc), bans, nil
+	return urlFunc(doc), bans, skipCount, nil
 }
 
-func parseDefault(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, error) {
+func parseDefault(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, int, error) {
 	var (
 		bans     []sbRecord
 		curBan   sbRecord
-		curState = unknown
+		curState mappedKey
 		isValue  bool
+		skipped  int
 	)
 	doc.Find("#banlist .listtable table tr td").Each(func(i int, selection *goquery.Selection) {
 		value := strings.TrimSpace(selection.Text())
 		if !isValue {
 			switch strings.ToLower(value) {
 			case "player":
-				curState = player
-				isValue = true
-			case "steam id":
-				curState = steamID
-				isValue = true
-			case "steam2":
-				curState = steam2
+				curState = keyPlayer
 				isValue = true
 			case "steam community":
-				curState = steamComm
+				curState = keySteamCommunity
 				isValue = true
 			case "invoked on":
-				curState = invokedOn
+				curState = keyInvokedOn
 				isValue = true
 			case "banlength":
-				curState = banLength
+				curState = keyBanLength
 				isValue = true
 			case "expires on":
-				curState = expiresOn
+				curState = keyExpiredOn
 				isValue = true
 			case "reason":
-				curState = reason
+				curState = keyReason
 				isValue = true
 			}
 		} else {
 			isValue = false
 			switch curState {
-			case player:
+			case keyPlayer:
 				curBan.setPlayer(scraperName, value)
-			case steamComm:
+			case keySteamCommunity:
 				pts := strings.Split(value, " ")
 				curBan.setSteam(scraperName, pts[0])
-			case invokedOn:
+			case keyInvokedOn:
 				curBan.setInvokedOn(scraperName, parseTime, value)
-			case banLength:
+			case keyBanLength:
 				curBan.setBanLength(value)
-			case expiresOn:
+			case keyExpiredOn:
 				curBan.setExpiredOn(scraperName, parseTime, value)
-			case reason:
-				curBan.setReason(scraperName, value)
+			case keyReason:
+				curBan.setReason(value)
 				if curBan.SteamID.Valid() {
 					bans = append(bans, curBan)
+				} else {
+					skipped++
 				}
 				curBan = sbRecord{}
-				curState = last
 			}
-			curState = unknown
 		}
-
 	})
-	return urlFunc(doc), bans, nil
+	return urlFunc(doc), bans, skipped, nil
 }
 
 //
