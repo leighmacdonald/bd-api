@@ -104,6 +104,6 @@ create table if not exists sb_ban
     permanent  boolean   not null
 );
 
-create index if not exists sb_ban_uidx ON sb_ban (sb_site_id, steam_id, created_on);
+create unique index if not exists sb_ban_uidx ON sb_ban (sb_site_id, steam_id, created_on);
 
 commit;
