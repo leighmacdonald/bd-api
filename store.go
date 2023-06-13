@@ -274,9 +274,12 @@ func (db *pgStore) playerRecordSave(ctx context.Context, r *playerRecord) error 
 	if errTx != nil {
 		return errTx
 	}
+	success := false
 	defer func() {
-		if errRollback := tx.Rollback(ctx); errRollback != nil {
-			logger.Error("Failed to rollback player tx", zap.Error(errRollback))
+		if !success {
+			if errRollback := tx.Rollback(ctx); errRollback != nil {
+				logger.Error("Failed to rollback player tx", zap.Error(errRollback))
+			}
 		}
 	}()
 	if r.isNewRecord {
@@ -331,7 +334,7 @@ func (db *pgStore) playerRecordSave(ctx context.Context, r *playerRecord) error 
 			Set("rgl_updated_on", r.RGLUpdatedOn).
 			Set("etf2l_updated_on", r.ETF2LUpdatedOn).
 			Set("logstf_updated_on", r.LogsTFUpdatedOn).
-			Set("updated_on", r.UpdatedOn).
+			Set("steam_updated_on", r.UpdatedOn).
 			Where(sq.Eq{"steam_id": r.SteamID}).
 			ToSql()
 		if errSQL != nil {
@@ -344,6 +347,7 @@ func (db *pgStore) playerRecordSave(ctx context.Context, r *playerRecord) error 
 	if errCommit := tx.Commit(ctx); errCommit != nil {
 		logger.Error("Failed to commit player tx", zap.Error(errCommit))
 	}
+	success = true
 	return nil
 }
 
@@ -397,6 +401,51 @@ func (site sbSite) newRecord(sid64 steamid.SID64, reason string, timeStamp time.
 			CreatedOn: timeStamp,
 		},
 	}
+}
+
+func (db *pgStore) playerGetOrCreate(ctx context.Context, sid64 steamid.SID64, r *playerRecord) error {
+	query, args, errSQL := sb.Select("steam_id", "community_visibility_state", "profile_state",
+		"persona_name", "vanity", "avatar_hash", "persona_state", "real_name", "time_created", "loc_country_code",
+		"loc_state_code", "loc_city_id", "community_banned", "vac_banned", "game_bans", "economy_banned",
+		"logstf_count", "ugc_updated_on", "rgl_updated_on", "etf2l_updated_on", "logstf_updated_on",
+		"steam_updated_on", "created_on").
+		From("player").
+		Where(sq.Eq{"steam_id": sid64}).
+		ToSql()
+	if errSQL != nil {
+		return errSQL
+	}
+	if errQuery := db.pool.QueryRow(ctx, query, args...).Scan(&r.SteamID, &r.CommunityVisibilityState, &r.ProfileState,
+		&r.PersonaName, &r.Vanity, &r.AvatarHash, &r.PersonaState, &r.RealName, &r.TimeCreated, &r.LocCountryCode,
+		&r.LocStateCode, &r.LocCityID, &r.CommunityBanned, &r.VacBanned, &r.GameBans, &r.EconomyBanned,
+		&r.LogsTFCount, &r.UGCUpdatedOn, &r.RGLUpdatedOn, &r.ETF2LUpdatedOn, &r.LogsTFUpdatedOn,
+		&r.timeStamped.UpdatedOn, &r.timeStamped.CreatedOn); errQuery != nil {
+		if errors.Is(errQuery, pgx.ErrNoRows) {
+			return db.playerRecordSave(ctx, r)
+		}
+		return errQuery
+	}
+	r.isNewRecord = false
+	return nil
+}
+
+func (db *pgStore) sbSiteGetOrCreate(ctx context.Context, name string, s *sbSite) error {
+	query, args, errSQL := sb.
+		Select("sb_site_id", "name", "updated_on", "created_on").
+		From("sb_site").
+		Where(sq.Eq{"name": name}).
+		ToSql()
+	if errSQL != nil {
+		return errSQL
+	}
+	if errQuery := db.pool.QueryRow(ctx, query, args...).Scan(&s.SiteID, &s.Name, &s.UpdatedOn, &s.CreatedOn); errQuery != nil {
+		if errors.Is(errQuery, pgx.ErrNoRows) {
+			s.Name = name
+			return db.sbSiteSave(ctx, s)
+		}
+		return errQuery
+	}
+	return nil
 }
 
 func (db *pgStore) sbSiteSave(ctx context.Context, s *sbSite) error {

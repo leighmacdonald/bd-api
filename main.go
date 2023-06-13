@@ -46,7 +46,7 @@ func main() {
 		if errInitScrapers := initScrapers(ctx, db, scrapers); errInitScrapers != nil {
 			logger.Fatal("Failed to initialize scrapers", zap.Error(errInitScrapers))
 		}
-		go startScrapers(&config, scrapers)
+		go startScrapers(ctx, &config, scrapers, db)
 	}
 
 	if errAPI := startAPI(ctx, config.ListenAddr); errAPI != nil {

@@ -6,8 +6,6 @@ import (
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/debug"
 	"github.com/gocolly/colly/extensions"
-	"github.com/jackc/pgerrcode"
-	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -27,21 +25,16 @@ type parserFunc func(doc *goquery.Selection, nextUrl nextURLFunc, timeParser par
 
 func initScrapers(ctx context.Context, db *pgStore, scrapers []*sbScraper) error {
 	for _, scraper := range scrapers {
-		s := sbSite{Name: scraper.name}
-		if errSave := db.sbSiteSave(ctx, &s); errSave != nil {
-			if errPg, ok := errSave.(*pgconn.PgError); ok {
-				if errPg.Code == pgerrcode.UniqueViolation {
-					continue
-				}
-				return errors.Wrap(errPg, "Database error")
-			}
-			return errors.Wrap(errSave, "Unknown error")
+		var s sbSite
+		if errSave := db.sbSiteGetOrCreate(ctx, scraper.name, &s); errSave != nil {
+			return errors.Wrap(errSave, "Database error")
 		}
+		scraper.ID = uint32(s.SiteID)
 	}
 	return nil
 }
 
-func startScrapers(config *appConfig, scrapers []*sbScraper) {
+func startScrapers(ctx context.Context, config *appConfig, scrapers []*sbScraper, db *pgStore) {
 	if config.ProxiesEnabled {
 		startProxies(config)
 		defer stopProxies()
@@ -54,7 +47,7 @@ func startScrapers(config *appConfig, scrapers []*sbScraper) {
 	}
 	for _, scraper := range scrapers {
 		go func(s *sbScraper) {
-			if errScrape := s.start(); errScrape != nil {
+			if errScrape := s.start(ctx, db); errScrape != nil {
 				logger.Error("sbScraper returned error", zap.Error(errScrape))
 			}
 		}(scraper)
@@ -174,11 +167,12 @@ func createScrapers() []*sbScraper {
 	}
 }
 
-func (scraper *sbScraper) start() error {
+func (scraper *sbScraper) start(ctx context.Context, db *pgStore) error {
 	scraper.log.Info("Starting scrape job", zap.String("name", scraper.name), zap.String("theme", scraper.theme))
 	lastURL := ""
 	startTime := time.Now()
 	totalErrorCount := 0
+
 	scraper.Collector.OnHTML("body", func(e *colly.HTMLElement) {
 		nextURL, results, errorCount, parseErr := scraper.parser(e.DOM, scraper.nextURL, scraper.parseTIme, scraper.name)
 		if parseErr != nil {
@@ -189,6 +183,26 @@ func (scraper *sbScraper) start() error {
 		scraper.resultsMu.Lock()
 		scraper.results = append(scraper.results, results...)
 		scraper.resultsMu.Unlock()
+		for _, result := range results {
+			pr := newPlayerRecord(result.SteamID)
+			if errPlayer := db.playerGetOrCreate(ctx, result.SteamID, &pr); errPlayer != nil {
+				scraper.log.Error("failed to get player record", zap.Int64("sid64", result.SteamID.Int64()), zap.Error(errPlayer))
+			}
+			br := sbBanRecord{
+				SiteID:    int(scraper.ID),
+				SteamID:   pr.SteamID,
+				Reason:    result.Reason,
+				Duration:  result.Length,
+				Permanent: result.Permanent,
+				timeStamped: timeStamped{
+					UpdatedOn: time.Now(),
+					CreatedOn: result.CreatedOn,
+				},
+			}
+			if errBanSave := db.sbBanSave(ctx, &br); errBanSave != nil {
+				scraper.log.Error("Failed to save ban record", zap.Int64("sid64", pr.SteamID.Int64()), zap.Error(errBanSave))
+			}
+		}
 		if nextURL != "" && nextURL != lastURL {
 			next := scraper.url(nextURL)
 			lastURL = nextURL
