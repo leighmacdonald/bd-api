@@ -16,9 +16,11 @@ func testParser(t *testing.T, scraper *sbScraper, count int, nextPage string) {
 	doc, errDoc := goquery.NewDocumentFromReader(testBody)
 	require.NoError(t, errDoc)
 
-	next, results, _, errParse := scraper.parser(doc.Selection, scraper.nextURL, scraper.parseTIme, scraper.name)
+	results, _, errParse := scraper.parser(doc.Selection, scraper.parseTIme, scraper.name)
+
 	require.NoError(t, errParse)
 	require.Equal(t, count, len(results))
+	next := scraper.nextURL(scraper, doc.Selection)
 	require.Equal(t, nextPage, next)
 	for _, d := range results {
 		require.NotEqual(t, "", d.Name)
@@ -36,6 +38,10 @@ func TestParseUGC(t *testing.T) {
 
 func TestParseWonderland(t *testing.T) {
 	testParser(t, newWonderlandTFScraper(), 22, "index.php?p=banlist&page=2")
+}
+
+func TestParseWonderlandGoog(t *testing.T) {
+	testParser(t, newWonderlandTFGOOGScraper(), 30, "index.php?p=banlist&page=2")
 }
 
 func TestParseGFL(t *testing.T) {
@@ -232,6 +238,10 @@ func TestAstraMania(t *testing.T) {
 
 func TestTF2Maps(t *testing.T) {
 	testParser(t, newTF2MapsScraper(), 56, "index.php?p=banlist&page=2")
+}
+
+func TestPetrolTF(t *testing.T) {
+	testParser(t, newPetrolTFScraper(), 98, "index.php?p=banlist&page=2")
 }
 
 func TestVaticanCity(t *testing.T) {
