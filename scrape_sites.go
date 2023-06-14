@@ -416,3 +416,8 @@ func newGetSomeScraper() *sbScraper {
 	return newScraper("getsome", "https://bans.getsome.co.nz/", "index.php?p=banlist",
 		parseDefault, nextURLLast, parseSkialTime)
 }
+
+func newRushyScraper() *sbScraper {
+	return newScraper("rushy", "https://sourcebans.rushyservers.com/", "index.php?p=banlist",
+		parseDefault, nextURLLast, parseRushyTime)
+}

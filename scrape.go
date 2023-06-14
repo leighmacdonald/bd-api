@@ -324,6 +324,14 @@ func parseSkialTime(s string) (time.Time, error) {
 	return time.Parse("01-02-06 15:04", s)
 }
 
+// 05-17-23 03:07
+func parseRushyTime(s string) (time.Time, error) {
+	if s == "Not applicable." || s == "Permanent" {
+		return time.Time{}, nil
+	}
+	return time.Parse("15:04 pm 01/02/2006", s)
+}
+
 // 17-05-23 03:07
 func parseBachuruServasTime(s string) (time.Time, error) {
 	if s == "Not applicable." || s == "Permanent" {
