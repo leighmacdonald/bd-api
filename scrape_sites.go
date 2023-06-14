@@ -411,3 +411,8 @@ func newSlavonServerScraper() *sbScraper {
 	return newScraper("slavonserver", "http://slavonserver.ru/ma/", "index.php?p=banlist",
 		parseMaterial, nextURLLast, parseProGamesZetTime)
 }
+
+func newGetSomeScraper() *sbScraper {
+	return newScraper("getsome", "https://bans.getsome.co.nz/", "index.php?p=banlist",
+		parseDefault, nextURLLast, parseSkialTime)
+}

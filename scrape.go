@@ -206,6 +206,7 @@ func (scraper *sbScraper) start(ctx context.Context, db *pgStore) error {
 			pr := newPlayerRecord(result.SteamID)
 			if errPlayer := db.playerGetOrCreate(ctx, result.SteamID, &pr); errPlayer != nil {
 				scraper.log.Error("failed to get player record", zap.Int64("sid64", result.SteamID.Int64()), zap.Error(errPlayer))
+				continue
 			}
 			br := sbBanRecord{
 				SiteID:      int(scraper.ID),

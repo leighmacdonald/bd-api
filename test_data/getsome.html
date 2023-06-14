@@ -1,0 +1,3805 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>GetSome SourceBans</title>
+<link rel="Shortcut Icon" href="themes/default/images/favicon.ico" />
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+<script type="text/javascript" src="./scripts/sourcebans.js"></script>
+<link href="themes/default/css/css.php" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="./scripts/mootools.js"></script>
+<script type="text/javascript" src="./scripts/contextMenoo.js"></script>
+
+
+
+	<script type="text/javascript">
+var xajaxRequestUri="./index.php";
+var xajaxDebug=false;
+var xajaxStatusMessages=false;
+var xajaxWaitCursor=true;
+var xajaxDefinedGet=0;
+var xajaxDefinedPost=1;
+var xajaxLoaded=false;
+function xajax_AddMod(){return xajax.call("AddMod", arguments, 1);}
+function xajax_RemoveMod(){return xajax.call("RemoveMod", arguments, 1);}
+function xajax_AddGroup(){return xajax.call("AddGroup", arguments, 1);}
+function xajax_RemoveGroup(){return xajax.call("RemoveGroup", arguments, 1);}
+function xajax_RemoveAdmin(){return xajax.call("RemoveAdmin", arguments, 1);}
+function xajax_RemoveSubmission(){return xajax.call("RemoveSubmission", arguments, 1);}
+function xajax_RemoveServer(){return xajax.call("RemoveServer", arguments, 1);}
+function xajax_UpdateGroupPermissions(){return xajax.call("UpdateGroupPermissions", arguments, 1);}
+function xajax_UpdateAdminPermissions(){return xajax.call("UpdateAdminPermissions", arguments, 1);}
+function xajax_AddAdmin(){return xajax.call("AddAdmin", arguments, 1);}
+function xajax_SetupEditServer(){return xajax.call("SetupEditServer", arguments, 1);}
+function xajax_AddServerGroupName(){return xajax.call("AddServerGroupName", arguments, 1);}
+function xajax_AddServer(){return xajax.call("AddServer", arguments, 1);}
+function xajax_AddBan(){return xajax.call("AddBan", arguments, 1);}
+function xajax_EditGroup(){return xajax.call("EditGroup", arguments, 1);}
+function xajax_RemoveProtest(){return xajax.call("RemoveProtest", arguments, 1);}
+function xajax_SendRcon(){return xajax.call("SendRcon", arguments, 1);}
+function xajax_EditAdminPerms(){return xajax.call("EditAdminPerms", arguments, 1);}
+function xajax_SelTheme(){return xajax.call("SelTheme", arguments, 1);}
+function xajax_ApplyTheme(){return xajax.call("ApplyTheme", arguments, 1);}
+function xajax_AddComment(){return xajax.call("AddComment", arguments, 1);}
+function xajax_EditComment(){return xajax.call("EditComment", arguments, 1);}
+function xajax_RemoveComment(){return xajax.call("RemoveComment", arguments, 1);}
+function xajax_PrepareReban(){return xajax.call("PrepareReban", arguments, 1);}
+function xajax_ClearCache(){return xajax.call("ClearCache", arguments, 1);}
+function xajax_KickPlayer(){return xajax.call("KickPlayer", arguments, 1);}
+function xajax_PasteBan(){return xajax.call("PasteBan", arguments, 1);}
+function xajax_RehashAdmins(){return xajax.call("RehashAdmins", arguments, 1);}
+function xajax_GroupBan(){return xajax.call("GroupBan", arguments, 1);}
+function xajax_BanMemberOfGroup(){return xajax.call("BanMemberOfGroup", arguments, 1);}
+function xajax_GetGroups(){return xajax.call("GetGroups", arguments, 1);}
+function xajax_BanFriends(){return xajax.call("BanFriends", arguments, 1);}
+function xajax_SendMessage(){return xajax.call("SendMessage", arguments, 1);}
+function xajax_ViewCommunityProfile(){return xajax.call("ViewCommunityProfile", arguments, 1);}
+function xajax_SetupBan(){return xajax.call("SetupBan", arguments, 1);}
+function xajax_CheckPassword(){return xajax.call("CheckPassword", arguments, 1);}
+function xajax_ChangePassword(){return xajax.call("ChangePassword", arguments, 1);}
+function xajax_CheckSrvPassword(){return xajax.call("CheckSrvPassword", arguments, 1);}
+function xajax_ChangeSrvPassword(){return xajax.call("ChangeSrvPassword", arguments, 1);}
+function xajax_ChangeEmail(){return xajax.call("ChangeEmail", arguments, 1);}
+function xajax_CheckVersion(){return xajax.call("CheckVersion", arguments, 1);}
+function xajax_SendMail(){return xajax.call("SendMail", arguments, 1);}
+function xajax_AddBlock(){return xajax.call("AddBlock", arguments, 1);}
+function xajax_PrepareReblock(){return xajax.call("PrepareReblock", arguments, 1);}
+function xajax_PrepareBlockFromBan(){return xajax.call("PrepareBlockFromBan", arguments, 1);}
+function xajax_PasteBlock(){return xajax.call("PasteBlock", arguments, 1);}
+function xajax_Plogin(){return xajax.call("Plogin", arguments, 1);}
+function xajax_ServerHostPlayers(){return xajax.call("ServerHostPlayers", arguments, 1);}
+function xajax_ServerHostProperty(){return xajax.call("ServerHostProperty", arguments, 1);}
+function xajax_ServerHostPlayers_list(){return xajax.call("ServerHostPlayers_list", arguments, 1);}
+function xajax_ServerPlayers(){return xajax.call("ServerPlayers", arguments, 1);}
+function xajax_LostPassword(){return xajax.call("LostPassword", arguments, 1);}
+function xajax_RefreshServer(){return xajax.call("RefreshServer", arguments, 1);}
+	</script>
+	<script type="text/javascript" src="scripts/xajax.js"></script>
+	<script type="text/javascript">
+window.setTimeout(function () { if (!xajaxLoaded) { alert('Error: the xajax Javascript file could not be included. Perhaps the URL is incorrect?\nURL: scripts/xajax.js'); } }, 6000);
+	</script>
+
+
+
+</head>
+<body>
+
+
+    <div style="background-color: #bab5b2;">
+	<div id="header">
+		<div id="head-logo">
+    		<a href="index.php">
+    			<img src="images/getsome_banner.jpg" border="0" alt="SourceBans Logo" />
+    		</a>
+		</div>
+	</div>
+	</div>
+	<div id="tabsWrapper">
+		<div id="mainwrapper">
+            <div id="tabs">
+	            	                <div style="float: right;">
+	                    <ul>
+	                    	<li>
+	          	                <a style="background-color: #70B04A;" href='index.php?p=login'>Login</a>
+	          	            </li>
+	          	        </ul>
+	          	    </div>
+	                            <ul>	<li class="nonactive">
+		<a href="index.php?p=home" class="tip" title="Dashboard :: This page shows an overview of your bans and servers." target="_self">Dashboard </a>
+</li>
+
+		<li class="nonactive">
+		<a href="index.php?p=servers" class="tip" title="Servers :: All of your servers and their status can be viewed here" target="_self">Servers </a>
+</li>
+
+		<li class="active">
+		<a href="index.php?p=banlist" class="tip" title="Bans :: All of the bans in the database can be viewed from here." target="_self">Bans </a>
+</li>
+
+		<li class="nonactive">
+		<a href="index.php?p=commslist" class="tip" title="Comms :: All of the communication bans (such as chat gags and voice mutes) in the database can be viewed from here." target="_self">Comms </a>
+</li>
+
+		<li class="nonactive">
+		<a href="index.php?p=submit" class="tip" title="Report Player :: You can submit a demo or screenshot of a suspected cheater here. It will then be up for review by one of the admins" target="_self">Report Player </a>
+</li>
+
+		<li class="nonactive">
+		<a href="index.php?p=protest" class="tip" title="Appeal Ban :: Here you can appeal your ban. And prove your case as to why you should be unbanned." target="_self">Appeal Ban </a>
+</li>
+
+	</ul>
+        </div>
+	</div>
+</div>
+<div id="mainwrapper">
+<div id="innerwrapper">
+	<div id="navigation">
+		<div id="nav"></div>
+		<div id="search">
+			<form method="get" action="index.php">
+				<input type="hidden" name="p" value="banlist" />
+				<input class="searchbox" alt="Search Bans" name="searchText" type="text" onfocus="this.value='';" onblur="if (this.value=='') {this.value=' Search Bans...';}" value=" Search Bans..." />
+				<input type="submit" name="Submit" value="Search" style="cursor:pointer;" class="button" />
+			</form>
+			<form method="get" action="index.php">
+				<input type="hidden" name="p" value="commslist" />
+				<input class="searchbox" alt="Search Comms" name="searchText" type="text" onfocus="this.value='';" onblur="if (this.value=='') {this.value=' Search Comms...';}" value=" Search Comms... " />
+				<input type="submit" name="Submit" value="Search" style="cursor:pointer;" class="button" />
+			</form>
+		</div>
+	</div><div id="msg-red-debug" style="display:none;" >
+	<i><img src="./images/warning.png" alt="Warning" /></i>
+	<b>Debug</b>
+	<br />
+	<div id="debug-text">
+	</div>
+</div>
+
+<div id="dialog-placement" style="vertical-align:middle;display:none;opacity:0;text-align:center;width:892px;margin:0 auto;position:fixed !important;position:absolute;overflow:hidden;top:10px;left:100px;"> 
+<table width="460px" id="dialog-holder" class="dialog-holder" border="0" cellspacing="0" cellpadding="0" >
+	<tbody width="460px">
+	  <tr>
+	    <td class="dialog-topleft"></td>
+	    <td class="dialog-border"></td>
+	    <td class="dialog-topright"></td>
+	  </tr>
+	  <tr>
+	    <td class="dialog-border"></td>
+	    <td class="box-content">
+			<div id="dragbar" style="cursor:pointer">
+			<ilayer width="100%" onSelectStart="return false">
+			<layer width="100%" onMouseover="dragswitch=1;if (ns4) drag_drop_ns(dialog-placement)" onMouseout="dragswitch=0">
+	    	<h2 align="left" id="dialog-title" class="ok"></h2>
+	        </layer></ilayer></div>
+	        <div class="dialog-content" align="left">
+	        	<div class="dialog-body">
+	            	<div class="clearfix">
+	                    <div style="float: left; margin-right: 15px;" id="dialog-icon" class="icon-info">&nbsp;</div>
+	                    <div style="width:360px;float: right; padding-bottom: 5px; font-size: 11px;" id="dialog-content-text"></div>
+	                </div>
+	            </div>
+	            <div class="dialog-control" id="dialog-control">    
+	            </div>
+	        </div>
+		</td>
+	    <td class="dialog-border"></td>
+	  </tr>
+	  <tr>
+	    <td class="dialog-bottomleft"></td>
+	    <td class="dialog-border"></td>
+	    <td class="dialog-bottomright"></td>
+	  </tr>
+	</tbody>
+</table>
+</div>
+
+
+<div id="content_title">
+	<b>Bans</b>
+</div>
+<div id="breadcrumb">
+</div>
+<div id="content">
+<script type="text/javascript">$("breadcrumb").setHTML("&raquo; <a href='index.php?p=home'>Home</a> &raquo; <b>Bans</b>");</script>
+
+
+<h3 align="left">Banlist Overview - <i>Total Bans: 61</i></h3>
+<br />
+<div align="center">
+	<table width="50%" cellpadding="0" class="listtable" cellspacing="0">
+		<tr class="sea_open">
+			<td width="2%" height="16" class="listtable_top" colspan="3" style="text-align: center;"><b>Advanced Search</b> (Click)</td>
+	  	</tr>
+	  	<tr>
+	  		<td>
+	  		<div class="panel">
+	  			<table width="100%" cellpadding="0" class="listtable" cellspacing="0">
+			    <tr>
+					<td class="listtable_1" width="8%" align="center"><input id="name" name="search_type" type="radio" value="name"></td>
+			        <td class="listtable_1" width="26%">Nickname</td>
+			        <td class="listtable_1" width="66%"><input class="textbox" type="text" id="nick" value="" onmouseup="$('name').checked = true" style="width: 87%;"></td>
+				</tr>       
+			    <tr>
+			        <td align="center" class="listtable_1" ><input id="steam_" type="radio" name="search_type" value="radiobutton"></td>
+			        <td class="listtable_1" >Steam ID</td>
+			        <td class="listtable_1" >
+			            <input class="textbox" type="text" id="steamid" value="" onmouseup="$('steam_').checked = true"style="width: 50%; margin-right: 12px;"><select class="select" id="steam_match" onmouseup="$('steam_').checked = true" style="width: 33%;">
+				        <option value="0" selected>Exact Match</option>
+				        <option value="1">Partial Match</option>
+				    </select>
+				</td>
+			    </tr>
+							    <tr>
+			        <td align="center" class="listtable_1" ><input id="reason_" type="radio" name="search_type" value="radiobutton"></td>
+			        <td class="listtable_1" >Reason</td>
+			        <td class="listtable_1" ><input class="textbox" type="text" id="ban_reason" value="" onmouseup="$('reason_').checked = true" style="width: 87%;"></td>
+			    </tr>
+				<tr>
+					<td align="center" class="listtable_1" ><input id="date" type="radio" name="search_type" value="radiobutton"></td>
+			        <td class="listtable_1" >Date</td>
+			        <td class="listtable_1" >
+			        	<input class="textbox" type="text" id="day" value="DD" onmouseup="$('date').checked = true" maxlength="2" style="width: 22%;">
+			            <input class="textbox" type="text" id="month" value="MM" onmouseup="$('date').checked = true" maxlength="2" style="width: 22%;">
+			            <input class="textbox" type="text" id="year" value="YY" onmouseup="$('date').checked = true" maxlength="4" style="width: 24%;"> 
+			        </td>
+			  	</tr>
+				<tr>
+			        <td align="center" class="listtable_1" ><input id="length_" type="radio" name="search_type" value="radiobutton"></td>
+			        <td class="listtable_1" >Length</td>
+			        <td class="listtable_1" >
+						<table border="0" cellpadding="0" cellspacing="0">
+							<tr>
+								<td>
+						            <select class="select" id="length_type" onmouseup="$('length_').checked = true" style="width: 60px; margin-right: 12px;">
+										<option value="e" title="equal to">=</option>
+										<option value="h" title="greater">&gt;</option>
+										<option value="l" title="smaller">&lt;</option>
+										<option value="eh" title="equal to or greater">&gt;=</option>
+										<option value="el" title="equal to or smaller">&lt;=</option>
+									</select>
+								</td>
+								<td>
+									<input type="text" id="other_length" name="other_length" onmouseup="$('length_').checked = true" style="border: 1px solid #000000; font-size: 12px; background-color: rgb(215, 215, 215);width: 190px;display:none;">
+								</td>
+								<td>
+									<select class="select" id="length" onmouseup="$('length_').checked = true" onchange="switch_length(this);" onmouseover="if(this.options[this.selectedIndex].value=='other')$('length').setStyle('width', '210px');if(this.options[this.selectedIndex].value=='other')this.focus();" onblur="if(this.options[this.selectedIndex].value=='other')$('length').setStyle('width', '20px');" style="width: 127%;">
+								        <option value="0">Permanent</option>
+										<optgroup label="minutes">
+											<option value="1">1 minute</option>
+											<option value="5">5 minutes</option>
+											<option value="10">10 minutes</option>
+											<option value="15">15 minutes</option>
+											<option value="30">30 minutes</option>
+											<option value="45">45 minutes</option>
+										</optgroup>
+										<optgroup label="hours">
+											<option value="60">1 hour</option>
+											<option value="120">2 hours</option>
+											<option value="180">3 hours</option>
+											<option value="240">4 hours</option>
+											<option value="480">8 hours</option>
+											<option value="720">12 hours</option>
+										</optgroup>
+										<optgroup label="days">
+											<option value="1440">1 day</option>
+											<option value="2880">2 days</option>
+											<option value="4320">3 days</option>
+											<option value="5760">4 days</option>
+											<option value="7200">5 days</option>
+											<option value="8640">6 days</option>
+										</optgroup>
+										<optgroup label="weeks">
+											<option value="10080">1 week</option>
+											<option value="20160">2 weeks</option>
+											<option value="30240">3 weeks</option>
+										</optgroup>
+										<optgroup label="months">
+											<option value="40320">1 month</option>
+											<option value="80640">2 months</option>
+											<option value="120960">3 months</option>
+											<option value="241920">6 months</option>
+											<option value="483840">12 months</option>
+										</optgroup>
+										<option value="other">Other length in minutes</option>
+									</select>
+								</td>
+							</tr>
+						</table>
+					</td>
+			    </tr>
+				<tr>
+			        <td align="center" class="listtable_1" ><input id="ban_type_" type="radio" name="search_type" value="radiobutton"></td>
+			        <td class="listtable_1" >Type</td>
+			        <td class="listtable_1" >
+			            <select class="select" id="ban_type" onmouseup="$('ban_type_').checked = true" style="width: 95%;">
+					        <option value="0" selected>Steam ID</option>
+					        <option value="1">IP Address</option>
+						</select>
+					</td>
+			    </tr>
+                			    <tr>
+			    	<td class="listtable_1"  align="center"><input id="admin" name="search_type" type="radio" value="radiobutton"></td>
+			        <td class="listtable_1" >Admin</td>
+			        <td class="listtable_1" >
+						<select class="select" id="ban_admin" onmouseup="$('admin').checked = true" style="width: 95%;">
+															<option label=" meesham" value="192"> meesham</option>
+															<option label=".osiRiS" value="160">.osiRiS</option>
+															<option label="Anthrax" value="250">Anthrax</option>
+															<option label="aussie ossie" value="220">aussie ossie</option>
+															<option label="Bert" value="161">Bert</option>
+															<option label="Bluehomzee" value="180">Bluehomzee</option>
+															<option label="Clin" value="256">Clin</option>
+															<option label="CONSOLE" value="0">CONSOLE</option>
+															<option label="Courpse" value="170">Courpse</option>
+															<option label="Craigor" value="5">Craigor</option>
+															<option label="DarkVirus" value="3">DarkVirus</option>
+															<option label="DashAlpha" value="217">DashAlpha</option>
+															<option label="Dexxterious" value="221">Dexxterious</option>
+															<option label="dovagamer" value="213">dovagamer</option>
+															<option label="Dumpy" value="253">Dumpy</option>
+															<option label="Fear" value="246">Fear</option>
+															<option label="Gruntley" value="184">Gruntley</option>
+															<option label="Gutty" value="1">Gutty</option>
+															<option label="Hoboneer" value="212">Hoboneer</option>
+															<option label="Jarrey" value="248">Jarrey</option>
+															<option label="Kayne" value="168">Kayne</option>
+															<option label="kwl_kiwi" value="251">kwl_kiwi</option>
+															<option label="Lias88NZ" value="237">Lias88NZ</option>
+															<option label="Morgan" value="254">Morgan</option>
+															<option label="pievirus" value="249">pievirus</option>
+															<option label="pigdog" value="255">pigdog</option>
+															<option label="Prolax" value="97">Prolax</option>
+															<option label="raydiense" value="189">raydiense</option>
+															<option label="Riley" value="252">Riley</option>
+															<option label="Spaztic" value="211">Spaztic</option>
+															<option label="Squatty" value="257">Squatty</option>
+															<option label="Suca" value="172">Suca</option>
+															<option label="tendodude" value="218">tendodude</option>
+															<option label="Top Geary" value="233">Top Geary</option>
+															<option label="TwistedVixen" value="96">TwistedVixen</option>
+															<option label="Zylos" value="228">Zylos</option>
+													</select>           
+					</td> 
+				</tr>
+                			    <tr>
+			    	<td class="listtable_1"  align="center"><input id="where_banned" name="search_type" type="radio" value="radiobutton"></td>
+					<td class="listtable_1" >Server</td>
+			        <td class="listtable_1" >
+						<select class="select" id="server" onmouseup="$('where_banned').checked = true" style="width: 95%;">
+						<option label="Web Ban" value="0">Web Ban</option>
+															<option value="16" id="ss16">Retrieving Hostname... (203.167.236.162:27054)</option>
+															<option value="11" id="ss11">Retrieving Hostname... (203.167.236.162:27066)</option>
+															<option value="12" id="ss12">Retrieving Hostname... (203.167.236.162:27062)</option>
+															<option value="13" id="ss13">Retrieving Hostname... (203.167.236.162:27058)</option>
+															<option value="14" id="ss14">Retrieving Hostname... (203.167.236.162:27078)</option>
+															<option value="17" id="ss17">Retrieving Hostname... (203.167.236.162:27050)</option>
+															<option value="18" id="ss18">Retrieving Hostname... (203.167.236.162:27041)</option>
+															<option value="19" id="ss19">Retrieving Hostname... (203.167.236.162:27020)</option>
+															<option value="20" id="ss20">Retrieving Hostname... (203.167.236.162:27072)</option>
+													</select>            
+					</td>
+			    </tr>
+							    <tr>
+			        <td colspan="4"><input type='button' onclick="search_bans();" name='searchbtn' class='btn ok searchbtn' onmouseover='ButtonOver("searchbtn")' onmouseout='ButtonOver("searchbtn")' id='searchbtn' value='Search' /></td>
+			    </tr>
+			   </table>
+			   </div>
+		  </td>
+		</tr>
+	</table>
+</div>
+<script type="text/javascript">xajax_ServerHostPlayers('16', 'id', 'ss16', '', '', false, 200);xajax_ServerHostPlayers('11', 'id', 'ss11', '', '', false, 200);xajax_ServerHostPlayers('12', 'id', 'ss12', '', '', false, 200);xajax_ServerHostPlayers('13', 'id', 'ss13', '', '', false, 200);xajax_ServerHostPlayers('14', 'id', 'ss14', '', '', false, 200);xajax_ServerHostPlayers('17', 'id', 'ss17', '', '', false, 200);xajax_ServerHostPlayers('18', 'id', 'ss18', '', '', false, 200);xajax_ServerHostPlayers('19', 'id', 'ss19', '', '', false, 200);xajax_ServerHostPlayers('20', 'id', 'ss20', '', '', false, 200);</script>
+<script>InitAccordion('tr.sea_open', 'div.panel', 'mainwrapper');</script><script type="text/javascript">
+function switch_length(opt)
+{
+    if (opt.options[opt.selectedIndex].value=='other') {
+        $('other_length').setStyle('display', 'block');
+        $('other_length').focus();
+        $('length').setStyle('width', '20px');
+    } else {
+        $('other_length').setStyle('display', 'none');
+        $('length').setStyle('width', '210px');
+    }
+}
+</script>
+<br />
+<div id="banlist-nav"><a href="index.php?p=banlist&hideinactive=true" title="Hide inactive">Hide inactive</a> | <i>Total Bans: 61</i></div>
+<div id="banlist">
+	<table width="100%" cellspacing="0" cellpadding="0" align="center" class="listtable">
+		<tr>
+						<td width="12%" height="16" class="listtable_top" align="center"><b>MOD/Country</b></td>
+			<td width="14%" height="16" class="listtable_top" align="center"><b>Date</b></td>
+			<td height="16" class="listtable_top"><b>Player</b></td>
+						<td width="20%" height="16" class="listtable_top"><b>Admin</b></td>
+						<td width="10%" height="16" class="listtable_top" align="center"><b>Length</b></td>
+		</tr>
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">06-22-22 09:17</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Dickhead2
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    DarkVirus
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Dickhead2
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:103712010
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:207424020]" target="_blank">[U:1:207424020]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198167689748" target="_blank">76561198167689748</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">06-22-22 09:17</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Ignoring Admins</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			DarkVirus
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">06-22-22 09:16</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Dickhead1
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    DarkVirus
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Dickhead1
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:495914768
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:991829537]" target="_blank">[U:1:991829537]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198952095265" target="_blank">76561198952095265</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">06-22-22 09:16</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Ignoring Admins</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			DarkVirus
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">2 <a href="index.php?p=banlist&searchText=STEAM_0:1:495914768&Submit" onclick="" target="_self">(search) </a></td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_8279');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">12-28-20 20:55</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      IroncladOctopus
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    aussie ossie
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">1 wk (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      IroncladOctopus
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:581384968
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1162769937]" target="_blank">[U:1:1162769937]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199123035665" target="_blank">76561199123035665</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">12-28-20 20:55</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">1 wk (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							01-04-21 20:55
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Aimbot</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			aussie ossie
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_8279">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_8278');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">08-31-20 21:56</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      golzy
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Spaztic
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">1 wk (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      golzy
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:552430828
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1104861656]" target="_blank">[U:1:1104861656]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199065127384" target="_blank">76561199065127384</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">08-31-20 21:56</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">1 wk (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							09-07-20 21:56
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Aimbot</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Spaztic
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_8278">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (3)</td>
+								<td height="16" class="listtable_1">
+																	<span title="Server: :, Date: 09-02-20 21:50">golzy</span>, <span title="Server: :, Date: 09-05-20 22:22">golzy</span>, <span title="Server: :, Date: 09-06-20 20:53">golzy</span>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(1, 'id', 'host_8277');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/au.jpg" alt="AU" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">08-31-20 21:56</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Human Target
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Spaztic
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">1 wk (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Human Target
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:158083495
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:316166991]" target="_blank">[U:1:316166991]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198276432719" target="_blank">76561198276432719</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">08-31-20 21:56</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">1 wk (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							09-07-20 21:56
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Aimbot</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Spaztic
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_8277">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">07-09-20 07:58</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      dreads boss
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Anthrax
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">1 wk (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      dreads boss
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:495914768
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:991829537]" target="_blank">[U:1:991829537]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198952095265" target="_blank">76561198952095265</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">07-09-20 07:58</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">1 wk (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							07-16-20 07:58
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Inappropriate Language</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Anthrax
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">2 <a href="index.php?p=banlist&searchText=STEAM_0:1:495914768&Submit" onclick="" target="_self">(search) </a></td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">07-04-20 17:24</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Human
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Morgan
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Human
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:3554901634988550868
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:7.1098032699771E+18]" target="_blank">[U:1:7.1098032699771E+18]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561205070068996" target="_blank">76561205070068996</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">07-04-20 17:24</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							07-09-20 17:24
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Orp Violation</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Morgan
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">07-04-20 17:23</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Avalon
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Morgan
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Avalon
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:158702275
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:317404550]" target="_blank">[U:1:317404550]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198277670278" target="_blank">76561198277670278</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">07-04-20 17:23</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							07-09-20 17:23
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Orp Violation</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Morgan
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">07-04-20 17:20</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Tyfa
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Morgan
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Tyfa
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:3997797416653700669
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:7.9955948333074E+18]" target="_blank">[U:1:7.9955948333074E+18]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561205955860560" target="_blank">76561205955860560</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">07-04-20 17:20</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							07-09-20 17:20
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Orp Violation</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Morgan
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">07-04-20 17:18</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Cromo
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Morgan
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Cromo
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:46483314
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:92966628]" target="_blank">[U:1:92966628]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198053232356" target="_blank">76561198053232356</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">07-04-20 17:18</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							07-09-20 17:18
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Orp Violation</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Morgan
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">07-04-20 17:17</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Aminurmi
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Morgan
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Aminurmi
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:63107889
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:126215779]" target="_blank">[U:1:126215779]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198086481507" target="_blank">76561198086481507</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">07-04-20 17:17</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							07-09-20 17:17
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Orp Violation</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Morgan
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">07-04-20 17:15</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Shu Pamela Ka
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Morgan
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Shu Pamela Ka
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:80077462
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:160154925]" target="_blank">[U:1:160154925]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198120420653" target="_blank">76561198120420653</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">07-04-20 17:15</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							07-09-20 17:15
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Orp Violation</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Morgan
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">07-04-20 17:14</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Canek
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Morgan
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Canek
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:43392564
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:86785128]" target="_blank">[U:1:86785128]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198047050856" target="_blank">76561198047050856</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">07-04-20 17:14</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							07-09-20 17:14
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Orp Violation</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Morgan
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">07-04-20 17:12</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Erza
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Morgan
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Erza
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:57427223
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:114854447]" target="_blank">[U:1:114854447]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198075120175" target="_blank">76561198075120175</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">07-04-20 17:12</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							07-09-20 17:12
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Orp Violation</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Morgan
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">07-04-20 17:11</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Aika
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Morgan
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Aika
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:81459359
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:162918719]" target="_blank">[U:1:162918719]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198123184447" target="_blank">76561198123184447</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">07-04-20 17:11</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							07-09-20 17:11
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Orp Violation</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Morgan
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">07-04-20 17:10</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      lyaris
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Morgan
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      lyaris
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:84449734
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:168899468]" target="_blank">[U:1:168899468]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198129165196" target="_blank">76561198129165196</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">07-04-20 17:10</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							07-09-20 17:10
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Orp Violation</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Morgan
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">06-27-20 16:18</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Big Chonkz
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Morgan
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Big Chonkz
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:15445218
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:30890437]" target="_blank">[U:1:30890437]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561197991156165" target="_blank">76561197991156165</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">06-27-20 16:18</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							07-02-20 16:18
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Raiding within 7 days</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Morgan
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">06-27-20 16:17</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Pauline Hanson
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Morgan
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Pauline Hanson
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:61146664
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:122293329]" target="_blank">[U:1:122293329]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198082559057" target="_blank">76561198082559057</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">06-27-20 16:17</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							07-02-20 16:17
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Raiding within 7 Days</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Morgan
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">06-27-20 16:16</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Squashler
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Morgan
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Squashler
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:38889797
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:77779594]" target="_blank">[U:1:77779594]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198038045322" target="_blank">76561198038045322</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">06-27-20 16:16</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							07-02-20 16:16
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Raiding within 7 days</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Morgan
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">06-27-20 16:14</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Belware
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Morgan
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Belware
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:37730643
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:75461286]" target="_blank">[U:1:75461286]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198035727014" target="_blank">76561198035727014</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">06-27-20 16:14</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							07-02-20 16:14
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Raiding within 7 days</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Morgan
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">06-27-20 16:13</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Danoz
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Morgan
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Danoz
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:42168358
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:84336717]" target="_blank">[U:1:84336717]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198044602445" target="_blank">76561198044602445</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">06-27-20 16:13</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							07-02-20 16:13
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Raiding within 7 days</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Morgan
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">06-27-20 16:11</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Camz
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Morgan
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Camz
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:23017164
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:46034328]" target="_blank">[U:1:46034328]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198006300056" target="_blank">76561198006300056</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">06-27-20 16:11</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							07-02-20 16:11
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Raiding within 7 Days</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Morgan
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">06-21-20 23:23</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Zypherr
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Kayne
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">1 wk (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Zypherr
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:46002411
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:92004823]" target="_blank">[U:1:92004823]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561198052270551" target="_blank">76561198052270551</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">06-21-20 23:23</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">1 wk (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							06-28-20 23:23
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Racism / ark</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Kayne
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">06-21-20 22:42</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      brodie
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Gutty
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      brodie
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:4289753733440583766
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:8.5795074668812E+18]" target="_blank">[U:1:8.5795074668812E+18]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561206539773195" target="_blank">76561206539773195</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">06-21-20 22:42</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							06-26-20 22:42
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Breaking rules, combat logging.</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Gutty
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">06-21-20 22:42</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      seq
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Gutty
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      seq
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:3865450512225604134
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:7.7309010244512E+18]" target="_blank">[U:1:7.7309010244512E+18]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561205691166753" target="_blank">76561205691166753</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">06-21-20 22:42</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							06-26-20 22:42
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Breaking rules, combat logging.</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Gutty
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">06-21-20 22:40</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      jen
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Gutty
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      jen
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:4047816563967624694
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:8.0956331279352E+18]" target="_blank">[U:1:8.0956331279352E+18]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561206055898855" target="_blank">76561206055898855</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">06-21-20 22:40</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							06-26-20 22:40
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Breaking rules, combat logging.</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Gutty
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">06-21-20 22:40</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      ghoulchad
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Gutty
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      ghoulchad
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:3781764665542298929
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:7.5635293310846E+18]" target="_blank">[U:1:7.5635293310846E+18]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561205523795059" target="_blank">76561205523795059</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">06-21-20 22:40</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							06-26-20 22:40
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Breaking rules, combat logging.</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Gutty
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">06-21-20 22:39</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      kyle
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Gutty
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      kyle
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:4078302354644282671
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:8.1566047092886E+18]" target="_blank">[U:1:8.1566047092886E+18]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561206116870437" target="_blank">76561206116870437</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">06-21-20 22:39</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							06-26-20 22:39
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Breaking rules, combat logging.</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Gutty
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">06-21-20 22:38</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      vorm
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Gutty
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      vorm
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:3766823653095637327
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:7.5336473061913E+18]" target="_blank">[U:1:7.5336473061913E+18]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561205493913035" target="_blank">76561205493913035</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">06-21-20 22:38</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							06-26-20 22:38
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Breaking rules, combat logging, spamming chat</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Gutty
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">06-21-20 22:37</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      thicc
+          		  </div>
+		  		          </td>
+		        <td height="16" class="listtable_1">
+                    Gutty
+                </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">5 d (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      thicc
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:4517940483696138344
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:9.0358809673923E+18]" target="_blank">[U:1:9.0358809673923E+18]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561206996146694" target="_blank">76561206996146694</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">06-21-20 22:37</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">5 d (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							06-26-20 22:37
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Breaking rules, combat logging.</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned by Admin</td>
+								<td height="16" class="listtable_1">
+																			Gutty
+																	</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+			</table>
+	<div id="banlist-nav">
+        displaying&nbsp;0&nbsp;-&nbsp;30&nbsp;of&nbsp;61&nbsp;results | <b><a href="index.php?p=banlist&page=2" onclick="" target="_self">next <img border="0" alt="next" src="images/right.png" style="vertical-align:middle;" /> </a></b>&nbsp;<select onchange="changePage(this,'B','','');"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+    </div>
+		</div>
+
+<script type="text/javascript">window.addEvent('domready', function(){
+InitAccordion('tr.opener', 'div.opener', 'mainwrapper');
+
+
+});
+</script>
+
+	</div></div></div>
+	<div id="footer">
+		<div id="mainwrapper" style="text-align: center;">
+			<a href="https://sbpp.github.io/" target="_blank"><img src="images/sb.png" alt="SourceBans" border="0" /></a><br/>
+			<div id="footqversion" style="line-height: 20px;"><a style="color: #C1C1C1" href="https://sbpp.github.io/" target="_blank">SourceBans++</a> 1.6.3</div>
+		    <span style="line-height: 20px;">Powered by <a href="http://www.sourcemod.net" target="_blank" style="color: #C1C1C1">SourceMod</a></span><br />
+		    <span style="line-height: 20px;">"Lets just blame it on FlyingMongoose" - <i>[Everyone]</i><span>
+		</div>
+	</div>
+	</div>
+<script type="text/javascript">
+var settab = ProcessAdminTabs();
+window.addEvent('domready', function(){
+        var Tips2 = new Tips($$('.tip'), {
+            initialize:function(){
+                this.fx = new Fx.Style(this.toolTip, 'opacity', {duration: 300, wait: false}).set(0);
+            },
+            onShow: function(toolTip) {
+                this.fx.start(1);
+            },
+            onHide: function(toolTip) {
+                this.fx.start(0);
+            }
+        });
+        var Tips4 = new Tips($$('.perm'), {
+            className: 'perm'
+        });
+    });
+$('nav').setHTML('');    $('content_title').setHTML('Ban List');
+
+
+        </script>
+<!--[if lt IE 7]>
+<script defer type="text/javascript" src="./scripts/pngfix.js"></script>
+<![endif]-->
+</body>
+</html>
