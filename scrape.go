@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/debug"
@@ -17,11 +18,11 @@ import (
 	"time"
 )
 
-type nextURLFunc func(doc *goquery.Selection) string
+type nextURLFunc func(scraper *sbScraper, doc *goquery.Selection) string
 
 type parseTimeFunc func(s string) (time.Time, error)
 
-type parserFunc func(doc *goquery.Selection, nextUrl nextURLFunc, timeParser parseTimeFunc, scraperName string) (string, []sbRecord, int, error)
+type parserFunc func(doc *goquery.Selection, timeParser parseTimeFunc, scraperName string) ([]sbRecord, int, error)
 
 func initScrapers(ctx context.Context, db *pgStore, scrapers []*sbScraper) error {
 	for _, scraper := range scrapers {
@@ -154,9 +155,11 @@ type sbScraper struct {
 	name      string
 	theme     string
 	log       *zap.Logger
+	curPage   int
 	results   []sbRecord
 	resultsMu sync.RWMutex
 	baseURL   string
+	sleepTime time.Duration
 	startPath string
 	parser    parserFunc
 	nextURL   nextURLFunc
@@ -174,12 +177,13 @@ func createScrapers() []*sbScraper {
 		newHellClanScraper(), newJumpAcademyScraper(), newLBGamingScraper(), newLOOSScraper(), newLazyNeerScraper(),
 		newLazyPurpleScraper(), newMagyarhnsScraper(), newMaxDBScraper(), newNeonHeightsScraper(), newNideScraper(),
 		newOpstOnlineScraper(), newOreonScraper(), newOwlTFScraper(), newPancakesScraper(), newPandaScraper(),
-		newPhoenixSourceScraper(), newPowerFPSScraper(), newProGamesZetScraper(), newPubsTFScraper(), newRetroServersScraper(),
-		newSGGamingScraper(), newSameTeemScraper(), newSavageServidoresScraper(), newScrapTFScraper(), newServiliveClScraper(),
-		newSettiScraper(), newSirPleaseScraper(), newSkialScraper(), newSlavonServerScraper(), newSneaksScraper(),
-		newSpaceShipScraper(), newSpectreScraper(), newSvdosBrothersScraper(), newSwapShopScraper(), newTF2MapsScraper(),
-		newTF2ROScraper() /*newTawernaScraper(),*/, newTheVilleScraper(), newTitanScraper(), newTriggerHappyScraper(),
-		newUGCScraper(), newVaticanCityScraper(), newVidyaGaemsScraper(), newWonderlandTFScraper(), newZMBrasilScraper(),
+		newPetrolTFScraper(), newPhoenixSourceScraper(), newPowerFPSScraper(), newProGamesZetScraper(), newPubsTFScraper(),
+		newRetroServersScraper(), newSGGamingScraper(), newSameTeemScraper(), newSavageServidoresScraper(), newScrapTFScraper(),
+		newServiliveClScraper(), newSettiScraper(), newSirPleaseScraper(), newSkialScraper(), newSlavonServerScraper(),
+		newSneaksScraper(), newSpaceShipScraper(), newSpectreScraper(), newSvdosBrothersScraper(), newSwapShopScraper(),
+		newTF2MapsScraper(), newTF2ROScraper() /*newTawernaScraper(),*/, newTheVilleScraper(), newTitanScraper(),
+		newTriggerHappyScraper(), newUGCScraper(), newVaticanCityScraper(), newVidyaGaemsScraper(), newWonderlandTFGOOGScraper(),
+		newZMBrasilScraper(),
 	}
 }
 
@@ -188,13 +192,13 @@ func (scraper *sbScraper) start(ctx context.Context, db *pgStore) error {
 	lastURL := ""
 	startTime := time.Now()
 	totalErrorCount := 0
-
 	scraper.Collector.OnHTML("body", func(e *colly.HTMLElement) {
-		nextURL, results, errorCount, parseErr := scraper.parser(e.DOM, scraper.nextURL, scraper.parseTIme, scraper.name)
+		results, errorCount, parseErr := scraper.parser(e.DOM, scraper.parseTIme, scraper.name)
 		if parseErr != nil {
 			logger.Error("Parser returned error", zap.Error(parseErr))
 			return
 		}
+		nextURL := scraper.nextURL(scraper, e.DOM)
 		totalErrorCount += errorCount
 		scraper.resultsMu.Lock()
 		scraper.results = append(scraper.results, results...)
@@ -221,10 +225,12 @@ func (scraper *sbScraper) start(ctx context.Context, db *pgStore) error {
 			}
 		}
 		if nextURL != "" && nextURL != lastURL {
-			next := scraper.url(nextURL)
 			lastURL = nextURL
-			scraper.log.Debug("Visiting next url", zap.String("url", next))
-			if errVisit := e.Request.Visit(next); errVisit != nil && !errors.Is(errVisit, colly.ErrAlreadyVisited) {
+			if scraper.sleepTime > 0 {
+				time.Sleep(scraper.sleepTime)
+			}
+			scraper.log.Debug("Visiting next url", zap.String("url", nextURL))
+			if errVisit := e.Request.Visit(nextURL); errVisit != nil && !errors.Is(errVisit, colly.ErrAlreadyVisited) {
 				scraper.log.Error("Failed to visit sub url", zap.Error(errVisit), zap.String("url", nextURL))
 				return
 			}
@@ -274,6 +280,7 @@ func newScraper(name string, baseURL string, startPath string, parser parserFunc
 		name:      name,
 		theme:     "default",
 		startPath: startPath,
+		curPage:   1,
 		parser:    parser,
 		nextURL:   nextURL,
 		parseTIme: parseTime,
@@ -492,7 +499,7 @@ func parseWonderlandTime(s string) (time.Time, error) {
 	return time.Parse("January 2, 2006 (15:04)", s)
 }
 
-func nextURLFluent(doc *goquery.Selection) string {
+func nextURLFluent(scraper *sbScraper, doc *goquery.Selection) string {
 	nextPage := ""
 	nodes := doc.Find(".pagination a[href]")
 	nodes.EachWithBreak(func(i int, selection *goquery.Selection) bool {
@@ -503,20 +510,20 @@ func nextURLFluent(doc *goquery.Selection) string {
 		}
 		return true
 	})
-	return nextPage
+	return scraper.url(nextPage)
 }
 
-func nextURLFirst(doc *goquery.Selection) string {
+func nextURLFirst(scraper *sbScraper, doc *goquery.Selection) string {
 	nextPage, _ := doc.Find("#banlist-nav a[href]").First().Attr("href")
-	return nextPage
+	return scraper.url(nextPage)
 }
 
-func nextURLLast(doc *goquery.Selection) string {
+func nextURLLast(scraper *sbScraper, doc *goquery.Selection) string {
 	nextPage, _ := doc.Find("#banlist-nav a[href]").Last().Attr("href")
 	if !strings.Contains(nextPage, "page=") {
 		return ""
 	}
-	return nextPage
+	return scraper.url(nextPage)
 }
 
 type mappedKey string
@@ -572,7 +579,7 @@ func getMappedKey(s string) (mappedKey, bool) {
 }
 
 // https://github.com/SB-MaterialAdmin/Web/tree/stable-dev
-func parseMaterial(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, int, error) {
+func parseMaterial(doc *goquery.Selection, parseTime parseTimeFunc, scraperName string) ([]sbRecord, int, error) {
 	var (
 		bans      []sbRecord
 		curBan    sbRecord
@@ -626,11 +633,11 @@ func parseMaterial(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseT
 		})
 
 	})
-	return urlFunc(doc), bans, skipCount, nil
+	return bans, skipCount, nil
 }
 
 // https://github.com/brhndursun/SourceBans-StarTheme
-func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, int, error) {
+func parseStar(doc *goquery.Selection, parseTime parseTimeFunc, scraperName string) ([]sbRecord, int, error) {
 	var (
 		bans      []sbRecord
 		curBan    sbRecord
@@ -697,11 +704,11 @@ func parseStar(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeF
 		})
 
 	})
-	return urlFunc(doc), bans, skipCount, nil
+	return bans, skipCount, nil
 }
 
 // https://github.com/aXenDeveloper/sourcebans-web-theme-fluent
-func parseFluent(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, int, error) {
+func parseFluent(doc *goquery.Selection, parseTime parseTimeFunc, scraperName string) ([]sbRecord, int, error) {
 	var (
 		bans      []sbRecord
 		curBan    sbRecord
@@ -739,10 +746,10 @@ func parseFluent(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTim
 			curBan = sbRecord{}
 		}
 	})
-	return urlFunc(doc), bans, skipCount, nil
+	return bans, skipCount, nil
 }
 
-func parseDefault(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTimeFunc, scraperName string) (string, []sbRecord, int, error) {
+func parseDefault(doc *goquery.Selection, parseTime parseTimeFunc, scraperName string) ([]sbRecord, int, error) {
 	var (
 		bans     []sbRecord
 		curBan   sbRecord
@@ -798,7 +805,7 @@ func parseDefault(doc *goquery.Selection, urlFunc nextURLFunc, parseTime parseTi
 			}
 		}
 	})
-	return urlFunc(doc), bans, skipped, nil
+	return bans, skipped, nil
 }
 
 //
@@ -903,6 +910,18 @@ func newScrapTFScraper() *sbScraper {
 func newWonderlandTFScraper() *sbScraper {
 	return newScraper("wonderland", "https://bans.wonderland.tf/", "index.php?p=banlist",
 		parseDefault, nextURLLast, parseWonderlandTime)
+}
+
+// Uses google cache since cloudflare will restrict access
+func newWonderlandTFGOOGScraper() *sbScraper {
+	s := newScraper("wonderland_goog", "https://webcache.googleusercontent.com/search?q=cache:https://bans.wonderland.tf/", "index.php?p=banlist",
+		parseDefault, nextURLLast, parseWonderlandTime)
+	s.sleepTime = time.Second * 10
+	s.nextURL = func(scraper *sbScraper, doc *goquery.Selection) string {
+		s.curPage++
+		return s.url(fmt.Sprintf("index.php?p=banlist&page=%d", s.curPage))
+	}
+	return s
 }
 
 func newLazyPurpleScraper() *sbScraper {
@@ -1112,6 +1131,11 @@ func newAstraManiaScraper() *sbScraper {
 
 func newTF2MapsScraper() *sbScraper {
 	return newScraper("tf2maps", "https://bans.tf2maps.net/", "index.php?p=banlist",
+		parseDefault, nextURLLast, parseDefaultTime)
+}
+
+func newPetrolTFScraper() *sbScraper {
+	return newScraper("petroltf", "https://petrol.tf/sb/", "index.php?p=banlist",
 		parseDefault, nextURLLast, parseDefaultTime)
 }
 

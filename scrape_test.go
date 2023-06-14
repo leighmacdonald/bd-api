@@ -20,8 +20,10 @@ func testParser(t *testing.T, scraper *sbScraper, count int, nextPage string) {
 
 	require.NoError(t, errParse)
 	require.Equal(t, count, len(results))
-	next := scraper.nextURL(scraper, doc.Selection)
-	require.Equal(t, nextPage, next)
+	if nextPage != "" {
+		next := scraper.nextURL(scraper, doc.Selection)
+		require.Equal(t, scraper.url(nextPage), next)
+	}
 	for _, d := range results {
 		require.NotEqual(t, "", d.Name)
 		require.Truef(t, d.SteamID.Valid(), "Invalid steamid: %s", d.SteamID.String())
