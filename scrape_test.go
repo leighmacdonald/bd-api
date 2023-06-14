@@ -358,6 +358,10 @@ func TestMoevsMachine(t *testing.T) {
 	testParser(t, newMoevsMachineScraper(), 27, "index.php?p=banlist&page=2")
 }
 
+func TestPRWH(t *testing.T) {
+	testParser(t, newPRWHScraper(), 30, "index.php?p=banlist&page=2")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)

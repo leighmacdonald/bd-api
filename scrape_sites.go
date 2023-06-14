@@ -426,3 +426,8 @@ func newMoevsMachineScraper() *sbScraper {
 	return newScraper("moevsmachine", "https://moevsmachine.tf/bans/", "index.php?p=banlist",
 		parseDefault, nextURLLast, parseDefaultTime)
 }
+
+func newPRWHScraper() *sbScraper {
+	return newScraper("prwh", "https://sourcebans.prwh.de/", "index.php?p=banlist",
+		parseDefault, nextURLLast, parsePRWHTime)
+}
