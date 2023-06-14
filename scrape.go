@@ -902,6 +902,11 @@ func newZMBrasilScraper() *sbScraper {
 		parseDefault, nextURLLast, parseSkialTime)
 }
 
+func newDixiGameScraper() *sbScraper {
+	return newScraper("dixigame", "https://dixigame.com/bans/", "index.php?p=banlist",
+		parseDefault, nextURLLast, parseDefaultTime)
+}
+
 func newScrapTFScraper() *sbScraper {
 	return newScraper("scraptf", "https://bans.scrap.tf/", "index.php?p=banlist",
 		parseDefault, nextURLLast, parseDefaultTime)
@@ -917,6 +922,7 @@ func newWonderlandTFGOOGScraper() *sbScraper {
 	s := newScraper("wonderland_goog", "https://webcache.googleusercontent.com/search?q=cache:https://bans.wonderland.tf/", "index.php?p=banlist",
 		parseDefault, nextURLLast, parseWonderlandTime)
 	s.sleepTime = time.Second * 10
+	// Cached versions do not have a proper next link, so we have to generate one.
 	s.nextURL = func(scraper *sbScraper, doc *goquery.Selection) string {
 		s.curPage++
 		return s.url(fmt.Sprintf("index.php?p=banlist&page=%d", s.curPage))

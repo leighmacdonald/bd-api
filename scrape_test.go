@@ -70,6 +70,10 @@ func TestParseFirePowered(t *testing.T) {
 	testParser(t, newFirePoweredScraper(), 26, "index.php?p=banlist&page=2")
 }
 
+func TestDixiGame(t *testing.T) {
+	testParser(t, newDixiGameScraper(), 23, "index.php?p=banlist&page=2")
+}
+
 func TestParseHarpoon(t *testing.T) {
 	testParser(t, newHarpoonScraper(), 38, "index.php?p=banlist&page=2")
 }
