@@ -380,22 +380,24 @@ func newSBSite(name string) sbSite {
 }
 
 type sbBanRecord struct {
-	BanID     int           `json:"ban_id"`
-	SiteID    int           `json:"site_id"`
-	SteamID   steamid.SID64 `json:"steam_id"`
-	Reason    string        `json:"reason"`
-	Duration  time.Duration `json:"duration"`
-	Permanent bool          `json:"permanent"`
+	BanID       int           `json:"ban_id"`
+	SiteID      int           `json:"site_id"`
+	PersonaName string        `json:"persona_name"`
+	SteamID     steamid.SID64 `json:"steam_id"`
+	Reason      string        `json:"reason"`
+	Duration    time.Duration `json:"duration"`
+	Permanent   bool          `json:"permanent"`
 	timeStamped
 }
 
-func (site sbSite) newRecord(sid64 steamid.SID64, reason string, timeStamp time.Time, duration time.Duration, perm bool) sbBanRecord {
+func (site sbSite) newRecord(sid64 steamid.SID64, personaName string, reason string, timeStamp time.Time, duration time.Duration, perm bool) sbBanRecord {
 	return sbBanRecord{
-		SiteID:    site.SiteID,
-		SteamID:   sid64,
-		Reason:    reason,
-		Duration:  duration,
-		Permanent: perm,
+		SiteID:      site.SiteID,
+		SteamID:     sid64,
+		PersonaName: personaName,
+		Reason:      reason,
+		Duration:    duration,
+		Permanent:   perm,
 		timeStamped: timeStamped{
 			UpdatedOn: timeStamp,
 			CreatedOn: timeStamp,
@@ -515,8 +517,8 @@ func (db *pgStore) sbBanSave(ctx context.Context, s *sbBanRecord) error {
 		s.CreatedOn = time.Now()
 		query, args, errSQL := sb.
 			Insert("sb_ban").
-			Columns("sb_site_id", "steam_id", "reason", "created_on", "duration", "permanent").
-			Values(s.SiteID, s.SteamID, s.Reason, s.CreatedOn, s.Duration, s.Permanent).
+			Columns("sb_site_id", "steam_id", "persona_name", "reason", "created_on", "duration", "permanent").
+			Values(s.SiteID, s.SteamID, s.PersonaName, s.Reason, s.CreatedOn, s.Duration, s.Permanent).
 			Suffix("RETURNING sb_ban_id").
 			ToSql()
 		if errSQL != nil {
@@ -530,6 +532,7 @@ func (db *pgStore) sbBanSave(ctx context.Context, s *sbBanRecord) error {
 			Update("sb_site").
 			Set("sb_site_id", s.SiteID).
 			Set("steam_id", s.SteamID).
+			Set("persona_name", s.PersonaName).
 			Set("reason", s.Reason).
 			Set("created_on", s.CreatedOn).
 			Set("duration", s.Duration).

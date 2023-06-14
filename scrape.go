@@ -189,11 +189,12 @@ func (scraper *sbScraper) start(ctx context.Context, db *pgStore) error {
 				scraper.log.Error("failed to get player record", zap.Int64("sid64", result.SteamID.Int64()), zap.Error(errPlayer))
 			}
 			br := sbBanRecord{
-				SiteID:    int(scraper.ID),
-				SteamID:   pr.SteamID,
-				Reason:    result.Reason,
-				Duration:  result.Length,
-				Permanent: result.Permanent,
+				SiteID:      int(scraper.ID),
+				SteamID:     pr.SteamID,
+				Reason:      result.Reason,
+				Duration:    result.Length,
+				PersonaName: result.Name,
+				Permanent:   result.Permanent,
 				timeStamped: timeStamped{
 					UpdatedOn: time.Now(),
 					CreatedOn: result.CreatedOn,

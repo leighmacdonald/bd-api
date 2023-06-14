@@ -66,7 +66,7 @@ func testSourceBans(t *testing.T) {
 
 	t0 := time.Now().AddDate(-1, 0, 0)
 	t1 := t0.AddDate(0, 1, 0)
-	recA := s3.newRecord(testIDCamper, "test", t0, t1.Sub(t0), false)
+	recA := s3.newRecord(testIDCamper, "blah", "test", t0, t1.Sub(t0), false)
 	require.NoError(t, testStore.sbBanSave(context.Background(), &recA))
 
 	require.NoError(t, testStore.sbSiteDelete(context.Background(), s3.SiteID))

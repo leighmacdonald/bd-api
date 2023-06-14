@@ -91,17 +91,18 @@ create index if not exists sb_site_uidx ON sb_site (name);
 
 create table if not exists sb_ban
 (
-    sb_ban_id  bigserial primary key,
-    sb_site_id int       not null
+    sb_ban_id    bigserial primary key,
+    sb_site_id   int       not null
         constraint ban_site_fk
             references sb_site (sb_site_id) on delete cascade,
-    steam_id   bigint    not null
+    steam_id     bigint    not null
         constraint ban_steam_fk
             references player (steam_id) on delete cascade,
-    reason     text      not null,
-    created_on timestamp not null,
-    duration   bigint    not null,
-    permanent  boolean   not null
+    persona_name text      not null,
+    reason       text      not null,
+    created_on   timestamp not null,
+    duration     bigint    not null,
+    permanent    boolean   not null
 );
 
 create unique index if not exists sb_ban_uidx ON sb_ban (sb_site_id, steam_id, created_on);
