@@ -177,7 +177,6 @@ func handleGetProfiles() gin.HandlerFunc {
 func apiErrorHandler(logger *zap.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
-
 		for _, ginErr := range c.Errors {
 			logger.Error("Unhandled HTTP Error", zap.Error(ginErr))
 		}
@@ -185,10 +184,9 @@ func apiErrorHandler(logger *zap.Logger) gin.HandlerFunc {
 }
 
 func createRouter() *gin.Engine {
-	tmplProfiles, errTmpl := template.New("profiles").Parse(`
-<!DOCTYPE html>
+	tmplProfiles, errTmpl := template.New("profiles").Parse(`<!DOCTYPE html>
 <html>
-<head>
+<head> 
 	<title>{{ .name }}</title>
 	<style> body {background-color: #272822;} {{ .style }} </style>
 </head>

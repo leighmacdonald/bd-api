@@ -29,18 +29,15 @@ func main() {
 	if errSetKey := steamweb.SetKey(config.SteamAPIKey); errSetKey != nil {
 		logger.Panic("Failed to configure steam api key", zap.Error(errSetKey))
 	}
-
 	if !exists(cacheDir) {
 		if errMkDir := os.MkdirAll(cacheDir, 0755); errMkDir != nil {
 			logger.Fatal("Failed to create cache dir", zap.String("dir", cacheDir), zap.Error(errMkDir))
 		}
 	}
-
 	db, errDB := newStore(ctx, config.DSN)
 	if errDB != nil {
 		logger.Fatal("Failed to connect to database", zap.Error(errDB))
 	}
-
 	if config.SourcebansScraperEnabled {
 		scrapers := createScrapers()
 		if errInitScrapers := initScrapers(ctx, db, scrapers); errInitScrapers != nil {
@@ -48,7 +45,6 @@ func main() {
 		}
 		go startScrapers(ctx, &config, scrapers, db)
 	}
-
 	if errAPI := startAPI(ctx, config.ListenAddr); errAPI != nil {
 		logger.Error("HTTP server returned error", zap.Error(errAPI))
 	}

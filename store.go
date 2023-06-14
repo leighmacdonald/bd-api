@@ -529,7 +529,7 @@ func (db *pgStore) sbBanSave(ctx context.Context, s *sbBanRecord) error {
 		}
 	} else {
 		query, args, errSQL := sb.
-			Update("sb_site").
+			Update("sb_ban").
 			Set("sb_site_id", s.SiteID).
 			Set("steam_id", s.SteamID).
 			Set("persona_name", s.PersonaName).
