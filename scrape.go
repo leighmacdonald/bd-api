@@ -35,23 +35,39 @@ func initScrapers(ctx context.Context, db *pgStore, scrapers []*sbScraper) error
 }
 
 func startScrapers(ctx context.Context, config *appConfig, scrapers []*sbScraper, db *pgStore) {
-	if config.ProxiesEnabled {
-		startProxies(config)
-		defer stopProxies()
-
-		for _, scraper := range scrapers {
-			if errProxies := setupProxies(scraper.Collector, config); errProxies != nil {
-				logger.Panic("Failed to setup proxies", zap.Error(errProxies))
+	do := func() {
+		if config.ProxiesEnabled {
+			startProxies(config)
+			defer stopProxies()
+			for _, scraper := range scrapers {
+				if errProxies := setupProxies(scraper.Collector, config); errProxies != nil {
+					logger.Panic("Failed to setup proxies", zap.Error(errProxies))
+				}
 			}
 		}
+		wg := &sync.WaitGroup{}
+		for _, scraper := range scrapers {
+			wg.Add(1)
+			go func(s *sbScraper) {
+				defer wg.Done()
+				if errScrape := s.start(ctx, db); errScrape != nil {
+					s.log.Error("Scraper returned error", zap.Error(errScrape))
+				}
+			}(scraper)
+		}
+		wg.Wait()
 	}
-	for _, scraper := range scrapers {
-		go func(s *sbScraper) {
-			if errScrape := s.start(ctx, db); errScrape != nil {
-				logger.Error("sbScraper returned error", zap.Error(errScrape))
-			}
-		}(scraper)
+	do()
+	t0 := time.NewTicker(time.Hour * 24)
+	for {
+		select {
+		case <-t0.C:
+			do()
+		case <-ctx.Done():
+			return
+		}
 	}
+
 }
 
 type sbRecord struct {
@@ -162,7 +178,7 @@ func createScrapers() []*sbScraper {
 		newSGGamingScraper(), newSameTeemScraper(), newSavageServidoresScraper(), newScrapTFScraper(), newServiliveClScraper(),
 		newSettiScraper(), newSirPleaseScraper(), newSkialScraper(), newSlavonServerScraper(), newSneaksScraper(),
 		newSpaceShipScraper(), newSpectreScraper(), newSvdosBrothersScraper(), newSwapShopScraper(), newTF2MapsScraper(),
-		newTF2ROScraper(), newTawernaScraper(), newTheVilleScraper(), newTitanScraper(), newTriggerHappyScraper(),
+		newTF2ROScraper() /*newTawernaScraper(),*/, newTheVilleScraper(), newTitanScraper(), newTriggerHappyScraper(),
 		newUGCScraper(), newVaticanCityScraper(), newVidyaGaemsScraper(), newWonderlandTFScraper(), newZMBrasilScraper(),
 	}
 }
@@ -218,7 +234,7 @@ func (scraper *sbScraper) start(ctx context.Context, db *pgStore) error {
 		return errVisit
 	}
 	scraper.Wait()
-	scraper.log.Info("Completed scrape job", zap.String("name", scraper.name), zap.Int("skipped", totalErrorCount), zap.Duration("duration", time.Since(startTime)))
+	scraper.log.Info("Completed scrape job", zap.String("name", scraper.name), zap.Int("valid", len(scraper.results)), zap.Int("skipped", totalErrorCount), zap.Duration("duration", time.Since(startTime)))
 	return nil
 }
 
@@ -262,7 +278,6 @@ func newScraper(name string, baseURL string, startPath string, parser parserFunc
 		nextURL:   nextURL,
 		parseTIme: parseTime,
 		log:       logger.Named(name),
-
 		Collector: colly.NewCollector(
 			colly.UserAgent("bd"),
 			colly.CacheDir(filepath.Join(cacheDir, "scrapers")),
@@ -272,12 +287,11 @@ func newScraper(name string, baseURL string, startPath string, parser parserFunc
 			//colly.MaxDepth(2),
 		),
 	}
+	scraper.SetRequestTimeout(time.Second * 30)
 	scraper.OnRequest(func(r *colly.Request) {
 		scraper.log.Debug("Visiting", zap.String("url", r.URL.String()))
 	})
-
 	extensions.RandomUserAgent(scraper.Collector)
-
 	if errLimit := scraper.Limit(&colly.LimitRule{
 		DomainGlob:  "*" + u.Hostname(),
 		Parallelism: 2,
@@ -285,11 +299,9 @@ func newScraper(name string, baseURL string, startPath string, parser parserFunc
 	}); errLimit != nil {
 		scraper.log.Panic("Failed to set limit", zap.Error(errLimit))
 	}
-
 	scraper.OnError(func(r *colly.Response, err error) {
 		scraper.log.Error("Request error", zap.String("url", r.Request.URL.String()), zap.Error(err))
 	})
-
 	return &scraper
 }
 
@@ -869,7 +881,7 @@ func newSirPleaseScraper() *sbScraper {
 }
 
 func newVidyaGaemsScraper() *sbScraper {
-	return newScraper("vidyagaems", "https://www.vidyagaems.net/", "index.php?p=banlist",
+	return newScraper("vidyagaems", "https://www.vidyagaems.net/sourcebans/", "index.php?p=banlist",
 		parseFluent, nextURLFluent, parseTrailYear)
 }
 
@@ -1133,6 +1145,7 @@ func newDefuseRoScraper() *sbScraper {
 		parseFluent, nextURLFluent, parseDefaultTime)
 }
 
+// FIXME overcome cloudflare?
 func newTawernaScraper() *sbScraper {
 	return newScraper("tawerna", "https://sb.tawerna.tf/", "index.php?p=banlist",
 		parseDefault, nextURLLast, parseSkialTime)
