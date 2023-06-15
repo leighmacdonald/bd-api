@@ -448,3 +448,8 @@ func newRandomTF2Scraper() *sbScraper {
 	return newScraper("randomtf2", "https://bans.randomtf2.com/", "index.php?p=banlist",
 		parseDefault, nextURLLast, parseSkialTime)
 }
+
+func newPlayesROScraper() *sbScraper {
+	return newScraper("playesro", "https://www.playes.ro/csgobans/", "index.php?p=banlist",
+		parseStar, nextURLLast, parseSkialTime)
+}
