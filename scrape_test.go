@@ -398,6 +398,10 @@ func TestZubat(t *testing.T) {
 	testParser(t, newZubatScraper(), 30, "index.php?p=banlist&page=2")
 }
 
+func TestLunario(t *testing.T) {
+	testParser(t, newLunarioScraper(), 15, "index.php?p=banlist&page=2")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)

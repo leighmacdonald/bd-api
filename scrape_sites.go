@@ -478,3 +478,8 @@ func newZubatScraper() *sbScraper {
 	return newScraper("zubat", "https://sb.zubat.ru/", "index.php?p=banlist",
 		parseStar, nextURLLast, parseSkialTime)
 }
+
+func newLunarioScraper() *sbScraper {
+	return newScraper("lunario", "https://sb.lunario.ro/", "index.php?p=banlist",
+		parseStar, nextURLLast, parseSkialTime)
+}
