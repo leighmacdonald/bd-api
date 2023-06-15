@@ -458,3 +458,8 @@ func newEOTLGamingScraper() *sbScraper {
 	return newScraper("eotlgaming", "https://tf2.endofthelinegaming.com/sourcebans/", "index.php?p=banlist",
 		parseDefault, nextURLLast, parseDefaultTime)
 }
+
+func newBioCraftingScraper() *sbScraper {
+	return newScraper("biocrafting", "https://sourcebans.biocrafting.net/", "index.php?p=banlist",
+		parseDefault, nextURLLast, parseSkialTime)
+}
