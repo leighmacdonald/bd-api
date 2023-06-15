@@ -398,8 +398,10 @@ func newG44Scraper() *sbScraper {
 }
 
 func newCuteProjectScraper() *sbScraper {
-	return newScraper("cuteproject", "https://bans.cute-project.net/", "index.php?p=banlist",
+	s := newScraper("cuteproject", "https://bans.cute-project.net/", "index.php?p=banlist",
 		parseMaterial, nextURLLast, parseProGamesZetTime)
+	s.sleepTime = time.Second * 4
+	return s
 }
 
 func newPhoenixSourceScraper() *sbScraper {
@@ -430,4 +432,9 @@ func newMoevsMachineScraper() *sbScraper {
 func newPRWHScraper() *sbScraper {
 	return newScraper("prwh", "https://sourcebans.prwh.de/", "index.php?p=banlist",
 		parseDefault, nextURLLast, parsePRWHTime)
+}
+
+func newVortexScraper() *sbScraper {
+	return newScraper("vortex", "http://vortex.oyunboss.net/sourcebans/", "index.php?p=banlist",
+		parseStar, nextURLLast, parseSkialTime)
 }

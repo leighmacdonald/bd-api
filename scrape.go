@@ -79,11 +79,11 @@ type sbRecord struct {
 	Permanent bool
 }
 
-var errEmpty = errors.New("value empty")
+//var errEmpty = errors.New("value empty")
 
-func (r *sbRecord) setPlayer(scraperName string, name string) bool {
+func (r *sbRecord) setPlayer(_ string, name string) bool {
 	if name == "" {
-		logger.Error("Failed to set player", zap.String("scraper", scraperName), zap.Error(errEmpty))
+		//logger.Error("Failed to set player", zap.String("scraper", scraperName), zap.Error(errEmpty))
 		return false
 	}
 	r.Name = name
@@ -172,17 +172,17 @@ func createScrapers() []*sbScraper {
 		newCSIServersScraper(), newCuteProjectScraper(), newCutiePieScraper(), newDarkPyroScraper(), newDefuseRoScraper(),
 		newDiscFFScraper(), newDreamFireScraper(), newECJScraper(), newElectricScraper(), newFirePoweredScraper(),
 		newFluxTFScraper(), newFurryPoundScraper(), newG44Scraper(), newGameSitesScraper(), newGamesTownScraper(),
-		newGFLScraper(), newGhostCapScraper(), newGlobalParadiseScraper(), newGunServerScraper(), newHarpoonScraper(),
-		newHellClanScraper(), newJumpAcademyScraper(), newLBGamingScraper(), newLOOSScraper(), newLazyNeerScraper(),
-		newLazyPurpleScraper(), newMagyarhnsScraper(), newMaxDBScraper(), newNeonHeightsScraper(), newNideScraper(),
-		newOpstOnlineScraper(), newOreonScraper(), newOwlTFScraper(), newPancakesScraper(), newPandaScraper(),
-		newPetrolTFScraper(), newPhoenixSourceScraper(), newPowerFPSScraper(), newProGamesZetScraper(), newPubsTFScraper(),
-		newRetroServersScraper(), newSGGamingScraper(), newSameTeemScraper(), newSavageServidoresScraper(), newScrapTFScraper(),
-		newServiliveClScraper(), newSettiScraper(), newSirPleaseScraper(), newSkialScraper(), newSlavonServerScraper(),
-		newSneaksScraper(), newSpaceShipScraper(), newSpectreScraper(), newSvdosBrothersScraper(), newSwapShopScraper(),
-		newTF2MapsScraper(), newTF2ROScraper() /*newTawernaScraper(),*/, newTheVilleScraper(), newTitanScraper(),
-		newTriggerHappyScraper(), newUGCScraper(), newVaticanCityScraper(), newVidyaGaemsScraper(), newWonderlandTFGOOGScraper(),
-		newZMBrasilScraper(),
+		newGetSomeScraper(), newGFLScraper(), newGhostCapScraper(), newGlobalParadiseScraper(), newGunServerScraper(),
+		newHarpoonScraper(), newHellClanScraper(), newJumpAcademyScraper(), newLBGamingScraper(), newLOOSScraper(),
+		newLazyNeerScraper(), newLazyPurpleScraper(), newMagyarhnsScraper(), newMaxDBScraper(), newMoevsMachineScraper(),
+		newNeonHeightsScraper(), newNideScraper(), newOpstOnlineScraper(), newOreonScraper(), newOwlTFScraper(),
+		newPancakesScraper(), newPandaScraper(), newPetrolTFScraper(), newPhoenixSourceScraper(), newPowerFPSScraper(),
+		newProGamesZetScraper(), newPRWHScraper(), newPubsTFScraper(), newRushyScraper(), newRetroServersScraper(),
+		newSGGamingScraper(), newSameTeemScraper(), newSavageServidoresScraper(), newScrapTFScraper(), newServiliveClScraper(),
+		newSettiScraper(), newSirPleaseScraper(), newSkialScraper(), newSlavonServerScraper(), newSneaksScraper(),
+		newSpaceShipScraper(), newSpectreScraper(), newSvdosBrothersScraper(), newSwapShopScraper(), newTF2MapsScraper(),
+		newTF2ROScraper() /*newTawernaScraper(),*/, newTheVilleScraper(), newTitanScraper(), newTriggerHappyScraper(),
+		newUGCScraper(), newVaticanCityScraper(), newVidyaGaemsScraper(), newWonderlandTFGOOGScraper(), newZMBrasilScraper(),
 	}
 }
 
@@ -556,27 +556,32 @@ const (
 )
 
 var keyMap = map[string]mappedKey{
-	"community links":     "community links",
-	"был выдан":           "invoked on",
-	"datum a čas udělení": "invoked on",
-	"invoked on":          "invoked on",
-	"steam community":     "steam community",
-	"steam komunitní":     "steam community",
-	"délka":               "ban length",
-	"banlength":           "ban length",
-	"ban length":          "ban length",
-	"длительность":        "ban length",
-	"vyprší":              "expires on",
-	"будет снят":          "expires on",
-	"expires on":          "expires on",
-	"причина разбана":     "reason unbanned",
-	"důvod":               "reason",
-	"reason":              "reason",
-	"разбанен админом":    "unbanned by",
-	"причина бана":        "reason",
-	"игрок":               "player",
-	"player":              "player",
-	"steam3 id":           "steam3 id",
+	"community links":      "community links",
+	"banlanma tarihi":      "invoked on",
+	"был выдан":            "invoked on",
+	"datum a čas udělení":  "invoked on",
+	"invoked on":           "invoked on",
+	"steam community":      "steam community",
+	"steam komunitní":      "steam community",
+	"ban uzunluğu":         "ban length",
+	"délka":                "ban length",
+	"banlength":            "ban length",
+	"ban length":           "ban length",
+	"длительность":         "ban length",
+	"şu zaman sona eriyor": "expires on",
+	"vyprší":               "expires on",
+	"будет снят":           "expires on",
+	"expires on":           "expires on",
+	"причина разбана":      "reason unbanned",
+	"sebep":                "reason",
+	"důvod":                "reason",
+	"reason":               "reason",
+	"разбанен админом":     "unbanned by",
+	"причина бана":         "reason",
+	"oyuncu":               "player",
+	"игрок":                "player",
+	"player":               "player",
+	"steam3 id":            "steam3 id",
 }
 
 var spaceRm = regexp.MustCompile(`\s+`)
@@ -587,10 +592,7 @@ func normKey(s string) string {
 
 func getMappedKey(s string) (mappedKey, bool) {
 	mk, found := keyMap[s]
-	if !found {
-		return "", false
-	}
-	return mk, true
+	return mk, found
 }
 
 // https://github.com/SB-MaterialAdmin/Web/tree/stable-dev
@@ -638,7 +640,7 @@ func parseMaterial(doc *goquery.Selection, parseTime parseTimeFunc, scraperName 
 			case keyReason:
 				curBan.setReason(value)
 				curBan.Reason = value
-				if curBan.SteamID.Valid() {
+				if curBan.SteamID.Valid() && curBan.Name != "" {
 					bans = append(bans, curBan)
 				} else {
 					skipCount++
@@ -709,7 +711,7 @@ func parseStar(doc *goquery.Selection, parseTime parseTimeFunc, scraperName stri
 				curBan.setExpiredOn(scraperName, parseTime, value)
 			case keyReason:
 				curBan.setReason(value)
-				if curBan.SteamID.Valid() {
+				if curBan.SteamID.Valid() && curBan.Name != "" {
 					bans = append(bans, curBan)
 				} else {
 					skipCount++
@@ -753,7 +755,7 @@ func parseFluent(doc *goquery.Selection, parseTime parseTimeFunc, scraperName st
 			curBan.setExpiredOn(scraperName, parseTime, value)
 		case keyReason:
 			curBan.setReason(value)
-			if curBan.SteamID.Valid() {
+			if curBan.SteamID.Valid() && curBan.Name != "" {
 				bans = append(bans, curBan)
 			} else {
 				skipCount++
@@ -811,7 +813,7 @@ func parseDefault(doc *goquery.Selection, parseTime parseTimeFunc, scraperName s
 				curBan.setExpiredOn(scraperName, parseTime, value)
 			case keyReason:
 				curBan.setReason(value)
-				if curBan.SteamID.Valid() {
+				if curBan.SteamID.Valid() && curBan.Name != "" {
 					bans = append(bans, curBan)
 				} else {
 					skipped++
