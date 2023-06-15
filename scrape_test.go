@@ -386,6 +386,10 @@ func TestBioCrafting(t *testing.T) {
 	testParser(t, newBioCraftingScraper(), 30, "index.php?p=banlist&page=2")
 }
 
+func TestBigBangGamers(t *testing.T) {
+	testParser(t, newBigBangGamersScraper(), 5, "")
+}
+
 func TestParseGFLTime(t *testing.T) {
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
 	require.NoError(t, e)

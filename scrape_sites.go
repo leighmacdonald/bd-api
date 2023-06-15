@@ -463,3 +463,8 @@ func newBioCraftingScraper() *sbScraper {
 	return newScraper("biocrafting", "https://sourcebans.biocrafting.net/", "index.php?p=banlist",
 		parseDefault, nextURLLast, parseSkialTime)
 }
+
+func newBigBangGamersScraper() *sbScraper {
+	return newScraper("bigbanggamers", "http://208.71.172.9/", "index.php?p=banlist",
+		parseDefault, nextURLLast, parseSkialTime)
+}
