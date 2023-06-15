@@ -473,3 +473,8 @@ func newEpicZoneScraper() *sbScraper {
 	return newScraper("epiczone", "https://sourcebans.epiczone.sk/", "index.php?p=banlist",
 		parseStar, nextURLLast, parseGunServer)
 }
+
+func newZubatScraper() *sbScraper {
+	return newScraper("zubat", "https://sb.zubat.ru/", "index.php?p=banlist",
+		parseStar, nextURLLast, parseSkialTime)
+}
