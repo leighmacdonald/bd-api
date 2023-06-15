@@ -438,3 +438,8 @@ func newVortexScraper() *sbScraper {
 	return newScraper("vortex", "http://vortex.oyunboss.net/sourcebans/", "index.php?p=banlist",
 		parseStar, nextURLLast, parseSkialTime)
 }
+
+func newCasualFunScraper() *sbScraper {
+	return newScraper("casualfun", "https://tf2-casual-fun.de/sourcebans/", "index.php?p=banlist",
+		parseDefault, nextURLLast, parsePRWHTime)
+}
