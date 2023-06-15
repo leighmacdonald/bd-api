@@ -468,3 +468,8 @@ func newBigBangGamersScraper() *sbScraper {
 	return newScraper("bigbanggamers", "http://208.71.172.9/", "index.php?p=banlist",
 		parseDefault, nextURLLast, parseSkialTime)
 }
+
+func newEpicZoneScraper() *sbScraper {
+	return newScraper("epiczone", "https://sourcebans.epiczone.sk/", "index.php?p=banlist",
+		parseStar, nextURLLast, parseGunServer)
+}
