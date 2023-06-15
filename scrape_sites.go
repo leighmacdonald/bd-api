@@ -453,3 +453,8 @@ func newPlayesROScraper() *sbScraper {
 	return newScraper("playesro", "https://www.playes.ro/csgobans/", "index.php?p=banlist",
 		parseStar, nextURLLast, parseSkialTime)
 }
+
+func newEOTLGamingScraper() *sbScraper {
+	return newScraper("eotlgaming", "https://tf2.endofthelinegaming.com/sourcebans/", "index.php?p=banlist",
+		parseDefault, nextURLLast, parseDefaultTime)
+}
