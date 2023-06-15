@@ -443,3 +443,8 @@ func newCasualFunScraper() *sbScraper {
 	return newScraper("casualfun", "https://tf2-casual-fun.de/sourcebans/", "index.php?p=banlist",
 		parseDefault, nextURLLast, parsePRWHTime)
 }
+
+func newRandomTF2Scraper() *sbScraper {
+	return newScraper("randomtf2", "https://bans.randomtf2.com/", "index.php?p=banlist",
+		parseDefault, nextURLLast, parseSkialTime)
+}

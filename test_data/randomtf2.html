@@ -1,0 +1,655 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>SourceBans</title>
+<link rel="Shortcut Icon" href="themes/default/images/favicon.ico" />
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+<script type="text/javascript" src="./scripts/sourcebans.js"></script>
+<link href="themes/default/css/css.php" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="./scripts/mootools.js"></script>
+<script type="text/javascript" src="./scripts/contextMenoo.js"></script>
+
+
+
+	<script type="text/javascript">
+var xajaxRequestUri="./index.php";
+var xajaxDebug=false;
+var xajaxStatusMessages=false;
+var xajaxWaitCursor=true;
+var xajaxDefinedGet=0;
+var xajaxDefinedPost=1;
+var xajaxLoaded=false;
+function xajax_Plogin(){return xajax.call("Plogin", arguments, 1);}
+function xajax_ServerHostPlayers(){return xajax.call("ServerHostPlayers", arguments, 1);}
+function xajax_ServerHostProperty(){return xajax.call("ServerHostProperty", arguments, 1);}
+function xajax_ServerHostPlayers_list(){return xajax.call("ServerHostPlayers_list", arguments, 1);}
+function xajax_ServerPlayers(){return xajax.call("ServerPlayers", arguments, 1);}
+function xajax_LostPassword(){return xajax.call("LostPassword", arguments, 1);}
+function xajax_RefreshServer(){return xajax.call("RefreshServer", arguments, 1);}
+	</script>
+	<script type="text/javascript" src="scripts/xajax.js"></script>
+	<script type="text/javascript">
+window.setTimeout(function () { if (!xajaxLoaded) { alert('Error: the xajax Javascript file could not be included. Perhaps the URL is incorrect?\nURL: scripts/xajax.js'); } }, 6000);
+	</script>
+
+
+
+</head>
+<body>
+
+
+    <div style="background-color: #bab5b2;">
+	<div id="header">
+		<div id="head-logo">
+    		<a href="index.php">
+    			<img src="images/logos/sb-large.png" border="0" alt="SourceBans Logo" />
+    		</a>
+		</div>
+	</div>
+	</div>
+	<div id="tabsWrapper">
+		<div id="mainwrapper">
+            <div id="tabs">
+	            	                <div style="float: right;">
+	                    <ul>
+	                    	<li>
+	          	                <a style="background-color: #70B04A;" href='index.php?p=login'>Login</a>
+	          	            </li>
+	          	        </ul>
+	          	    </div>
+	                            <ul>	<li class="nonactive">
+		<a href="index.php?p=home" class="tip" title="Dashboard :: This page shows an overview of your bans and servers." target="_self">Dashboard </a>
+</li>
+
+		<li class="nonactive">
+		<a href="index.php?p=servers" class="tip" title="Servers :: All of your servers and their status can be viewed here" target="_self">Servers </a>
+</li>
+
+		<li class="active">
+		<a href="index.php?p=banlist" class="tip" title="Bans :: All of the bans in the database can be viewed from here." target="_self">Bans </a>
+</li>
+
+		<li class="nonactive">
+		<a href="index.php?p=commslist" class="tip" title="Comms :: All of the communication bans (such as chat gags and voice mutes) in the database can be viewed from here." target="_self">Comms </a>
+</li>
+
+		<li class="nonactive">
+		<a href="index.php?p=submit" class="tip" title="Report Player :: You can submit a demo or screenshot of a suspected cheater here. It will then be up for review by one of the admins" target="_self">Report Player </a>
+</li>
+
+		<li class="nonactive">
+		<a href="index.php?p=protest" class="tip" title="Appeal Ban :: Here you can appeal your ban. And prove your case as to why you should be unbanned." target="_self">Appeal Ban </a>
+</li>
+
+	</ul>
+        </div>
+	</div>
+</div>
+<div id="mainwrapper">
+<div id="innerwrapper">
+	<div id="navigation">
+		<div id="nav"></div>
+		<div id="search">
+			<form method="get" action="index.php">
+				<input type="hidden" name="p" value="banlist" />
+				<input class="searchbox" alt="Search Bans" name="searchText" type="text" onfocus="this.value='';" onblur="if (this.value=='') {this.value=' Search Bans...';}" value=" Search Bans..." />
+				<input type="submit" name="Submit" value="Search" style="cursor:pointer;" class="button" />
+			</form>
+			<form method="get" action="index.php">
+				<input type="hidden" name="p" value="commslist" />
+				<input class="searchbox" alt="Search Comms" name="searchText" type="text" onfocus="this.value='';" onblur="if (this.value=='') {this.value=' Search Comms...';}" value=" Search Comms... " />
+				<input type="submit" name="Submit" value="Search" style="cursor:pointer;" class="button" />
+			</form>
+		</div>
+	</div><div id="msg-red-debug" style="display:none;" >
+	<i><img src="./images/warning.png" alt="Warning" /></i>
+	<b>Debug</b>
+	<br />
+	<div id="debug-text">
+	</div>
+</div>
+
+<div id="dialog-placement" style="vertical-align:middle;display:none;opacity:0;text-align:center;width:892px;margin:0 auto;position:fixed !important;position:absolute;overflow:hidden;top:10px;left:100px;"> 
+<table width="460px" id="dialog-holder" class="dialog-holder" border="0" cellspacing="0" cellpadding="0" >
+	<tbody width="460px">
+	  <tr>
+	    <td class="dialog-topleft"></td>
+	    <td class="dialog-border"></td>
+	    <td class="dialog-topright"></td>
+	  </tr>
+	  <tr>
+	    <td class="dialog-border"></td>
+	    <td class="box-content">
+			<div id="dragbar" style="cursor:pointer">
+			<ilayer width="100%" onSelectStart="return false">
+			<layer width="100%" onMouseover="dragswitch=1;if (ns4) drag_drop_ns(dialog-placement)" onMouseout="dragswitch=0">
+	    	<h2 align="left" id="dialog-title" class="ok"></h2>
+	        </layer></ilayer></div>
+	        <div class="dialog-content" align="left">
+	        	<div class="dialog-body">
+	            	<div class="clearfix">
+	                    <div style="float: left; margin-right: 15px;" id="dialog-icon" class="icon-info">&nbsp;</div>
+	                    <div style="width:360px;float: right; padding-bottom: 5px; font-size: 11px;" id="dialog-content-text"></div>
+	                </div>
+	            </div>
+	            <div class="dialog-control" id="dialog-control">    
+	            </div>
+	        </div>
+		</td>
+	    <td class="dialog-border"></td>
+	  </tr>
+	  <tr>
+	    <td class="dialog-bottomleft"></td>
+	    <td class="dialog-border"></td>
+	    <td class="dialog-bottomright"></td>
+	  </tr>
+	</tbody>
+</table>
+</div>
+
+
+<div id="content_title">
+	<b>Bans</b>
+</div>
+<div id="breadcrumb">
+</div>
+<div id="content">
+<script type="text/javascript">$("breadcrumb").setHTML("&raquo; <a href='index.php?p=home'>Home</a> &raquo; <b>Bans</b>");</script>
+
+
+<h3 align="left">Banlist Overview - <i>Total Bans: 3</i></h3>
+<br />
+<div align="center">
+	<table width="50%" cellpadding="0" class="listtable" cellspacing="0">
+		<tr class="sea_open">
+			<td width="2%" height="16" class="listtable_top" colspan="3" style="text-align: center;"><b>Advanced Search</b> (Click)</td>
+	  	</tr>
+	  	<tr>
+	  		<td>
+	  		<div class="panel">
+	  			<table width="100%" cellpadding="0" class="listtable" cellspacing="0">
+			    <tr>
+					<td class="listtable_1" width="8%" align="center"><input id="name" name="search_type" type="radio" value="name"></td>
+			        <td class="listtable_1" width="26%">Nickname</td>
+			        <td class="listtable_1" width="66%"><input class="textbox" type="text" id="nick" value="" onmouseup="$('name').checked = true" style="width: 87%;"></td>
+				</tr>       
+			    <tr>
+			        <td align="center" class="listtable_1" ><input id="steam_" type="radio" name="search_type" value="radiobutton"></td>
+			        <td class="listtable_1" >Steam ID</td>
+			        <td class="listtable_1" >
+			            <input class="textbox" type="text" id="steamid" value="" onmouseup="$('steam_').checked = true"style="width: 50%; margin-right: 12px;"><select class="select" id="steam_match" onmouseup="$('steam_').checked = true" style="width: 33%;">
+				        <option value="0" selected>Exact Match</option>
+				        <option value="1">Partial Match</option>
+				    </select>
+				</td>
+			    </tr>
+							    <tr>
+			        <td align="center" class="listtable_1" ><input id="reason_" type="radio" name="search_type" value="radiobutton"></td>
+			        <td class="listtable_1" >Reason</td>
+			        <td class="listtable_1" ><input class="textbox" type="text" id="ban_reason" value="" onmouseup="$('reason_').checked = true" style="width: 87%;"></td>
+			    </tr>
+				<tr>
+					<td align="center" class="listtable_1" ><input id="date" type="radio" name="search_type" value="radiobutton"></td>
+			        <td class="listtable_1" >Date</td>
+			        <td class="listtable_1" >
+			        	<input class="textbox" type="text" id="day" value="DD" onmouseup="$('date').checked = true" maxlength="2" style="width: 22%;">
+			            <input class="textbox" type="text" id="month" value="MM" onmouseup="$('date').checked = true" maxlength="2" style="width: 22%;">
+			            <input class="textbox" type="text" id="year" value="YY" onmouseup="$('date').checked = true" maxlength="4" style="width: 24%;"> 
+			        </td>
+			  	</tr>
+				<tr>
+			        <td align="center" class="listtable_1" ><input id="length_" type="radio" name="search_type" value="radiobutton"></td>
+			        <td class="listtable_1" >Length</td>
+			        <td class="listtable_1" >
+						<table border="0" cellpadding="0" cellspacing="0">
+							<tr>
+								<td>
+						            <select class="select" id="length_type" onmouseup="$('length_').checked = true" style="width: 60px; margin-right: 12px;">
+										<option value="e" title="equal to">=</option>
+										<option value="h" title="greater">&gt;</option>
+										<option value="l" title="smaller">&lt;</option>
+										<option value="eh" title="equal to or greater">&gt;=</option>
+										<option value="el" title="equal to or smaller">&lt;=</option>
+									</select>
+								</td>
+								<td>
+									<input type="text" id="other_length" name="other_length" onmouseup="$('length_').checked = true" style="border: 1px solid #000000; font-size: 12px; background-color: rgb(215, 215, 215);width: 190px;display:none;">
+								</td>
+								<td>
+									<select class="select" id="length" onmouseup="$('length_').checked = true" onchange="switch_length(this);" onmouseover="if(this.options[this.selectedIndex].value=='other')$('length').setStyle('width', '210px');if(this.options[this.selectedIndex].value=='other')this.focus();" onblur="if(this.options[this.selectedIndex].value=='other')$('length').setStyle('width', '20px');" style="width: 127%;">
+								        <option value="0">Permanent</option>
+										<optgroup label="minutes">
+											<option value="1">1 minute</option>
+											<option value="5">5 minutes</option>
+											<option value="10">10 minutes</option>
+											<option value="15">15 minutes</option>
+											<option value="30">30 minutes</option>
+											<option value="45">45 minutes</option>
+										</optgroup>
+										<optgroup label="hours">
+											<option value="60">1 hour</option>
+											<option value="120">2 hours</option>
+											<option value="180">3 hours</option>
+											<option value="240">4 hours</option>
+											<option value="480">8 hours</option>
+											<option value="720">12 hours</option>
+										</optgroup>
+										<optgroup label="days">
+											<option value="1440">1 day</option>
+											<option value="2880">2 days</option>
+											<option value="4320">3 days</option>
+											<option value="5760">4 days</option>
+											<option value="7200">5 days</option>
+											<option value="8640">6 days</option>
+										</optgroup>
+										<optgroup label="weeks">
+											<option value="10080">1 week</option>
+											<option value="20160">2 weeks</option>
+											<option value="30240">3 weeks</option>
+										</optgroup>
+										<optgroup label="months">
+											<option value="40320">1 month</option>
+											<option value="80640">2 months</option>
+											<option value="120960">3 months</option>
+											<option value="241920">6 months</option>
+											<option value="483840">12 months</option>
+										</optgroup>
+										<option value="other">Other length in minutes</option>
+									</select>
+								</td>
+							</tr>
+						</table>
+					</td>
+			    </tr>
+				<tr>
+			        <td align="center" class="listtable_1" ><input id="ban_type_" type="radio" name="search_type" value="radiobutton"></td>
+			        <td class="listtable_1" >Type</td>
+			        <td class="listtable_1" >
+			            <select class="select" id="ban_type" onmouseup="$('ban_type_').checked = true" style="width: 95%;">
+					        <option value="0" selected>Steam ID</option>
+					        <option value="1">IP Address</option>
+						</select>
+					</td>
+			    </tr>
+                			    <tr>
+			    	<td class="listtable_1"  align="center"><input id="where_banned" name="search_type" type="radio" value="radiobutton"></td>
+					<td class="listtable_1" >Server</td>
+			        <td class="listtable_1" >
+						<select class="select" id="server" onmouseup="$('where_banned').checked = true" style="width: 95%;">
+						<option label="Web Ban" value="0">Web Ban</option>
+															<option value="1" id="ss1">Retrieving Hostname... (173.237.76.206:27015)</option>
+															<option value="2" id="ss2">Retrieving Hostname... (173.237.30.222:27015)</option>
+															<option value="3" id="ss3">Retrieving Hostname... (63.251.240.246:27015)</option>
+													</select>            
+					</td>
+			    </tr>
+							    <tr>
+			        <td colspan="4"><input type='button' onclick="search_bans();" name='searchbtn' class='btn ok searchbtn' onmouseover='ButtonOver("searchbtn")' onmouseout='ButtonOver("searchbtn")' id='searchbtn' value='Search' /></td>
+			    </tr>
+			   </table>
+			   </div>
+		  </td>
+		</tr>
+	</table>
+</div>
+<script type="text/javascript">xajax_ServerHostPlayers('1', 'id', 'ss1', '', '', false, 200);xajax_ServerHostPlayers('2', 'id', 'ss2', '', '', false, 200);xajax_ServerHostPlayers('3', 'id', 'ss3', '', '', false, 200);</script>
+<script>InitAccordion('tr.sea_open', 'div.panel', 'mainwrapper');</script><script type="text/javascript">
+function switch_length(opt)
+{
+    if (opt.options[opt.selectedIndex].value=='other') {
+        $('other_length').setStyle('display', 'block');
+        $('other_length').focus();
+        $('length').setStyle('width', '20px');
+    } else {
+        $('other_length').setStyle('display', 'none');
+        $('length').setStyle('width', '210px');
+    }
+}
+</script>
+<br />
+<div id="banlist-nav"><a href="index.php?p=banlist&hideinactive=true" title="Hide inactive">Hide inactive</a> | <i>Total Bans: 3</i></div>
+<div id="banlist">
+	<table width="100%" cellspacing="0" cellpadding="0" align="center" class="listtable">
+		<tr>
+						<td width="12%" height="16" class="listtable_top" align="center"><b>MOD/Country</b></td>
+			<td width="14%" height="16" class="listtable_top" align="center"><b>Date</b></td>
+			<td height="16" class="listtable_top"><b>Player</b></td>
+						<td width="10%" height="16" class="listtable_top" align="center"><b>Length</b></td>
+		</tr>
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">03-02-22 18:17</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Vorx/SmartBots.Net
+          		  </div>
+		  		          </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Vorx/SmartBots.Net
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:639731644
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1279463289]" target="_blank">[U:1:1279463289]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199239729017" target="_blank">76561199239729017</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">03-02-22 18:17</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Aimbot</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/web.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/zz.jpg" alt="Unknown Country" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">02-26-22 14:01</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Shroast
+          		  </div>
+		  		          </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_unbanned">2 wk (Expired)</td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Shroast
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="13" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:0:527258125
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1054516250]" target="_blank">[U:1:1054516250]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199014781978" target="_blank">76561199014781978</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">02-26-22 14:01</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">2 wk (Expired)</td>
+					        </tr>
+														<tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unban reason</td>
+					            <td height="16" class="listtable_1">
+																	<i><font color="#677882">no reason present</font></i>
+																</td>
+					        </tr>
+							 <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Unbanned by Admin</td>
+					            <td height="16" class="listtable_1">
+                                    										CONSOLE
+									                                </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							03-12-22 14:01
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">Inappropriate Language</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1" >
+																			Web Ban
+																	</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+					<tr class="opener tbl_out" onmouseout="this.className='tbl_out'" onmouseover="this.className='tbl_hover'"
+							onclick="xajax_ServerHostPlayers(2, 'id', 'host_9');"
+						>
+				<td height="16" align="center" class="listtable_1"><img src="images/games/tf2.png" alt="MOD" border="0" align="absmiddle" />&nbsp;<img src="images/country/br.jpg" alt="BR" border="0" align="absmiddle" /></td>
+        <td height="16" align="center" class="listtable_1">01-07-22 20:15</td>
+        <td height="16" class="listtable_1">
+		  <div style="float:left;">
+                      Tobbih
+          		  </div>
+		  		          </td>
+		        <td width="20%" height="16" align="center" class="listtable_1_permanent">Permanent </td>
+			</tr>
+			<!-- ###############[ Start Sliding Panel ]################## -->
+			<tr>
+        <td colspan="7" align="center">
+          <div class="opener">
+						<table width="100%" cellspacing="0" cellpadding="0" class="listtable">
+              <tr>
+                <td height="16" align="left" class="listtable_top" colspan="3">
+									<b>Ban Details</b>
+								</td>
+              </tr>
+              <tr align="left">
+                <td width="30%" height="16" class="listtable_1">Player</td>
+                <td height="16" class="listtable_1">
+                                      Tobbih
+                                  </td>
+                <!-- ###############[ Start Admin Controls ]################## -->
+                                <td width="30%" rowspan="11" class="listtable_2 opener">
+                  <div class="ban-edit">
+                    <ul>
+                      <li><a href="#" onclick="" target="_self"><img src="images/demo.png" border="0" alt="" style="vertical-align:middle" /> No Demos </a></li>
+                    </ul>
+                  </div>
+                </td>
+                                <!-- ###############[ End Admin Controls ]##################### -->
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam ID</td>
+                <td height="16" class="listtable_1">
+                                      STEAM_0:1:631337732
+                                  </td>
+              </tr>
+              <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam3 ID</td>
+                <td height="16" class="listtable_1">
+                                      <a href="http://steamcommunity.com/profiles/[U:1:1262675465]" target="_blank">[U:1:1262675465]</a>
+                                  </td>
+              </tr>
+                            <tr align="left">
+                <td width="20%" height="16" class="listtable_1">Steam Community</td>
+                <td height="16" class="listtable_1"><a href="http://steamcommunity.com/profiles/76561199222941193" target="_blank">76561199222941193</a></td>
+              </tr>
+                                          <tr align="left">
+								<td width="20%" height="16" class="listtable_1">Invoked on</td>
+								<td height="16" class="listtable_1">01-07-22 20:15</td>
+					        </tr>
+					        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Banlength</td>
+					            <td height="16" class="listtable_1">Permanent </td>
+					        </tr>
+												        <tr align="left">
+					            <td width="20%" height="16" class="listtable_1">Expires on</td>
+					            <td height="16" class="listtable_1">
+					            			     							<i><font color="#677882">Not applicable.</font></i>
+		     								     					</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Reason</td>
+								<td height="16" class="listtable_1">[Little Anti-Cheat 1.7.1] NoLerp detectado</td>
+							</tr>
+														<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Banned from</td>
+								<td height="16" class="listtable_1"  id="host_9">
+																			Please Wait...
+                                    								</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Total Bans</td>
+								<td height="16" class="listtable_1">No previous bans</td>
+							</tr>
+							<tr align="left">
+								<td width="20%" height="16" class="listtable_1">Blocked (0)</td>
+								<td height="16" class="listtable_1">
+																	<i><font color="#677882">never</font></i>
+																</td>
+							</tr>
+													</table>
+					</div>
+          		</td>
+          	</tr>
+          	<!-- ###############[ End Sliding Panel ]################## -->
+			</table>
+	<div id="banlist-nav">
+        displaying&nbsp;0&nbsp;-&nbsp;3&nbsp;of&nbsp;3&nbsp;results
+    </div>
+		</div>
+
+<script type="text/javascript">window.addEvent('domready', function(){
+InitAccordion('tr.opener', 'div.opener', 'mainwrapper');
+
+
+});
+</script>
+
+	</div></div></div>
+	<div id="footer">
+		<div id="mainwrapper" style="text-align: center;">
+			<a href="https://sbpp.github.io/" target="_blank"><img src="images/sb.png" alt="SourceBans" border="0" /></a><br/>
+			<div id="footqversion" style="line-height: 20px;"><a style="color: #C1C1C1" href="https://sbpp.github.io/" target="_blank">SourceBans++</a> 1.6.4</div>
+		    <span style="line-height: 20px;">Powered by <a href="http://www.sourcemod.net" target="_blank" style="color: #C1C1C1">SourceMod</a></span><br />
+		    <span style="line-height: 20px;">"I pity da fool" - <i>Mr. T</i><span>
+		</div>
+	</div>
+	</div>
+<script type="text/javascript">
+var settab = ProcessAdminTabs();
+window.addEvent('domready', function(){
+        var Tips2 = new Tips($$('.tip'), {
+            initialize:function(){
+                this.fx = new Fx.Style(this.toolTip, 'opacity', {duration: 300, wait: false}).set(0);
+            },
+            onShow: function(toolTip) {
+                this.fx.start(1);
+            },
+            onHide: function(toolTip) {
+                this.fx.start(0);
+            }
+        });
+        var Tips4 = new Tips($$('.perm'), {
+            className: 'perm'
+        });
+    });
+$('nav').setHTML('');    $('content_title').setHTML('Ban List');
+
+
+        </script>
+<!--[if lt IE 7]>
+<script defer type="text/javascript" src="./scripts/pngfix.js"></script>
+<![endif]-->
+</body>
+</html>
