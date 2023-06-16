@@ -188,7 +188,7 @@ func createScrapers() []*sbScraper {
 		newSirPleaseScraper(), newSkialScraper(), newSlavonServerScraper(), newSneaksScraper(), newSpaceShipScraper(),
 		newSpectreScraper(), newSvdosBrothersScraper(), newSwapShopScraper(), newTF2MapsScraper(), newTF2ROScraper(),
 		/*newTawernaScraper(),*/ newTheVilleScraper(), newTitanScraper(), newTriggerHappyScraper(), newUGCScraper(),
-		newVaticanCityScraper(), newVidyaGaemsScraper(), newVortexScraper(), newWonderlandTFGOOGScraper(), newZMBrasilScraper(),
+		newVaticanCityScraper(), newVidyaGaemsScraper(), newVortexScraper() /* newWonderlandTFGOOGScraper(),*/, newZMBrasilScraper(),
 		newZubatScraper(),
 	}
 }
