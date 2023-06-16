@@ -514,7 +514,6 @@ func (db *pgStore) sbSiteDelete(ctx context.Context, siteID int) error {
 func (db *pgStore) sbBanSave(ctx context.Context, s *sbBanRecord) error {
 	s.UpdatedOn = time.Now()
 	if s.BanID <= 0 {
-		s.CreatedOn = time.Now()
 		query, args, errSQL := sb.
 			Insert("sb_ban").
 			Columns("sb_site_id", "steam_id", "persona_name", "reason", "created_on", "duration", "permanent").
