@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/alecthomas/chroma"
 	"github.com/alecthomas/chroma/formatters/html"
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/alecthomas/chroma/styles"
@@ -88,7 +89,8 @@ func loadProfile(steamID steamid.SID64, profile *Profile) error {
 
 	_, errFriends := getSteamFriends(steamID)
 	if errFriends != nil {
-		return errBanState
+		logger.Debug("Failed to get friends", zap.Error(errFriends))
+		//return errBanState
 	}
 	//profile.Friends = friends
 
@@ -120,19 +122,45 @@ func handleGetProfile() gin.HandlerFunc {
 	}
 }
 
-func handleGetProfiles() gin.HandlerFunc {
-	style := styles.Get("monokai")
-	if style == nil {
-		style = styles.Fallback
-	}
-	formatter := html.New(html.WithClasses(true))
-	lexer := lexers.Get("json")
-	type tmplArgs struct {
-		name string
-		css  template.HTML
-		body template.HTML
-	}
+var (
+	style     *chroma.Style
+	formatter *html.Formatter
+	lexer     chroma.Lexer
+)
 
+func init() {
+	newStyle := styles.Get("monokai")
+	if newStyle == nil {
+		newStyle = styles.Fallback
+	}
+	style = newStyle
+	formatter = html.New(html.WithClasses(true))
+	lexer = lexers.Get("json")
+}
+
+type syntaxTemplate interface {
+	setCSS(css string)
+	setBody(css string)
+}
+
+type baseTmplArgs struct {
+	CSS  template.CSS
+	Body template.HTML
+}
+
+func (t *baseTmplArgs) setCSS(css string) {
+	t.CSS = template.CSS(css)
+}
+
+func (t *baseTmplArgs) setBody(html string) {
+	t.Body = template.HTML(html)
+}
+
+func handleGetProfiles() gin.HandlerFunc {
+	type profileArgs struct {
+		baseTmplArgs
+		Name string
+	}
 	return func(ctx *gin.Context) {
 		slug := ctx.Param("steam_id")
 		lCtx, cancel := context.WithTimeout(ctx, time.Second*10)
@@ -147,31 +175,35 @@ func handleGetProfiles() gin.HandlerFunc {
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to load profile")
 			return
 		}
-		jsonBody, errJSON := json.MarshalIndent(profile, "", "    ")
-		if errJSON != nil {
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to generate json")
-			return
-		}
-		iterator, errTokenize := lexer.Tokenise(nil, string(jsonBody))
-		if errTokenize != nil {
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to tokenise json")
-			return
-		}
-		cssBuf := bytes.NewBuffer(nil)
-		if errWrite := formatter.WriteCSS(cssBuf, style); errWrite != nil {
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to generate HTML")
-		}
-		bodyBuf := bytes.NewBuffer(nil)
-		if errFormat := formatter.Format(bodyBuf, style, iterator); errFormat != nil {
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to format json")
-			return
-		}
-		ctx.HTML(http.StatusOK, "profiles", tmplArgs{
-			name: profile.Summary.PersonaName,
-			css:  template.HTML(cssBuf.String()),
-			body: template.HTML(bodyBuf.String()),
+		renderSyntax(ctx, profile, "profiles", &profileArgs{
+			Name: profile.Summary.PersonaName,
 		})
 	}
+}
+
+func renderSyntax(ctx *gin.Context, value any, tmpl string, args syntaxTemplate) {
+	jsonBody, errJSON := json.MarshalIndent(value, "", "    ")
+	if errJSON != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to generate json")
+		return
+	}
+	iterator, errTokenize := lexer.Tokenise(nil, string(jsonBody))
+	if errTokenize != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to tokenise json")
+		return
+	}
+	cssBuf := bytes.NewBuffer(nil)
+	if errWrite := formatter.WriteCSS(cssBuf, style); errWrite != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to generate HTML")
+	}
+	bodyBuf := bytes.NewBuffer(nil)
+	if errFormat := formatter.Format(bodyBuf, style, iterator); errFormat != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to format json")
+		return
+	}
+	args.setCSS(cssBuf.String())
+	args.setBody(bodyBuf.String())
+	ctx.HTML(http.StatusOK, tmpl, args)
 }
 
 func apiErrorHandler(logger *zap.Logger) gin.HandlerFunc {
@@ -187,10 +219,10 @@ func createRouter() *gin.Engine {
 	tmplProfiles, errTmpl := template.New("profiles").Parse(`<!DOCTYPE html>
 <html>
 <head> 
-	<title>{{ .name }}</title>
-	<style> body {background-color: #272822;} {{ .style }} </style>
+	<title>{{ .Name }}</title>
+	<style> body {background-color: #272822;} {{ .CSS }} </style>
 </head>
-<body>{{ .body }}</body>
+<body>{{ .Body }}</body>
 </html>`)
 	if errTmpl != nil {
 		logger.Panic("Failed to parse html template", zap.Error(errTmpl))
