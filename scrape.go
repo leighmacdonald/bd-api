@@ -121,6 +121,10 @@ func (r *sbRecord) setExpiredOn(scraperName string, parseTime parseTimeFunc, val
 		return false
 	}
 	r.Length = t.Sub(r.CreatedOn)
+	if r.Length < 0 {
+		// Some temp ban/actions use a negative duration?, just invalidate these
+		r.SteamID = 0
+	}
 	return true
 }
 
@@ -780,23 +784,28 @@ func parseDefault(doc *goquery.Selection, parseTime parseTimeFunc, scraperName s
 	doc.Find("#banlist .listtable table tr td").Each(func(i int, selection *goquery.Selection) {
 		value := strings.TrimSpace(selection.Text())
 		if !isValue {
-			switch strings.ToLower(value) {
-			case "player":
+			key := normKey(value)
+			mk, found := getMappedKey(key)
+			if !found {
+				return
+			}
+			switch mk {
+			case keyPlayer:
 				curState = keyPlayer
 				isValue = true
-			case "steam community":
+			case keySteamCommunity:
 				curState = keySteamCommunity
 				isValue = true
-			case "invoked on":
+			case keyInvokedOn:
 				curState = keyInvokedOn
 				isValue = true
-			case "banlength":
+			case keyBanLength:
 				curState = keyBanLength
 				isValue = true
-			case "expires on":
+			case keyExpiredOn:
 				curState = keyExpiredOn
 				isValue = true
-			case "reason":
+			case keyReason:
 				curState = keyReason
 				isValue = true
 			}

@@ -15,18 +15,18 @@ func testParser(t *testing.T, scraper *sbScraper, count int, nextPage string) {
 	defer logCloser(testBody)
 	doc, errDoc := goquery.NewDocumentFromReader(testBody)
 	require.NoError(t, errDoc)
-
 	results, _, errParse := scraper.parser(doc.Selection, scraper.parseTIme, scraper.name)
-
 	require.NoError(t, errParse)
 	require.Equal(t, count, len(results))
 	if nextPage != "" {
 		next := scraper.nextURL(scraper, doc.Selection)
 		require.Equal(t, scraper.url(nextPage), next)
 	}
+
 	for _, d := range results {
 		require.NotEqual(t, "", d.Name)
 		require.Truef(t, d.SteamID.Valid(), "Invalid steamid: %s", d.SteamID.String())
+		require.True(t, d.Length >= 0, "negative duration")
 	}
 }
 
@@ -123,7 +123,7 @@ func TestApeMode(t *testing.T) {
 }
 
 func TestMaxDB(t *testing.T) {
-	testParser(t, newMaxDBScraper(), 27, "index.php?p=banlist&page=2")
+	testParser(t, newMaxDBScraper(), 26, "index.php?p=banlist&page=2")
 }
 
 func TestSvdosBrothers(t *testing.T) {
@@ -327,15 +327,15 @@ func TestGamesTown(t *testing.T) {
 }
 
 func TestProGamesZet(t *testing.T) {
-	testParser(t, newProGamesZetScraper(), 20, "index.php?p=banlist&page=2")
+	testParser(t, newProGamesZetScraper(), 16, "index.php?p=banlist&page=2")
 }
 
 func TestG44(t *testing.T) {
-	testParser(t, newG44Scraper(), 100, "index.php?p=banlist&page=2")
+	testParser(t, newG44Scraper(), 52, "index.php?p=banlist&page=2")
 }
 
 func TestCuteProject(t *testing.T) {
-	testParser(t, newCuteProjectScraper(), 30, "index.php?p=banlist&page=2")
+	testParser(t, newCuteProjectScraper(), 12, "index.php?p=banlist&page=2")
 }
 
 func TestPhoenixSource(t *testing.T) {
@@ -343,7 +343,7 @@ func TestPhoenixSource(t *testing.T) {
 }
 
 func TestSlavonServer(t *testing.T) {
-	testParser(t, newSlavonServerScraper(), 30, "index.php?p=banlist&page=2")
+	testParser(t, newSlavonServerScraper(), 26, "index.php?p=banlist&page=2")
 }
 
 func TestGetSome(t *testing.T) {
