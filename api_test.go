@@ -13,7 +13,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	if key, found := os.LookupEnv("STEAM_API_KEY"); found && key != "" {
+	if key, found := os.LookupEnv("BDAPI_STEAM_API_KEY"); found && key != "" {
 		if errKey := steamweb.SetKey(key); errKey != nil {
 			os.Exit(2)
 		}
@@ -22,7 +22,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestGetBans(t *testing.T) {
-	router := createRouter()
+	router := createRouter(testStore)
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/bans?steam_id=%d", testIDb4nny), nil)
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
@@ -37,7 +37,7 @@ func TestGetBans(t *testing.T) {
 }
 
 func TestGetSummary(t *testing.T) {
-	router := createRouter()
+	router := createRouter(testStore)
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/summary?steam_id=%d", testIDb4nny), nil)
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
@@ -52,7 +52,7 @@ func TestGetSummary(t *testing.T) {
 }
 
 func TestGetProfile(t *testing.T) {
-	router := createRouter()
+	router := createRouter(testStore)
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/profile?steam_id=%d", testIDb4nny), nil)
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)

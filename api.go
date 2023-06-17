@@ -158,7 +158,7 @@ func (t *baseTmplArgs) setBody(html string) {
 }
 func handleGetSourceBans(db *pgStore) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		sid, errSid := steamIdFromSlug(ctx)
+		sid, errSid := steamIDFromSlug(ctx)
 		if errSid != nil {
 			return
 		}
@@ -173,7 +173,7 @@ func handleGetSourceBans(db *pgStore) gin.HandlerFunc {
 	}
 }
 
-func steamIdFromSlug(ctx *gin.Context) (steamid.SID64, error) {
+func steamIDFromSlug(ctx *gin.Context) (steamid.SID64, error) {
 	slug := ctx.Param("steam_id")
 	lCtx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
@@ -187,7 +187,7 @@ func steamIdFromSlug(ctx *gin.Context) (steamid.SID64, error) {
 
 func handleGetProfiles() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		sid, errSid := steamIdFromSlug(ctx)
+		sid, errSid := steamIDFromSlug(ctx)
 		if errSid != nil {
 			return
 		}
