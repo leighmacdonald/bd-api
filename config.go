@@ -14,9 +14,9 @@ import (
 )
 
 type proxyConfig struct {
-	Username   string `yaml:"username"`
-	RemoteAddr string `yaml:"remote_addr"`
-	LocalAddr  string `yaml:"local_addr"`
+	Username   string `mapstructure:"username"`
+	RemoteAddr string `mapstructure:"remote_addr"`
+	LocalAddr  string `mapstructure:"local_addr"`
 	conn       *ssh.Client
 	socks      *socks5.Server
 	signer     ssh.Signer

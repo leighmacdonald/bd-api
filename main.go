@@ -35,7 +35,7 @@ func main() {
 		}
 		go startScrapers(ctx, &config, scrapers, db)
 	}
-	if errAPI := startAPI(ctx, config.ListenAddr); errAPI != nil {
+	if errAPI := startAPI(ctx, createRouter(db), config.ListenAddr); errAPI != nil {
 		logger.Error("HTTP server returned error", zap.Error(errAPI))
 	}
 }

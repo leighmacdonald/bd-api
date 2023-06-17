@@ -546,3 +546,28 @@ func (db *pgStore) sbBanSave(ctx context.Context, s *sbBanRecord) error {
 	}
 	return nil
 }
+
+func (db *pgStore) sbGetBansBySID(ctx context.Context, sid64 steamid.SID64) ([]sbBanRecord, error) {
+	query, args, errSQL := sb.
+		Select("sb_ban_id", "sb_site_id", "steam_id", "persona_name", "reason", "created_on", "duration", "permanent").
+		From("sb_ban").
+		Where(sq.Eq{"steam_id": sid64}).
+		ToSql()
+	if errSQL != nil {
+		return nil, errSQL
+	}
+	rows, errQuery := db.pool.Query(ctx, query, args...)
+	if errQuery != nil {
+		return nil, errQuery
+	}
+	defer rows.Close()
+	var records []sbBanRecord
+	for rows.Next() {
+		var r sbBanRecord
+		if errScan := rows.Scan(&r.BanID, &r.SiteID, &r.SteamID, &r.PersonaName, &r.Reason, &r.CreatedOn, &r.Duration, &r.Permanent); errScan != nil {
+			return nil, errScan
+		}
+		records = append(records, r)
+	}
+	return records, nil
+}

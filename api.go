@@ -144,8 +144,9 @@ type syntaxTemplate interface {
 }
 
 type baseTmplArgs struct {
-	CSS  template.CSS
-	Body template.HTML
+	CSS   template.CSS
+	Body  template.HTML
+	Title string
 }
 
 func (t *baseTmplArgs) setCSS(css string) {
@@ -155,32 +156,48 @@ func (t *baseTmplArgs) setCSS(css string) {
 func (t *baseTmplArgs) setBody(html string) {
 	t.Body = template.HTML(html)
 }
-func handleGetSourceBans() gin.HandlerFunc {
+func handleGetSourceBans(db *pgStore) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-
+		sid, errSid := steamIdFromSlug(ctx)
+		if errSid != nil {
+			return
+		}
+		bans, errBans := db.sbGetBansBySID(ctx, sid)
+		if errBans != nil {
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to query records")
+			return
+		}
+		renderSyntax(ctx, bans, "profiles", &baseTmplArgs{
+			Title: "source bans",
+		})
 	}
 }
-func handleGetProfiles() gin.HandlerFunc {
-	type profileArgs struct {
-		baseTmplArgs
-		Name string
+
+func steamIdFromSlug(ctx *gin.Context) (steamid.SID64, error) {
+	slug := ctx.Param("steam_id")
+	lCtx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+	sid64, errSid := steamid.ResolveSID64(lCtx, slug)
+	if errSid != nil {
+		ctx.AbortWithStatusJSON(http.StatusNotFound, "not found")
+		return 0, errSid
 	}
+	return sid64, nil
+}
+
+func handleGetProfiles() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		slug := ctx.Param("steam_id")
-		lCtx, cancel := context.WithTimeout(ctx, time.Second*10)
-		defer cancel()
-		sid64, errSid := steamid.ResolveSID64(lCtx, slug)
+		sid, errSid := steamIdFromSlug(ctx)
 		if errSid != nil {
-			ctx.AbortWithStatusJSON(http.StatusNotFound, "not found")
 			return
 		}
 		var profile Profile
-		if errProfile := loadProfile(sid64, &profile); errProfile != nil {
+		if errProfile := loadProfile(sid, &profile); errProfile != nil {
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to load profile")
 			return
 		}
-		renderSyntax(ctx, profile, "profiles", &profileArgs{
-			Name: profile.Summary.PersonaName,
+		renderSyntax(ctx, profile, "profiles", &baseTmplArgs{
+			Title: profile.Summary.PersonaName,
 		})
 	}
 }
@@ -219,11 +236,11 @@ func apiErrorHandler(logger *zap.Logger) gin.HandlerFunc {
 	}
 }
 
-func createRouter() *gin.Engine {
+func createRouter(db *pgStore) *gin.Engine {
 	tmplProfiles, errTmpl := template.New("profiles").Parse(`<!DOCTYPE html>
 <html>
 <head> 
-	<title>{{ .Name }}</title>
+	<title>{{ .Title }}</title>
 	<style> body {background-color: #272822;} {{ .CSS }} </style>
 </head>
 <body>{{ .Body }}</body>
@@ -239,13 +256,14 @@ func createRouter() *gin.Engine {
 	engine.GET("/summary", handleGetSummary())
 	engine.GET("/profile", handleGetProfile())
 	engine.GET("/profiles/:steam_id", handleGetProfiles())
+	engine.GET("/sourcebans/:steam_id", handleGetSourceBans(db))
 	return engine
 }
 
-func startAPI(ctx context.Context, addr string) error {
+func startAPI(ctx context.Context, router *gin.Engine, addr string) error {
 	httpServer := &http.Server{
 		Addr:           addr,
-		Handler:        createRouter(),
+		Handler:        router,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
