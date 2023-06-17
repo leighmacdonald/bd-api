@@ -517,7 +517,7 @@ func (db *pgStore) sbBanSave(ctx context.Context, s *sbBanRecord) error {
 		query, args, errSQL := sb.
 			Insert("sb_ban").
 			Columns("sb_site_id", "steam_id", "persona_name", "reason", "created_on", "duration", "permanent").
-			Values(s.SiteID, s.SteamID, s.PersonaName, s.Reason, s.CreatedOn, s.Duration, s.Permanent).
+			Values(s.SiteID, s.SteamID, s.PersonaName, s.Reason, s.CreatedOn, s.Duration.Seconds(), s.Permanent).
 			Suffix("RETURNING sb_ban_id").
 			ToSql()
 		if errSQL != nil {
@@ -534,7 +534,7 @@ func (db *pgStore) sbBanSave(ctx context.Context, s *sbBanRecord) error {
 			Set("persona_name", s.PersonaName).
 			Set("reason", s.Reason).
 			Set("created_on", s.CreatedOn).
-			Set("duration", s.Duration).
+			Set("duration", s.Duration.Seconds()).
 			Set("permanent", s.Permanent).
 			ToSql()
 		if errSQL != nil {
