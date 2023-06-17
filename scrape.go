@@ -6,6 +6,7 @@ import (
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/debug"
 	"github.com/gocolly/colly/extensions"
+	"github.com/gocolly/colly/queue"
 	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -160,6 +161,7 @@ type sbScraper struct {
 	log       *zap.Logger
 	curPage   int
 	results   []sbRecord
+	queue     *queue.Queue
 	resultsMu sync.RWMutex
 	baseURL   string
 	sleepTime time.Duration
@@ -237,16 +239,17 @@ func (scraper *sbScraper) start(ctx context.Context, db *pgStore) error {
 				time.Sleep(scraper.sleepTime)
 			}
 			scraper.log.Debug("Visiting next url", zap.String("url", nextURL))
-			if errVisit := e.Request.Visit(nextURL); errVisit != nil && !errors.Is(errVisit, colly.ErrAlreadyVisited) {
-				scraper.log.Error("Failed to visit sub url", zap.Error(errVisit), zap.String("url", nextURL))
-				return
+			if errAdd := scraper.queue.AddURL(nextURL); errAdd != nil {
+				scraper.log.Panic("Failed to add queue error", zap.Error(errAdd))
 			}
 		}
 	})
-	if errVisit := scraper.Visit(scraper.url(scraper.startPath)); errVisit != nil {
-		return errVisit
+	if errAdd := scraper.queue.AddURL(scraper.url(scraper.startPath)); errAdd != nil {
+		scraper.log.Panic("Failed to add queue error", zap.Error(errAdd))
 	}
-	scraper.Wait()
+	if errRun := scraper.queue.Run(scraper.Collector); errRun != nil {
+		scraper.log.Error("Queue returned error", zap.Error(errRun))
+	}
 	scraper.log.Info("Completed scrape job", zap.String("name", scraper.name), zap.Int("valid", len(scraper.results)), zap.Int("skipped", totalErrorCount), zap.Duration("duration", time.Since(startTime)))
 	return nil
 }
@@ -282,11 +285,16 @@ func newScraper(name string, baseURL string, startPath string, parser parserFunc
 		logger.Panic("Failed to parse base url", zap.Error(errURL))
 	}
 	debugLogger := scrapeLogger{logger: logger}
+	q, errQueue := queue.New(1, &queue.InMemoryQueueStorage{MaxSize: 10000})
+	if errQueue != nil {
+		logger.Panic("Filed to create queue")
+	}
 	scraper := sbScraper{
 		baseURL:   baseURL,
 		name:      name,
 		theme:     "default",
 		startPath: startPath,
+		queue:     q,
 		curPage:   1,
 		parser:    parser,
 		nextURL:   nextURL,
