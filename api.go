@@ -155,7 +155,11 @@ func (t *baseTmplArgs) setCSS(css string) {
 func (t *baseTmplArgs) setBody(html string) {
 	t.Body = template.HTML(html)
 }
+func handleGetSourceBans() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
 
+	}
+}
 func handleGetProfiles() gin.HandlerFunc {
 	type profileArgs struct {
 		baseTmplArgs

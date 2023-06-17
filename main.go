@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/leighmacdonald/steamweb"
 	"go.uber.org/zap"
 	"os"
 )
@@ -17,17 +16,8 @@ func main() {
 	}()
 	logger.Info("Starting...")
 	var config appConfig
-	if errConfig := readConfig("config.yml", &config); errConfig != nil {
+	if errConfig := readConfig(&config); errConfig != nil {
 		logger.Panic("Failed to load config", zap.Error(errConfig))
-	}
-	if errSetKey := steamweb.SetKey(config.SteamAPIKey); errSetKey != nil {
-		logger.Panic("Failed to set steam api key:", zap.Error(errSetKey))
-	}
-	if config.SteamAPIKey == "" {
-		logger.Panic("Must set STEAM_API_KEY")
-	}
-	if errSetKey := steamweb.SetKey(config.SteamAPIKey); errSetKey != nil {
-		logger.Panic("Failed to configure steam api key", zap.Error(errSetKey))
 	}
 	if !exists(cacheDir) {
 		if errMkDir := os.MkdirAll(cacheDir, 0755); errMkDir != nil {

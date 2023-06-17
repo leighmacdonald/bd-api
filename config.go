@@ -2,11 +2,14 @@ package main
 
 import (
 	"github.com/armon/go-socks5"
+	"github.com/gin-gonic/gin"
+	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/leighmacdonald/steamweb"
+	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/ssh"
-	"gopkg.in/yaml.v2"
 	"os"
 )
 
@@ -20,14 +23,15 @@ type proxyConfig struct {
 }
 
 type appConfig struct {
-	ListenAddr               string         `yaml:"listen_addr"`
-	SteamAPIKey              string         `yaml:"steam_api_key"`
-	DSN                      string         `yaml:"dsn"`
-	SourcebansScraperEnabled bool           `yaml:"sourcebans_scraper_enabled"`
-	ProxiesEnabled           bool           `json:"proxies_enabled"`
-	Proxies                  []*proxyConfig `yaml:"proxies"`
-	PrivateKeyPath           string         `yaml:"private_key_path"`
-	EnableCache              bool           `yaml:"enable_cache"`
+	ListenAddr               string         `mapstructure:"listen_addr"`
+	SteamAPIKey              string         `mapstructure:"steam_api_key"`
+	DSN                      string         `mapstructure:"dsn"`
+	RunMode                  string         `mapstructure:"run_mode"`
+	SourcebansScraperEnabled bool           `mapstructure:"sourcebans_scraper_enabled"`
+	ProxiesEnabled           bool           `mapstructure:"proxies_enabled"`
+	Proxies                  []*proxyConfig `mapstructure:"proxies"`
+	PrivateKeyPath           string         `mapstructure:"private_key_path"`
+	EnableCache              bool           `mapstructure:"enable_cache"`
 }
 
 func makeSigner(keyPath string) (ssh.Signer, error) {
@@ -54,26 +58,43 @@ func makeSigner(keyPath string) (ssh.Signer, error) {
 	return signer, nil
 }
 
-func readConfig(configFile string, config *appConfig) error {
-	cf, errCf := os.Open(configFile)
-	if errCf != nil {
-		return errCf
+func readConfig(config *appConfig) error {
+	if errReadConfig := viper.ReadInConfig(); errReadConfig != nil {
+		return errors.Wrapf(errReadConfig, "Failed to read config file")
 	}
-	defer logCloser(cf)
-	if errDecode := yaml.NewDecoder(cf).Decode(&config); errDecode != nil {
-		return errDecode
+	if errUnmarshal := viper.Unmarshal(config); errUnmarshal != nil {
+		return errors.Wrap(errUnmarshal, "Invalid config file format")
 	}
-	signer, errSigner := makeSigner(config.PrivateKeyPath)
-	if errSigner != nil {
-		return errors.Wrap(errSigner, "Failed to setup SSH signer")
+	gin.SetMode(config.RunMode)
+	if config.SteamAPIKey == "" {
+		return errors.New("Invalid steam api key [empty]")
 	}
-	for _, cfg := range config.Proxies {
-		cfg.signer = signer
+	if errSteam := steamid.SetKey(config.SteamAPIKey); errSteam != nil {
+		return errors.Errorf("Failed to set steamid key: %v", errSteam)
 	}
-	if key, found := os.LookupEnv("STEAM_API_KEY"); found && key != "" {
-		if errKey := steamweb.SetKey(key); errKey != nil {
-			return errKey
+	if errSteamWeb := steamweb.SetKey(config.SteamAPIKey); errSteamWeb != nil {
+		return errors.Errorf("Failed to set steamweb key: %v", errSteamWeb)
+	}
+	if config.ProxiesEnabled {
+		signer, errSigner := makeSigner(config.PrivateKeyPath)
+		if errSigner != nil {
+			return errors.Wrap(errSigner, "Failed to setup SSH signer")
+		}
+		for _, cfg := range config.Proxies {
+			cfg.signer = signer
 		}
 	}
 	return nil
+}
+
+func init() {
+	if home, errHomeDir := homedir.Dir(); errHomeDir == nil {
+		viper.AddConfigPath(home)
+	}
+	viper.AddConfigPath(".")
+	viper.SetConfigName("bdapi")
+	viper.SetConfigType("yml")
+	viper.SetEnvPrefix("bdapi")
+	//viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.AutomaticEnv()
 }
