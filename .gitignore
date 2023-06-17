@@ -1,4 +1,6 @@
 config.yml
-private.key
+*.key
 .cache
 .idea
+/bdapi.yml
+bd-api
