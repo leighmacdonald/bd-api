@@ -156,6 +156,7 @@ func (t *baseTmplArgs) setCSS(css string) {
 func (t *baseTmplArgs) setBody(html string) {
 	t.Body = template.HTML(html)
 }
+
 func handleGetSourceBans(db *pgStore) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		sid, errSid := steamIDFromSlug(ctx)
