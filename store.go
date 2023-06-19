@@ -93,7 +93,7 @@ func (db *pgStore) migrate() error {
 }
 
 type timeStamped struct {
-	UpdatedOn time.Time `json:"steam_updated_on"`
+	UpdatedOn time.Time `json:"-"`
 	CreatedOn time.Time `json:"created_on"`
 }
 
