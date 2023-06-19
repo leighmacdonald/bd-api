@@ -381,6 +381,7 @@ func newSBSite(name string) sbSite {
 
 type sbBanRecord struct {
 	BanID       int           `json:"ban_id"`
+	SiteName    string        `json:"site_name"`
 	SiteID      int           `json:"site_id"`
 	PersonaName string        `json:"persona_name"`
 	SteamID     steamid.SID64 `json:"steam_id"`
@@ -549,8 +550,9 @@ func (db *pgStore) sbBanSave(ctx context.Context, s *sbBanRecord) error {
 
 func (db *pgStore) sbGetBansBySID(ctx context.Context, sid64 steamid.SID64) ([]sbBanRecord, error) {
 	query, args, errSQL := sb.
-		Select("sb_ban_id", "sb_site_id", "steam_id", "persona_name", "reason", "created_on", "duration", "permanent").
-		From("sb_ban").
+		Select("b.sb_ban_id", "b.sb_site_id", "b.steam_id", "b.persona_name", "b.reason", "b.created_on", "b.duration", "b.permanent", "s.name").
+		From("sb_ban b").
+		LeftJoin("sb_site s ON b.sb_site_id = s.sb_site_id").
 		Where(sq.Eq{"steam_id": sid64}).
 		ToSql()
 	if errSQL != nil {
@@ -564,9 +566,11 @@ func (db *pgStore) sbGetBansBySID(ctx context.Context, sid64 steamid.SID64) ([]s
 	var records []sbBanRecord
 	for rows.Next() {
 		var r sbBanRecord
-		if errScan := rows.Scan(&r.BanID, &r.SiteID, &r.SteamID, &r.PersonaName, &r.Reason, &r.CreatedOn, &r.Duration, &r.Permanent); errScan != nil {
+		var d time.Duration
+		if errScan := rows.Scan(&r.BanID, &r.SiteID, &r.SteamID, &r.PersonaName, &r.Reason, &r.CreatedOn, &d, &r.Permanent, &r.SiteName); errScan != nil {
 			return nil, errScan
 		}
+		r.Duration = d * time.Second
 		records = append(records, r)
 	}
 	return records, nil
