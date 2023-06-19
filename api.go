@@ -204,6 +204,10 @@ func handleGetProfiles() gin.HandlerFunc {
 }
 
 func renderSyntax(ctx *gin.Context, value any, tmpl string, args syntaxTemplate) {
+	if ctx.GetHeader("Accept") == "application/json" {
+		ctx.JSON(http.StatusOK, value)
+		return
+	}
 	jsonBody, errJSON := json.MarshalIndent(value, "", "    ")
 	if errJSON != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to generate json")
