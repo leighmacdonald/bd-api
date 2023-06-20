@@ -15,6 +15,7 @@ import (
 	"html/template"
 	"net/http"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -204,7 +205,7 @@ func handleGetProfiles() gin.HandlerFunc {
 }
 
 func renderSyntax(ctx *gin.Context, value any, tmpl string, args syntaxTemplate) {
-	if ctx.GetHeader("Accept") == "application/json" {
+	if !strings.Contains(strings.ToLower(ctx.GetHeader("Accept")), "text/html") {
 		ctx.JSON(http.StatusOK, value)
 		return
 	}
