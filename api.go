@@ -10,7 +10,7 @@ import (
 	"github.com/alecthomas/chroma/styles"
 	"github.com/gin-gonic/gin"
 	"github.com/leighmacdonald/steamid/v2/steamid"
-	"github.com/leighmacdonald/steamweb"
+	"github.com/leighmacdonald/steamweb/v2"
 	"go.uber.org/zap"
 	"html/template"
 	"net/http"
@@ -32,7 +32,7 @@ func handleGetSummary() gin.HandlerFunc {
 			return
 		}
 		ids := steamid.Collection{sid64}
-		summaries, errSum := getSteamSummary(sid64)
+		summaries, errSum := getSteamSummary(ctx, sid64)
 		if errSum != nil || len(ids) != len(summaries) {
 			logger.Error("Failed to fetch summary",
 				zap.Error(errSum), zap.Int64("steam_id", sid64.Int64()))
@@ -56,7 +56,7 @@ func handleGetBans() gin.HandlerFunc {
 			return
 		}
 		ids := steamid.Collection{sid}
-		bans, errBans := steamweb.GetPlayerBans(ids)
+		bans, errBans := steamweb.GetPlayerBans(ctx, ids)
 		if errBans != nil || len(ids) != len(bans) {
 			logger.Error("Failed to fetch player bans",
 				zap.Error(errBans), zap.Int64("steam_id", sid.Int64()))
@@ -76,19 +76,19 @@ type Profile struct {
 	LogsCount int64                   `json:"logs_count"`
 }
 
-func loadProfile(steamID steamid.SID64, profile *Profile) error {
-	sum, errSum := getSteamSummary(steamID)
+func loadProfile(ctx context.Context, steamID steamid.SID64, profile *Profile) error {
+	sum, errSum := getSteamSummary(ctx, steamID)
 	if errSum != nil || len(sum) == 0 {
 		return errSum
 	}
 	profile.Summary = sum[0]
-	banState, errBanState := steamweb.GetPlayerBans(steamid.Collection{steamID})
+	banState, errBanState := steamweb.GetPlayerBans(ctx, steamid.Collection{steamID})
 	if errBanState != nil || len(banState) == 0 {
 		return errBanState
 	}
 	profile.BanState = banState[0]
 
-	_, errFriends := getSteamFriends(steamID)
+	_, errFriends := getSteamFriends(ctx, steamID)
 	if errFriends != nil {
 		logger.Debug("Failed to get friends", zap.Error(errFriends))
 		//return errBanState
@@ -114,7 +114,7 @@ func handleGetProfile() gin.HandlerFunc {
 			return
 		}
 		var profile Profile
-		if errProfile := loadProfile(sid64, &profile); errProfile != nil {
+		if errProfile := loadProfile(ctx, sid64, &profile); errProfile != nil {
 			logger.Error("Failed to load profile", zap.Error(errProfile))
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to fetch profile")
 			return
@@ -194,7 +194,7 @@ func handleGetProfiles() gin.HandlerFunc {
 			return
 		}
 		var profile Profile
-		if errProfile := loadProfile(sid, &profile); errProfile != nil {
+		if errProfile := loadProfile(ctx, sid, &profile); errProfile != nil {
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to load profile")
 			return
 		}

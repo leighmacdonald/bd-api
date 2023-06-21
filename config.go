@@ -4,7 +4,7 @@ import (
 	"github.com/armon/go-socks5"
 	"github.com/gin-gonic/gin"
 	"github.com/leighmacdonald/steamid/v2/steamid"
-	"github.com/leighmacdonald/steamweb"
+	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"

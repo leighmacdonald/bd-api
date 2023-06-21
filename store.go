@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/leighmacdonald/steamid/v2/steamid"
+	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"net/http"
@@ -118,28 +119,37 @@ type playerVanityRecord struct {
 	CreatedOn time.Time     `json:"created_on"`
 }
 
+type EconBanState int
+
+const (
+	EconBanNone EconBanState = iota
+	EconBanProbation
+	EconBanBanned
+)
+
 type playerRecord struct {
-	SteamID                  steamid.SID64 `json:"steam_id"`
-	CommunityVisibilityState int           `json:"community_visibility_state"`
-	ProfileState             int           `json:"profile_state"`
-	PersonaName              string        `json:"persona_name"`
-	Vanity                   string        `json:"vanity"`
-	AvatarHash               string        `json:"avatar_hash"`
-	PersonaState             int           `json:"persona_state"`
-	RealName                 string        `json:"real_name"`
-	TimeCreated              int           `json:"time_created"`
-	LocCountryCode           string        `json:"loc_country_code"`
-	LocStateCode             string        `json:"loc_state_code"`
-	LocCityID                int           `json:"loc_city_id"`
-	CommunityBanned          bool          `json:"community_banned"`
-	VacBanned                bool          `json:"vac_banned"`
-	GameBans                 int           `json:"game_bans"`
-	EconomyBanned            int           `json:"economy_banned"`
-	LogsTFCount              int           `json:"logstf_count"`
-	UGCUpdatedOn             time.Time     `json:"ugc_updated_on"`
-	RGLUpdatedOn             time.Time     `json:"rgl_updated_on"`
-	ETF2LUpdatedOn           time.Time     `json:"etf2l_updated_on"`
-	LogsTFUpdatedOn          time.Time     `json:"logs_tf_updated_on"`
+	SteamID                  steamid.SID64            `json:"steam_id"`
+	CommunityVisibilityState steamweb.VisibilityState `json:"community_visibility_state"`
+	ProfileState             steamweb.ProfileState    `json:"profile_state"`
+	PersonaName              string                   `json:"persona_name"`
+	Vanity                   string                   `json:"vanity"`
+	AvatarHash               string                   `json:"avatar_hash"`
+	PersonaState             steamweb.PersonaState    `json:"persona_state"`
+	RealName                 string                   `json:"real_name"`
+	TimeCreated              int                      `json:"time_created"`
+	LocCountryCode           string                   `json:"loc_country_code"`
+	LocStateCode             string                   `json:"loc_state_code"`
+	LocCityID                int                      `json:"loc_city_id"`
+	CommunityBanned          bool                     `json:"community_banned"`
+	VacBanned                bool                     `json:"vac_banned"`
+	LastBannedOn             time.Time                `json:"last_banned_on"`
+	GameBans                 int                      `json:"game_bans"`
+	EconomyBanned            EconBanState             `json:"economy_banned"`
+	LogsTFCount              int                      `json:"logstf_count"`
+	UGCUpdatedOn             time.Time                `json:"ugc_updated_on"`
+	RGLUpdatedOn             time.Time                `json:"rgl_updated_on"`
+	ETF2LUpdatedOn           time.Time                `json:"etf2l_updated_on"`
+	LogsTFUpdatedOn          time.Time                `json:"logs_tf_updated_on"`
 	isNewRecord              bool
 	timeStamped
 }
@@ -430,6 +440,42 @@ func (db *pgStore) playerGetOrCreate(ctx context.Context, sid64 steamid.SID64, r
 	}
 	r.isNewRecord = false
 	return nil
+}
+
+func (db *pgStore) playerGetExpiredProfiles(ctx context.Context, limit int) ([]playerRecord, error) {
+	query, args, errSQL := sb.
+		Select("steam_id", "community_visibility_state", "profile_state",
+			"persona_name", "vanity", "avatar_hash", "persona_state", "real_name", "time_created", "loc_country_code",
+			"loc_state_code", "loc_city_id", "community_banned", "vac_banned", "game_bans", "economy_banned",
+			"logstf_count", "ugc_updated_on", "rgl_updated_on", "etf2l_updated_on", "logstf_updated_on",
+			"steam_updated_on", "created_on").
+		From("player").
+		Where(sq.Lt{"steam_updated_on": time.Since(time.Now().AddDate(0, 0, 1))}).
+		OrderBy("steam_updated_on desc").
+		Limit(uint64(limit)).
+		ToSql()
+	if errSQL != nil {
+		return nil, errSQL
+	}
+	rows, errRows := db.pool.Query(ctx, query, args...)
+	if errRows != nil {
+		return nil, errRows
+	}
+	defer rows.Close()
+	var records []playerRecord
+	for rows.Next() {
+		var r playerRecord
+		if errQuery := db.pool.QueryRow(ctx, query, args...).
+			Scan(&r.SteamID, &r.CommunityVisibilityState, &r.ProfileState,
+				&r.PersonaName, &r.Vanity, &r.AvatarHash, &r.PersonaState, &r.RealName, &r.TimeCreated, &r.LocCountryCode,
+				&r.LocStateCode, &r.LocCityID, &r.CommunityBanned, &r.VacBanned, &r.GameBans, &r.EconomyBanned,
+				&r.LogsTFCount, &r.UGCUpdatedOn, &r.RGLUpdatedOn, &r.ETF2LUpdatedOn, &r.LogsTFUpdatedOn,
+				&r.timeStamped.UpdatedOn, &r.timeStamped.CreatedOn); errQuery != nil {
+			return nil, errQuery
+		}
+		records = append(records, r)
+	}
+	return records, nil
 }
 
 func (db *pgStore) sbSiteGetOrCreate(ctx context.Context, name string, s *sbSite) error {

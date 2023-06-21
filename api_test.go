@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/leighmacdonald/steamweb"
+	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
@@ -48,7 +48,7 @@ func TestGetSummary(t *testing.T) {
 	var bs []steamweb.PlayerSummary
 	require.NoError(t, json.Unmarshal(data, &bs))
 	sid := testIDb4nny
-	require.Equal(t, sid.String(), bs[0].Steamid)
+	require.Equal(t, sid.String(), bs[0].SteamID)
 }
 
 func TestGetProfile(t *testing.T) {
@@ -64,6 +64,6 @@ func TestGetProfile(t *testing.T) {
 	require.NoError(t, json.Unmarshal(data, &profile))
 	sid := testIDb4nny
 	require.Equal(t, "none", profile.BanState.EconomyBan)
-	require.Equal(t, sid.String(), profile.Summary.Steamid)
+	require.Equal(t, sid.String(), profile.Summary.SteamID)
 	//require.True(t, len(profile.Friends) > 0)
 }
