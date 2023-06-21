@@ -4,18 +4,19 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/leighmacdonald/steamid/v2/steamid"
 	"io"
 	"sort"
-)
 
-//var reETF2L = regexp.MustCompile(`.org/forum/user/(\d+)`)
+	"github.com/leighmacdonald/steamid/v2/steamid"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
+)
 
 type comp struct {
 	Category    string `json:"category"`
 	Competition string `json:"competition"`
 	Division    struct {
-		Name interface{} `json:"name"`
+		Name string      `json:"name"`
 		Tier interface{} `json:"tier"`
 	} `json:"division"`
 	URL string `json:"url"`
@@ -72,37 +73,46 @@ type etf2lPlayer struct {
 	} `json:"status"`
 }
 
-func sortSeasons(s []Season) []Season {
-	sort.Slice(s, func(i, j int) bool {
-		return s[i].DivisionInt < s[j].DivisionInt
+func sortSeasons(seasons []Season) []Season {
+	sort.Slice(seasons, func(i, j int) bool {
+		return seasons[i].DivisionInt < seasons[j].DivisionInt
 	})
-	return s
+
+	return seasons
 }
 
 func getETF2L(ctx context.Context, sid steamid.SID64) ([]Season, error) {
 	url := fmt.Sprintf("https://api.etf2l.org/player/%d.json", sid.Int64())
+
 	var player etf2lPlayer
+
 	resp, errGet := get(ctx, url, nil)
 	if errGet != nil {
 		return nil, errGet
 	}
-	b, errRead := io.ReadAll(resp.Body)
+
+	body, errRead := io.ReadAll(resp.Body)
 	if errRead != nil {
-		return nil, errRead
+		return nil, errors.Wrap(errRead, "Failed to read response body")
 	}
+
 	defer logCloser(resp.Body)
-	if errUnmarshal := json.Unmarshal(b, &player); errUnmarshal != nil {
-		return nil, errUnmarshal
+
+	if errUnmarshal := json.Unmarshal(body, &player); errUnmarshal != nil {
+		return nil, errors.Wrap(errUnmarshal, "Failed to decode response body")
 	}
+
 	seasons, errParse := parseETF2L(player)
 	if errParse != nil {
 		return nil, errParse
 	}
+
 	return seasons, nil
 }
 
 func parseETF2L(player etf2lPlayer) ([]Season, error) {
 	var seasons []Season
+
 	for _, team := range player.Player.Teams {
 		for _, competition := range team.Competitions {
 			var (
@@ -110,7 +120,8 @@ func parseETF2L(player etf2lPlayer) ([]Season, error) {
 				divStr = competition.Competition
 				format = "N/A"
 			)
-			if competition.Division.Name != nil {
+
+			if competition.Division.Name != "" {
 				switch competition.Division.Name {
 				case "Open":
 					div = ETF2LOpen
@@ -134,15 +145,17 @@ func parseETF2L(player etf2lPlayer) ([]Season, error) {
 					div = ETF2LPremiership
 					divStr = "Premiership"
 				default:
-					fmt.Printf("Unknown etf2l div: %s\n", competition.Division.Name)
+					logger.Warn("Unknown etf2l div", zap.String("div", competition.Division.Name))
 				}
 			}
+
 			switch team.Type {
 			case "Highlander":
 				format = "Highlander"
 			case "6on6":
 				format = "6s"
 			}
+
 			seasons = append(seasons, Season{
 				League:      "ETF2L",
 				Division:    divStr,
@@ -152,5 +165,6 @@ func parseETF2L(player etf2lPlayer) ([]Season, error) {
 			})
 		}
 	}
+
 	return sortSeasons(seasons), nil
 }

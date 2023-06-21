@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 func newSkialScraper() *sbScraper {
@@ -62,17 +63,26 @@ func newWonderlandTFScraper() *sbScraper {
 		parseDefault, nextURLLast, parseWonderlandTime)
 }
 
-// Uses google cache since cloudflare will restrict access
+// Uses google cache since cloudflare will restrict access.
 func newWonderlandTFGOOGScraper() *sbScraper {
-	s := newScraper("wonderland_goog", "https://webcache.googleusercontent.com/search?q=cache:https://bans.wonderland.tf/", "index.php?p=banlist",
-		parseDefault, nextURLLast, parseWonderlandTime)
-	s.sleepTime = time.Second * 10
+	const siteSleepTime = time.Second * 10
+
+	scraper := newScraper(
+		"wonderland_goog",
+		"https://webcache.googleusercontent.com/search?q=cache:https://bans.wonderland.tf/",
+		"index.php?p=banlist",
+		parseDefault,
+		nextURLLast,
+		parseWonderlandTime)
+	scraper.sleepTime = siteSleepTime
 	// Cached versions do not have a proper next link, so we have to generate one.
-	s.nextURL = func(scraper *sbScraper, doc *goquery.Selection) string {
-		s.curPage++
-		return s.url(fmt.Sprintf("index.php?p=banlist&page=%d", s.curPage))
+	scraper.nextURL = func(scraper *sbScraper, doc *goquery.Selection) string {
+		scraper.curPage++
+
+		return scraper.url(fmt.Sprintf("index.php?p=banlist&page=%d", scraper.curPage))
 	}
-	return s
+
+	return scraper
 }
 
 func newLazyPurpleScraper() *sbScraper {
@@ -124,6 +134,7 @@ func newCutiePieScraper() *sbScraper {
 	return newScraper("cutiepie", "https://bans.cutiepie.tf/", "index.php?p=banlist",
 		parseDefault, nextURLLast, parseDefaultTime)
 }
+
 func newSGGamingScraper() *sbScraper {
 	return newScraper("sggaming", "https://sg-gaming.net/bans/", "index.php?p=banlist",
 		parseDefault, nextURLLast, parseSGGamingTime)
@@ -337,7 +348,7 @@ func newDiscFFScraper() *sbScraper {
 }
 
 // TODO Has unique theme...
-//func NewOtakuScraper() *sbScraper {
+// func NewOtakuScraper() *sbScraper {
 //	return newScraper("otaku", "https://bans.otaku.tf/bans", "",
 //		parseDefault, nextURLLast, parseOtakuTime)
 //}
@@ -398,10 +409,13 @@ func newG44Scraper() *sbScraper {
 }
 
 func newCuteProjectScraper() *sbScraper {
-	s := newScraper("cuteproject", "https://bans.cute-project.net/", "index.php?p=banlist",
+	const siteSleepTime = time.Second * 4
+
+	scraper := newScraper("cuteproject", "https://bans.cute-project.net/", "index.php?p=banlist",
 		parseMaterial, nextURLLast, parseProGamesZetTime)
-	s.sleepTime = time.Second * 4
-	return s
+	scraper.sleepTime = siteSleepTime
+
+	return scraper
 }
 
 func newPhoenixSourceScraper() *sbScraper {

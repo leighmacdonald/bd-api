@@ -2,38 +2,46 @@ package main
 
 import (
 	"context"
+
 	"github.com/leighmacdonald/rgl"
 	"github.com/leighmacdonald/steamid/v2/steamid"
+	"github.com/pkg/errors"
 )
 
 func getRGL(ctx context.Context, sid64 steamid.SID64) ([]Season, error) {
 	_, errProfile := rgl.Profile(ctx, sid64)
 	if errProfile != nil {
-		return nil, errProfile
+		return nil, errors.Wrap(errProfile, "Failed tp fetch profile")
 	}
+
 	teams, errTeams := rgl.ProfileTeams(ctx, sid64)
 	if errTeams != nil {
-		return nil, errTeams
+		return nil, errors.Wrap(errTeams, "Failed to fetch teams")
 	}
-	var seasons []Season
-	for _, team := range teams {
+
+	seasons := make([]Season, len(teams))
+
+	for index, team := range teams {
 		var season Season
+
 		seasonInfo, errSeason := rgl.Season(ctx, team.SeasonId)
 		if errSeason != nil {
-			return nil, errSeason
+			return nil, errors.Wrap(errSeason, "Failed to fetch seasons")
 		}
+
 		season.League = "rgl"
 		season.Division = seasonInfo.Name
 		season.DivisionInt = parseRGLDivision(team.DivisionName)
 		season.TeamName = team.TeamName
 		season.Format = seasonInfo.FormatName
-		seasons = append(seasons, season)
+		seasons[index] = season
 	}
+
 	return seasons, nil
 }
 
+//nolint:cyclop
 func parseRGLDivision(div string) Division {
-
 	switch div {
 	case "RGL-Invite":
 		fallthrough
@@ -68,5 +76,4 @@ func parseRGLDivision(div string) Division {
 	default:
 		return RGLRankNone
 	}
-
 }

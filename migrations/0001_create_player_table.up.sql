@@ -10,7 +10,7 @@ create table if not exists player
     avatar_hash                text          not null,
     persona_state              int           not null,
     real_name                  text          not null,
-    time_created               int           not null,
+    time_created               timestamp     not null,
     loc_country_code           text          not null,
     loc_state_code             text          not null,
     loc_city_id                int           not null,

@@ -1,16 +1,17 @@
 package main
 
 import (
+	"os"
+
+	"github.com/mitchellh/go-homedir"
+
 	"github.com/armon/go-socks5"
 	"github.com/gin-gonic/gin"
 	"github.com/leighmacdonald/steamid/v2/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
-	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
 	"golang.org/x/crypto/ssh"
-	"os"
 )
 
 type proxyConfig struct {
@@ -34,67 +35,76 @@ type appConfig struct {
 	EnableCache              bool           `mapstructure:"enable_cache"`
 }
 
-func makeSigner(keyPath string) (ssh.Signer, error) {
+func makeSigner(keyPath string) (ssh.Signer, error) { //nolint:ireturn
 	privateKeyBody, errPKBody := os.ReadFile(keyPath)
 	if errPKBody != nil {
-		logger.Panic("Cannot read private key", zap.String("path", keyPath))
+		return nil, errors.Wrap(errPKBody, "Cannot read private key")
 	}
-	var signer ssh.Signer
-	key, keyFound := os.LookupEnv("PASSWORD")
 
+	var signer ssh.Signer
+
+	key, keyFound := os.LookupEnv("PASSWORD")
 	if keyFound {
 		newSigner, errSigner := ssh.ParsePrivateKeyWithPassphrase(privateKeyBody, []byte(key))
 		if errSigner != nil {
-			logger.Panic("Failed to parse private key", zap.Error(errSigner))
+			return nil, errors.Wrap(errSigner, "Failed to parse private key")
 		}
+
 		signer = newSigner
 	} else {
 		newSigner, errSigner := ssh.ParsePrivateKey(privateKeyBody)
 		if errSigner != nil {
-			logger.Panic("Failed to parse private key", zap.Error(errSigner))
+			return nil, errors.Wrap(errSigner, "Failed to parse private key")
 		}
 		signer = newSigner
 	}
+
 	return signer, nil
 }
 
 func readConfig(config *appConfig) error {
+	if home, errHomeDir := homedir.Dir(); errHomeDir == nil {
+		viper.AddConfigPath(home)
+	}
+
+	viper.AddConfigPath(".")
+	viper.SetConfigName("bdapi")
+	viper.SetConfigType("yml")
+	viper.SetEnvPrefix("bdapi")
+	viper.AutomaticEnv()
+
 	if errReadConfig := viper.ReadInConfig(); errReadConfig != nil {
 		return errors.Wrapf(errReadConfig, "Failed to read config file")
 	}
+
 	if errUnmarshal := viper.Unmarshal(config); errUnmarshal != nil {
 		return errors.Wrap(errUnmarshal, "Invalid config file format")
 	}
+
 	gin.SetMode(config.RunMode)
+
 	if config.SteamAPIKey == "" {
 		return errors.New("Invalid steam api key [empty]")
 	}
+
 	if errSteam := steamid.SetKey(config.SteamAPIKey); errSteam != nil {
 		return errors.Errorf("Failed to set steamid key: %v", errSteam)
 	}
+
 	if errSteamWeb := steamweb.SetKey(config.SteamAPIKey); errSteamWeb != nil {
 		return errors.Errorf("Failed to set steamweb key: %v", errSteamWeb)
 	}
+
 	if config.ProxiesEnabled {
 		signer, errSigner := makeSigner(config.PrivateKeyPath)
 		if errSigner != nil {
 			return errors.Wrap(errSigner, "Failed to setup SSH signer")
 		}
+
 		for _, cfg := range config.Proxies {
 			cfg.signer = signer
 		}
 	}
-	return nil
-}
 
-func init() {
-	if home, errHomeDir := homedir.Dir(); errHomeDir == nil {
-		viper.AddConfigPath(home)
-	}
-	viper.AddConfigPath(".")
-	viper.SetConfigName("bdapi")
-	viper.SetConfigType("yml")
-	viper.SetEnvPrefix("bdapi")
-	//viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	viper.AutomaticEnv()
+	return nil
 }

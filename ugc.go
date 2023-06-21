@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/leighmacdonald/steamid/v2/steamid"
-	"github.com/pkg/errors"
 	"io"
 	"regexp"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/leighmacdonald/steamid/v2/steamid"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -25,25 +26,33 @@ func getUGC(ctx context.Context, steam steamid.SID64) ([]Season, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "Failed to get ugc response: %v", err)
 	}
-	b, errRead := io.ReadAll(resp.Body)
+
+	body, errRead := io.ReadAll(resp.Body)
 	if errRead != nil {
 		return nil, errors.Wrapf(errRead, "Failed to read response body: %v", errRead)
 	}
+
 	defer logCloser(resp.Body)
-	seasons, errSeasons := parseUGCRank(string(b))
+
+	seasons, errSeasons := parseUGCRank(string(body))
 	if errSeasons != nil {
 		return seasons, errors.Wrapf(errSeasons, "Failed to parse ugc response: %v", errSeasons)
 	}
+
 	return seasons, nil
 }
 
 func parseUGCRank(body string) ([]Season, error) {
+	dom, errReader := goquery.NewDocumentFromReader(strings.NewReader(body))
+	if errReader != nil {
+		return nil, errors.Wrap(errReader, "Failed to create doc reader")
+	}
+
 	var seasons []Season
-	dom, _ := goquery.NewDocumentFromReader(strings.NewReader(body))
+
 	dom.Find("h5").Each(func(i int, selection *goquery.Selection) {
 		text := selection.Text()
 		if text == ugcHLHeader || text == ugc6sHeader || text == ugc4sHeader {
-			//ugcRank := UGCRankNone
 			selection.Next().ChildrenFiltered("li").Each(func(i int, selection *goquery.Selection) {
 				curRank, curRankStr := parseRankField(selection.Text())
 				var format string
@@ -60,17 +69,22 @@ func parseUGCRank(body string) ([]Season, error) {
 					Division:    curRankStr,
 					DivisionInt: curRank,
 					Format:      format,
+					TeamName:    "",
 				})
 			})
 		}
 	})
+
 	return seasons, nil
 }
 
 func parseRankField(field string) (Division, string) {
-	info := strings.Split(strings.Replace(field, "\n\n", "", -1), "\n")
+	const expectedFieldCount = 4
+
+	info := strings.Split(strings.ReplaceAll(field, "\n\n", ""), "\n")
+
 	results := reUGCRank.FindStringSubmatch(info[0])
-	if len(results) == 4 {
+	if len(results) == expectedFieldCount {
 		switch results[3] {
 		case "Platinum":
 			return UGCRankPlatinum, "platinum"
@@ -84,5 +98,6 @@ func parseRankField(field string) (Division, string) {
 			return UGCRankIron, "iron"
 		}
 	}
+
 	return UGCRankNone, ""
 }

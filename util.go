@@ -1,9 +1,10 @@
 package main
 
 import (
-	"go.uber.org/zap"
 	"io"
 	"os"
+
+	"go.uber.org/zap"
 )
 
 func logCloser(closer io.Closer) {
@@ -16,5 +17,6 @@ func exists(filePath string) bool {
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		return false
 	}
+
 	return true
 }

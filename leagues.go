@@ -1,9 +1,9 @@
 package main
 
-// Division tries to define a generalized ranked division order
+// Division tries to define a generalized ranked division order.
 type Division int
 
-// *Rough* mapping of skill for each division for sorting, 0 being invite
+// *Rough* mapping of skill for each division for sorting, 0 being invite.
 const (
 	RGLRankInvite       Division = 0
 	ETF2LPremiership    Division = 0
@@ -30,18 +30,18 @@ const (
 	UnknownDivision     Division = 20
 )
 
-// League represents supported leagues
+// League represents supported leagues.
 type League string
 
 //
-//const (
+// const (
 //	leagueUGC   League = "ugc"
 //	leagueESEA  League = "esea"
 //	leagueETF2L League = "etf2l"
 //	leagueRGL   League = "rgl"
 //)
 
-// Season stores generalized league season data
+// Season stores generalized league season data.
 type Season struct {
 	League      League   `json:"league"`
 	Division    string   `json:"division"`
