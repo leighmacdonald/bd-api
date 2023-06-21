@@ -77,11 +77,14 @@ func getSteamSummary(ctx context.Context, steamID steamid.SID64) ([]steamweb.Pla
 }
 
 func profileUpdater(ctx context.Context, database *pgStore, inChan <-chan steamid.SID64) {
-	const maxQueuedCount = 100
+	const (
+		maxQueuedCount = 100
+		updateInterval = time.Second * 5
+	)
 
 	var updateQueue steamid.Collection
 
-	updateTicker := time.NewTicker(time.Second * 5)
+	updateTicker := time.NewTicker(updateInterval)
 	triggerUpdate := make(chan any)
 
 	for {
@@ -97,7 +100,7 @@ func profileUpdater(ctx context.Context, database *pgStore, inChan <-chan steami
 			var expiredIds steamid.Collection
 			expiredIds = append(expiredIds, updateQueue...)
 
-			expiredProfiles, errProfiles := database.playerGetExpiredProfiles(ctx, 100-len(expiredIds))
+			expiredProfiles, errProfiles := database.playerGetExpiredProfiles(ctx, maxQueuedCount-len(expiredIds))
 			if errProfiles != nil {
 				logger.Error("Failed to fetch expired profiles", zap.Error(errProfiles))
 			}
@@ -143,6 +146,7 @@ func profileUpdater(ctx context.Context, database *pgStore, inChan <-chan steami
 						break
 					}
 				}
+
 				for _, ban := range bans {
 					if ban.SteamID == profile.SteamID {
 						profile.applyBans(ban)
@@ -150,6 +154,7 @@ func profileUpdater(ctx context.Context, database *pgStore, inChan <-chan steami
 						break
 					}
 				}
+
 				if errSave := database.playerRecordSave(ctx, &profile); errSave != nil {
 					logger.Error("Failed to update profile", zap.Int64("sid", profile.SteamID.Int64()), zap.Error(errSave))
 				}

@@ -165,7 +165,9 @@ func init() {
 	if newStyle == nil {
 		newStyle = styles.Fallback
 	}
+
 	style = newStyle
+
 	formatter = html.New(html.WithClasses(true))
 	lexer = lexers.Get("json")
 }

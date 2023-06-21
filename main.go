@@ -68,8 +68,10 @@ func init() {
 	logCfg := zap.NewProductionConfig()
 	logCfg.DisableStacktrace = true
 	newLogger, errLogger := logCfg.Build()
+
 	if errLogger != nil {
 		panic(errLogger)
 	}
+
 	logger = newLogger
 }

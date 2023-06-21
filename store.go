@@ -28,7 +28,7 @@ var (
 	// ErrDuplicate is returned when a duplicate row result is attempted to be inserted
 	// errDuplicate = errors.New("Duplicate entity")
 	// Use $ for pg based queries.
-	sb = sq.StatementBuilder.PlaceholderFormat(sq.Dollar) //nolint:gochecknoglobals
+	sb = sq.StatementBuilder.PlaceholderFormat(sq.Dollar) //nolint:gochecknoglobals,varnamelen
 	//go:embed migrations
 	migrations embed.FS
 
@@ -309,7 +309,7 @@ func playerVanitySave(ctx context.Context, transaction pgx.Tx, record *playerRec
 	return nil
 }
 
-// nolint:dupl
+//nolint:dupl
 func (db *pgStore) playerGetNames(ctx context.Context, sid64 steamid.SID64) ([]playerNameRecord, error) {
 	query, args, errSQL := sb.
 		Select("name_id", "persona_name", "created_on").
@@ -341,6 +341,7 @@ func (db *pgStore) playerGetNames(ctx context.Context, sid64 steamid.SID64) ([]p
 	return records, nil
 }
 
+//nolint:dupl
 func (db *pgStore) playerGetAvatars(ctx context.Context, sid64 steamid.SID64) ([]playerAvatarRecord, error) {
 	query, args, errSQL := sb.
 		Select("avatar_id", "avatar_hash", "created_on").

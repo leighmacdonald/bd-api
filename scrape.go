@@ -39,7 +39,7 @@ func initScrapers(ctx context.Context, db *pgStore, scrapers []*sbScraper) error
 }
 
 func startScrapers(ctx context.Context, config *appConfig, scrapers []*sbScraper,
-	db *pgStore, profileUpdateQueue chan steamid.SID64,
+	database *pgStore, profileUpdateQueue chan steamid.SID64,
 ) {
 	const scraperInterval = time.Hour * 24
 
@@ -64,7 +64,7 @@ func startScrapers(ctx context.Context, config *appConfig, scrapers []*sbScraper
 			go func(s *sbScraper) {
 				defer waitGroup.Done()
 
-				if errScrape := s.start(ctx, db, profileUpdateQueue); errScrape != nil {
+				if errScrape := s.start(ctx, database, profileUpdateQueue); errScrape != nil {
 					s.log.Error("Scraper returned error", zap.Error(errScrape))
 				}
 			}(scraper)
@@ -128,14 +128,14 @@ func (r *sbRecord) setExpiredOn(scraperName string, parseTime parseTimeFunc, val
 		return
 	}
 
-	t, errTime := parseTime(value)
+	parsedTime, errTime := parseTime(value)
 	if errTime != nil {
 		logger.Error("Failed to parse expire time", zap.Error(errTime), zap.String("scraper", scraperName))
 
 		return
 	}
 
-	r.Length = t.Sub(r.CreatedOn)
+	r.Length = parsedTime.Sub(r.CreatedOn)
 
 	if r.Length < 0 {
 		// Some temp ban/actions use a negative duration?, just invalidate these
@@ -334,8 +334,9 @@ func newScraper(name string, baseURL string, startPath string, parser parserFunc
 	nextURL nextURLFunc, parseTime parseTimeFunc,
 ) *sbScraper {
 	const (
-		randomDelay  = 5 * time.Second
-		maxQueueSize = 10000
+		randomDelay    = 5 * time.Second
+		maxQueueSize   = 10000
+		requestTimeout = time.Second * 30
 	)
 
 	parsedURL, errURL := url.Parse(baseURL)
@@ -369,7 +370,7 @@ func newScraper(name string, baseURL string, startPath string, parser parserFunc
 		),
 	}
 
-	scraper.SetRequestTimeout(time.Second * 30)
+	scraper.SetRequestTimeout(requestTimeout)
 	scraper.OnRequest(func(r *colly.Request) {
 		scraper.log.Debug("Visiting", zap.String("url", r.URL.String()))
 	})
@@ -407,6 +408,7 @@ func parseSkialTime(timeStr string) (time.Time, error) {
 	if timeStr == "Not applicable." || timeStr == "Permanent" {
 		return time.Time{}, nil
 	}
+
 	return doTimeParse("01-02-06 15:04", timeStr)
 }
 
@@ -544,8 +546,7 @@ func parseDefaultTime(timeStr string) (time.Time, error) {
 	return doTimeParse("2006-01-02 15:04:05", timeStr)
 }
 
-// 2023-17-05 03:07:05  / 2023-26-05 10:56:53
-// nolint
+// 2023-17-05 03:07:05  / 2023-26-05 10:56:53.
 func parseDefaultTimeMonthFirst(timeStr string) (time.Time, error) {
 	if timeStr == "Not applicable." {
 		return time.Time{}, nil
@@ -601,12 +602,13 @@ func parseFurryPoundTime(timeStr string) (time.Time, error) {
 // Sunday 11th of May 2023 7:14:05 PM.
 func parseFluxTime(timeStr string) (time.Time, error) {
 	rx := regexp.MustCompile(`\s(\d+)(st|nd|rd|th)\s`)
-	t := rx.ReplaceAllString(timeStr, " $1 ")
+	normTimeStr := rx.ReplaceAllString(timeStr, " $1 ")
+
 	if timeStr == "Not applicable." || timeStr == "never, this is permanent" {
 		return time.Time{}, nil
 	}
 
-	return doTimeParse("Monday _2 of January 2006 15:04:05 PM", t)
+	return doTimeParse("Monday _2 of January 2006 15:04:05 PM", normTimeStr)
 }
 
 // May 17th, 2023 (6:56).
@@ -616,7 +618,7 @@ func parseWonderlandTime(timeStr string) (time.Time, error) {
 	}
 
 	for _, k := range []string{"st", "nd", "rd", "th"} {
-		timeStr = strings.Replace(timeStr, k, "", -1)
+		timeStr = strings.ReplaceAll(timeStr, k, "")
 	}
 
 	return doTimeParse("January 2, 2006 (15:04)", timeStr)
@@ -760,7 +762,7 @@ func parseMaterial(doc *goquery.Selection, parseTime parseTimeFunc, scraperName 
 				} else {
 					skipCount++
 				}
-				curBan = sbRecord{}
+				curBan = sbRecord{} //nolint:exhaustruct
 			}
 		})
 	})
@@ -770,6 +772,8 @@ func parseMaterial(doc *goquery.Selection, parseTime parseTimeFunc, scraperName 
 
 // https://github.com/brhndursun/SourceBans-StarTheme
 func parseStar(doc *goquery.Selection, parseTime parseTimeFunc, scraperName string) ([]sbRecord, int, error) {
+	const expectedNodes = 3
+
 	var (
 		bans      []sbRecord
 		curBan    sbRecord
@@ -789,7 +793,7 @@ func parseStar(doc *goquery.Selection, parseTime parseTimeFunc, scraperName stri
 				return
 			}
 			children := selection.Children()
-			if len(children.Nodes) == 3 {
+			if len(children.Nodes) == expectedNodes {
 				curBan.Name = strings.TrimSpace(children.First().Next().Text())
 
 				return
@@ -833,7 +837,7 @@ func parseStar(doc *goquery.Selection, parseTime parseTimeFunc, scraperName stri
 				} else {
 					skipCount++
 				}
-				curBan = sbRecord{}
+				curBan = sbRecord{} //nolint:exhaustruct
 			}
 		})
 	})
@@ -857,7 +861,7 @@ func parseFluent(doc *goquery.Selection, parseTime parseTimeFunc, scraperName st
 		if !found {
 			return
 		}
-		switch mk {
+		switch mk { //nolint:exhaustive
 		case keyPlayer:
 			curBan.setPlayer(value)
 		case keySteam3ID:
@@ -878,7 +882,7 @@ func parseFluent(doc *goquery.Selection, parseTime parseTimeFunc, scraperName st
 			} else {
 				skipCount++
 			}
-			curBan = sbRecord{}
+			curBan = sbRecord{} //nolint:exhaustruct
 		}
 	})
 
@@ -902,7 +906,7 @@ func parseDefault(doc *goquery.Selection, parseTime parseTimeFunc, scraperName s
 			if !found {
 				return
 			}
-			switch mk {
+			switch mk { //nolint:exhaustive
 			case keyPlayer:
 				curState = keyPlayer
 				isValue = true
@@ -924,7 +928,7 @@ func parseDefault(doc *goquery.Selection, parseTime parseTimeFunc, scraperName s
 			}
 		} else {
 			isValue = false
-			switch curState {
+			switch curState { //nolint:exhaustive
 			case keyPlayer:
 				curBan.setPlayer(value)
 			case keySteamCommunity:
@@ -943,7 +947,7 @@ func parseDefault(doc *goquery.Selection, parseTime parseTimeFunc, scraperName s
 				} else {
 					skipped++
 				}
-				curBan = sbRecord{}
+				curBan = sbRecord{} //nolint:exhaustruct
 			}
 		}
 	})
