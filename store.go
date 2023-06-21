@@ -4,11 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"net/http"
+	"time"
+
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/jackc/pgx/v5"
 	"github.com/leighmacdonald/steamweb/v2"
-	"net/http"
-	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	pgxMigrate "github.com/golang-migrate/migrate/v4/database/pgx"
@@ -540,7 +541,8 @@ type sbBanRecord struct {
 }
 
 func (site sbSite) newRecord(sid64 steamid.SID64, personaName string, reason string,
-	timeStamp time.Time, duration time.Duration, perm bool) sbBanRecord {
+	timeStamp time.Time, duration time.Duration, perm bool,
+) sbBanRecord {
 	return sbBanRecord{
 		BanID:       0,
 		SiteName:    "",

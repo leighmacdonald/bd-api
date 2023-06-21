@@ -39,7 +39,8 @@ func initScrapers(ctx context.Context, db *pgStore, scrapers []*sbScraper) error
 }
 
 func startScrapers(ctx context.Context, config *appConfig, scrapers []*sbScraper,
-	db *pgStore, profileUpdateQueue chan steamid.SID64) {
+	db *pgStore, profileUpdateQueue chan steamid.SID64,
+) {
 	const scraperInterval = time.Hour * 24
 
 	startScrapersInternal := func() {
@@ -310,8 +311,10 @@ func (log *scrapeLogger) Init() error {
 }
 
 func (log *scrapeLogger) Event(event *debug.Event) {
-	args := []zap.Field{zap.Uint32("col_id", event.CollectorID),
-		zap.Uint32("req_id", event.RequestID), zap.Duration("duration", time.Since(log.start))}
+	args := []zap.Field{
+		zap.Uint32("col_id", event.CollectorID),
+		zap.Uint32("req_id", event.RequestID), zap.Duration("duration", time.Since(log.start)),
+	}
 
 	u, ok := event.Values["url"]
 	if ok {
@@ -328,7 +331,8 @@ func (log *scrapeLogger) Event(event *debug.Event) {
 }
 
 func newScraper(name string, baseURL string, startPath string, parser parserFunc,
-	nextURL nextURLFunc, parseTime parseTimeFunc) *sbScraper {
+	nextURL nextURLFunc, parseTime parseTimeFunc,
+) *sbScraper {
 	const (
 		randomDelay  = 5 * time.Second
 		maxQueueSize = 10000
