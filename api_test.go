@@ -9,7 +9,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/stretchr/testify/require"
 )
@@ -39,18 +38,10 @@ func TestGetBans(t *testing.T) {
 		t.Errorf("expected error to be nil got %v", err)
 	}
 
-	var bs []struct {
-		SteamID          steamid.SID64         `json:"SteamId"`
-		CommunityBanned  bool                  `json:"CommunityBanned"`
-		VACBanned        bool                  `json:"VACBanned"`
-		NumberOfVACBans  int                   `json:"NumberOfVACBans"`
-		DaysSinceLastBan int                   `json:"DaysSinceLastBan"`
-		NumberOfGameBans int                   `json:"NumberOfGameBans"`
-		EconomyBan       steamweb.EconBanState `json:"EconomyBan"`
-	}
+	var banState []steamweb.PlayerBanState
 
-	require.NoError(t, json.Unmarshal(body, &bs))
-	require.Equal(t, sid, bs[0].SteamID)
+	require.NoError(t, json.Unmarshal(body, &banState))
+	require.Equal(t, sid, banState[0].SteamID)
 }
 
 func TestGetSummary(t *testing.T) {
@@ -70,7 +61,7 @@ func TestGetSummary(t *testing.T) {
 	var bs []steamweb.PlayerSummary
 
 	require.NoError(t, json.Unmarshal(data, &bs))
-	require.Equal(t, sid.String(), bs[0].SteamID)
+	require.Equal(t, sid, bs[0].SteamID)
 }
 
 func TestGetProfile(t *testing.T) {

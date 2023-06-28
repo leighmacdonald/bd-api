@@ -138,24 +138,25 @@ func profileUpdater(ctx context.Context, database *pgStore, inChan <-chan steami
 			}
 
 			for _, profile := range expiredProfiles {
+				prof := profile
 				for _, sum := range summaries {
-					if sum.SteamID.Uint64() == profile.SteamID.Uint64() {
-						profile.applySummary(sum)
+					if sum.SteamID.Int64() == prof.SteamID.Int64() {
+						prof.applySummary(sum)
 
 						break
 					}
 				}
 
 				for _, ban := range bans {
-					if ban.SteamID.Uint64() == profile.SteamID.Uint64() {
-						profile.applyBans(ban)
+					if ban.SteamID.Int64() == prof.SteamID.Int64() {
+						prof.applyBans(ban)
 
 						break
 					}
 				}
 
-				if errSave := database.playerRecordSave(ctx, &profile); errSave != nil {
-					logger.Error("Failed to update profile", zap.Int64("sid", profile.SteamID.Int64()), zap.Error(errSave))
+				if errSave := database.playerRecordSave(ctx, &prof); errSave != nil {
+					logger.Error("Failed to update profile", zap.Int64("sid", prof.SteamID.Int64()), zap.Error(errSave))
 				}
 			}
 

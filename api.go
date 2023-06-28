@@ -223,7 +223,7 @@ func steamIDFromSlug(ctx *gin.Context) (steamid.SID64, error) {
 	if errSid != nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, "not found")
 
-		return steamid.SID64{}, errors.Wrap(errSid, "Failed to resolve steam id")
+		return "", errors.Wrap(errSid, "Failed to resolve steam id")
 	}
 
 	return sid64, nil

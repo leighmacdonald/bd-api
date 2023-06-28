@@ -115,7 +115,7 @@ func (r *sbRecord) setInvokedOn(scraperName string, parseTime parseTimeFunc, val
 func (r *sbRecord) setBanLength(value string) {
 	lowerVal := strings.ToLower(value)
 	if strings.Contains(lowerVal, "unbanned") {
-		r.SteamID.SetInt64(0) // invalidate it
+		r.SteamID = "" // invalidate it
 	} else if lowerVal == "permanent" {
 		r.Permanent = true
 	}
@@ -139,7 +139,7 @@ func (r *sbRecord) setExpiredOn(scraperName string, parseTime parseTimeFunc, val
 
 	if r.Length < 0 {
 		// Some temp ban/actions use a negative duration?, just invalidate these
-		r.SteamID.SetInt64(0)
+		r.SteamID = ""
 	}
 }
 
