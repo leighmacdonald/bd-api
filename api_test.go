@@ -3,13 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/leighmacdonald/steamid/v3/steamid"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 
+	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/stretchr/testify/require"
 )

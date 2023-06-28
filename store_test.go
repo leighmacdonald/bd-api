@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/leighmacdonald/steamid/v3/steamid"
 	"testing"
 	"time"
 
+	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
