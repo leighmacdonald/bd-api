@@ -99,26 +99,6 @@ linters:
     - wrapcheck
     - wsl
     #- zerologlint
-  # Disable specific linter
-  # https://golangci-lint.run/usage/linters/#disabled-by-default
-  #disable:
-  #  - staticcheck
-  # Enable presets.
-  # https://golangci-lint.run/usage/linters
-  presets:
-    - bugs
-    - comment
-    - complexity
-    - error
-    - format
-    - import
-    - metalinter
-    - module
-    - performance
-    - sql
-    - style
-    - test
-    - unused
 
 linters-settings:
   tagliatelle:
@@ -127,3 +107,12 @@ linters-settings:
       rules:
         json: snake
         yaml: snake
+  funlen:
+    # Checks the number of lines in a function.
+    # If lower than 0, disable the check.
+    # Default: 60
+    lines: 100
+    # Checks the number of statements in a function.
+    # If lower than 0, disable the check.
+    # Default: 40
+    statements: -1

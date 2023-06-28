@@ -14,7 +14,7 @@ import (
 	"github.com/gocolly/colly/debug"
 	"github.com/gocolly/colly/extensions"
 	"github.com/gocolly/colly/queue"
-	"github.com/leighmacdonald/steamid/v2/steamid"
+	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
@@ -115,7 +115,7 @@ func (r *sbRecord) setInvokedOn(scraperName string, parseTime parseTimeFunc, val
 func (r *sbRecord) setBanLength(value string) {
 	lowerVal := strings.ToLower(value)
 	if strings.Contains(lowerVal, "unbanned") {
-		r.SteamID = 0 // invalidate it
+		r.SteamID.SetInt64(0) // invalidate it
 	} else if lowerVal == "permanent" {
 		r.Permanent = true
 	}
@@ -139,7 +139,7 @@ func (r *sbRecord) setExpiredOn(scraperName string, parseTime parseTimeFunc, val
 
 	if r.Length < 0 {
 		// Some temp ban/actions use a negative duration?, just invalidate these
-		r.SteamID = 0
+		r.SteamID.SetInt64(0)
 	}
 }
 

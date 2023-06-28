@@ -7,17 +7,16 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/jackc/pgx/v5"
-	"github.com/leighmacdonald/steamweb/v2"
-
 	sq "github.com/Masterminds/squirrel"
+	"github.com/golang-migrate/migrate/v4"
 	pgxMigrate "github.com/golang-migrate/migrate/v4/database/pgx"
 	"github.com/golang-migrate/migrate/v4/source/httpfs"
 	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/leighmacdonald/steamid/v2/steamid"
+	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )

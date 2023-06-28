@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/leighmacdonald/steamid/v3/steamid"
 	"testing"
 	"time"
 
@@ -13,7 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var testStore *pgStore
+var testStore *pgStore //nolint:gochecknoglobals
 
 func TestStore(t *testing.T) {
 	t.Parallel()
@@ -93,7 +94,7 @@ func testSourceBans(t *testing.T) {
 func testPlayerRecord(t *testing.T) {
 	t.Helper()
 
-	pRecord := newPlayerRecord(76561197961279983)
+	pRecord := newPlayerRecord(steamid.New(76561197961279983))
 	pRecord.PersonaName = "blah"
 	pRecord.Vanity = "123"
 

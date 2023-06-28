@@ -1,2 +1,2 @@
-test_data/* linguist-vendored
+testdata/* linguist-vendored
 *.md linguist-documentation

@@ -4,9 +4,10 @@ build:
 	go build -o bd-api
 
 fmt:
+	gci write . --skip-generated -s default
 	gofumpt -l -w .
 
-check: lint_golangci lint_imports lint_cyclo lint_golint static
+check: lint_golangci static
 
 lint_golangci:
 	@golangci-lint run --timeout 3m ./...
@@ -20,6 +21,7 @@ static:
 check_deps:
 	go install mvdan.cc/gofumpt@latest
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.53.3
+	go install github.com/daixiang0/gci@latest
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 
 dev_db:

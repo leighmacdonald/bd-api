@@ -15,7 +15,7 @@ import (
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/alecthomas/chroma/styles"
 	"github.com/gin-gonic/gin"
-	"github.com/leighmacdonald/steamid/v2/steamid"
+	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -223,7 +223,7 @@ func steamIDFromSlug(ctx *gin.Context) (steamid.SID64, error) {
 	if errSid != nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, "not found")
 
-		return 0, errors.Wrap(errSid, "Failed to resolve steam id")
+		return steamid.SID64{}, errors.Wrap(errSid, "Failed to resolve steam id")
 	}
 
 	return sid64, nil

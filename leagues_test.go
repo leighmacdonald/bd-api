@@ -5,14 +5,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/leighmacdonald/steamid/v2/steamid"
+	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	testIDb4nny = steamid.SID64(76561197970669109)
+var (
+	testIDb4nny = steamid.New(76561197970669109)
 
-	testIDCamper = steamid.SID64(76561197992870439)
+	testIDCamper = steamid.New(76561197992870439)
 )
 
 func TestGetLogsTF(t *testing.T) {
@@ -23,7 +23,7 @@ func TestGetLogsTF(t *testing.T) {
 	require.NoError(t, errLogs)
 	require.Less(t, int64(13000), count)
 
-	countZero, errLogsZero := getLogsTF(context.Background(), testIDb4nny+2)
+	countZero, errLogsZero := getLogsTF(context.Background(), steamid.New(testIDb4nny.Int64()+2))
 	require.NoError(t, errLogsZero)
 	require.Equal(t, int64(0), countZero)
 }
@@ -52,7 +52,7 @@ func TestETF2L(t *testing.T) {
 func TestRGL(t *testing.T) {
 	t.Parallel()
 
-	seasons, errSeasons := getRGL(context.Background(), 76561198084134025)
+	seasons, errSeasons := getRGL(context.Background(), steamid.New(76561198084134025))
 	require.NoError(t, errSeasons)
 	require.LessOrEqual(t, 1, len(seasons))
 }

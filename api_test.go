@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/leighmacdonald/steamid/v3/steamid"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -28,7 +29,7 @@ func TestGetBans(t *testing.T) {
 
 	sid := testIDb4nny
 	router := createRouter(testStore)
-	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/bans?steam_id=%d", testIDb4nny), nil)
+	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/bans?steam_id=%d", testIDb4nny.Int64()), nil)
 	recorder := httptest.NewRecorder()
 
 	router.ServeHTTP(recorder, request)
@@ -38,10 +39,18 @@ func TestGetBans(t *testing.T) {
 		t.Errorf("expected error to be nil got %v", err)
 	}
 
-	var bs []steamweb.PlayerBanState
+	var bs []struct {
+		SteamID          steamid.SID64         `json:"SteamId"`
+		CommunityBanned  bool                  `json:"CommunityBanned"`
+		VACBanned        bool                  `json:"VACBanned"`
+		NumberOfVACBans  int                   `json:"NumberOfVACBans"`
+		DaysSinceLastBan int                   `json:"DaysSinceLastBan"`
+		NumberOfGameBans int                   `json:"NumberOfGameBans"`
+		EconomyBan       steamweb.EconBanState `json:"EconomyBan"`
+	}
 
 	require.NoError(t, json.Unmarshal(body, &bs))
-	require.Equal(t, sid.String(), bs[0].SteamID)
+	require.Equal(t, sid, bs[0].SteamID)
 }
 
 func TestGetSummary(t *testing.T) {
@@ -49,7 +58,7 @@ func TestGetSummary(t *testing.T) {
 
 	sid := testIDb4nny
 	router := createRouter(testStore)
-	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/summary?steam_id=%d", testIDb4nny), nil)
+	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/summary?steam_id=%d", testIDb4nny.Int64()), nil)
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
@@ -69,7 +78,7 @@ func TestGetProfile(t *testing.T) {
 
 	sid := testIDb4nny
 	router := createRouter(testStore)
-	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/profile?steam_id=%d", testIDb4nny), nil)
+	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/profile?steam_id=%d", testIDb4nny.Int64()), nil)
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
@@ -81,6 +90,6 @@ func TestGetProfile(t *testing.T) {
 	var profile Profile
 
 	require.NoError(t, json.Unmarshal(data, &profile))
-	require.Equal(t, "none", profile.BanState.EconomyBan)
-	require.Equal(t, sid.String(), profile.Summary.SteamID)
+	require.Equal(t, steamweb.EconBanNone, profile.BanState.EconomyBan)
+	require.Equal(t, sid, profile.Summary.SteamID)
 }

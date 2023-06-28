@@ -7,10 +7,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
-
-	"github.com/leighmacdonald/steamid/v2/steamid"
 	"go.uber.org/zap"
 )
 
@@ -140,7 +139,7 @@ func profileUpdater(ctx context.Context, database *pgStore, inChan <-chan steami
 
 			for _, profile := range expiredProfiles {
 				for _, sum := range summaries {
-					if sum.SteamID == profile.SteamID {
+					if sum.SteamID.Uint64() == profile.SteamID.Uint64() {
 						profile.applySummary(sum)
 
 						break
@@ -148,7 +147,7 @@ func profileUpdater(ctx context.Context, database *pgStore, inChan <-chan steami
 				}
 
 				for _, ban := range bans {
-					if ban.SteamID == profile.SteamID {
+					if ban.SteamID.Uint64() == profile.SteamID.Uint64() {
 						profile.applyBans(ban)
 
 						break

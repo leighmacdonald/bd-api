@@ -13,7 +13,7 @@ import (
 func testParser(t *testing.T, scraper *sbScraper, count int, nextPage string) {
 	t.Helper()
 
-	testBody, errOpen := os.Open(fmt.Sprintf("test_data/%s.html", scraper.name))
+	testBody, errOpen := os.Open(fmt.Sprintf("testdata/%s.html", scraper.name))
 
 	require.NoError(t, errOpen)
 
@@ -560,7 +560,7 @@ func TestParseFluxTFTime(t *testing.T) {
 }
 
 // func TestParseMegaScatter(t *testing.T) {
-//	testBody, errOpen := os.Open("test_data/megascatter.html")
+//	testBody, errOpen := os.Open("testdata/megascatter.html")
 //	require.NoError(t, errOpen)
 //	defer logCloser(testBody)
 //	bans, errBans := parseMegaScatter(testBody)

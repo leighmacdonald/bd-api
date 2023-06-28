@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/leighmacdonald/rgl"
-	"github.com/leighmacdonald/steamid/v2/steamid"
+	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/pkg/errors"
 )
 
@@ -24,7 +24,7 @@ func getRGL(ctx context.Context, sid64 steamid.SID64) ([]Season, error) {
 	for index, team := range teams {
 		var season Season
 
-		seasonInfo, errSeason := rgl.Season(ctx, team.SeasonId)
+		seasonInfo, errSeason := rgl.Season(ctx, team.SeasonID)
 		if errSeason != nil {
 			return nil, errors.Wrap(errSeason, "Failed to fetch seasons")
 		}

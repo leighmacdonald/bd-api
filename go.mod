@@ -10,10 +10,11 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/gocolly/colly v1.2.0
 	github.com/golang-migrate/migrate/v4 v4.16.2
+	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
 	github.com/jackc/pgx/v5 v5.4.1
-	github.com/leighmacdonald/rgl v0.0.0-20230605080734-80a392af27d1
-	github.com/leighmacdonald/steamid/v2 v2.2.2
-	github.com/leighmacdonald/steamweb/v2 v2.0.3
+	github.com/leighmacdonald/rgl v0.0.0-20230627125656-911215b21377
+	github.com/leighmacdonald/steamid/v3 v3.0.1
+	github.com/leighmacdonald/steamweb/v2 v2.1.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.16.0
@@ -32,7 +33,7 @@ require (
 	github.com/antchfx/htmlquery v1.3.0 // indirect
 	github.com/antchfx/xmlquery v1.3.17 // indirect
 	github.com/antchfx/xpath v1.2.4 // indirect
-	github.com/bytedance/sonic v1.9.1 // indirect
+	github.com/bytedance/sonic v1.9.2 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/containerd/containerd v1.6.19 // indirect
@@ -61,7 +62,6 @@ require (
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.14.0 // indirect
-	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgproto3/v2 v2.3.2 // indirect
@@ -113,7 +113,7 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 	google.golang.org/grpc v1.55.0 // indirect
-	google.golang.org/protobuf v1.30.0 // indirect
+	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
