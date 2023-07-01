@@ -21,6 +21,7 @@ steam_api_key: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 listen_addr: ":8888"
 sourcebans_scraper_enabled: true
 enable_cache: true
+cache_dir: "./.cache/"
 proxies_enabled: true
 proxies:
   - username: user
@@ -36,6 +37,11 @@ proxies:
 You can override these values using matching environment vars with the `BDAPI` prefix like so:
 
     $ BDAPI_STEAM_API_KEY=ANOTHERSTEAMAPIKEY ./bd-api
+
+## Pretty JSON
+
+If you make API requests with a browser, or otherwise set the `Accept: text/html` header, the JSON output will be encoded 
+as "prettified" HTML with syntax highlighting of the JSON data returned. All other cases will return standard JSON output.
 
 ## Development Workflow
 
