@@ -21,74 +21,6 @@ import (
 	"go.uber.org/zap"
 )
 
-func handleGetSummary() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		steamIDQuery, ok := ctx.GetQuery("steam_id")
-		if !ok {
-			ctx.AbortWithStatus(http.StatusBadRequest)
-
-			return
-		}
-
-		sid64, steamIDErr := steamid.SID64FromString(steamIDQuery)
-		if steamIDErr != nil {
-			ctx.AbortWithStatus(http.StatusBadRequest)
-
-			return
-		}
-
-		if !sid64.Valid() {
-			ctx.AbortWithStatus(http.StatusBadRequest)
-
-			return
-		}
-
-		ids := steamid.Collection{sid64}
-		summaries, errSum := getSteamSummary(ctx, sid64)
-
-		if errSum != nil || len(ids) != len(summaries) {
-			logger.Error("Failed to fetch summary",
-				zap.Error(errSum), zap.Int64("steam_id", sid64.Int64()))
-			ctx.AbortWithStatus(http.StatusBadRequest)
-
-			return
-		}
-
-		ctx.JSON(http.StatusOK, summaries)
-	}
-}
-
-func handleGetBans() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		steamIDQuery, ok := ctx.GetQuery("steam_id")
-		if !ok {
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, "Missing steam_id")
-
-			return
-		}
-
-		sid, steamIDErr := steamid.SID64FromString(steamIDQuery)
-		if steamIDErr != nil {
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, "Invalid steam_id")
-
-			return
-		}
-
-		ids := steamid.Collection{sid}
-
-		bans, errBans := steamweb.GetPlayerBans(ctx, ids)
-		if errBans != nil || len(ids) != len(bans) {
-			logger.Error("Failed to fetch player bans",
-				zap.Error(errBans), zap.Int64("steam_id", sid.Int64()))
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to fetch bans")
-
-			return
-		}
-
-		ctx.JSON(http.StatusOK, bans)
-	}
-}
-
 // Profile is a high level meta profile of several services.
 type Profile struct {
 	Summary   steamweb.PlayerSummary  `json:"summary"`
@@ -98,8 +30,8 @@ type Profile struct {
 	LogsCount int64                   `json:"logs_count"`
 }
 
-func loadProfile(ctx context.Context, steamID steamid.SID64, profile *Profile) error {
-	sum, errSum := getSteamSummary(ctx, steamID)
+func (a *App) loadProfile(ctx context.Context, log *zap.Logger, steamID steamid.SID64, profile *Profile) error {
+	sum, errSum := a.getSteamSummary(ctx, steamID)
 	if errSum != nil || len(sum) == 0 {
 		return errSum
 	}
@@ -113,9 +45,9 @@ func loadProfile(ctx context.Context, steamID steamid.SID64, profile *Profile) e
 
 	profile.BanState = banState[0]
 
-	_, errFriends := getSteamFriends(ctx, steamID)
+	_, errFriends := a.getSteamFriends(ctx, steamID)
 	if errFriends != nil {
-		logger.Debug("Failed to get friends", zap.Error(errors.Wrap(errFriends, "Failed to get friends")))
+		log.Debug("Failed to get friends", zap.Error(errors.Wrap(errFriends, "Failed to get friends")))
 	}
 	// profile.Friends = friends
 
@@ -126,50 +58,47 @@ func loadProfile(ctx context.Context, steamID steamid.SID64, profile *Profile) e
 	return nil
 }
 
-func handleGetProfile() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		steamIDQuery, ok := ctx.GetQuery("steam_id")
-		if !ok {
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, "Missing steam_id")
-
-			return
-		}
-
-		sid64, steamIDErr := steamid.SID64FromString(steamIDQuery)
-		if steamIDErr != nil {
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, "Invalid steam_id")
-
-			return
-		}
-
-		var profile Profile
-		if errProfile := loadProfile(ctx, sid64, &profile); errProfile != nil {
-			logger.Error("Failed to load profile", zap.Error(errProfile))
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to fetch profile")
-
-			return
-		}
-
-		ctx.JSON(http.StatusOK, profile)
-	}
-}
-
-var (
+type styleEncoder struct {
 	style     *chroma.Style
 	formatter *html.Formatter
 	lexer     chroma.Lexer
-)
+}
 
-func init() {
+func newStyleEncoder() *styleEncoder {
 	newStyle := styles.Get("monokai")
 	if newStyle == nil {
 		newStyle = styles.Fallback
 	}
 
-	style = newStyle
+	return &styleEncoder{
+		style:     newStyle,
+		formatter: html.New(html.WithClasses(true)),
+		lexer:     lexers.Get("json"),
+	}
+}
 
-	formatter = html.New(html.WithClasses(true))
-	lexer = lexers.Get("json")
+func (s *styleEncoder) Encode(value any) (string, string, error) {
+	jsonBody, errJSON := json.MarshalIndent(value, "", "    ")
+	if errJSON != nil {
+		return "", "", errors.Wrap(errJSON, "Failed to generate json")
+	}
+
+	iterator, errTokenize := s.lexer.Tokenise(nil, string(jsonBody))
+	if errTokenize != nil {
+		return "", "", errors.Wrap(errTokenize, "Failed to tokenise json")
+	}
+
+	cssBuf := bytes.NewBuffer(nil)
+	if errWrite := s.formatter.WriteCSS(cssBuf, s.style); errWrite != nil {
+		return "", "", errors.Wrap(errWrite, "Failed to generate HTML")
+	}
+
+	bodyBuf := bytes.NewBuffer(nil)
+	if errFormat := s.formatter.Format(bodyBuf, s.style, iterator); errFormat != nil {
+		return "", "", errors.Wrap(errFormat, "Failed to format json")
+	}
+
+	return cssBuf.String(), bodyBuf.String(), nil
 }
 
 type syntaxTemplate interface {
@@ -191,26 +120,6 @@ func (t *baseTmplArgs) setBody(html string) {
 	t.Body = template.HTML(html) //nolint:gosec
 }
 
-func handleGetSourceBans(database *pgStore) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		sid, errSid := steamIDFromSlug(ctx)
-		if errSid != nil {
-			return
-		}
-
-		bans, errBans := database.sbGetBansBySID(ctx, sid)
-		if errBans != nil {
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to query records")
-
-			return
-		}
-
-		renderSyntax(ctx, bans, "profiles", &baseTmplArgs{ //nolint:exhaustruct
-			Title: "source bans",
-		})
-	}
-}
-
 func steamIDFromSlug(ctx *gin.Context) (steamid.SID64, error) {
 	const resolveTimeout = time.Second * 10
 
@@ -229,61 +138,22 @@ func steamIDFromSlug(ctx *gin.Context) (steamid.SID64, error) {
 	return sid64, nil
 }
 
-func handleGetProfiles() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		sid, errSid := steamIDFromSlug(ctx)
-		if errSid != nil {
-			return
-		}
-
-		var profile Profile
-		if errProfile := loadProfile(ctx, sid, &profile); errProfile != nil {
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to load profile")
-
-			return
-		}
-
-		renderSyntax(ctx, profile, "profiles", &baseTmplArgs{ //nolint:exhaustruct
-			Title: profile.Summary.PersonaName,
-		})
-	}
-}
-
-func renderSyntax(ctx *gin.Context, value any, tmpl string, args syntaxTemplate) {
+func renderSyntax(ctx *gin.Context, encoder *styleEncoder, value any, tmpl string, args syntaxTemplate) {
 	if !strings.Contains(strings.ToLower(ctx.GetHeader("Accept")), "text/html") {
 		ctx.JSON(http.StatusOK, value)
 
 		return
 	}
 
-	jsonBody, errJSON := json.MarshalIndent(value, "", "    ")
-	if errJSON != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to generate json")
+	css, body, errEncode := encoder.Encode(value)
+	if errEncode != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to load profile")
 
 		return
 	}
 
-	iterator, errTokenize := lexer.Tokenise(nil, string(jsonBody))
-	if errTokenize != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to tokenise json")
-
-		return
-	}
-
-	cssBuf := bytes.NewBuffer(nil)
-	if errWrite := formatter.WriteCSS(cssBuf, style); errWrite != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to generate HTML")
-	}
-
-	bodyBuf := bytes.NewBuffer(nil)
-	if errFormat := formatter.Format(bodyBuf, style, iterator); errFormat != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to format json")
-
-		return
-	}
-
-	args.setCSS(cssBuf.String())
-	args.setBody(bodyBuf.String())
+	args.setCSS(css)
+	args.setBody(body)
 	ctx.HTML(http.StatusOK, tmpl, args)
 }
 
@@ -297,7 +167,7 @@ func apiErrorHandler(logger *zap.Logger) gin.HandlerFunc {
 	}
 }
 
-func createRouter(database *pgStore) *gin.Engine {
+func (a *App) createRouter() (*gin.Engine, error) {
 	tmplProfiles, errTmpl := template.New("profiles").Parse(`<!DOCTYPE html>
 <html>
 <head> 
@@ -307,36 +177,40 @@ func createRouter(database *pgStore) *gin.Engine {
 <body>{{ .Body }}</body>
 </html>`)
 	if errTmpl != nil {
-		logger.Panic("Failed to parse html template", zap.Error(errTmpl))
+		return nil, errors.Wrap(errTmpl, "Failed to parse html template")
 	}
+
+	gin.SetMode(a.config.RunMode)
 
 	engine := gin.New()
 	engine.SetHTMLTemplate(tmplProfiles)
-	engine.Use(apiErrorHandler(logger), gin.Recovery())
-	engine.GET("/bans", handleGetBans())
-	engine.GET("/summary", handleGetSummary())
-	engine.GET("/profile", handleGetProfile())
-	engine.GET("/profiles/:steam_id", handleGetProfiles())
-	engine.GET("/sourcebans/:steam_id", handleGetSourceBans(database))
+	engine.Use(apiErrorHandler(a.log), gin.Recovery())
+	engine.GET("/bans", a.handleGetBans())
+	engine.GET("/summary", a.handleGetSummary())
+	engine.GET("/profile", a.handleGetProfile())
+	engine.GET("/profiles/:steam_id", a.handleGetProfiles())
+	engine.GET("/sourcebans/:steam_id", a.handleGetSourceBans())
 
-	return engine
+	return engine, nil
 }
 
-func startAPI(ctx context.Context, router *gin.Engine, addr string) error {
+func (a *App) startAPI(ctx context.Context, addr string) error {
 	const apiHandlerTimeout = 10 * time.Second
 
 	const shutdownTimeout = 10 * time.Second
 
-	defer logger.Info("Service status changed", zap.String("state", "stopped"))
+	log := a.log.Named("api")
+
+	defer log.Info("Service status changed", zap.String("state", "stopped"))
 
 	httpServer := &http.Server{ //nolint:exhaustruct
 		Addr:         addr,
-		Handler:      router,
+		Handler:      a.router,
 		ReadTimeout:  apiHandlerTimeout,
 		WriteTimeout: apiHandlerTimeout,
 	}
 
-	logger.Info("Service status changed", zap.String("state", "ready"))
+	log.Info("Service status changed", zap.String("state", "ready"))
 
 	go func() {
 		<-ctx.Done()
@@ -345,7 +219,7 @@ func startAPI(ctx context.Context, router *gin.Engine, addr string) error {
 		defer cancel()
 
 		if errShutdown := httpServer.Shutdown(shutdownCtx); errShutdown != nil { //nolint:contextcheck
-			logger.Error("Error shutting down http service", zap.Error(errShutdown))
+			log.Error("Error shutting down http service", zap.Error(errShutdown))
 		}
 	}()
 

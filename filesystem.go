@@ -14,21 +14,43 @@ import (
 
 var errCacheExpired = errors.New("cache expired")
 
-func hashKey(fullURL string) (string, string) {
+type cache interface {
+	get(url string) ([]byte, error)
+	set(key string, reader io.Reader) error
+}
+
+type fsCache struct {
+	cacheDir string
+	log      *zap.Logger
+}
+
+func newFSCache(logger *zap.Logger, cacheDir string) (*fsCache, error) {
+	const cachePerms = 0o755
+
+	if !exists(cacheDir) {
+		if errMkDir := os.MkdirAll(cacheDir, cachePerms); errMkDir != nil {
+			return nil, errors.Wrap(errMkDir, "Failed to create cache dir")
+		}
+	}
+
+	return &fsCache{cacheDir: cacheDir, log: logger.Named("fsCache")}, nil
+}
+
+func (c *fsCache) hashKey(fullURL string) (string, string) {
 	hash := fmt.Sprintf("%x", sha256.Sum256([]byte(fullURL)))
-	dir := hashedPath(hash)
+	dir := c.hashedPath(hash)
 
 	return dir, path.Join(dir, hash)
 }
 
-func hashedPath(hash string) string {
-	return path.Join(cacheDir, hash[0:2], hash[2:4])
+func (c *fsCache) hashedPath(hash string) string {
+	return path.Join(c.cacheDir, hash[0:2], hash[2:4])
 }
 
-func cacheGet(url string) ([]byte, error) {
+func (c *fsCache) get(url string) ([]byte, error) {
 	const maxAge = time.Hour * 24 * 7
 
-	_, fullPath := hashKey(url)
+	_, fullPath := c.hashKey(url)
 
 	cachedFile, errOpen := os.Open(fullPath)
 	if errOpen != nil {
@@ -37,7 +59,7 @@ func cacheGet(url string) ([]byte, error) {
 
 	stat, errStat := cachedFile.Stat()
 	if errStat != nil {
-		logger.Error("Could not stat file",
+		c.log.Error("Could not stat file",
 			zap.Error(errStat), zap.String("file", fullPath))
 
 		return nil, errCacheExpired
@@ -57,8 +79,8 @@ func cacheGet(url string) ([]byte, error) {
 	return body, nil
 }
 
-func cacheSet(key string, reader io.Reader) error {
-	dir, fullPath := hashKey(key)
+func (c *fsCache) set(key string, reader io.Reader) error {
+	dir, fullPath := c.hashKey(key)
 	if errDir := os.MkdirAll(dir, os.ModePerm); errDir != nil {
 		return errors.Wrap(errDir, "Failed to make cache dir")
 	}

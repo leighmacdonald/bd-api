@@ -35,7 +35,7 @@ var (
 	errNoRows    = errors.New("No rows")
 )
 
-func newStore(ctx context.Context, dsn string) (*pgStore, error) {
+func newStore(ctx context.Context, logger *zap.Logger, dsn string) (*pgStore, error) {
 	log := logger.Named("db")
 	cfg, errConfig := pgxpool.ParseConfig(dsn)
 
@@ -44,19 +44,19 @@ func newStore(ctx context.Context, dsn string) (*pgStore, error) {
 	}
 
 	database := pgStore{
-		logger: log,
-		dsn:    dsn,
-		pool:   nil,
+		log:  log,
+		dsn:  dsn,
+		pool: nil,
 	}
 
 	if errMigrate := database.migrate(); errMigrate != nil {
 		if errMigrate.Error() == "no change" {
-			database.logger.Info("Migration at latest version")
+			database.log.Info("Migration at latest version")
 		} else {
 			return nil, errors.Errorf("Could not migrate schema: %v", errMigrate)
 		}
 	} else {
-		database.logger.Info("Migration completed successfully")
+		database.log.Info("Migration completed successfully")
 	}
 
 	dbConn, errConnectConfig := pgxpool.NewWithConfig(ctx, cfg)
@@ -70,9 +70,9 @@ func newStore(ctx context.Context, dsn string) (*pgStore, error) {
 }
 
 type pgStore struct {
-	dsn    string
-	logger *zap.Logger
-	pool   *pgxpool.Pool
+	dsn  string
+	log  *zap.Logger
+	pool *pgxpool.Pool
 }
 
 // Migrate database schema.
@@ -403,7 +403,7 @@ func (db *pgStore) playerGetVanityNames(ctx context.Context, sid64 steamid.SID64
 	return records, nil
 }
 
-//nolint:funlen,cyclop
+//nolint:nolintlint,funlen,cyclop
 func (db *pgStore) playerRecordSave(ctx context.Context, record *playerRecord) error {
 	success := false
 
@@ -415,7 +415,7 @@ func (db *pgStore) playerRecordSave(ctx context.Context, record *playerRecord) e
 	defer func() {
 		if !success {
 			if errRollback := transaction.Rollback(ctx); errRollback != nil {
-				logger.Error("Failed to rollback player transaction", zap.Error(errRollback))
+				db.log.Error("Failed to rollback player transaction", zap.Error(errRollback))
 			}
 		}
 	}()
@@ -816,14 +816,13 @@ func (db *pgStore) sbGetBansBySID(ctx context.Context, sid64 steamid.SID64) ([]s
 	for rows.Next() {
 		var bRecord sbBanRecord
 
-		var duration time.Duration
-
+		var duration int64
 		if errScan := rows.Scan(&bRecord.BanID, &bRecord.SiteID, &bRecord.SteamID, &bRecord.PersonaName,
 			&bRecord.Reason, &bRecord.CreatedOn, &duration, &bRecord.Permanent, &bRecord.SiteName); errScan != nil {
 			return nil, dbErr(errScan, "Failed to scan sourcebans ban")
 		}
 
-		bRecord.Duration = duration * time.Second
+		bRecord.Duration = time.Duration(duration * 1000000000)
 
 		records = append(records, bRecord)
 	}

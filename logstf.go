@@ -22,12 +22,12 @@ func getLogsTF(ctx context.Context, steamid steamid.SID64) (int64, error) {
 		return 0, err
 	}
 
+	defer logCloser(resp.Body)
+
 	body, errRead := io.ReadAll(resp.Body)
 	if errRead != nil {
 		return 0, errors.Wrap(errRead, "Failed to read response body")
 	}
-
-	defer logCloser(resp.Body)
 
 	bStr := string(body)
 	if strings.Contains(bStr, "No logs found.") {

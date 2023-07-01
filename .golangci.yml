@@ -35,7 +35,7 @@ linters:
     - gochecknoglobals
     - gochecknoinits
     - gocognit
-    #- goconst
+    - goconst
     - gocritic
     - gocyclo
     - godot
@@ -56,7 +56,7 @@ linters:
     - importas
     - ineffassign
     - interfacebloat
-    #- ireturn
+    - ireturn
     - lll
     - loggercheck
     - maintidx
@@ -69,7 +69,7 @@ linters:
     - nilnil
     - nlreturn
     - noctx
-    #- nolintlint
+    - nolintlint
     - nonamedreturns
     - nosprintfhostport
     - paralleltest

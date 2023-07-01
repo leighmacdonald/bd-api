@@ -3,14 +3,10 @@ package main
 import (
 	"io"
 	"os"
-
-	"go.uber.org/zap"
 )
 
 func logCloser(closer io.Closer) {
-	if errClose := closer.Close(); errClose != nil {
-		logger.Error("Failed to close", zap.Error(errClose))
-	}
+	_ = closer.Close()
 }
 
 func exists(filePath string) bool {

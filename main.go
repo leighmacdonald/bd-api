@@ -2,19 +2,20 @@ package main
 
 import (
 	"context"
-	"os"
 
-	"github.com/leighmacdonald/steamid/v3/steamid"
 	"go.uber.org/zap"
 )
 
 func main() {
-	const profileQueueSize = 100
-
-	const cachePerms = 0o755
-
 	ctx := context.Background()
-	profileUpdateQueue := make(chan steamid.SID64, profileQueueSize)
+
+	logCfg := zap.NewProductionConfig()
+	logCfg.DisableStacktrace = true
+	logger, errLogger := logCfg.Build()
+
+	if errLogger != nil {
+		panic(errLogger)
+	}
 
 	defer func() {
 		logger.Info("Shutting down")
@@ -32,46 +33,22 @@ func main() {
 		logger.Panic("Failed to load config", zap.Error(errConfig))
 	}
 
-	if !exists(cacheDir) {
-		if errMkDir := os.MkdirAll(cacheDir, cachePerms); errMkDir != nil {
-			logger.Fatal("Failed to create cache dir", zap.String("dir", cacheDir), zap.Error(errMkDir))
-		}
+	cache, cacheErr := newFSCache(logger, "./.cache/")
+	if cacheErr != nil {
+		logger.Panic("Failed to create fsCache", zap.Error(cacheErr))
 	}
 
-	database, errDB := newStore(ctx, config.DSN)
+	database, errDB := newStore(ctx, logger, config.DSN)
 	if errDB != nil {
 		logger.Fatal("Failed to connect to database", zap.Error(errDB))
 	}
 
-	if config.SourcebansScraperEnabled {
-		scrapers := createScrapers()
-		if errInitScrapers := initScrapers(ctx, database, scrapers); errInitScrapers != nil {
-			logger.Fatal("Failed to initialize scrapers", zap.Error(errInitScrapers))
-		}
+	pm := newProxyManager(logger)
 
-		go startScrapers(ctx, &config, scrapers, database, profileUpdateQueue)
+	app := NewApp(logger, config, database, cache, pm)
+
+	if errStart := app.Start(ctx); errStart != nil {
+		logger.Error("App returned error", zap.Error(errStart))
+		return
 	}
-
-	go profileUpdater(ctx, database, profileUpdateQueue)
-
-	if errAPI := startAPI(ctx, createRouter(database), config.ListenAddr); errAPI != nil {
-		logger.Error("HTTP server returned error", zap.Error(errAPI))
-	}
-}
-
-var (
-	logger   *zap.Logger
-	cacheDir = "./.cache/"
-)
-
-func init() {
-	logCfg := zap.NewProductionConfig()
-	logCfg.DisableStacktrace = true
-	newLogger, errLogger := logCfg.Build()
-
-	if errLogger != nil {
-		panic(errLogger)
-	}
-
-	logger = newLogger
 }

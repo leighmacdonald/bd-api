@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/armon/go-socks5"
-	"github.com/gin-gonic/gin"
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/mitchellh/go-homedir"
@@ -32,6 +31,7 @@ type appConfig struct {
 	Proxies                  []*proxyConfig `mapstructure:"proxies"`
 	PrivateKeyPath           string         `mapstructure:"private_key_path"`
 	EnableCache              bool           `mapstructure:"enable_cache"`
+	CacheDir                 string         `mapstructure:"cache_dir"`
 }
 
 func makeSigner(keyPath string) (ssh.Signer, error) { //nolint:ireturn
@@ -79,8 +79,6 @@ func readConfig(config *appConfig) error {
 	if errUnmarshal := viper.Unmarshal(config); errUnmarshal != nil {
 		return errors.Wrap(errUnmarshal, "Invalid config file format")
 	}
-
-	gin.SetMode(config.RunMode)
 
 	if config.SteamAPIKey == "" {
 		return errors.New("Invalid steam api key [empty]")

@@ -9,10 +9,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var (
-	testIDb4nny = steamid.New(76561197970669109)
-
-	testIDCamper = steamid.New(76561197992870439)
+const (
+	testIDb4nny  steamid.SID64 = "76561197970669109"
+	testIDCamper steamid.SID64 = "76561197992870439"
 )
 
 func TestGetLogsTF(t *testing.T) {

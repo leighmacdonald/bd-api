@@ -9,7 +9,6 @@ import (
 
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 type comp struct {
@@ -82,7 +81,7 @@ func sortSeasons(seasons []Season) []Season {
 }
 
 func getETF2L(ctx context.Context, sid steamid.SID64) ([]Season, error) {
-	url := fmt.Sprintf("https://api.etf2l.org/player/%d.json", sid.Int64())
+	url := fmt.Sprintf("https://api.etf2l.org/player/%s.json", sid)
 
 	var player etf2lPlayer
 
@@ -144,8 +143,6 @@ func parseETF2L(player etf2lPlayer) ([]Season, error) {
 				case "Premiership":
 					div = ETF2LPremiership
 					divStr = "Premiership"
-				default:
-					logger.Warn("Unknown etf2l div", zap.String("div", competition.Division.Name))
 				}
 			}
 

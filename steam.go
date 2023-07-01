@@ -13,15 +13,15 @@ import (
 	"go.uber.org/zap"
 )
 
-func getSteamFriends(ctx context.Context, steamID steamid.SID64) ([]steamweb.Friend, error) {
+func (a *App) getSteamFriends(ctx context.Context, steamID steamid.SID64) ([]steamweb.Friend, error) {
 	var friends []steamweb.Friend
 
 	key := fmt.Sprintf("steam-friends-%d", steamID.Int64())
 
-	friendsBody, errCache := cacheGet(key)
+	friendsBody, errCache := a.cache.get(key)
 	if errCache == nil {
 		if err := json.Unmarshal(friendsBody, &friends); err != nil {
-			logger.Error("Failed to unmarshal cached result", zap.Error(err))
+			a.log.Error("Failed to unmarshal cached result", zap.Error(err))
 		}
 
 		return friends, nil
@@ -37,22 +37,22 @@ func getSteamFriends(ctx context.Context, steamID steamid.SID64) ([]steamweb.Fri
 		return nil, errors.Wrap(errFriends, "Failed to unmarshal friends")
 	}
 
-	if errSet := cacheSet(key, bytes.NewReader(body)); errSet != nil {
-		logger.Error("Failed to update cache", zap.Error(errSet), zap.String("site", "ugc"))
+	if errSet := a.cache.set(key, bytes.NewReader(body)); errSet != nil {
+		a.log.Error("Failed to update cache", zap.Error(errSet), zap.String("site", "ugc"))
 	}
 
 	return newFriends, nil
 }
 
-func getSteamSummary(ctx context.Context, steamID steamid.SID64) ([]steamweb.PlayerSummary, error) {
+func (a *App) getSteamSummary(ctx context.Context, steamID steamid.SID64) ([]steamweb.PlayerSummary, error) {
 	var summaries []steamweb.PlayerSummary
 
 	key := fmt.Sprintf("steam-summary-%d", steamID.Int64())
 
-	summaryBody, errCache := cacheGet(key)
+	summaryBody, errCache := a.cache.get(key)
 	if errCache == nil {
 		if err := json.Unmarshal(summaryBody, &summaries); err != nil {
-			logger.Error("Failed to unmarshal cached result", zap.Error(err))
+			a.log.Error("Failed to unmarshal cached result", zap.Error(err))
 		}
 
 		return summaries, nil
@@ -68,14 +68,14 @@ func getSteamSummary(ctx context.Context, steamID steamid.SID64) ([]steamweb.Pla
 		return nil, errors.Wrap(errMarshal, "Failed to marshal friends")
 	}
 
-	if errSet := cacheSet(key, bytes.NewReader(body)); errSet != nil {
-		logger.Error("Failed to update cache", zap.Error(errSet), zap.String("site", "ugc"))
+	if errSet := a.cache.set(key, bytes.NewReader(body)); errSet != nil {
+		a.log.Error("Failed to update cache", zap.Error(errSet), zap.String("site", "ugc"))
 	}
 
 	return newSummaries, nil
 }
 
-func profileUpdater(ctx context.Context, database *pgStore, inChan <-chan steamid.SID64) {
+func (a *App) profileUpdater(ctx context.Context, inChan <-chan steamid.SID64) {
 	const (
 		maxQueuedCount = 100
 		updateInterval = time.Second * 5
@@ -99,14 +99,14 @@ func profileUpdater(ctx context.Context, database *pgStore, inChan <-chan steami
 			var expiredIds steamid.Collection
 			expiredIds = append(expiredIds, updateQueue...)
 
-			expiredProfiles, errProfiles := database.playerGetExpiredProfiles(ctx, maxQueuedCount-len(expiredIds))
+			expiredProfiles, errProfiles := a.db.playerGetExpiredProfiles(ctx, maxQueuedCount-len(expiredIds))
 			if errProfiles != nil {
-				logger.Error("Failed to fetch expired profiles", zap.Error(errProfiles))
+				a.log.Error("Failed to fetch expired profiles", zap.Error(errProfiles))
 			}
 
 			for _, sid64 := range updateQueue {
 				var pr playerRecord
-				if errQueued := database.playerGetOrCreate(ctx, sid64, &pr); errQueued != nil {
+				if errQueued := a.db.playerGetOrCreate(ctx, sid64, &pr); errQueued != nil {
 					continue
 				}
 
@@ -125,14 +125,14 @@ func profileUpdater(ctx context.Context, database *pgStore, inChan <-chan steami
 
 			summaries, errSum := steamweb.PlayerSummaries(ctx, expiredIds)
 			if errSum != nil {
-				logger.Error("Failed to fetch summaries", zap.Error(errSum))
+				a.log.Error("Failed to fetch summaries", zap.Error(errSum))
 
 				continue
 			}
 
 			bans, errBans := steamweb.GetPlayerBans(ctx, expiredIds)
 			if errBans != nil {
-				logger.Error("Failed to fetch bans", zap.Error(errSum))
+				a.log.Error("Failed to fetch bans", zap.Error(errSum))
 
 				continue
 			}
@@ -155,8 +155,8 @@ func profileUpdater(ctx context.Context, database *pgStore, inChan <-chan steami
 					}
 				}
 
-				if errSave := database.playerRecordSave(ctx, &prof); errSave != nil {
-					logger.Error("Failed to update profile", zap.Int64("sid", prof.SteamID.Int64()), zap.Error(errSave))
+				if errSave := a.db.playerRecordSave(ctx, &prof); errSave != nil {
+					a.log.Error("Failed to update profile", zap.Int64("sid", prof.SteamID.Int64()), zap.Error(errSave))
 				}
 			}
 

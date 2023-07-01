@@ -17,69 +17,60 @@ import (
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"golang.org/x/sync/errgroup"
 )
 
 type nextURLFunc func(scraper *sbScraper, doc *goquery.Selection) string
 
 type parseTimeFunc func(s string) (time.Time, error)
 
-type parserFunc func(doc *goquery.Selection, timeParser parseTimeFunc, scraperName string) ([]sbRecord, int, error)
+type parserFunc func(doc *goquery.Selection, logger *zap.Logger, timeParser parseTimeFunc) ([]sbRecord, int, error)
 
-func initScrapers(ctx context.Context, db *pgStore, scrapers []*sbScraper) error {
-	for _, scraper := range scrapers {
-		var s sbSite
-		if errSave := db.sbSiteGetOrCreate(ctx, scraper.name, &s); errSave != nil {
-			return errors.Wrap(errSave, "Database error")
-		}
+func (a *App) runScrapers(ctx context.Context) {
+	if a.config.ProxiesEnabled {
+		a.pm.start(&a.config)
 
-		scraper.ID = uint32(s.SiteID)
-	}
+		defer a.pm.stop()
 
-	return nil
-}
-
-func startScrapers(ctx context.Context, config *appConfig, scrapers []*sbScraper,
-	database *pgStore, profileUpdateQueue chan steamid.SID64,
-) {
-	const scraperInterval = time.Hour * 24
-
-	startScrapersInternal := func() {
-		if config.ProxiesEnabled {
-			startProxies(config)
-
-			defer stopProxies()
-
-			for _, scraper := range scrapers {
-				if errProxies := setupProxies(scraper.Collector, config); errProxies != nil {
-					logger.Panic("Failed to setup proxies", zap.Error(errProxies))
-				}
+		for _, scraper := range a.scrapers {
+			if errProxies := a.pm.setup(scraper.Collector, &a.config); errProxies != nil {
+				a.log.Panic("Failed to setup proxies", zap.Error(errProxies))
 			}
 		}
-
-		waitGroup := &sync.WaitGroup{}
-
-		for _, scraper := range scrapers {
-			waitGroup.Add(1)
-
-			go func(s *sbScraper) {
-				defer waitGroup.Done()
-
-				if errScrape := s.start(ctx, database, profileUpdateQueue); errScrape != nil {
-					s.log.Error("Scraper returned error", zap.Error(errScrape))
-				}
-			}(scraper)
-		}
-
-		waitGroup.Wait()
 	}
-	startScrapersInternal()
 
+	waitGroup := &sync.WaitGroup{}
+
+	for _, scraper := range a.scrapers {
+		waitGroup.Add(1)
+
+		go func(s *sbScraper) {
+			defer waitGroup.Done()
+
+			if errScrape := s.start(ctx, a.db, a.profileUpdateQueue); errScrape != nil {
+				s.log.Error("Scraper returned error", zap.Error(errScrape))
+			}
+		}(scraper)
+	}
+
+	waitGroup.Wait()
+}
+
+func (a *App) startScrapers(ctx context.Context) {
+	const scraperInterval = time.Hour * 24
 	scraperTicker := time.NewTicker(scraperInterval)
+	trigger := make(chan any)
+
+	go func() {
+		trigger <- true
+	}()
 
 	for {
 		select {
+		case <-trigger:
+			a.runScrapers(ctx)
 		case <-scraperTicker.C:
-			startScrapersInternal()
+			trigger <- true
 		case <-ctx.Done():
 			return
 		}
@@ -103,13 +94,14 @@ func (r *sbRecord) setPlayer(name string) {
 	r.Name = name
 }
 
-func (r *sbRecord) setInvokedOn(scraperName string, parseTime parseTimeFunc, value string) {
+func (r *sbRecord) setInvokedOn(parseTime parseTimeFunc, value string) error {
 	parsedTime, errTime := parseTime(value)
 	if errTime != nil {
-		logger.Warn("Failed to parse invoke time", zap.Error(errTime), zap.String("scraper", scraperName))
+		return errTime
 	}
 
 	r.CreatedOn = parsedTime
+	return nil
 }
 
 func (r *sbRecord) setBanLength(value string) {
@@ -123,16 +115,14 @@ func (r *sbRecord) setBanLength(value string) {
 	r.Length = 0
 }
 
-func (r *sbRecord) setExpiredOn(scraperName string, parseTime parseTimeFunc, value string) {
+func (r *sbRecord) setExpiredOn(parseTime parseTimeFunc, value string) error {
 	if r.Permanent || !r.SteamID.Valid() {
-		return
+		return steamid.ErrInvalidSID
 	}
 
 	parsedTime, errTime := parseTime(value)
 	if errTime != nil {
-		logger.Error("Failed to parse expire time", zap.Error(errTime), zap.String("scraper", scraperName))
-
-		return
+		return errTime
 	}
 
 	r.Length = parsedTime.Sub(r.CreatedOn)
@@ -141,6 +131,8 @@ func (r *sbRecord) setExpiredOn(scraperName string, parseTime parseTimeFunc, val
 		// Some temp ban/actions use a negative duration?, just invalidate these
 		r.SteamID = ""
 	}
+
+	return nil
 }
 
 func (r *sbRecord) setReason(value string) {
@@ -151,23 +143,23 @@ func (r *sbRecord) setReason(value string) {
 	r.Reason = value
 }
 
-func (r *sbRecord) setSteam(scraperName string, value string) {
+func (r *sbRecord) setSteam(value string) error {
 	if r.SteamID.Valid() {
-		return
+		return steamid.ErrInvalidSID
 	}
 
 	if value == "[U:1:0]" || value == "76561197960265728" {
-		return
+		return steamid.ErrInvalidSID
 	}
 
 	sid64, errSid := steamid.StringToSID64(value)
 	if errSid != nil {
-		logger.Error("Failed to parse sid3", zap.Error(errSid), zap.String("scraper", scraperName))
-
-		return
+		return errors.Wrap(errSid, "Failed to parse sid3")
 	}
 
 	r.SteamID = sid64
+
+	return nil
 }
 
 type sbScraper struct {
@@ -187,28 +179,50 @@ type sbScraper struct {
 	parseTIme parseTimeFunc
 }
 
-func createScrapers() []*sbScraper {
-	return []*sbScraper{
-		new7MauScraper(), newAceKillScraper(), newAMSGamingScraper(), newApeModeScraper(), newAstraManiaScraper(),
-		newBachuruServasScraper(), newBaitedCommunityScraper(), newBierwieseScraper(), newBigBangGamersScraper(),
-		newBioCraftingScraper(), newBouncyBallScraper(), newCasualFunScraper(), newCedaPugScraper(), newCSIServersScraper(),
-		newCuteProjectScraper(), newCutiePieScraper(), newDarkPyroScraper(), newDefuseRoScraper(), newDiscFFScraper(),
-		newDreamFireScraper(), newECJScraper(), newElectricScraper(), newEOTLGamingScraper(), newEpicZoneScraper(),
-		newFirePoweredScraper(), newFluxTFScraper(), newFurryPoundScraper(), newG44Scraper(), newGameSitesScraper(),
-		newGamesTownScraper(), newGetSomeScraper(), newGFLScraper(), newGhostCapScraper(), newGlobalParadiseScraper(),
-		newGunServerScraper(), newHarpoonScraper(), newHellClanScraper(), newJumpAcademyScraper(), newLBGamingScraper(),
-		newLOOSScraper(), newLazyNeerScraper(), newLazyPurpleScraper(), newLunarioScraper(), newMagyarhnsScraper(),
-		newMaxDBScraper(), newMoevsMachineScraper(), newNeonHeightsScraper(), newNideScraper(), newOpstOnlineScraper(),
-		newOreonScraper(), newOwlTFScraper(), newPancakesScraper(), newPandaScraper(), newPetrolTFScraper(),
-		newPhoenixSourceScraper(), newPlayesROScraper(), newPowerFPSScraper(), newProGamesZetScraper(), newPRWHScraper(),
-		newPubsTFScraper(), newRandomTF2Scraper(), newRushyScraper(), newRetroServersScraper(), newSGGamingScraper(),
-		newSameTeemScraper(), newSavageServidoresScraper(), newScrapTFScraper(), newServiliveClScraper(), newSettiScraper(),
-		newSirPleaseScraper(), newSkialScraper(), newSlavonServerScraper(), newSneaksScraper(), newSpaceShipScraper(),
-		newSpectreScraper(), newSvdosBrothersScraper(), newSwapShopScraper(), newTF2MapsScraper(), newTF2ROScraper(),
-		/*newTawernaScraper(),*/ newTheVilleScraper(), newTitanScraper(), newTriggerHappyScraper(), newUGCScraper(),
-		newVaticanCityScraper(), newVidyaGaemsScraper(), newVortexScraper(), /* newWonderlandTFGOOGScraper(),*/
-		newZMBrasilScraper(), newZubatScraper(),
+func createScrapers(logger *zap.Logger, cacheDir string) ([]*sbScraper, error) {
+	scraperConstructors := []func(logger *zap.Logger, cacheDir string) (*sbScraper, error){
+		new7MauScraper, newAceKillScraper, newAMSGamingScraper, newApeModeScraper, newAstraManiaScraper,
+		newBachuruServasScraper, newBaitedCommunityScraper, newBierwieseScraper, newBigBangGamersScraper,
+		newBioCraftingScraper, newBouncyBallScraper, newCasualFunScraper, newCedaPugScraper, newCSIServersScraper,
+		newCuteProjectScraper, newCutiePieScraper, newDarkPyroScraper, newDefuseRoScraper, newDiscFFScraper,
+		newDreamFireScraper, newECJScraper, newElectricScraper, newEOTLGamingScraper, newEpicZoneScraper,
+		newFirePoweredScraper, newFluxTFScraper, newFurryPoundScraper, newG44Scraper, newGameSitesScraper,
+		newGamesTownScraper, newGetSomeScraper, newGFLScraper, newGhostCapScraper, newGlobalParadiseScraper,
+		newGunServerScraper, newHarpoonScraper, newHellClanScraper, newJumpAcademyScraper, newLBGamingScraper,
+		newLOOSScraper, newLazyNeerScraper, newLazyPurpleScraper, newLunarioScraper, newMagyarhnsScraper,
+		newMaxDBScraper, newMoevsMachineScraper, newNeonHeightsScraper, newNideScraper, newOpstOnlineScraper,
+		newOreonScraper, newOwlTFScraper, newPancakesScraper, newPandaScraper, newPetrolTFScraper,
+		newPhoenixSourceScraper, newPlayesROScraper, newPowerFPSScraper, newProGamesZetScraper, newPRWHScraper,
+		newPubsTFScraper, newRandomTF2Scraper, newRushyScraper, newRetroServersScraper, newSGGamingScraper,
+		newSameTeemScraper, newSavageServidoresScraper, newScrapTFScraper, newServiliveClScraper, newSettiScraper,
+		newSirPleaseScraper, newSkialScraper, newSlavonServerScraper, newSneaksScraper, newSpaceShipScraper,
+		newSpectreScraper, newSvdosBrothersScraper, newSwapShopScraper, newTF2MapsScraper, newTF2ROScraper,
+		/*newTawernaScraper,*/ newTheVilleScraper, newTitanScraper, newTriggerHappyScraper, newUGCScraper,
+		newVaticanCityScraper, newVidyaGaemsScraper, newVortexScraper, /* newWonderlandTFGOOGScraper,*/
+		newZMBrasilScraper, newZubatScraper,
 	}
+
+	var scrapers []*sbScraper
+	mu := &sync.RWMutex{}
+	eg := errgroup.Group{}
+	for _, scraperSetupFunc := range scraperConstructors {
+		setupFn := scraperSetupFunc
+		eg.Go(func() error {
+			scraper, errScraper := setupFn(logger, cacheDir)
+			if errScraper != nil {
+				return errScraper
+			}
+			mu.Lock()
+			scrapers = append(scrapers, scraper)
+			mu.Unlock()
+			return nil
+		})
+	}
+	if errWait := eg.Wait(); errWait != nil {
+		return nil, errors.Wrap(errWait, "Could not initialize all scrapers")
+	}
+
+	return scrapers, nil
 }
 
 //nolint:funlen
@@ -220,9 +234,9 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore, profileU
 	totalErrorCount := 0
 
 	scraper.Collector.OnHTML("body", func(element *colly.HTMLElement) {
-		results, errorCount, parseErr := scraper.parser(element.DOM, scraper.parseTIme, scraper.name)
+		results, errorCount, parseErr := scraper.parser(element.DOM, scraper.log, scraper.parseTIme)
 		if parseErr != nil {
-			logger.Error("Parser returned error", zap.Error(parseErr))
+			scraper.log.Error("Parser returned error", zap.Error(parseErr))
 
 			return
 		}
@@ -330,9 +344,9 @@ func (log *scrapeLogger) Event(event *debug.Event) {
 	}
 }
 
-func newScraper(name string, baseURL string, startPath string, parser parserFunc,
+func newScraper(logger *zap.Logger, cacheDir string, name string, baseURL string, startPath string, parser parserFunc,
 	nextURL nextURLFunc, parseTime parseTimeFunc,
-) *sbScraper {
+) (*sbScraper, error) {
 	const (
 		randomDelay    = 5 * time.Second
 		maxQueueSize   = 10000
@@ -341,14 +355,14 @@ func newScraper(name string, baseURL string, startPath string, parser parserFunc
 
 	parsedURL, errURL := url.Parse(baseURL)
 	if errURL != nil {
-		logger.Panic("Failed to parse base url", zap.Error(errURL))
+		return nil, errors.Wrap(errURL, "Failed to parse base url")
 	}
 
 	debugLogger := scrapeLogger{logger: logger} //nolint:exhaustruct
 
 	reqQueue, errQueue := queue.New(1, &queue.InMemoryQueueStorage{MaxSize: maxQueueSize})
 	if errQueue != nil {
-		logger.Panic("Filed to create queue")
+		return nil, errors.Wrap(errQueue, "Filed to create queue")
 	}
 
 	scraper := sbScraper{ //nolint:exhaustruct
@@ -387,7 +401,7 @@ func newScraper(name string, baseURL string, startPath string, parser parserFunc
 		scraper.log.Error("Request error", zap.String("url", r.Request.URL.String()), zap.Error(err))
 	})
 
-	return &scraper
+	return &scraper, nil
 }
 
 func (scraper *sbScraper) url(path string) string {
@@ -712,7 +726,7 @@ func getMappedKey(s string) (mappedKey, bool) {
 }
 
 // https://github.com/SB-MaterialAdmin/Web/tree/stable-dev
-func parseMaterial(doc *goquery.Selection, parseTime parseTimeFunc, scraperName string) ([]sbRecord, int, error) {
+func parseMaterial(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFunc) ([]sbRecord, int, error) {
 	var (
 		bans      []sbRecord
 		curBan    sbRecord
@@ -734,7 +748,9 @@ func parseMaterial(doc *goquery.Selection, parseTime parseTimeFunc, scraperName 
 			case keyPlayer:
 				curBan.setPlayer(value)
 			case keySteam3ID:
-				curBan.setSteam(scraperName, value)
+				if errSteam := curBan.setSteam(value); errSteam != nil {
+					log.Debug("Failed to parse steam")
+				}
 			case keyCommunityLinks:
 				if curBan.SteamID.Valid() {
 					return
@@ -744,16 +760,16 @@ func parseMaterial(doc *goquery.Selection, parseTime parseTimeFunc, scraperName 
 					return
 				}
 				pcs := strings.Split(nv, "/")
-				curBan.setSteam(scraperName, pcs[4])
+				curBan.setSteam(pcs[4])
 			case keySteamCommunity:
 				pts := strings.Split(value, " ")
-				curBan.setSteam(scraperName, pts[0])
+				curBan.setSteam(pts[0])
 			case keyInvokedOn:
-				curBan.setInvokedOn(scraperName, parseTime, value)
+				curBan.setInvokedOn(parseTime, value)
 			case keyBanLength:
 				curBan.setBanLength(value)
 			case keyExpiredOn:
-				curBan.setExpiredOn(scraperName, parseTime, value)
+				curBan.setExpiredOn(parseTime, value)
 			case keyReason:
 				curBan.setReason(value)
 				curBan.Reason = value
@@ -771,7 +787,7 @@ func parseMaterial(doc *goquery.Selection, parseTime parseTimeFunc, scraperName 
 }
 
 // https://github.com/brhndursun/SourceBans-StarTheme
-func parseStar(doc *goquery.Selection, parseTime parseTimeFunc, scraperName string) ([]sbRecord, int, error) {
+func parseStar(doc *goquery.Selection, logger *zap.Logger, parseTime parseTimeFunc) ([]sbRecord, int, error) {
 	const expectedNodes = 3
 
 	var (
@@ -815,21 +831,21 @@ func parseStar(doc *goquery.Selection, parseTime parseTimeFunc, scraperName stri
 					return
 				}
 				pcs := strings.Split(nv, "/")
-				curBan.setSteam(scraperName, pcs[4])
+				curBan.setSteam(pcs[4])
 			case keySteam3ID:
-				curBan.setSteam(scraperName, value)
+				curBan.setSteam(value)
 			case keySteamCommunity:
 				if curBan.SteamID.Valid() {
 					return
 				}
 				pts := strings.Split(value, " ")
-				curBan.setSteam(scraperName, pts[0])
+				curBan.setSteam(pts[0])
 			case keyInvokedOn:
-				curBan.setInvokedOn(scraperName, parseTime, value)
+				curBan.setInvokedOn(parseTime, value)
 			case keyBanLength:
 				curBan.setBanLength(value)
 			case keyExpiredOn:
-				curBan.setExpiredOn(scraperName, parseTime, value)
+				curBan.setExpiredOn(parseTime, value)
 			case keyReason:
 				curBan.setReason(value)
 				if curBan.SteamID.Valid() && curBan.Name != "" {
@@ -846,7 +862,7 @@ func parseStar(doc *goquery.Selection, parseTime parseTimeFunc, scraperName stri
 }
 
 // https://github.com/aXenDeveloper/sourcebans-web-theme-fluent
-func parseFluent(doc *goquery.Selection, parseTime parseTimeFunc, scraperName string) ([]sbRecord, int, error) {
+func parseFluent(doc *goquery.Selection, logger *zap.Logger, parseTime parseTimeFunc) ([]sbRecord, int, error) {
 	var (
 		bans      []sbRecord
 		curBan    sbRecord
@@ -865,16 +881,16 @@ func parseFluent(doc *goquery.Selection, parseTime parseTimeFunc, scraperName st
 		case keyPlayer:
 			curBan.setPlayer(value)
 		case keySteam3ID:
-			curBan.setSteam(scraperName, value)
+			curBan.setSteam(value)
 		case keySteamCommunity:
 			pts := strings.Split(value, " ")
-			curBan.setSteam(scraperName, pts[0])
+			curBan.setSteam(pts[0])
 		case keyInvokedOn:
-			curBan.setInvokedOn(scraperName, parseTime, value)
+			curBan.setInvokedOn(parseTime, value)
 		case keyBanLength:
 			curBan.setBanLength(value)
 		case keyExpiredOn:
-			curBan.setExpiredOn(scraperName, parseTime, value)
+			curBan.setExpiredOn(parseTime, value)
 		case keyReason:
 			curBan.setReason(value)
 			if curBan.SteamID.Valid() && curBan.Name != "" {
@@ -889,7 +905,7 @@ func parseFluent(doc *goquery.Selection, parseTime parseTimeFunc, scraperName st
 	return bans, skipCount, nil
 }
 
-func parseDefault(doc *goquery.Selection, parseTime parseTimeFunc, scraperName string) ([]sbRecord, int, error) {
+func parseDefault(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFunc) ([]sbRecord, int, error) {
 	var (
 		bans     []sbRecord
 		curBan   sbRecord
@@ -933,13 +949,13 @@ func parseDefault(doc *goquery.Selection, parseTime parseTimeFunc, scraperName s
 				curBan.setPlayer(value)
 			case keySteamCommunity:
 				pts := strings.Split(value, " ")
-				curBan.setSteam(scraperName, pts[0])
+				curBan.setSteam(pts[0])
 			case keyInvokedOn:
-				curBan.setInvokedOn(scraperName, parseTime, value)
+				curBan.setInvokedOn(parseTime, value)
 			case keyBanLength:
 				curBan.setBanLength(value)
 			case keyExpiredOn:
-				curBan.setExpiredOn(scraperName, parseTime, value)
+				curBan.setExpiredOn(parseTime, value)
 			case keyReason:
 				curBan.setReason(value)
 				if curBan.SteamID.Valid() && curBan.Name != "" {
