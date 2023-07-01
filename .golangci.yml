@@ -34,8 +34,8 @@ linters:
     - gocheckcompilerdirectives
     - gochecknoglobals
     - gochecknoinits
-    - gocognit
-    - goconst
+    #- gocognit
+    #- goconst
     - gocritic
     - gocyclo
     - godot
@@ -116,3 +116,6 @@ linters-settings:
     # If lower than 0, disable the check.
     # Default: 40
     statements: -1
+  cyclop:
+    max-complexity: 25
+

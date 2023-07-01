@@ -24,7 +24,7 @@ type App struct {
 func NewApp(logger *zap.Logger, config appConfig, database *pgStore, cache cache, proxyManager *proxyManager) *App {
 	const profileQueueSize = 100
 
-	a := &App{
+	application := &App{
 		config:             config,
 		log:                logger.Named("api"),
 		db:                 database,
@@ -35,14 +35,14 @@ func NewApp(logger *zap.Logger, config appConfig, database *pgStore, cache cache
 		scrapers:           []*sbScraper{},
 	}
 
-	router, errRouter := a.createRouter()
+	router, errRouter := application.createRouter()
 	if errRouter != nil {
 		logger.Fatal("Failed to create router", zap.Error(errRouter))
 	}
 
-	a.router = router
+	application.router = router
 
-	return a
+	return application
 }
 
 func (a *App) Start(ctx context.Context) error {

@@ -40,7 +40,6 @@ func getRGL(ctx context.Context, sid64 steamid.SID64) ([]Season, error) {
 	return seasons, nil
 }
 
-//nolint:cyclop
 func parseRGLDivision(div string) Division {
 	switch div {
 	case "RGL-Invite":

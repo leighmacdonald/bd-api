@@ -110,8 +110,10 @@ func (db *pgStore) migrate() error {
 		return errors.Wrapf(errMigrateInstance, "Failed to create migrator")
 	}
 
-	if errUp := migrator.Up(); errUp != nil {
-		return errors.Wrap(errUp, "Failed to migrate up")
+	errMigration := migrator.Up()
+
+	if errMigration != nil && errMigration.Error() != "no change" {
+		return errors.Wrapf(errMigration, "Failed to perform migration")
 	}
 
 	return nil
@@ -403,7 +405,6 @@ func (db *pgStore) playerGetVanityNames(ctx context.Context, sid64 steamid.SID64
 	return records, nil
 }
 
-//nolint:nolintlint,funlen,cyclop
 func (db *pgStore) playerRecordSave(ctx context.Context, record *playerRecord) error {
 	success := false
 
@@ -792,6 +793,9 @@ func (db *pgStore) sbBanSave(ctx context.Context, record *sbBanRecord) error {
 	return nil
 }
 
+// Turn the saved usec back into seconds.
+const storeDurationSecondMulti = int64(time.Second)
+
 func (db *pgStore) sbGetBansBySID(ctx context.Context, sid64 steamid.SID64) ([]sbBanRecord, error) {
 	query, args, errSQL := sb.
 		Select("b.sb_ban_id", "b.sb_site_id", "b.steam_id", "b.persona_name", "b.reason",
@@ -822,7 +826,7 @@ func (db *pgStore) sbGetBansBySID(ctx context.Context, sid64 steamid.SID64) ([]s
 			return nil, dbErr(errScan, "Failed to scan sourcebans ban")
 		}
 
-		bRecord.Duration = time.Duration(duration * 1000000000)
+		bRecord.Duration = time.Duration(duration * storeDurationSecondMulti)
 
 		records = append(records, bRecord)
 	}

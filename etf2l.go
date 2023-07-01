@@ -101,15 +101,10 @@ func getETF2L(ctx context.Context, sid steamid.SID64) ([]Season, error) {
 		return nil, errors.Wrap(errUnmarshal, "Failed to decode response body")
 	}
 
-	seasons, errParse := parseETF2L(player)
-	if errParse != nil {
-		return nil, errParse
-	}
-
-	return seasons, nil
+	return parseETF2L(player), nil
 }
 
-func parseETF2L(player etf2lPlayer) ([]Season, error) {
+func parseETF2L(player etf2lPlayer) []Season {
 	var seasons []Season
 
 	for _, team := range player.Player.Teams {
@@ -163,5 +158,5 @@ func parseETF2L(player etf2lPlayer) ([]Season, error) {
 		}
 	}
 
-	return sortSeasons(seasons), nil
+	return sortSeasons(seasons)
 }

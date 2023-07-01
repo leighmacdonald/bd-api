@@ -30,30 +30,30 @@ func TestStore(t *testing.T) {
 		}
 	})
 
-	db, errStore := newStore(ctx, zap.NewNop(), dsn)
+	database, errStore := newStore(ctx, zap.NewNop(), dsn)
 	if errStore != nil {
 		panic(errStore)
 	}
 
-	t.Run("sourceBansStoreTest", sourceBansStoreTest(db))               //nolint:paralleltest
-	t.Run("sourceBansPlayerRecordTest", sourceBansPlayerRecordTest(db)) //nolint:paralleltest
+	t.Run("sourceBansStoreTest", sourceBansStoreTest(database))               //nolint:paralleltest
+	t.Run("sourceBansPlayerRecordTest", sourceBansPlayerRecordTest(database)) //nolint:paralleltest
 }
 
-func sourceBansStoreTest(db *pgStore) func(t *testing.T) {
+func sourceBansStoreTest(database *pgStore) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Parallel()
 
 		var site sbSite
 
-		require.Error(t, db.sbSiteGet(context.Background(), 99999, &site))
+		require.Error(t, database.sbSiteGet(context.Background(), 99999, &site))
 
 		site2 := newSBSite("test-site")
 
-		require.NoError(t, db.sbSiteSave(context.Background(), &site2))
+		require.NoError(t, database.sbSiteSave(context.Background(), &site2))
 
 		var site3 sbSite
 
-		require.NoError(t, db.sbSiteGet(context.Background(), site2.SiteID, &site3))
+		require.NoError(t, database.sbSiteGet(context.Background(), site2.SiteID, &site3))
 		require.Equal(t, site2.Name, site3.Name)
 		require.Equal(t, site2.UpdatedOn.Second(), site3.UpdatedOn.Second())
 
@@ -61,19 +61,19 @@ func sourceBansStoreTest(db *pgStore) func(t *testing.T) {
 		pRecord.PersonaName = "blah"
 		pRecord.Vanity = "poop3r"
 
-		require.NoError(t, db.playerRecordSave(context.Background(), &pRecord))
+		require.NoError(t, database.playerRecordSave(context.Background(), &pRecord))
 
 		t0 := time.Now().AddDate(-1, 0, 0)
 		t1 := t0.AddDate(0, 1, 0)
 		recA := site3.newRecord(testIDCamper, "blah", "test", t0, t1.Sub(t0), false)
 
-		require.NoError(t, db.sbBanSave(context.Background(), &recA))
-		require.NoError(t, db.sbSiteDelete(context.Background(), site3.SiteID))
-		require.Error(t, db.sbSiteGet(context.Background(), site3.SiteID, &site))
+		require.NoError(t, database.sbBanSave(context.Background(), &recA))
+		require.NoError(t, database.sbSiteDelete(context.Background(), site3.SiteID))
+		require.Error(t, database.sbSiteGet(context.Background(), site3.SiteID, &site))
 	}
 }
 
-func sourceBansPlayerRecordTest(db *pgStore) func(t *testing.T) {
+func sourceBansPlayerRecordTest(database *pgStore) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Parallel()
 
@@ -81,9 +81,9 @@ func sourceBansPlayerRecordTest(db *pgStore) func(t *testing.T) {
 		pRecord.PersonaName = "blah"
 		pRecord.Vanity = "123"
 
-		require.NoError(t, db.playerRecordSave(context.Background(), &pRecord))
+		require.NoError(t, database.playerRecordSave(context.Background(), &pRecord))
 
-		names, errNames := db.playerGetNames(context.Background(), pRecord.SteamID)
+		names, errNames := database.playerGetNames(context.Background(), pRecord.SteamID)
 
 		require.NoError(t, errNames)
 
@@ -100,7 +100,7 @@ func sourceBansPlayerRecordTest(db *pgStore) func(t *testing.T) {
 		require.True(t, nameOk, "Name not found")
 
 		vNameOk := false
-		vNames, errVNames := db.playerGetVanityNames(context.Background(), pRecord.SteamID)
+		vNames, errVNames := database.playerGetVanityNames(context.Background(), pRecord.SteamID)
 
 		require.NoError(t, errVNames)
 
@@ -115,7 +115,7 @@ func sourceBansPlayerRecordTest(db *pgStore) func(t *testing.T) {
 		require.True(t, vNameOk, "Vanity not found")
 
 		avatarOk := false
-		avatars, errAvatars := db.playerGetAvatars(context.Background(), pRecord.SteamID)
+		avatars, errAvatars := database.playerGetAvatars(context.Background(), pRecord.SteamID)
 		require.NoError(t, errAvatars)
 
 		for _, name := range avatars {

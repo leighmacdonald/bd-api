@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"time"
 
 	"go.uber.org/zap"
 )
 
 func main() {
+	startTime := time.Now()
 	ctx := context.Background()
 
 	logCfg := zap.NewProductionConfig()
@@ -18,6 +20,7 @@ func main() {
 	}
 
 	defer func() {
+		defer logger.Info("Exited", zap.Duration("uptime", time.Since(startTime)))
 		logger.Info("Shutting down")
 
 		if errSync := logger.Sync(); errSync != nil {
@@ -33,7 +36,7 @@ func main() {
 		logger.Panic("Failed to load config", zap.Error(errConfig))
 	}
 
-	cache, cacheErr := newFSCache(logger, "./.cache/")
+	localCache, cacheErr := newFSCache(logger, "./.cache/")
 	if cacheErr != nil {
 		logger.Panic("Failed to create fsCache", zap.Error(cacheErr))
 	}
@@ -45,10 +48,11 @@ func main() {
 
 	pm := newProxyManager(logger)
 
-	app := NewApp(logger, config, database, cache, pm)
+	app := NewApp(logger, config, database, localCache, pm)
 
 	if errStart := app.Start(ctx); errStart != nil {
 		logger.Error("App returned error", zap.Error(errStart))
+
 		return
 	}
 }

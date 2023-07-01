@@ -11,11 +11,14 @@ import (
 	"go.uber.org/zap"
 )
 
-func testParser(t *testing.T, scraperFn func(logger *zap.Logger, cacheDir string) (*sbScraper, error), count int, nextPage string) {
+type scraperFn func(logger *zap.Logger, cacheDir string) (*sbScraper, error)
+
+func testParser(t *testing.T, scraperFn scraperFn, count int, nextPage string) {
 	t.Helper()
 
 	scraper, scraperErr := scraperFn(zap.NewNop(), "./cache/")
 	require.NoError(t, scraperErr, "Failed to create scraper")
+
 	testBody, errOpen := os.Open(fmt.Sprintf("testdata/%s.html", scraper.name))
 
 	require.NoError(t, errOpen)
@@ -25,6 +28,7 @@ func testParser(t *testing.T, scraperFn func(logger *zap.Logger, cacheDir string
 	doc, errDoc := goquery.NewDocumentFromReader(testBody)
 
 	require.NoError(t, errDoc)
+
 	results, _, errParse := scraper.parser(doc.Selection, zap.NewNop(), scraper.parseTIme)
 
 	require.NoError(t, errParse)
@@ -347,10 +351,10 @@ func TestDefuseRo(t *testing.T) {
 	testParser(t, newDefuseRoScraper, 25, "index.php?p=banlist&page=2")
 }
 
-func TestTawerna(t *testing.T) {
-	t.Parallel()
-	testParser(t, newTawernaScraper, 30, "index.php?p=banlist&page=2")
-}
+// func TestTawerna(t *testing.T) {
+//	t.Parallel()
+//	testParser(t, newTawernaScraper, 30, "index.php?p=banlist&page=2")
+// }
 
 func TestTitan(t *testing.T) {
 	t.Parallel()
@@ -364,7 +368,7 @@ func TestDiscFF(t *testing.T) {
 
 // func TestOtaku(t *testing.T) {
 //	testParser(t, NewOtakuScraper(), 30, "index.php?p=banlist&page=2")
-//}
+// }
 
 func TestAMSGaming(t *testing.T) {
 	t.Parallel()

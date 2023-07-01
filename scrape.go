@@ -47,9 +47,7 @@ func (a *App) runScrapers(ctx context.Context) {
 		go func(s *sbScraper) {
 			defer waitGroup.Done()
 
-			if errScrape := s.start(ctx, a.db, a.profileUpdateQueue); errScrape != nil {
-				s.log.Error("Scraper returned error", zap.Error(errScrape))
-			}
+			s.start(ctx, a.db, a.profileUpdateQueue)
 		}(scraper)
 	}
 
@@ -101,6 +99,7 @@ func (r *sbRecord) setInvokedOn(parseTime parseTimeFunc, value string) error {
 	}
 
 	r.CreatedOn = parsedTime
+
 	return nil
 }
 
@@ -203,30 +202,35 @@ func createScrapers(logger *zap.Logger, cacheDir string) ([]*sbScraper, error) {
 	}
 
 	var scrapers []*sbScraper
-	mu := &sync.RWMutex{}
-	eg := errgroup.Group{}
+
+	scraperMu := &sync.RWMutex{}
+	errGroup := errgroup.Group{}
+
 	for _, scraperSetupFunc := range scraperConstructors {
 		setupFn := scraperSetupFunc
-		eg.Go(func() error {
+
+		errGroup.Go(func() error {
 			scraper, errScraper := setupFn(logger, cacheDir)
 			if errScraper != nil {
 				return errScraper
 			}
-			mu.Lock()
+
+			scraperMu.Lock()
 			scrapers = append(scrapers, scraper)
-			mu.Unlock()
+			scraperMu.Unlock()
+
 			return nil
 		})
 	}
-	if errWait := eg.Wait(); errWait != nil {
+
+	if errWait := errGroup.Wait(); errWait != nil {
 		return nil, errors.Wrap(errWait, "Could not initialize all scrapers")
 	}
 
 	return scrapers, nil
 }
 
-//nolint:funlen
-func (scraper *sbScraper) start(ctx context.Context, database *pgStore, profileUpdateQueue chan steamid.SID64) error {
+func (scraper *sbScraper) start(ctx context.Context, database *pgStore, profileUpdateQueue chan steamid.SID64) {
 	scraper.log.Info("Starting scrape job", zap.String("name", scraper.name), zap.String("theme", scraper.theme))
 
 	lastURL := ""
@@ -309,8 +313,6 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore, profileU
 	scraper.log.Info("Completed scrape job", zap.String("name", scraper.name),
 		zap.Int("valid", len(scraper.results)), zap.Int("skipped", totalErrorCount),
 		zap.Duration("duration", time.Since(startTime)))
-
-	return nil
 }
 
 type scrapeLogger struct {
@@ -344,6 +346,9 @@ func (log *scrapeLogger) Event(event *debug.Event) {
 	}
 }
 
+const defaultStartPath = "index.php?p=banlist"
+
+//nolint:unparam
 func newScraper(logger *zap.Logger, cacheDir string, name string, baseURL string, startPath string, parser parserFunc,
 	nextURL nextURLFunc, parseTime parseTimeFunc,
 ) (*sbScraper, error) {
@@ -363,6 +368,10 @@ func newScraper(logger *zap.Logger, cacheDir string, name string, baseURL string
 	reqQueue, errQueue := queue.New(1, &queue.InMemoryQueueStorage{MaxSize: maxQueueSize})
 	if errQueue != nil {
 		return nil, errors.Wrap(errQueue, "Filed to create queue")
+	}
+
+	if startPath == "" {
+		startPath = defaultStartPath
 	}
 
 	scraper := sbScraper{ //nolint:exhaustruct
@@ -684,43 +693,51 @@ const (
 	keyPlayer   mappedKey = "player"
 )
 
-var keyMap = map[string]mappedKey{
-	"community links":      "community links",
-	"banlanma tarihi":      "invoked on",
-	"был выдан":            "invoked on",
-	"datum a čas udělení":  "invoked on",
-	"invoked on":           "invoked on",
-	"steam community":      "steam community",
-	"steam komunitní":      "steam community",
-	"ban uzunluğu":         "ban length",
-	"délka":                "ban length",
-	"banlength":            "ban length",
-	"ban length":           "ban length",
-	"длительность":         "ban length",
-	"şu zaman sona eriyor": "expires on",
-	"vyprší":               "expires on",
-	"будет снят":           "expires on",
-	"expires on":           "expires on",
-	"причина разбана":      "reason unbanned",
-	"sebep":                "reason",
-	"důvod":                "reason",
-	"reason":               "reason",
-	"разбанен админом":     "unbanned by",
-	"причина бана":         "reason",
-	"oyuncu":               "player",
-	"игрок":                "player",
-	"player":               "player",
-	"steam3 id":            "steam3 id",
+type normalizer struct {
+	keyMap  map[string]mappedKey
+	spaceRm *regexp.Regexp
 }
 
-var spaceRm = regexp.MustCompile(`\s+`)
-
-func normKey(s string) string {
-	return strings.ReplaceAll(spaceRm.ReplaceAllString(strings.TrimSpace(strings.ToLower(s)), " "), "\n", "")
+func newNormalizer() *normalizer {
+	return &normalizer{
+		spaceRm: regexp.MustCompile(`\s+`),
+		keyMap: map[string]mappedKey{
+			"community links":      "community links",
+			"banlanma tarihi":      "invoked on",
+			"был выдан":            "invoked on",
+			"datum a čas udělení":  "invoked on",
+			"invoked on":           "invoked on",
+			"steam community":      "steam community",
+			"steam komunitní":      "steam community",
+			"ban uzunluğu":         "ban length",
+			"délka":                "ban length",
+			"banlength":            "ban length",
+			"ban length":           "ban length",
+			"длительность":         "ban length",
+			"şu zaman sona eriyor": "expires on",
+			"vyprší":               "expires on",
+			"будет снят":           "expires on",
+			"expires on":           "expires on",
+			"причина разбана":      "reason unbanned",
+			"sebep":                "reason",
+			"důvod":                "reason",
+			"reason":               "reason",
+			"разбанен админом":     "unbanned by",
+			"причина бана":         "reason",
+			"oyuncu":               "player",
+			"игрок":                "player",
+			"player":               "player",
+			"steam3 id":            "steam3 id",
+		},
+	}
 }
 
-func getMappedKey(s string) (mappedKey, bool) {
-	mk, found := keyMap[s]
+func (n normalizer) key(s string) string {
+	return strings.ReplaceAll(n.spaceRm.ReplaceAllString(strings.TrimSpace(strings.ToLower(s)), " "), "\n", "")
+}
+
+func (n normalizer) getMappedKey(s string) (mappedKey, bool) {
+	mk, found := n.keyMap[s]
 
 	return mk, found
 }
@@ -733,14 +750,16 @@ func parseMaterial(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeF
 		skipCount int
 	)
 
+	norm := newNormalizer()
+
 	doc.Find("div.opener .card-body").Each(func(_ int, selection *goquery.Selection) {
 		selection.First().Children().Children().Each(func(i int, selection *goquery.Selection) {
 			children := selection.First().Children()
 			first := children.First()
 			second := children.Last()
-			key := normKey(first.Contents().Text())
+			key := norm.key(first.Contents().Text())
 			value := strings.TrimSpace(second.Contents().Text())
-			mk, ok := getMappedKey(key)
+			mk, ok := norm.getMappedKey(key)
 			if !ok {
 				return
 			}
@@ -749,7 +768,7 @@ func parseMaterial(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeF
 				curBan.setPlayer(value)
 			case keySteam3ID:
 				if errSteam := curBan.setSteam(value); errSteam != nil {
-					log.Debug("Failed to parse steam")
+					log.Error("Failed to set steam (steam3)", zap.Error(errSteam))
 				}
 			case keyCommunityLinks:
 				if curBan.SteamID.Valid() {
@@ -760,16 +779,24 @@ func parseMaterial(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeF
 					return
 				}
 				pcs := strings.Split(nv, "/")
-				curBan.setSteam(pcs[4])
+				if errSteam := curBan.setSteam(pcs[4]); errSteam != nil {
+					log.Error("Failed to set steam (comm link)", zap.Error(errSteam))
+				}
 			case keySteamCommunity:
 				pts := strings.Split(value, " ")
-				curBan.setSteam(pts[0])
+				if errSteam := curBan.setSteam(pts[0]); errSteam != nil {
+					log.Error("Failed to set steam (steam comm)", zap.Error(errSteam))
+				}
 			case keyInvokedOn:
-				curBan.setInvokedOn(parseTime, value)
+				if errInvoke := curBan.setInvokedOn(parseTime, value); errInvoke != nil {
+					log.Error("failed to set invoke time", zap.Error(errInvoke))
+				}
 			case keyBanLength:
 				curBan.setBanLength(value)
 			case keyExpiredOn:
-				curBan.setExpiredOn(parseTime, value)
+				if errExpiration := curBan.setExpiredOn(parseTime, value); errExpiration != nil {
+					log.Error("failed to set expiration time", zap.Error(errExpiration))
+				}
 			case keyReason:
 				curBan.setReason(value)
 				curBan.Reason = value
@@ -787,7 +814,7 @@ func parseMaterial(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeF
 }
 
 // https://github.com/brhndursun/SourceBans-StarTheme
-func parseStar(doc *goquery.Selection, logger *zap.Logger, parseTime parseTimeFunc) ([]sbRecord, int, error) {
+func parseStar(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFunc) ([]sbRecord, int, error) {
 	const expectedNodes = 3
 
 	var (
@@ -795,6 +822,8 @@ func parseStar(doc *goquery.Selection, logger *zap.Logger, parseTime parseTimeFu
 		curBan    sbRecord
 		skipCount int
 	)
+
+	norm := newNormalizer()
 
 	doc.Find("div").Each(func(_ int, selection *goquery.Selection) {
 		idAttr, ok := selection.Attr("id")
@@ -816,9 +845,9 @@ func parseStar(doc *goquery.Selection, logger *zap.Logger, parseTime parseTimeFu
 			}
 			first := children.First()
 			second := children.Last()
-			key := normKey(first.Contents().Text())
+			key := norm.key(first.Contents().Text())
 			value := strings.TrimSpace(second.Contents().Text())
-			mk, found := getMappedKey(key)
+			mk, found := norm.getMappedKey(key)
 			if !found {
 				return
 			}
@@ -831,21 +860,32 @@ func parseStar(doc *goquery.Selection, logger *zap.Logger, parseTime parseTimeFu
 					return
 				}
 				pcs := strings.Split(nv, "/")
-				curBan.setSteam(pcs[4])
+				if errSteam := curBan.setSteam(pcs[4]); errSteam != nil {
+					log.Error("Failed to set steam (comm link)", zap.Error(errSteam))
+				}
 			case keySteam3ID:
-				curBan.setSteam(value)
+				if errSteam := curBan.setSteam(value); errSteam != nil {
+					log.Error("Failed to set steam (sid))", zap.Error(errSteam))
+				}
 			case keySteamCommunity:
 				if curBan.SteamID.Valid() {
 					return
 				}
 				pts := strings.Split(value, " ")
-				curBan.setSteam(pts[0])
+				if errSteam := curBan.setSteam(pts[0]); errSteam != nil {
+					log.Error("Failed to set steam (steam comm)", zap.Error(errSteam))
+				}
 			case keyInvokedOn:
-				curBan.setInvokedOn(parseTime, value)
+				if errInvoke := curBan.setInvokedOn(parseTime, value); errInvoke != nil {
+					log.Error("failed to set invoke time", zap.Error(errInvoke))
+				}
 			case keyBanLength:
 				curBan.setBanLength(value)
 			case keyExpiredOn:
-				curBan.setExpiredOn(parseTime, value)
+				if errExpiration := curBan.setExpiredOn(parseTime, value); errExpiration != nil {
+					log.Error("failed to set expiration time", zap.Error(errExpiration))
+				}
+
 			case keyReason:
 				curBan.setReason(value)
 				if curBan.SteamID.Valid() && curBan.Name != "" {
@@ -862,18 +902,20 @@ func parseStar(doc *goquery.Selection, logger *zap.Logger, parseTime parseTimeFu
 }
 
 // https://github.com/aXenDeveloper/sourcebans-web-theme-fluent
-func parseFluent(doc *goquery.Selection, logger *zap.Logger, parseTime parseTimeFunc) ([]sbRecord, int, error) {
+func parseFluent(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFunc) ([]sbRecord, int, error) {
 	var (
 		bans      []sbRecord
 		curBan    sbRecord
 		skipCount int
 	)
 
+	norm := newNormalizer()
+
 	doc.Find("ul.ban_list_detal li").Each(func(i int, selection *goquery.Selection) {
 		child := selection.Children()
-		key := normKey(child.First().Contents().Text())
+		key := norm.key(child.First().Contents().Text())
 		value := strings.TrimSpace(child.Last().Contents().Text())
-		mk, found := getMappedKey(key)
+		mk, found := norm.getMappedKey(key)
 		if !found {
 			return
 		}
@@ -881,16 +923,24 @@ func parseFluent(doc *goquery.Selection, logger *zap.Logger, parseTime parseTime
 		case keyPlayer:
 			curBan.setPlayer(value)
 		case keySteam3ID:
-			curBan.setSteam(value)
+			if errSteam := curBan.setSteam(value); errSteam != nil {
+				log.Error("Failed to set steam (steam3)", zap.Error(errSteam))
+			}
 		case keySteamCommunity:
 			pts := strings.Split(value, " ")
-			curBan.setSteam(pts[0])
+			if errSteam := curBan.setSteam(pts[0]); errSteam != nil {
+				log.Error("Failed to set steam (steam comm)", zap.Error(errSteam))
+			}
 		case keyInvokedOn:
-			curBan.setInvokedOn(parseTime, value)
+			if errInvoke := curBan.setInvokedOn(parseTime, value); errInvoke != nil {
+				log.Error("failed to set invoke time", zap.Error(errInvoke))
+			}
 		case keyBanLength:
 			curBan.setBanLength(value)
 		case keyExpiredOn:
-			curBan.setExpiredOn(parseTime, value)
+			if errExpiration := curBan.setExpiredOn(parseTime, value); errExpiration != nil {
+				log.Error("failed to set expiration time", zap.Error(errExpiration))
+			}
 		case keyReason:
 			curBan.setReason(value)
 			if curBan.SteamID.Valid() && curBan.Name != "" {
@@ -914,11 +964,14 @@ func parseDefault(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFu
 		skipped  int
 	)
 
+	norm := newNormalizer()
+
 	doc.Find("#banlist .listtable table tr td").Each(func(i int, selection *goquery.Selection) {
 		value := strings.TrimSpace(selection.Text())
+
 		if !isValue {
-			key := normKey(value)
-			mk, found := getMappedKey(key)
+			key := norm.key(value)
+			mk, found := norm.getMappedKey(key)
 			if !found {
 				return
 			}
@@ -942,29 +995,37 @@ func parseDefault(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFu
 				curState = keyReason
 				isValue = true
 			}
-		} else {
-			isValue = false
-			switch curState { //nolint:exhaustive
-			case keyPlayer:
-				curBan.setPlayer(value)
-			case keySteamCommunity:
-				pts := strings.Split(value, " ")
-				curBan.setSteam(pts[0])
-			case keyInvokedOn:
-				curBan.setInvokedOn(parseTime, value)
-			case keyBanLength:
-				curBan.setBanLength(value)
-			case keyExpiredOn:
-				curBan.setExpiredOn(parseTime, value)
-			case keyReason:
-				curBan.setReason(value)
-				if curBan.SteamID.Valid() && curBan.Name != "" {
-					bans = append(bans, curBan)
-				} else {
-					skipped++
-				}
-				curBan = sbRecord{} //nolint:exhaustruct
+
+			return
+		}
+
+		isValue = false
+		switch curState { //nolint:exhaustive
+		case keyPlayer:
+			curBan.setPlayer(value)
+		case keySteamCommunity:
+			pts := strings.Split(value, " ")
+			if errSteam := curBan.setSteam(pts[0]); errSteam != nil {
+				log.Error("Failed to set steam (steam comm)", zap.Error(errSteam))
 			}
+		case keyInvokedOn:
+			if errInvoke := curBan.setInvokedOn(parseTime, value); errInvoke != nil {
+				log.Error("failed to set invoke time", zap.Error(errInvoke))
+			}
+		case keyBanLength:
+			curBan.setBanLength(value)
+		case keyExpiredOn:
+			if errExpiration := curBan.setExpiredOn(parseTime, value); errExpiration != nil {
+				log.Error("failed to set expiration time", zap.Error(errExpiration))
+			}
+		case keyReason:
+			curBan.setReason(value)
+			if curBan.SteamID.Valid() && curBan.Name != "" {
+				bans = append(bans, curBan)
+			} else {
+				skipped++
+			}
+			curBan = sbRecord{} //nolint:exhaustruct
 		}
 	})
 

@@ -10,8 +10,10 @@ import (
 	"go.uber.org/zap"
 )
 
+const funcSize = 10
+
 func (a *App) handleGetSummary() gin.HandlerFunc {
-	log := a.log.Named(runtime.FuncForPC(make([]uintptr, 10)[0]).Name())
+	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
 
 	return func(ctx *gin.Context) {
 		steamIDQuery, ok := ctx.GetQuery("steam_id")
@@ -50,7 +52,8 @@ func (a *App) handleGetSummary() gin.HandlerFunc {
 }
 
 func (a *App) handleGetBans() gin.HandlerFunc {
-	log := a.log.Named(runtime.FuncForPC(make([]uintptr, 10)[0]).Name())
+	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
+
 	return func(ctx *gin.Context) {
 		steamIDQuery, ok := ctx.GetQuery("steam_id")
 		if !ok {
@@ -82,7 +85,7 @@ func (a *App) handleGetBans() gin.HandlerFunc {
 }
 
 func (a *App) handleGetProfile() gin.HandlerFunc {
-	log := a.log.Named(runtime.FuncForPC(make([]uintptr, 10)[0]).Name())
+	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
 
 	return func(ctx *gin.Context) {
 		steamIDQuery, ok := ctx.GetQuery("steam_id")
@@ -134,13 +137,14 @@ func (a *App) handleGetSourceBans() gin.HandlerFunc {
 }
 
 func (a *App) handleGetProfiles() gin.HandlerFunc {
-	log := a.log.Named(runtime.FuncForPC(make([]uintptr, 10)[0]).Name())
+	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
 	encoder := newStyleEncoder()
 
 	return func(ctx *gin.Context) {
 		sid, errSid := steamIDFromSlug(ctx)
 		if errSid != nil {
 			log.Error("Failed to resolve slug steamid", zap.Error(errSid))
+
 			return
 		}
 
