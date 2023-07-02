@@ -31,7 +31,6 @@ proxies:
   - username: user
     remote_addr: sfo-1.us.kittyland.com:22
     local_addr: localhost:3001
-
 ```
 
 You can override these values using matching environment vars with the `BDAPI` prefix like so:

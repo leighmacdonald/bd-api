@@ -18,16 +18,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type nopCache struct{}
-
-func (c *nopCache) get(_ string) ([]byte, error) {
-	return nil, errCacheExpired
-}
-
-func (c *nopCache) set(_ string, _ io.Reader) error {
-	return nil
-}
-
 func newTestDB(ctx context.Context) (string, *postgres.PostgresContainer) {
 	const testInfo = "bdapi-test"
 	username, password, dbName := testInfo, testInfo, testInfo

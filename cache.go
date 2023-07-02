@@ -19,6 +19,16 @@ type cache interface {
 	set(key string, reader io.Reader) error
 }
 
+type nopCache struct{}
+
+func (c *nopCache) get(_ string) ([]byte, error) {
+	return nil, errCacheExpired
+}
+
+func (c *nopCache) set(_ string, _ io.Reader) error {
+	return nil
+}
+
 type fsCache struct {
 	cacheDir string
 	log      *zap.Logger

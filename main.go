@@ -21,8 +21,6 @@ func main() {
 
 	defer func() {
 		defer logger.Info("Exited", zap.Duration("uptime", time.Since(startTime)))
-		logger.Info("Shutting down")
-
 		if errSync := logger.Sync(); errSync != nil {
 			logger.Panic("Failed to sync", zap.Error(errSync))
 		}
@@ -36,9 +34,17 @@ func main() {
 		logger.Panic("Failed to load config", zap.Error(errConfig))
 	}
 
-	localCache, cacheErr := newFSCache(logger, "./.cache/")
-	if cacheErr != nil {
-		logger.Panic("Failed to create fsCache", zap.Error(cacheErr))
+	var cacheHandler cache
+
+	if config.EnableCache {
+		localCache, cacheErr := newFSCache(logger, config.CacheDir)
+		if cacheErr != nil {
+			logger.Panic("Failed to create fsCache", zap.Error(cacheErr))
+		}
+
+		cacheHandler = localCache
+	} else {
+		cacheHandler = &nopCache{}
 	}
 
 	database, errDB := newStore(ctx, logger, config.DSN)
@@ -48,7 +54,7 @@ func main() {
 
 	pm := newProxyManager(logger)
 
-	app := NewApp(logger, config, database, localCache, pm)
+	app := NewApp(logger, config, database, cacheHandler, pm)
 
 	if errStart := app.Start(ctx); errStart != nil {
 		logger.Error("App returned error", zap.Error(errStart))
