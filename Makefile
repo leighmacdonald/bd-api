@@ -25,7 +25,7 @@ check_deps:
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 
 dev_db:
-	docker compose -f docker-compose-dev.yml up --force-recreate -V postgres
+	docker-compose --file docker-compose-dev.yml up --force-recreate -V postgres
 
 test:
 	go test ./...

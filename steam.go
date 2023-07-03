@@ -78,13 +78,14 @@ func (a *App) getSteamSummary(ctx context.Context, steamID steamid.SID64) ([]ste
 func (a *App) profileUpdater(ctx context.Context, inChan <-chan steamid.SID64) {
 	const (
 		maxQueuedCount = 100
-		updateInterval = time.Second * 5
+		updateInterval = time.Second
 	)
 
-	var updateQueue steamid.Collection
-
-	updateTicker := time.NewTicker(updateInterval)
-	triggerUpdate := make(chan any)
+	var (
+		updateQueue   steamid.Collection
+		updateTicker  = time.NewTicker(updateInterval)
+		triggerUpdate = make(chan any)
+	)
 
 	for {
 		select {
@@ -92,32 +93,33 @@ func (a *App) profileUpdater(ctx context.Context, inChan <-chan steamid.SID64) {
 			triggerUpdate <- true
 		case updateSid := <-inChan:
 			updateQueue = append(updateQueue, updateSid)
-			if len(updateQueue) >= maxQueuedCount {
-				triggerUpdate <- true
-			}
 		case <-triggerUpdate:
 			var expiredIds steamid.Collection
-			expiredIds = append(expiredIds, updateQueue...)
 
-			expiredProfiles, errProfiles := a.db.playerGetExpiredProfiles(ctx, maxQueuedCount-len(expiredIds))
+			expiredProfiles, errProfiles := a.db.playerGetExpiredProfiles(ctx, maxQueuedCount)
 			if errProfiles != nil {
 				a.log.Error("Failed to fetch expired profiles", zap.Error(errProfiles))
 			}
 
-			for _, sid64 := range updateQueue {
-				var pr playerRecord
-				if errQueued := a.db.playerGetOrCreate(ctx, sid64, &pr); errQueued != nil {
-					continue
-				}
+			additional := 0
 
-				expiredProfiles = append(expiredProfiles, pr)
+			for len(expiredProfiles) < maxQueuedCount {
+				for _, sid64 := range updateQueue {
+					var pr playerRecord
+					if errQueued := a.db.playerGetOrCreate(ctx, sid64, &pr); errQueued != nil {
+						continue
+					}
+
+					expiredProfiles = append(expiredProfiles, pr)
+					additional++
+				}
 			}
+
+			updateQueue = updateQueue[additional:]
 
 			if len(expiredProfiles) == 0 {
 				continue
 			}
-
-			updateQueue = nil
 
 			for _, profile := range expiredProfiles {
 				expiredIds = append(expiredIds, profile.SteamID)

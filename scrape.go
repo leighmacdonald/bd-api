@@ -283,12 +283,7 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore, profileU
 					zap.Int64("sid64", pRecord.SteamID.Int64()), zap.Error(errBanSave))
 			}
 
-			select {
-			case profileUpdateQueue <- bRecord.SteamID:
-			default:
-				scraper.log.Warn("Failed to trigger profile update, queue full",
-					zap.Int64("sid64", pRecord.SteamID.Int64()))
-			}
+			profileUpdateQueue <- bRecord.SteamID
 		}
 		if nextURL != "" && nextURL != lastURL {
 			lastURL = nextURL

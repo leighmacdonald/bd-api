@@ -22,15 +22,13 @@ type App struct {
 }
 
 func NewApp(logger *zap.Logger, config appConfig, database *pgStore, cache cache, proxyManager *proxyManager) *App {
-	const profileQueueSize = 100
-
 	application := &App{
 		config:             config,
 		log:                logger.Named("api"),
 		db:                 database,
 		cache:              cache,
 		pm:                 proxyManager,
-		profileUpdateQueue: make(chan steamid.SID64, profileQueueSize),
+		profileUpdateQueue: make(chan steamid.SID64),
 		router:             nil,
 		scrapers:           []*sbScraper{},
 	}
