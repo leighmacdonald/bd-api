@@ -21,6 +21,7 @@ func main() {
 
 	defer func() {
 		defer logger.Info("Exited", zap.Duration("uptime", time.Since(startTime)))
+
 		if errSync := logger.Sync(); errSync != nil {
 			logger.Panic("Failed to sync", zap.Error(errSync))
 		}
