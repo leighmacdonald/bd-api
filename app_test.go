@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/leighmacdonald/steamid/v3/steamid"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -89,6 +90,10 @@ func apiTestGans(app *App) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Parallel()
 
+		if !steamid.KeyConfigured() {
+			t.Skip("BDAPI_STEAM_API_KEY not set")
+		}
+
 		sid := testIDb4nny
 
 		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/bans?steam_id=%d", testIDb4nny.Int64()), nil)
@@ -112,6 +117,10 @@ func apiTestSummary(app *App) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Parallel()
 
+		if !steamid.KeyConfigured() {
+			t.Skip("BDAPI_STEAM_API_KEY not set")
+		}
+
 		sid := testIDb4nny
 		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/summary?steam_id=%d", testIDb4nny.Int64()), nil)
 		recorder := httptest.NewRecorder()
@@ -133,6 +142,10 @@ func apiTestSummary(app *App) func(t *testing.T) {
 func apiTestGetprofile(app *App) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Parallel()
+
+		if !steamid.KeyConfigured() {
+			t.Skip("BDAPI_STEAM_API_KEY not set")
+		}
 
 		sid := testIDb4nny
 
