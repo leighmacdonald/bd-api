@@ -4,7 +4,7 @@ build:
 	go build -o bd-api
 
 fmt:
-	gci write . --skip-generated -s default
+	gci write . --skip-generated -s standard -s default
 	gofumpt -l -w .
 
 check: lint_golangci static
