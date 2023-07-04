@@ -2,25 +2,75 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"time"
 
+	"github.com/gin-gonic/gin"
+	"github.com/leighmacdonald/bd/pkg/util"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
+
+func MustCreateLogger(conf appConfig) *zap.Logger {
+	var loggingConfig zap.Config
+
+	switch conf.RunMode {
+	case gin.ReleaseMode:
+		loggingConfig = zap.NewProductionConfig()
+		loggingConfig.DisableCaller = true
+	case gin.DebugMode:
+		loggingConfig = zap.NewDevelopmentConfig()
+		loggingConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	case gin.TestMode:
+		return zap.NewNop()
+	default:
+		panic(fmt.Sprintf("Unknown run mode: %s", conf.RunMode))
+	}
+
+	if conf.LogFileEnabled {
+		if util.Exists(conf.LogFilePath) {
+			if err := os.Remove(conf.LogFilePath); err != nil {
+				panic(fmt.Sprintf("Failed to remove log file: %v", err))
+			}
+		}
+
+		loggingConfig.OutputPaths = append(loggingConfig.OutputPaths, conf.LogFilePath)
+	}
+
+	level, errLevel := zap.ParseAtomicLevel(conf.LogLevel)
+	if errLevel != nil {
+		panic(fmt.Sprintf("Failed to parse log level: %v", errLevel))
+	}
+
+	loggingConfig.Level.SetLevel(level.Level())
+
+	l, errLogger := loggingConfig.Build()
+	if errLogger != nil {
+		panic("Failed to create log config")
+	}
+
+	return l.Named("gb")
+}
 
 func main() {
 	startTime := time.Now()
 	ctx := context.Background()
 
-	logCfg := zap.NewProductionConfig()
-	logCfg.DisableStacktrace = true
-	logger, errLogger := logCfg.Build()
+	var config appConfig
 
-	if errLogger != nil {
-		panic(errLogger)
+	if errConfig := readConfig(&config); errConfig != nil {
+		panic(fmt.Sprintf("Failed to load config: %v", errConfig))
 	}
+
+	logger := MustCreateLogger(config)
 
 	defer func() {
 		defer logger.Info("Exited", zap.Duration("uptime", time.Since(startTime)))
+
+		if !config.LogFileEnabled {
+			return
+		}
 
 		if errSync := logger.Sync(); errSync != nil {
 			logger.Panic("Failed to sync", zap.Error(errSync))
@@ -28,12 +78,6 @@ func main() {
 	}()
 
 	logger.Info("Starting...")
-
-	var config appConfig
-
-	if errConfig := readConfig(&config); errConfig != nil {
-		logger.Panic("Failed to load config", zap.Error(errConfig))
-	}
 
 	var cacheHandler cache
 

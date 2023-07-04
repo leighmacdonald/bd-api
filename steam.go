@@ -75,7 +75,7 @@ func (a *App) getSteamSummary(ctx context.Context, steamID steamid.SID64) ([]ste
 	return newSummaries, nil
 }
 
-func (a *App) profileUpdater(ctx context.Context, inChan <-chan steamid.SID64) {
+func (a *App) profileUpdater(ctx context.Context) {
 	const (
 		maxQueuedCount = 100
 		updateInterval = time.Second
@@ -91,8 +91,6 @@ func (a *App) profileUpdater(ctx context.Context, inChan <-chan steamid.SID64) {
 		select {
 		case <-updateTicker.C:
 			triggerUpdate <- true
-		case updateSid := <-inChan:
-			updateQueue = append(updateQueue, updateSid)
 		case <-triggerUpdate:
 			var expiredIds steamid.Collection
 

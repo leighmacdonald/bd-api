@@ -739,7 +739,7 @@ func (db *pgStore) sbSiteDelete(ctx context.Context, siteID int) error {
 
 func dbErr(err error, wrapMsg string) error {
 	var pgErr *pgconn.PgError
-	if ok := errors.Is(err, pgErr); ok {
+	if errors.As(err, &pgErr) {
 		if pgErr.Code == pgerrcode.UniqueViolation {
 			return errors.Wrap(errDuplicate, wrapMsg)
 		}

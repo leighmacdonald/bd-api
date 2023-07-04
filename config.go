@@ -26,6 +26,9 @@ type appConfig struct {
 	SteamAPIKey              string         `mapstructure:"steam_api_key"`
 	DSN                      string         `mapstructure:"dsn"`
 	RunMode                  string         `mapstructure:"run_mode"`
+	LogLevel                 string         `mapstructure:"log_level"`
+	LogFileEnabled           bool           `mapstructure:"log_file_enabled"`
+	LogFilePath              string         `mapstructure:"log_file_path"`
 	SourcebansScraperEnabled bool           `mapstructure:"sourcebans_scraper_enabled"`
 	ProxiesEnabled           bool           `mapstructure:"proxies_enabled"`
 	Proxies                  []*proxyConfig `mapstructure:"proxies"`

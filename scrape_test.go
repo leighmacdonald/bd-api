@@ -39,10 +39,20 @@ func testParser(t *testing.T, scraperFn scraperFn, count int, nextPage string) {
 		require.Equal(t, scraper.url(nextPage), next)
 	}
 
-	for _, d := range results {
-		require.NotEqual(t, "", d.Name)
-		require.Truef(t, d.SteamID.Valid(), "Invalid steamid: %s", d.SteamID.String())
-		require.True(t, d.Length >= 0, "negative duration")
+	for _, result := range results {
+		require.NotEqual(t, "", result.Name)
+		require.Truef(t, result.SteamID.Valid(), "Invalid steamid: %s", result.SteamID.String())
+		require.True(t, result.Length >= 0, "negative duration")
+
+		if result.Length == 0 {
+			require.True(t, result.Permanent)
+		} else {
+			require.False(t, result.Permanent)
+		}
+
+		const nintyFive = 788943600
+
+		require.Truef(t, result.CreatedOn.Unix() > nintyFive, "Date: %s", result.CreatedOn)
 	}
 }
 
@@ -432,7 +442,7 @@ func TestCuteProject(t *testing.T) {
 
 func TestPhoenixSource(t *testing.T) {
 	t.Parallel()
-	testParser(t, newPhoenixSourceScraper, 19, "index.php?p=banlist&page=2")
+	testParser(t, newPhoenixSourceScraper, 20, "index.php?p=banlist&page=2")
 }
 
 func TestSlavonServer(t *testing.T) {
@@ -462,7 +472,7 @@ func TestPRWH(t *testing.T) {
 
 func TestVortex(t *testing.T) {
 	t.Parallel()
-	testParser(t, newVortexScraper, 46, "index.php?p=banlist&page=2")
+	testParser(t, newVortexScraper, 47, "index.php?p=banlist&page=2")
 }
 
 func TestCasualFun(t *testing.T) {

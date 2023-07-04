@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/gin-gonic/gin"
-	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
@@ -17,20 +16,17 @@ type App struct {
 	scrapers []*sbScraper
 	pm       *proxyManager
 	router   *gin.Engine
-
-	profileUpdateQueue chan steamid.SID64
 }
 
 func NewApp(logger *zap.Logger, config appConfig, database *pgStore, cache cache, proxyManager *proxyManager) *App {
 	application := &App{
-		config:             config,
-		log:                logger.Named("api"),
-		db:                 database,
-		cache:              cache,
-		pm:                 proxyManager,
-		profileUpdateQueue: make(chan steamid.SID64),
-		router:             nil,
-		scrapers:           []*sbScraper{},
+		config:   config,
+		log:      logger.Named("api"),
+		db:       database,
+		cache:    cache,
+		pm:       proxyManager,
+		router:   nil,
+		scrapers: []*sbScraper{},
 	}
 
 	router, errRouter := application.createRouter()
@@ -49,10 +45,10 @@ func (a *App) Start(ctx context.Context) error {
 			return errInitScrapers
 		}
 
-		a.startScrapers(ctx)
+		go a.startScrapers(ctx)
 	}
 
-	go a.profileUpdater(ctx, a.profileUpdateQueue)
+	go a.profileUpdater(ctx)
 
 	return a.startAPI(ctx, a.config.ListenAddr)
 }

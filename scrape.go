@@ -47,7 +47,7 @@ func (a *App) runScrapers(ctx context.Context) {
 		go func(s *sbScraper) {
 			defer waitGroup.Done()
 
-			s.start(ctx, a.db, a.profileUpdateQueue)
+			s.start(ctx, a.db)
 		}(scraper)
 	}
 
@@ -116,7 +116,8 @@ func (r *sbRecord) setBanLength(value string) {
 
 func (r *sbRecord) setExpiredOn(parseTime parseTimeFunc, value string) error {
 	if r.Permanent || !r.SteamID.Valid() {
-		return steamid.ErrInvalidSID
+		// Ignore when
+		return nil
 	}
 
 	parsedTime, errTime := parseTime(value)
@@ -142,23 +143,12 @@ func (r *sbRecord) setReason(value string) {
 	r.Reason = value
 }
 
-func (r *sbRecord) setSteam(value string) error {
+func (r *sbRecord) setSteam(value string) {
 	if r.SteamID.Valid() {
-		return steamid.ErrInvalidSID
+		return
 	}
 
-	if value == "[U:1:0]" || value == "76561197960265728" {
-		return steamid.ErrInvalidSID
-	}
-
-	sid64, errSid := steamid.StringToSID64(value)
-	if errSid != nil {
-		return errors.Wrap(errSid, "Failed to parse sid3")
-	}
-
-	r.SteamID = sid64
-
-	return nil
+	r.SteamID = steamid.New(value)
 }
 
 type sbScraper struct {
@@ -179,6 +169,7 @@ type sbScraper struct {
 }
 
 func createScrapers(logger *zap.Logger, cacheDir string) ([]*sbScraper, error) {
+	// scraperConstructors:= []func(logger *zap.Logger, cacheDir string) (*sbScraper, error){newProGamesZetScraper}.
 	scraperConstructors := []func(logger *zap.Logger, cacheDir string) (*sbScraper, error){
 		new7MauScraper, newAceKillScraper, newAMSGamingScraper, newApeModeScraper, newAstraManiaScraper,
 		newBachuruServasScraper, newBaitedCommunityScraper, newBierwieseScraper, newBigBangGamersScraper,
@@ -201,10 +192,11 @@ func createScrapers(logger *zap.Logger, cacheDir string) ([]*sbScraper, error) {
 		newZMBrasilScraper, newZubatScraper,
 	}
 
-	var scrapers []*sbScraper
-
-	scraperMu := &sync.RWMutex{}
-	errGroup := errgroup.Group{}
+	var (
+		scrapers  []*sbScraper
+		scraperMu = &sync.RWMutex{}
+		errGroup  = errgroup.Group{}
+	)
 
 	for _, scraperSetupFunc := range scraperConstructors {
 		setupFn := scraperSetupFunc
@@ -230,7 +222,7 @@ func createScrapers(logger *zap.Logger, cacheDir string) ([]*sbScraper, error) {
 	return scrapers, nil
 }
 
-func (scraper *sbScraper) start(ctx context.Context, database *pgStore, profileUpdateQueue chan steamid.SID64) {
+func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 	scraper.log.Info("Starting scrape job", zap.String("name", scraper.name), zap.String("theme", scraper.theme))
 
 	lastURL := ""
@@ -282,8 +274,6 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore, profileU
 				scraper.log.Error("Failed to save ban record",
 					zap.Int64("sid64", pRecord.SteamID.Int64()), zap.Error(errBanSave))
 			}
-
-			profileUpdateQueue <- bRecord.SteamID
 		}
 		if nextURL != "" && nextURL != lastURL {
 			lastURL = nextURL
@@ -358,7 +348,8 @@ func newScraper(logger *zap.Logger, cacheDir string, name string, baseURL string
 		return nil, errors.Wrap(errURL, "Failed to parse base url")
 	}
 
-	debugLogger := scrapeLogger{logger: logger} //nolint:exhaustruct
+	log := logger.Named(name)
+	debugLogger := scrapeLogger{logger: log} //nolint:exhaustruct
 
 	reqQueue, errQueue := queue.New(1, &queue.InMemoryQueueStorage{MaxSize: maxQueueSize})
 	if errQueue != nil {
@@ -379,7 +370,7 @@ func newScraper(logger *zap.Logger, cacheDir string, name string, baseURL string
 		parser:    parser,
 		nextURL:   nextURL,
 		parseTIme: parseTime,
-		log:       logger.Named(name),
+		log:       log,
 		Collector: colly.NewCollector(
 			colly.UserAgent("bd"),
 			colly.CacheDir(filepath.Join(cacheDir, "scrapers")),
@@ -722,7 +713,8 @@ func newNormalizer() *normalizer {
 			"oyuncu":               "player",
 			"игрок":                "player",
 			"player":               "player",
-			"steam3 id":            "steam3 id",
+			"steam3 id":            "steam3",
+			"steam id":             "steam",
 		},
 	}
 }
@@ -762,35 +754,26 @@ func parseMaterial(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeF
 			case keyPlayer:
 				curBan.setPlayer(value)
 			case keySteam3ID:
-				if errSteam := curBan.setSteam(value); errSteam != nil {
-					log.Error("Failed to set steam (steam3)", zap.Error(errSteam))
-				}
+				curBan.setSteam(value)
 			case keyCommunityLinks:
-				if curBan.SteamID.Valid() {
-					return
-				}
 				nv, foundKey := second.Children().First().Attr("href")
 				if !foundKey {
 					return
 				}
 				pcs := strings.Split(nv, "/")
-				if errSteam := curBan.setSteam(pcs[4]); errSteam != nil {
-					log.Error("Failed to set steam (comm link)", zap.Error(errSteam))
-				}
+				curBan.setSteam(pcs[4])
 			case keySteamCommunity:
 				pts := strings.Split(value, " ")
-				if errSteam := curBan.setSteam(pts[0]); errSteam != nil {
-					log.Error("Failed to set steam (steam comm)", zap.Error(errSteam))
-				}
+				curBan.setSteam(pts[0])
 			case keyInvokedOn:
 				if errInvoke := curBan.setInvokedOn(parseTime, value); errInvoke != nil {
-					log.Error("failed to set invoke time", zap.Error(errInvoke))
+					log.Error("failed to set invoke time", zap.String("input", value), zap.Error(errInvoke))
 				}
 			case keyBanLength:
 				curBan.setBanLength(value)
 			case keyExpiredOn:
 				if errExpiration := curBan.setExpiredOn(parseTime, value); errExpiration != nil {
-					log.Error("failed to set expiration time", zap.Error(errExpiration))
+					log.Error("failed to set expiration time", zap.String("input", value), zap.Error(errExpiration))
 				}
 			case keyReason:
 				curBan.setReason(value)
@@ -855,30 +838,21 @@ func parseStar(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFunc)
 					return
 				}
 				pcs := strings.Split(nv, "/")
-				if errSteam := curBan.setSteam(pcs[4]); errSteam != nil {
-					log.Error("Failed to set steam (comm link)", zap.Error(errSteam))
-				}
+				curBan.setSteam(pcs[4])
 			case keySteam3ID:
-				if errSteam := curBan.setSteam(value); errSteam != nil {
-					log.Error("Failed to set steam (sid))", zap.Error(errSteam))
-				}
+				curBan.setSteam(value)
 			case keySteamCommunity:
-				if curBan.SteamID.Valid() {
-					return
-				}
 				pts := strings.Split(value, " ")
-				if errSteam := curBan.setSteam(pts[0]); errSteam != nil {
-					log.Error("Failed to set steam (steam comm)", zap.Error(errSteam))
-				}
+				curBan.setSteam(pts[0])
 			case keyInvokedOn:
 				if errInvoke := curBan.setInvokedOn(parseTime, value); errInvoke != nil {
-					log.Error("failed to set invoke time", zap.Error(errInvoke))
+					log.Error("failed to set invoke time", zap.String("input", value), zap.Error(errInvoke))
 				}
 			case keyBanLength:
 				curBan.setBanLength(value)
 			case keyExpiredOn:
 				if errExpiration := curBan.setExpiredOn(parseTime, value); errExpiration != nil {
-					log.Error("failed to set expiration time", zap.Error(errExpiration))
+					log.Error("failed to set expiration time", zap.String("input", value), zap.Error(errExpiration))
 				}
 
 			case keyReason:
@@ -918,23 +892,19 @@ func parseFluent(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFun
 		case keyPlayer:
 			curBan.setPlayer(value)
 		case keySteam3ID:
-			if errSteam := curBan.setSteam(value); errSteam != nil {
-				log.Error("Failed to set steam (steam3)", zap.Error(errSteam))
-			}
+			curBan.setSteam(value)
 		case keySteamCommunity:
 			pts := strings.Split(value, " ")
-			if errSteam := curBan.setSteam(pts[0]); errSteam != nil {
-				log.Error("Failed to set steam (steam comm)", zap.Error(errSteam))
-			}
+			curBan.setSteam(pts[0])
 		case keyInvokedOn:
 			if errInvoke := curBan.setInvokedOn(parseTime, value); errInvoke != nil {
-				log.Error("failed to set invoke time", zap.Error(errInvoke))
+				log.Error("failed to set invoke time", zap.String("input", value), zap.Error(errInvoke))
 			}
 		case keyBanLength:
 			curBan.setBanLength(value)
 		case keyExpiredOn:
 			if errExpiration := curBan.setExpiredOn(parseTime, value); errExpiration != nil {
-				log.Error("failed to set expiration time", zap.Error(errExpiration))
+				log.Error("failed to set expiration time", zap.String("input", value), zap.Error(errExpiration))
 			}
 		case keyReason:
 			curBan.setReason(value)
@@ -977,6 +947,9 @@ func parseDefault(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFu
 			case keySteamCommunity:
 				curState = keySteamCommunity
 				isValue = true
+			case keySteam3ID:
+				curState = keySteam3ID
+				isValue = true
 			case keyInvokedOn:
 				curState = keyInvokedOn
 				isValue = true
@@ -998,20 +971,26 @@ func parseDefault(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFu
 		switch curState { //nolint:exhaustive
 		case keyPlayer:
 			curBan.setPlayer(value)
+		// case keySteam3ID:
+		//	if errSteam := curBan.setSteam(value); errSteam != nil {
+		//		log.Debug("Failed to set steam (steam3 comm)", zap.String("input", value), zap.Error(errSteam))
+		//	}
+		// case keySteamID:
+		//	if errSteam := curBan.setSteam(value); errSteam != nil {
+		//		log.Debug("Failed to set steam (steam)", zap.String("input", value), zap.Error(errSteam))
+		//	}
 		case keySteamCommunity:
 			pts := strings.Split(value, " ")
-			if errSteam := curBan.setSteam(pts[0]); errSteam != nil {
-				log.Error("Failed to set steam (steam comm)", zap.Error(errSteam))
-			}
+			curBan.setSteam(pts[0])
 		case keyInvokedOn:
 			if errInvoke := curBan.setInvokedOn(parseTime, value); errInvoke != nil {
-				log.Error("failed to set invoke time", zap.Error(errInvoke))
+				log.Error("failed to set invoke time", zap.String("input", value), zap.Error(errInvoke))
 			}
 		case keyBanLength:
 			curBan.setBanLength(value)
 		case keyExpiredOn:
 			if errExpiration := curBan.setExpiredOn(parseTime, value); errExpiration != nil {
-				log.Error("failed to set expiration time", zap.Error(errExpiration))
+				log.Error("failed to set expiration time", zap.String("input", value), zap.Error(errExpiration))
 			}
 		case keyReason:
 			curBan.setReason(value)

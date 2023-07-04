@@ -195,9 +195,10 @@ func (a *App) createRouter() (*gin.Engine, error) {
 }
 
 func (a *App) startAPI(ctx context.Context, addr string) error {
-	const apiHandlerTimeout = 10 * time.Second
-
-	const shutdownTimeout = 10 * time.Second
+	const (
+		apiHandlerTimeout = 10 * time.Second
+		shutdownTimeout   = 10 * time.Second
+	)
 
 	log := a.log.Named("api")
 

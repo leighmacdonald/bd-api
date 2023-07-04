@@ -21,6 +21,10 @@ steam_api_key: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 listen_addr: ":8888"
 sourcebans_scraper_enabled: true
 enable_cache: true
+# One of: debug, info, warn, error, dpanic, panic, fatal
+log_level: "info"
+log_file_enabled: true
+log_file_path: "bdapi.log"
 cache_dir: "./.cache/"
 proxies_enabled: true
 proxies:
