@@ -80,6 +80,11 @@ func (a *App) handleGetBans() gin.HandlerFunc {
 			return
 		}
 
+		if bans == nil {
+			// Return empty list instead of null
+			bans = []steamweb.PlayerBanState{}
+		}
+
 		ctx.JSON(http.StatusOK, bans)
 	}
 }
@@ -128,6 +133,11 @@ func (a *App) handleGetSourceBans() gin.HandlerFunc {
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to query records")
 
 			return
+		}
+
+		if bans == nil {
+			// Return empty list instead of null
+			bans = []sbBanRecord{}
 		}
 
 		renderSyntax(ctx, encoder, bans, "profiles", &baseTmplArgs{ //nolint:exhaustruct
