@@ -13,7 +13,7 @@ require (
 	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
 	github.com/jackc/pgx/v5 v5.4.1
 	github.com/leighmacdonald/rgl v0.0.0-20230627125656-911215b21377
-	github.com/leighmacdonald/steamid/v3 v3.0.3
+	github.com/leighmacdonald/steamid/v3 v3.0.4
 	github.com/leighmacdonald/steamweb/v2 v2.1.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/errors v0.9.1
