@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/leighmacdonald/bd/pkg/util"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -29,7 +28,7 @@ func MustCreateLogger(conf appConfig) *zap.Logger {
 	}
 
 	if conf.LogFileEnabled {
-		if util.Exists(conf.LogFilePath) {
+		if exists(conf.LogFilePath) {
 			if err := os.Remove(conf.LogFilePath); err != nil {
 				panic(fmt.Sprintf("Failed to remove log file: %v", err))
 			}

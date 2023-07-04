@@ -64,7 +64,6 @@ github.com/antchfx/xpath v1.2.4/go.mod h1:i54GszH55fYfBmoZXapTHN8T8tkcHfRgLyVwwq
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5 h1:0CwZNZbxp69SHPdPJAN/hZIm0C4OItdklCFmMRWYpio=
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5/go.mod h1:wHh0iHkYZB8zMSxRWpUBQtwG5a7fFgvEO+odwuTv2gs=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
-github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1O2AihPM=
 github.com/bytedance/sonic v1.9.2 h1:GDaNjuWSGu09guE9Oql0MSTNhNCLlWwO8y/xM5BzcbM=
 github.com/bytedance/sonic v1.9.2/go.mod h1:i736AoUSYt75HyZLoJW9ERYxcy6eaN6h4BZXU064P/U=
@@ -221,7 +220,6 @@ github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+
 github.com/googleapis/gax-go/v2 v2.0.4/go.mod h1:0Wqv26UfaUD9n4G6kQubkQ+KchISgw+vpHVxEJEs9eg=
 github.com/googleapis/gax-go/v2 v2.0.5/go.mod h1:DWXyrwAJ9X0FpwwEdw+IPEYBICEFu5mhpdKc/us6bOk=
 github.com/googleapis/google-cloud-go-testing v0.0.0-20200911160855-bcd43fbb19e8/go.mod h1:dvDLG8qkwmyD9a/MJJN3XJcT3xFxOKAvTZGvuZmac9g=
-github.com/grpc-ecosystem/grpc-gateway v1.16.0/go.mod h1:BDjrQk3hbvj6Nolgz8mAMFbcEtjT1g+wF4CSlocrBnw=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/errwrap v1.1.0 h1:OxrOeh75EUXMY8TBjag2fzXGZ40LB6IKw45YeGUDY2I=
 github.com/hashicorp/errwrap v1.1.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
@@ -321,12 +319,8 @@ github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 h1:P6pPBnrTSX3DEVR4fDembhR
 github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0/go.mod h1:vmVJ0l/dxyfGW6FmdpVm2joNMFikkuWg0EoCKLGUMNw=
 github.com/leighmacdonald/rgl v0.0.0-20230627125656-911215b21377 h1:ZIGWaGlm0CEo3tRBWEp+tkpO+Hp2OvIuqgQeq7d6kpo=
 github.com/leighmacdonald/rgl v0.0.0-20230627125656-911215b21377/go.mod h1:36CVtFnk/jFmqxFlqushLp/+BF3IhlkkAi/u6aNPpmU=
-github.com/leighmacdonald/steamid/v3 v3.0.1 h1:JAXoC6ds2+bSK+xHmo8QYC/wv5zCeX+I8U4EmUZ6qiA=
-github.com/leighmacdonald/steamid/v3 v3.0.1/go.mod h1:MK8gccWiUJFG3TehipZ2MiJWUpJbNiIGxts463RyJwE=
 github.com/leighmacdonald/steamid/v3 v3.0.3 h1:FtrgDMYb2XOcbg5E2CMCIhiOPAXufVkZluqbA1t17P8=
 github.com/leighmacdonald/steamid/v3 v3.0.3/go.mod h1:MK8gccWiUJFG3TehipZ2MiJWUpJbNiIGxts463RyJwE=
-github.com/leighmacdonald/steamweb/v2 v2.1.0 h1:2394S/bMhroh2A2KHGQegaN73vCWl92zgAnLOQX8QW4=
-github.com/leighmacdonald/steamweb/v2 v2.1.0/go.mod h1:E58m7nPL9hqBSo/ZPsDS/+gwgMY5yN7YJu8EzNVRr8A=
 github.com/leighmacdonald/steamweb/v2 v2.1.1 h1:RRDTMqTGySX2dF5YpHTVn+MsGqsrZRoC81KKuaBFCag=
 github.com/leighmacdonald/steamweb/v2 v2.1.1/go.mod h1:Tu+rH2nM8OD/X9vH8eGkPAGluR9R9Yn6ZXmWKBdV4Zg=
 github.com/leodido/go-urn v1.2.4 h1:XlAE/cm/ms7TE/VMVoduSpNBoyc2dOxHs5MZSwAN63Q=
