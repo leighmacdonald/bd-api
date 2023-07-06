@@ -8,11 +8,24 @@ import (
 	"path"
 	"time"
 
+	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
 var errCacheExpired = errors.New("cache expired")
+
+type CacheKeyType string
+
+const (
+	KeySummary CacheKeyType = "summary"
+	KeyBans    CacheKeyType = "bans"
+	KeyFriends CacheKeyType = "friends"
+)
+
+func makeKey(keyType CacheKeyType, sid64 steamid.SID64) string {
+	return fmt.Sprintf("steam-%s-%d", keyType, sid64.Int64())
+}
 
 type cache interface {
 	get(url string) ([]byte, error)

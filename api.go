@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/alecthomas/chroma"
@@ -30,32 +31,91 @@ type Profile struct {
 	LogsCount int64                   `json:"logs_count"`
 }
 
-func (a *App) loadProfile(ctx context.Context, log *zap.Logger, steamID steamid.SID64, profile *Profile) error {
-	sum, errSum := a.getSteamSummary(ctx, steamID)
-	if errSum != nil || len(sum) == 0 {
-		return errSum
+const apiTimeout = time.Second * 10
+
+func (a *App) loadProfiles(ctx context.Context, steamIDs steamid.Collection) ([]Profile, error) {
+	var (
+		waitGroup = &sync.WaitGroup{}
+		summaries []steamweb.PlayerSummary
+		bans      []steamweb.PlayerBanState
+		profiles  = make([]Profile, len(steamIDs))
+		friends   map[steamid.SID64][]steamweb.Friend
+	)
+
+	localCtx, cancel := context.WithTimeout(ctx, apiTimeout)
+	defer cancel()
+
+	waitGroup.Add(1)
+
+	go func() {
+		defer waitGroup.Done()
+
+		sum, errSum := a.getSteamSummaries(localCtx, steamIDs)
+		if errSum != nil || len(sum) == 0 {
+			a.log.Error("Failed to load player summaries", zap.Error(errSum))
+		}
+
+		summaries = sum
+	}()
+
+	waitGroup.Add(1)
+
+	go func() {
+		defer waitGroup.Done()
+
+		banState, errBanState := a.getSteamBans(localCtx, steamIDs)
+		if errBanState != nil || len(banState) == 0 {
+			a.log.Error("Failed to load player ban states", zap.Error(errBanState))
+		}
+
+		bans = banState
+	}()
+
+	waitGroup.Add(1)
+
+	go func() {
+		defer waitGroup.Done()
+
+		friends = a.getSteamFriends(localCtx, steamIDs)
+	}()
+
+	waitGroup.Wait()
+
+	if len(steamIDs) == 0 || len(summaries) == 0 {
+		return nil, errors.New("No results fetched")
 	}
 
-	profile.Summary = sum[0]
+	for _, sid := range steamIDs {
+		var profile Profile
 
-	banState, errBanState := steamweb.GetPlayerBans(ctx, steamid.Collection{steamID})
-	if errBanState != nil || len(banState) == 0 {
-		return errors.Wrap(errBanState, "Failed to query player bans")
+		for _, summary := range summaries {
+			if summary.SteamID == sid {
+				profile.Summary = summary
+
+				break
+			}
+		}
+
+		for _, ban := range bans {
+			if ban.SteamID == sid {
+				profile.BanState = ban
+
+				break
+			}
+		}
+
+		if friendsList, ok := friends[sid]; ok {
+			profile.Friends = friendsList
+		}
+
+		sort.Slice(profile.Seasons, func(i, j int) bool {
+			return profile.Seasons[i].DivisionInt < profile.Seasons[j].DivisionInt
+		})
+
+		profiles = append(profiles, profile)
 	}
 
-	profile.BanState = banState[0]
-
-	_, errFriends := a.getSteamFriends(ctx, steamID)
-	if errFriends != nil {
-		log.Debug("Failed to get friends", zap.Error(errors.Wrap(errFriends, "Failed to get friends")))
-	}
-	// profile.Friends = friends
-
-	sort.Slice(profile.Seasons, func(i, j int) bool {
-		return profile.Seasons[i].DivisionInt < profile.Seasons[j].DivisionInt
-	})
-
-	return nil
+	return profiles, nil
 }
 
 type styleEncoder struct {
@@ -85,7 +145,7 @@ func (s *styleEncoder) Encode(value any) (string, string, error) {
 
 	iterator, errTokenize := s.lexer.Tokenise(nil, string(jsonBody))
 	if errTokenize != nil {
-		return "", "", errors.Wrap(errTokenize, "Failed to tokenise json")
+		return "", "", errors.Wrap(errTokenize, "Failed to tokenize json")
 	}
 
 	cssBuf := bytes.NewBuffer(nil)
@@ -120,22 +180,15 @@ func (t *baseTmplArgs) setBody(html string) {
 	t.Body = template.HTML(html) //nolint:gosec
 }
 
-func steamIDFromSlug(ctx *gin.Context) (steamid.SID64, error) {
-	const resolveTimeout = time.Second * 10
-
-	slug := ctx.Param("steam_id")
-	lCtx, cancel := context.WithTimeout(ctx, resolveTimeout)
-
-	defer cancel()
-
-	sid64, errSid := steamid.ResolveSID64(lCtx, slug)
-	if errSid != nil {
+func steamIDFromSlug(ctx *gin.Context) (steamid.SID64, bool) {
+	sid64 := steamid.New(ctx.Param("steam_id"))
+	if !sid64.Valid() {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, "not found")
 
-		return "", errors.Wrap(errSid, "Failed to resolve steam id")
+		return "", false
 	}
 
-	return sid64, nil
+	return sid64, true
 }
 
 func renderSyntax(ctx *gin.Context, encoder *styleEncoder, value any, tmpl string, args syntaxTemplate) {
@@ -188,7 +241,7 @@ func (a *App) createRouter() (*gin.Engine, error) {
 	engine.GET("/bans", a.handleGetBans())
 	engine.GET("/summary", a.handleGetSummary())
 	engine.GET("/profile", a.handleGetProfile())
-	engine.GET("/profiles/:steam_id", a.handleGetProfiles())
+	engine.GET("/friends", a.handleGetFriendList())
 	engine.GET("/sourcebans/:steam_id", a.handleGetSourceBans())
 
 	return engine, nil

@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"runtime"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leighmacdonald/steamid/v3/steamid"
@@ -12,36 +13,65 @@ import (
 
 const funcSize = 10
 
+func getSteamIDS(ctx *gin.Context) (steamid.Collection, bool) {
+	steamIDQuery, ok := ctx.GetQuery("steamids")
+	if !ok {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+
+		return nil, false
+	}
+
+	var validIds steamid.Collection
+
+	for _, steamID := range strings.Split(steamIDQuery, ",") {
+		sid64 := steamid.New(steamID)
+		if !sid64.Valid() {
+			ctx.AbortWithStatus(http.StatusBadRequest)
+
+			return nil, false
+		}
+
+		validIds = append(validIds, sid64)
+	}
+
+	return validIds, true
+}
+
+func (a *App) handleGetFriendList() gin.HandlerFunc {
+	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
+
+	return func(ctx *gin.Context) {
+		ids, ok := getSteamIDS(ctx)
+		if !ok {
+			return
+		}
+
+		summaries, errSum := a.getSteamSummaries(ctx, ids)
+
+		if errSum != nil || len(ids) != len(summaries) {
+			log.Error("Failed to fetch summary", zap.Error(errSum))
+			ctx.AbortWithStatus(http.StatusBadRequest)
+
+			return
+		}
+
+		ctx.JSON(http.StatusOK, summaries)
+	}
+}
+
 func (a *App) handleGetSummary() gin.HandlerFunc {
 	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
 
 	return func(ctx *gin.Context) {
-		steamIDQuery, ok := ctx.GetQuery("steam_id")
+		ids, ok := getSteamIDS(ctx)
 		if !ok {
-			ctx.AbortWithStatus(http.StatusBadRequest)
-
 			return
 		}
 
-		sid64, steamIDErr := steamid.SID64FromString(steamIDQuery)
-		if steamIDErr != nil {
-			ctx.AbortWithStatus(http.StatusBadRequest)
-
-			return
-		}
-
-		if !sid64.Valid() {
-			ctx.AbortWithStatus(http.StatusBadRequest)
-
-			return
-		}
-
-		ids := steamid.Collection{sid64}
-		summaries, errSum := a.getSteamSummary(ctx, sid64)
+		summaries, errSum := a.getSteamSummaries(ctx, ids)
 
 		if errSum != nil || len(ids) != len(summaries) {
-			log.Error("Failed to fetch summary",
-				zap.Error(errSum), zap.Int64("steam_id", sid64.Int64()))
+			log.Error("Failed to fetch summary", zap.Error(errSum))
 			ctx.AbortWithStatus(http.StatusBadRequest)
 
 			return
@@ -55,26 +85,14 @@ func (a *App) handleGetBans() gin.HandlerFunc {
 	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
 
 	return func(ctx *gin.Context) {
-		steamIDQuery, ok := ctx.GetQuery("steam_id")
+		ids, ok := getSteamIDS(ctx)
 		if !ok {
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, "Missing steam_id")
-
 			return
 		}
-
-		sid, steamIDErr := steamid.SID64FromString(steamIDQuery)
-		if steamIDErr != nil {
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, "Invalid steam_id")
-
-			return
-		}
-
-		ids := steamid.Collection{sid}
 
 		bans, errBans := steamweb.GetPlayerBans(ctx, ids)
 		if errBans != nil || len(ids) != len(bans) {
-			log.Error("Failed to fetch player bans",
-				zap.Error(errBans), zap.Int64("steam_id", sid.Int64()))
+			log.Error("Failed to fetch player bans", zap.Error(errBans))
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to fetch bans")
 
 			return
@@ -93,29 +111,20 @@ func (a *App) handleGetProfile() gin.HandlerFunc {
 	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
 
 	return func(ctx *gin.Context) {
-		steamIDQuery, ok := ctx.GetQuery("steam_id")
+		ids, ok := getSteamIDS(ctx)
 		if !ok {
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, "Missing steam_id")
-
 			return
 		}
 
-		sid64, steamIDErr := steamid.SID64FromString(steamIDQuery)
-		if steamIDErr != nil {
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, "Invalid steam_id")
-
-			return
-		}
-
-		var profile Profile
-		if errProfile := a.loadProfile(ctx, log, sid64, &profile); errProfile != nil {
+		profiles, errProfile := a.loadProfiles(ctx, ids)
+		if errProfile != nil || len(profiles) == 0 {
 			log.Error("Failed to load profile", zap.Error(errProfile))
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to fetch profile")
 
 			return
 		}
 
-		ctx.JSON(http.StatusOK, profile)
+		ctx.JSON(http.StatusOK, profiles)
 	}
 }
 
@@ -123,8 +132,8 @@ func (a *App) handleGetSourceBans() gin.HandlerFunc {
 	encoder := newStyleEncoder()
 
 	return func(ctx *gin.Context) {
-		sid, errSid := steamIDFromSlug(ctx)
-		if errSid != nil {
+		sid, ok := steamIDFromSlug(ctx)
+		if !ok {
 			return
 		}
 
@@ -142,31 +151,6 @@ func (a *App) handleGetSourceBans() gin.HandlerFunc {
 
 		renderSyntax(ctx, encoder, bans, "profiles", &baseTmplArgs{ //nolint:exhaustruct
 			Title: "source bans",
-		})
-	}
-}
-
-func (a *App) handleGetProfiles() gin.HandlerFunc {
-	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
-	encoder := newStyleEncoder()
-
-	return func(ctx *gin.Context) {
-		sid, errSid := steamIDFromSlug(ctx)
-		if errSid != nil {
-			log.Error("Failed to resolve slug steamid", zap.Error(errSid))
-
-			return
-		}
-
-		var profile Profile
-		if errProfile := a.loadProfile(ctx, log, sid, &profile); errProfile != nil {
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to load profile")
-
-			return
-		}
-
-		renderSyntax(ctx, encoder, profile, "profiles", &baseTmplArgs{ //nolint:exhaustruct
-			Title: profile.Summary.PersonaName,
 		})
 	}
 }

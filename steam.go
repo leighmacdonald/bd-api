@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
+	"sync"
 	"time"
 
 	"github.com/leighmacdonald/steamid/v3/steamid"
@@ -13,66 +13,146 @@ import (
 	"go.uber.org/zap"
 )
 
-func (a *App) getSteamFriends(ctx context.Context, steamID steamid.SID64) ([]steamweb.Friend, error) {
-	var friends []steamweb.Friend
+func (a *App) getSteamFriends(ctx context.Context,
+	steamIDs steamid.Collection,
+) map[steamid.SID64][]steamweb.Friend {
+	var (
+		mutex     = sync.RWMutex{}
+		output    map[steamid.SID64][]steamweb.Friend
+		waitGroup = &sync.WaitGroup{}
+	)
 
-	key := fmt.Sprintf("steam-friends-%d", steamID.Int64())
+	for _, currentID := range steamIDs {
+		waitGroup.Add(1)
 
-	friendsBody, errCache := a.cache.get(key)
-	if errCache == nil {
-		if err := json.Unmarshal(friendsBody, &friends); err != nil {
-			a.log.Error("Failed to unmarshal cached result", zap.Error(err))
-		}
+		go func(steamID steamid.SID64) {
+			defer waitGroup.Done()
 
-		return friends, nil
+			var (
+				friends []steamweb.Friend
+				key     = makeKey(KeyFriends, steamID)
+			)
+
+			friendsBody, errCache := a.cache.get(key)
+			if errCache == nil {
+				if err := json.Unmarshal(friendsBody, &friends); err != nil {
+					a.log.Error("Failed to unmarshal cached result", zap.Error(err))
+				}
+
+				return
+			}
+
+			newFriends, errFriends := steamweb.GetFriendList(ctx, steamID)
+			if errFriends != nil {
+				a.log.Warn("Failed to fetch friends", zap.Error(errFriends))
+
+				return
+			}
+
+			body, errMarshal := json.Marshal(newFriends)
+			if errMarshal != nil {
+				a.log.Error("Failed to unmarshal friends", zap.Error(errMarshal))
+
+				return
+			}
+
+			if errSet := a.cache.set(key, bytes.NewReader(body)); errSet != nil {
+				a.log.Error("Failed to update cache", zap.Error(errSet), zap.String("site", "ugc"))
+			}
+
+			mutex.Lock()
+			output[steamID] = newFriends
+			mutex.Unlock()
+		}(currentID)
 	}
 
-	newFriends, errFriends := steamweb.GetFriendList(ctx, steamID)
-	if errFriends != nil {
-		return nil, errors.Wrap(errFriends, "Failed to fetch friends")
-	}
+	waitGroup.Wait()
 
-	body, errMarshal := json.Marshal(newFriends)
-	if errMarshal != nil {
-		return nil, errors.Wrap(errFriends, "Failed to unmarshal friends")
-	}
-
-	if errSet := a.cache.set(key, bytes.NewReader(body)); errSet != nil {
-		a.log.Error("Failed to update cache", zap.Error(errSet), zap.String("site", "ugc"))
-	}
-
-	return newFriends, nil
+	return output
 }
 
-func (a *App) getSteamSummary(ctx context.Context, steamID steamid.SID64) ([]steamweb.PlayerSummary, error) {
-	var summaries []steamweb.PlayerSummary
+func (a *App) getSteamBans(ctx context.Context, steamIDs steamid.Collection) ([]steamweb.PlayerBanState, error) {
+	var (
+		banStates []steamweb.PlayerBanState
+		missed    steamid.Collection
+	)
 
-	key := fmt.Sprintf("steam-summary-%d", steamID.Int64())
+	for _, steamID := range steamIDs {
+		var banState steamweb.PlayerBanState
 
-	summaryBody, errCache := a.cache.get(key)
-	if errCache == nil {
-		if err := json.Unmarshal(summaryBody, &summaries); err != nil {
-			a.log.Error("Failed to unmarshal cached result", zap.Error(err))
+		summaryBody, errCache := a.cache.get(makeKey(KeyBans, steamID))
+		if errCache == nil {
+			if err := json.Unmarshal(summaryBody, &banState); err != nil {
+				a.log.Error("Failed to unmarshal cached result", zap.Error(err))
+			}
 		}
 
-		return summaries, nil
+		if banState.SteamID.Valid() {
+			banStates = append(banStates, banState)
+		} else {
+			missed = append(missed, steamID)
+		}
 	}
 
-	newSummaries, errSummaries := steamweb.PlayerSummaries(ctx, steamid.Collection{steamID})
+	newBans, errBans := steamweb.GetPlayerBans(ctx, missed)
+	if errBans != nil {
+		return nil, errors.Wrap(errBans, "Failed to fetch ban state")
+	}
+
+	for _, ban := range newBans {
+		body, errMarshal := json.Marshal(ban)
+		if errMarshal != nil {
+			return nil, errors.Wrap(errMarshal, "Failed to marshal ban state")
+		}
+
+		if errSet := a.cache.set(makeKey(KeyBans, ban.SteamID), bytes.NewReader(body)); errSet != nil {
+			a.log.Error("Failed to update cache", zap.Error(errSet))
+		}
+	}
+
+	return append(banStates, newBans...), nil
+}
+
+func (a *App) getSteamSummaries(ctx context.Context, steamIDs steamid.Collection) ([]steamweb.PlayerSummary, error) {
+	var (
+		summaries []steamweb.PlayerSummary
+		missed    steamid.Collection
+	)
+
+	for _, steamID := range steamIDs {
+		var summary steamweb.PlayerSummary
+
+		summaryBody, errCache := a.cache.get(makeKey(KeySummary, steamID))
+		if errCache == nil {
+			if err := json.Unmarshal(summaryBody, &summary); err != nil {
+				a.log.Error("Failed to unmarshal cached result", zap.Error(err))
+			}
+		}
+
+		if summary.SteamID.Valid() {
+			summaries = append(summaries, summary)
+		} else {
+			missed = append(missed, steamID)
+		}
+	}
+
+	newSummaries, errSummaries := steamweb.PlayerSummaries(ctx, missed)
 	if errSummaries != nil {
 		return nil, errors.Wrap(errSummaries, "Failed to fetch summaries")
 	}
 
-	body, errMarshal := json.Marshal(newSummaries)
-	if errMarshal != nil {
-		return nil, errors.Wrap(errMarshal, "Failed to marshal friends")
+	for _, summary := range newSummaries {
+		body, errMarshal := json.Marshal(summary)
+		if errMarshal != nil {
+			return nil, errors.Wrap(errMarshal, "Failed to marshal friends")
+		}
+
+		if errSet := a.cache.set(makeKey(KeySummary, summary.SteamID), bytes.NewReader(body)); errSet != nil {
+			a.log.Error("Failed to update cache", zap.Error(errSet))
+		}
 	}
 
-	if errSet := a.cache.set(key, bytes.NewReader(body)); errSet != nil {
-		a.log.Error("Failed to update cache", zap.Error(errSet), zap.String("site", "ugc"))
-	}
-
-	return newSummaries, nil
+	return append(summaries, newSummaries...), nil
 }
 
 func (a *App) profileUpdater(ctx context.Context) {
