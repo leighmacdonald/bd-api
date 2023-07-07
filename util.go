@@ -3,6 +3,9 @@ package main
 import (
 	"io"
 	"os"
+	"strings"
+
+	"github.com/leighmacdonald/steamid/v3/steamid"
 )
 
 func logCloser(closer io.Closer) {
@@ -15,4 +18,13 @@ func exists(filePath string) bool {
 	}
 
 	return true
+}
+
+func SteamIDStringList(collection steamid.Collection) string {
+	ids := make([]string, len(collection))
+	for index, steamID := range collection {
+		ids[index] = steamID.String()
+	}
+
+	return strings.Join(ids, ",")
 }

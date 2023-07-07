@@ -47,6 +47,10 @@ func TestApp(t *testing.T) {
 	t.Parallel()
 
 	if key, found := os.LookupEnv("BDAPI_STEAM_API_KEY"); found && key != "" {
+		if errKey := steamid.SetKey(key); errKey != nil {
+			panic(errKey)
+		}
+
 		if errKey := steamweb.SetKey(key); errKey != nil {
 			panic(errKey)
 		}
@@ -84,12 +88,12 @@ func TestApp(t *testing.T) {
 
 	app := NewApp(logger, conf, db, &nopCache{}, newProxyManager(logger))
 
-	t.Run("apiTestGans", apiTestGans(app))             //nolint:paralleltest
+	t.Run("apiTestBans", apiTestBans(app))             //nolint:paralleltest
 	t.Run("apiTestSummary", apiTestSummary(app))       //nolint:paralleltest
 	t.Run("apiTestGetprofile", apiTestGetprofile(app)) //nolint:paralleltest
 }
 
-func apiTestGans(app *App) func(t *testing.T) {
+func apiTestBans(app *App) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Parallel()
 
@@ -97,9 +101,9 @@ func apiTestGans(app *App) func(t *testing.T) {
 			t.Skip("BDAPI_STEAM_API_KEY not set")
 		}
 
-		sid := testIDb4nny
+		sids := steamid.Collection{testIDb4nny, testIDCamper}
 
-		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/bans?steam_id=%d", testIDb4nny.Int64()), nil)
+		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/bans?steamids=%s", SteamIDStringList(sids)), nil)
 		recorder := httptest.NewRecorder()
 
 		app.router.ServeHTTP(recorder, request)
@@ -109,10 +113,10 @@ func apiTestGans(app *App) func(t *testing.T) {
 			t.Errorf("expected error to be nil got %v", err)
 		}
 
-		var banState []steamweb.PlayerBanState
+		var banStates []steamweb.PlayerBanState
 
-		require.NoError(t, json.Unmarshal(body, &banState))
-		require.Equal(t, sid, banState[0].SteamID)
+		require.NoError(t, json.Unmarshal(body, &banStates))
+		require.Equal(t, len(sids), len(banStates))
 	}
 }
 
@@ -124,8 +128,9 @@ func apiTestSummary(app *App) func(t *testing.T) {
 			t.Skip("BDAPI_STEAM_API_KEY not set")
 		}
 
-		sid := testIDb4nny
-		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/summary?steam_id=%d", testIDb4nny.Int64()), nil)
+		sids := steamid.Collection{testIDb4nny, testIDCamper}
+
+		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/summary?steamids=%s", SteamIDStringList(sids)), nil)
 		recorder := httptest.NewRecorder()
 
 		app.router.ServeHTTP(recorder, request)
@@ -135,10 +140,10 @@ func apiTestSummary(app *App) func(t *testing.T) {
 			t.Errorf("expected error to be nil got %v", err)
 		}
 
-		var bs []steamweb.PlayerSummary
+		var summaries []steamweb.PlayerSummary
 
-		require.NoError(t, json.Unmarshal(data, &bs))
-		require.Equal(t, sid, bs[0].SteamID)
+		require.NoError(t, json.Unmarshal(data, &summaries))
+		require.Equal(t, len(sids), len(summaries))
 	}
 }
 
@@ -150,9 +155,9 @@ func apiTestGetprofile(app *App) func(t *testing.T) {
 			t.Skip("BDAPI_STEAM_API_KEY not set")
 		}
 
-		sid := testIDb4nny
+		sids := steamid.Collection{testIDb4nny, testIDCamper}
 
-		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/profile?steam_id=%d", testIDb4nny.Int64()), nil)
+		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/profile?steamids=%s", SteamIDStringList(sids)), nil)
 		recorder := httptest.NewRecorder()
 
 		app.router.ServeHTTP(recorder, request)
@@ -162,10 +167,26 @@ func apiTestGetprofile(app *App) func(t *testing.T) {
 			t.Errorf("expected error to be nil got %v", err)
 		}
 
-		var profile Profile
+		var (
+			profiles []Profile
+			validIds steamid.Collection
+		)
 
-		require.NoError(t, json.Unmarshal(data, &profile))
-		require.Equal(t, steamweb.EconBanNone, profile.BanState.EconomyBan)
-		require.Equal(t, sid, profile.Summary.SteamID)
+		require.NoError(t, json.Unmarshal(data, &profiles))
+
+		for _, sid := range sids {
+			for _, profile := range profiles {
+				if profile.Summary.SteamID == sid {
+					require.Equal(t, steamweb.EconBanNone, profile.BanState.EconomyBan)
+					require.NotEqual(t, "", profile.Summary.PersonaName)
+					require.Equal(t, sid, profile.Summary.SteamID)
+					require.Equal(t, sid, profile.BanState.SteamID)
+
+					validIds = append(validIds, profile.Summary.SteamID)
+				}
+			}
+		}
+
+		require.EqualValues(t, sids, validIds)
 	}
 }

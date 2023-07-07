@@ -13,12 +13,12 @@ import (
 	"go.uber.org/zap"
 )
 
-func (a *App) getSteamFriends(ctx context.Context,
-	steamIDs steamid.Collection,
-) map[steamid.SID64][]steamweb.Friend {
+type friendMap map[steamid.SID64][]steamweb.Friend
+
+func (a *App) getSteamFriends(ctx context.Context, steamIDs steamid.Collection) friendMap {
 	var (
 		mutex     = sync.RWMutex{}
-		output    map[steamid.SID64][]steamweb.Friend
+		output    = make(friendMap)
 		waitGroup = &sync.WaitGroup{}
 	)
 
