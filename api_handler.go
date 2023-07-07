@@ -62,24 +62,13 @@ func getSteamIDS(ctx *gin.Context) (steamid.Collection, bool) {
 }
 
 func (a *App) handleGetFriendList() gin.HandlerFunc {
-	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
-
 	return func(ctx *gin.Context) {
 		ids, ok := getSteamIDS(ctx)
 		if !ok {
 			return
 		}
 
-		summaries, errSum := a.getSteamSummaries(ctx, ids)
-
-		if errSum != nil || len(ids) != len(summaries) {
-			log.Error("Failed to fetch friends list", zap.Error(errSum))
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, newAPIErr(ErrLoadFailed))
-
-			return
-		}
-
-		ctx.JSON(http.StatusOK, summaries)
+		ctx.JSON(http.StatusOK, a.getSteamFriends(ctx, ids))
 	}
 }
 

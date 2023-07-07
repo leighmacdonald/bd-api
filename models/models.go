@@ -41,6 +41,7 @@ type PlayerVanityRecord struct {
 	Vanity    string        `json:"vanity"`
 	CreatedOn time.Time     `json:"created_on"`
 }
+
 type Player struct {
 	SteamID                  steamid.SID64            `json:"steam_id"`
 	CommunityVisibilityState steamweb.VisibilityState `json:"community_visibility_state"`

@@ -14,6 +14,7 @@ import (
 	"github.com/leighmacdonald/bd-api/models"
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
@@ -94,80 +95,167 @@ func TestApp(t *testing.T) {
 		t.Skip("BDAPI_STEAM_API_KEY not set")
 	}
 
-	t.Run("apiTestBans", apiTestBans(app))                   //nolint:paralleltest
-	t.Run("apiTestSummary", apiTestSummary(app))             //nolint:paralleltest
-	t.Run("apiTestGetProfile", apiTestGetprofile(app))       //nolint:paralleltest
-	t.Run("apiTestGetSourcebans", apiTestGetSourcebans(app)) //nolint:paralleltest
+	t.Run("apiTestBans", apiTestBans(app))                     //nolint:paralleltest
+	t.Run("apiTestSummary", apiTestSummary(app))               //nolint:paralleltest
+	t.Run("apiTestGetProfile", apiTestGetProfile(app))         //nolint:paralleltest
+	t.Run("apiTestGetSourcebans", apiTestGetSourcebans(app))   //nolint:paralleltest
+	t.Run("apiTestGetFriends", apiTestGetFriends(app))         //nolint:paralleltest
+	t.Run("apiTestInvalidQueries", apiTestInvalidQueries(app)) //nolint:paralleltest
+}
+
+func generateIds(count int) steamid.Collection {
+	var collection steamid.Collection
+
+	for i := 0; i < count; i++ {
+		collection = append(collection, steamid.RandSID64())
+	}
+
+	return collection
+}
+
+//nolint:unparam
+func testReq(t *testing.T, app *App, method string, path string, target any) error {
+	t.Helper()
+
+	request := httptest.NewRequest(method, path, nil)
+	recorder := httptest.NewRecorder()
+
+	app.router.ServeHTTP(recorder, request)
+
+	body, err := io.ReadAll(recorder.Body)
+	if err != nil {
+		return errors.Wrap(err, "Failed to read test response body")
+	}
+
+	require.NoError(t, json.Unmarshal(body, &target))
+
+	return nil
 }
 
 func apiTestBans(app *App) func(t *testing.T) {
 	return func(t *testing.T) {
-		t.Parallel()
+		t.Run("success", func(t *testing.T) {
+			t.Parallel()
 
-		sids := steamid.Collection{testIDb4nny, testIDCamper}
+			var (
+				sids      = steamid.Collection{testIDb4nny, testIDCamper}
+				banStates []steamweb.PlayerBanState
+				path      = fmt.Sprintf("/bans?steamids=%s", SteamIDStringList(sids))
+			)
 
-		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/bans?steamids=%s", SteamIDStringList(sids)), nil)
-		recorder := httptest.NewRecorder()
+			require.NoError(t, testReq(t, app, http.MethodGet, path, &banStates))
+			require.Equal(t, len(sids), len(banStates))
+		})
+		t.Run("tooManyError", func(t *testing.T) {
+			t.Parallel()
 
-		app.router.ServeHTTP(recorder, request)
+			var (
+				sids = generateIds(maxResults + 10)
+				err  apiErr
+				path = fmt.Sprintf("/bans?steamids=%s", SteamIDStringList(sids))
+			)
 
-		body, err := io.ReadAll(recorder.Body)
-		if err != nil {
-			t.Errorf("expected error to be nil got %v", err)
-		}
+			require.NoError(t, testReq(t, app, http.MethodGet, path, &err))
+			require.Equal(t, err.Error, ErrTooMany.Error())
+		})
+	}
+}
 
-		var banStates []steamweb.PlayerBanState
+func apiTestInvalidQueries(app *App) func(t *testing.T) {
+	return func(t *testing.T) {
+		t.Run("invalidParams", func(t *testing.T) {
+			t.Parallel()
 
-		require.NoError(t, json.Unmarshal(body, &banStates))
-		require.Equal(t, len(sids), len(banStates))
+			var (
+				err  apiErr
+				path = "/summary?blah"
+			)
+
+			require.NoError(t, testReq(t, app, http.MethodGet, path, &err))
+			require.Equal(t, err.Error, ErrInvalidQueryParams.Error())
+		})
+		t.Run("invalidSteamID", func(t *testing.T) {
+			t.Parallel()
+
+			var (
+				err  apiErr
+				path = "/summary?steamids=ABC,12X"
+			)
+
+			require.NoError(t, testReq(t, app, http.MethodGet, path, &err))
+			require.Equal(t, err.Error, ErrInvalidSteamID.Error())
+		})
+		t.Run("tooManyRequested", func(t *testing.T) {
+			t.Parallel()
+
+			var (
+				sids = generateIds(maxResults + 10)
+				err  apiErr
+				path = fmt.Sprintf("/summary?steamids=%s", SteamIDStringList(sids))
+			)
+
+			require.NoError(t, testReq(t, app, http.MethodGet, path, &err))
+			require.Equal(t, err.Error, ErrTooMany.Error())
+		})
 	}
 }
 
 func apiTestSummary(app *App) func(t *testing.T) {
 	return func(t *testing.T) {
-		t.Parallel()
+		t.Run("success", func(t *testing.T) {
+			t.Parallel()
 
-		sids := steamid.Collection{testIDb4nny, testIDCamper}
+			var (
+				sids      = steamid.Collection{testIDb4nny, testIDCamper}
+				summaries []steamweb.PlayerSummary
+				path      = fmt.Sprintf("/summary?steamids=%s", SteamIDStringList(sids))
+			)
 
-		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/summary?steamids=%s", SteamIDStringList(sids)), nil)
-		recorder := httptest.NewRecorder()
-
-		app.router.ServeHTTP(recorder, request)
-
-		data, err := io.ReadAll(recorder.Body)
-		if err != nil {
-			t.Errorf("expected error to be nil got %v", err)
-		}
-
-		var summaries []steamweb.PlayerSummary
-
-		require.NoError(t, json.Unmarshal(data, &summaries))
-		require.Equal(t, len(sids), len(summaries))
+			require.NoError(t, testReq(t, app, http.MethodGet, path, &summaries))
+			require.Equal(t, len(sids), len(summaries))
+		})
 	}
 }
 
-func apiTestGetprofile(app *App) func(t *testing.T) {
+func apiTestGetFriends(app *App) func(t *testing.T) {
+	return func(t *testing.T) {
+		t.Run("success", func(t *testing.T) {
+			t.Parallel()
+
+			sids := steamid.Collection{testIDb4nny, testIDCamper}
+
+			request := httptest.NewRequest(http.MethodGet,
+				fmt.Sprintf("/friends?steamids=%s", SteamIDStringList(sids)), nil)
+			recorder := httptest.NewRecorder()
+
+			app.router.ServeHTTP(recorder, request)
+
+			data, err := io.ReadAll(recorder.Body)
+			if err != nil {
+				t.Errorf("expected error to be nil got %v", err)
+			}
+
+			var friends friendMap
+
+			require.NoError(t, json.Unmarshal(data, &friends))
+			require.True(t, len(friends[sids[0]]) > 0)
+			require.True(t, len(friends[sids[1]]) == 0)
+		})
+	}
+}
+
+func apiTestGetProfile(app *App) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Parallel()
 
-		sids := steamid.Collection{testIDb4nny, testIDCamper}
-
-		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/profile?steamids=%s", SteamIDStringList(sids)), nil)
-		recorder := httptest.NewRecorder()
-
-		app.router.ServeHTTP(recorder, request)
-
-		data, err := io.ReadAll(recorder.Body)
-		if err != nil {
-			t.Errorf("expected error to be nil got %v", err)
-		}
-
 		var (
+			sids     = steamid.Collection{testIDb4nny, testIDCamper}
+			path     = fmt.Sprintf("/profile?steamids=%s", SteamIDStringList(sids))
 			profiles []Profile
 			validIds steamid.Collection
 		)
 
-		require.NoError(t, json.Unmarshal(data, &profiles))
+		require.NoError(t, testReq(t, app, http.MethodGet, path, &profiles))
 
 		for _, sid := range sids {
 			for _, profile := range profiles {
@@ -217,29 +305,36 @@ func createTestSourcebansRecord(t *testing.T, app *App) models.SbBanRecord {
 
 func apiTestGetSourcebans(app *App) func(t *testing.T) {
 	return func(t *testing.T) {
-		t.Parallel()
+		t.Run("success", func(t *testing.T) {
+			t.Parallel()
 
-		record := createTestSourcebansRecord(t, app)
-		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/sourcebans/%s", record.SteamID), nil)
-		recorder := httptest.NewRecorder()
+			var (
+				record     = createTestSourcebansRecord(t, app)
+				banRecords []models.SbBanRecord
+				path       = fmt.Sprintf("/sourcebans/%s", record.SteamID)
+			)
 
-		app.router.ServeHTTP(recorder, request)
+			require.NoError(t, testReq(t, app, http.MethodGet, path, &banRecords))
+			require.Equal(t, record.BanID, banRecords[0].BanID)
+			require.Equal(t, record.SiteName, banRecords[0].SiteName)
+			require.Equal(t, record.SiteID, banRecords[0].SiteID)
+			require.Equal(t, record.PersonaName, banRecords[0].PersonaName)
+			require.Equal(t, record.SteamID, banRecords[0].SteamID)
+			require.Equal(t, record.Reason, banRecords[0].Reason)
+			require.Equal(t, record.Duration, banRecords[0].Duration)
+			require.Equal(t, record.Permanent, banRecords[0].Permanent)
+		})
+		t.Run("emptyResults", func(t *testing.T) {
+			t.Parallel()
 
-		data, err := io.ReadAll(recorder.Body)
-		if err != nil {
-			t.Errorf("expected error to be nil got %v", err)
-		}
+			var (
+				steamID    = steamid.RandSID64()
+				banRecords []models.SbBanRecord
+				path       = fmt.Sprintf("/sourcebans/%s", steamID)
+			)
 
-		var banRecords []models.SbBanRecord
-
-		require.NoError(t, json.Unmarshal(data, &banRecords))
-		require.Equal(t, record.BanID, banRecords[0].BanID)
-		require.Equal(t, record.SiteName, banRecords[0].SiteName)
-		require.Equal(t, record.SiteID, banRecords[0].SiteID)
-		require.Equal(t, record.PersonaName, banRecords[0].PersonaName)
-		require.Equal(t, record.SteamID, banRecords[0].SteamID)
-		require.Equal(t, record.Reason, banRecords[0].Reason)
-		require.Equal(t, record.Duration, banRecords[0].Duration)
-		require.Equal(t, record.Permanent, banRecords[0].Permanent)
+			require.NoError(t, testReq(t, app, http.MethodGet, path, &banRecords))
+			require.Equal(t, []models.SbBanRecord{}, banRecords)
+		})
 	}
 }

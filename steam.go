@@ -22,6 +22,10 @@ func (a *App) getSteamFriends(ctx context.Context, steamIDs steamid.Collection) 
 		waitGroup = &sync.WaitGroup{}
 	)
 
+	for _, sid := range steamIDs {
+		output[sid] = []steamweb.Friend{}
+	}
+
 	for _, currentID := range steamIDs {
 		waitGroup.Add(1)
 
