@@ -475,7 +475,7 @@ func newRecord(site models.SbSite, sid64 steamid.SID64, personaName string, reas
 ) models.SbBanRecord {
 	return models.SbBanRecord{
 		BanID:       0,
-		SiteName:    "",
+		SiteName:    site.Name,
 		SiteID:      site.SiteID,
 		PersonaName: personaName,
 		SteamID:     sid64,
