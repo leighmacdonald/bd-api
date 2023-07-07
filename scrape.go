@@ -1,8 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"context"
-	"fmt"
+	"net/http"
 	"net/url"
 	"path/filepath"
 	"regexp"
@@ -192,7 +193,7 @@ func createScrapers(logger *zap.Logger, cacheDir string) ([]*sbScraper, error) {
 		newSirPleaseScraper, newSkialScraper, newSlavonServerScraper, newSneaksScraper, newSpaceShipScraper,
 		newSpectreScraper, newSvdosBrothersScraper, newSwapShopScraper, newTF2MapsScraper, newTF2ROScraper,
 		/*newTawernaScraper,*/ newTheVilleScraper, newTitanScraper, newTriggerHappyScraper, newUGCScraper,
-		newVaticanCityScraper, newVidyaGaemsScraper, newVortexScraper, /* newWonderlandTFGOOGScraper,*/
+		newVaticanCityScraper, newVidyaGaemsScraper, newVortexScraper, newWonderlandTFScraper,
 		newZMBrasilScraper, newZubatScraper,
 	}
 
@@ -339,7 +340,7 @@ const defaultStartPath = "index.php?p=banlist"
 
 //nolint:unparam
 func newScraper(logger *zap.Logger, cacheDir string, name string, baseURL string, startPath string, parser parserFunc,
-	nextURL nextURLFunc, parseTime parseTimeFunc,
+	nextURL nextURLFunc, parseTime parseTimeFunc, transport http.RoundTripper,
 ) (*sbScraper, error) {
 	const (
 		randomDelay    = 5 * time.Second
@@ -364,6 +365,17 @@ func newScraper(logger *zap.Logger, cacheDir string, name string, baseURL string
 		startPath = defaultStartPath
 	}
 
+	collector := colly.NewCollector(
+		colly.UserAgent("bd"),
+		colly.CacheDir(filepath.Join(cacheDir, "scrapers")),
+		colly.Debugger(&debugLogger),
+		colly.AllowedDomains(parsedURL.Hostname()),
+	)
+
+	if transport != nil {
+		collector.WithTransport(transport)
+	}
+
 	scraper := sbScraper{ //nolint:exhaustruct
 		baseURL:   baseURL,
 		name:      name,
@@ -375,12 +387,7 @@ func newScraper(logger *zap.Logger, cacheDir string, name string, baseURL string
 		nextURL:   nextURL,
 		parseTIme: parseTime,
 		log:       log,
-		Collector: colly.NewCollector(
-			colly.UserAgent("bd"),
-			colly.CacheDir(filepath.Join(cacheDir, "scrapers")),
-			colly.Debugger(&debugLogger),
-			colly.AllowedDomains(parsedURL.Hostname()),
-		),
+		Collector: collector,
 	}
 
 	scraper.SetRequestTimeout(requestTimeout)
@@ -1064,54 +1071,102 @@ func parseDefault(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFu
 //}
 
 type cfResult struct {
-	page int
+	page string
 	body string
 }
 
-func crawlCloudflare(ctx context.Context, baseURL string, pages int, results chan cfResult) error {
+type cfTransport struct {
+	launchURL      string
+	browser        *rod.Browser
+	page           *rod.Page
+	waitStableTime time.Duration
+	similarity     float32
+}
+
+func newCFTransport() *cfTransport {
+	const (
+		stableWaitTimeout = time.Second * 5
+		pageSimilarity    = 0.5
+	)
+
+	return &cfTransport{waitStableTime: stableWaitTimeout, similarity: pageSimilarity} //nolint:exhaustruct
+}
+
+func (t *cfTransport) Open(ctx context.Context) error {
 	const (
 		slowTimeout = time.Second * 5
 	)
 
-	var (
-		userMode = launcher.
-				NewUserMode().
-				Leakless(true).
-				Headless(true).
-				UserDataDir("cache/t"). // *must* be this?
-				Set("disable-default-apps").
-				Set("no-first-run").
-				MustLaunch()
-		browser = rod.
-			New().
-			SlowMotion(slowTimeout).
-			Context(ctx).
-			ControlURL(userMode).
-			MustConnect().
-			NoDefaultDevice()
-		page    *rod.Page
-		curPage = 1
-	)
-
-	for curPage <= pages {
-		URL := fmt.Sprintf(baseURL, curPage)
-		if page == nil {
-			page = browser.MustPage(URL)
-		} else {
-			page = page.MustNavigate(URL)
-		}
-
-		page.MustWaitLoad()
-
-		body, errBody := page.HTML()
-		if errBody != nil {
-			return errors.Wrap(errBody, "Failed to read HTML body")
-		}
-
-		results <- cfResult{page: curPage, body: body}
-
-		curPage++
+	launchURL, errLauncher := launcher.
+		NewUserMode().
+		Leakless(true).
+		Headless(true).
+		UserDataDir("cache/t"). // *must* be this?
+		Set("disable-default-apps").
+		Set("no-first-run").
+		Launch()
+	if errLauncher != nil {
+		return errors.Wrap(errLauncher, "Failed to setup launcher")
 	}
 
+	t.launchURL = launchURL
+	t.browser = rod.
+		New().
+		SlowMotion(slowTimeout).
+		Context(ctx).
+		ControlURL(t.launchURL).
+		MustConnect().
+		NoDefaultDevice()
+
 	return nil
+}
+
+// NopCloser exists to satisfy io.ReadCloser interface for our fake http.Response.
+type NopCloser struct {
+	*bytes.Reader
+}
+
+func (b NopCloser) Close() error {
+	return nil
+}
+
+// RoundTrip implements the minimal http.Transport interface so that the underlying browser used for
+// scraping cloudflare protected sites can be integrated into the colly.Collector pipeline.
+func (t *cfTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	reqURL := req.URL.String()
+
+	res, errReq := t.fetch(reqURL)
+	if errReq != nil {
+		return nil, errReq
+	}
+
+	body := NopCloser{Reader: bytes.NewReader([]byte(res.body))}
+	resp := &http.Response{ //nolint:exhaustruct
+		Request:    req,
+		Body:       body,
+		StatusCode: http.StatusOK,
+		Status:     http.StatusText(http.StatusOK),
+		Proto:      "HTTP/1.0",
+	}
+
+	return resp, nil
+}
+
+func (t *cfTransport) fetch(url string) (*cfResult, error) {
+	if t.page == nil {
+		t.page = t.browser.MustPage(url)
+	} else {
+		t.page = t.page.MustNavigate(url)
+	}
+
+	if errWait := t.page.WaitStable(t.waitStableTime, t.similarity); errWait != nil {
+		return nil, errors.Wrap(errWait, "Failed to wait for content to load")
+	}
+
+	body, errBody := t.page.HTML()
+	if errBody != nil {
+		return nil, errors.Wrap(errBody, "Failed to read HTML body")
+	}
+
+	return &cfResult{page: url, body: body}, nil
 }

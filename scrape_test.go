@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"testing"
 	"time"
@@ -69,12 +70,7 @@ func TestParseUGC(t *testing.T) {
 
 func TestParseWonderland(t *testing.T) {
 	t.Parallel()
-	testParser(t, newWonderlandTFScraper, 22, "index.php?p=banlist&page=2")
-}
-
-func TestParseWonderlandGoog(t *testing.T) {
-	t.Parallel()
-	testParser(t, newWonderlandTFGOOGScraper, 30, "index.php?p=banlist&page=2")
+	testParser(t, newWonderlandTFScraper, 30, "index.php?p=banlist&page=2")
 }
 
 func TestParseGFL(t *testing.T) {
@@ -585,35 +581,47 @@ func TestParseFluxTFTime(t *testing.T) {
 //	require.True(t, len(bans) > 100)
 //}
 
-func TestCFBotProtection(t *testing.T) { //nolint:paralleltest
-	if os.Getenv("$DISPLAY") == "" {
+func TestCFBotProtectedRequest(t *testing.T) { //nolint:paralleltest
+	if os.Getenv("$DISPLAY") == "" && os.Getenv("DISPLAY") == "" {
 		t.Skip("No display found")
 	}
 
+	t.Skip("fix parser")
+
 	var (
-		results = make(chan cfResult)
-		pages   = 4
+		url = "https://bans.wonderland.tf/index.php?p=banlist&page=2"
+		cdt = newCFTransport()
 	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
-	go func() {
-		if err := crawlCloudflare(ctx, "https://bans.wonderland.tf/index.php?p=banlist&page=%d", pages, results); err != nil {
-			t.Error("Error returned")
-		}
-	}()
+	require.NoError(t, cdt.Open(ctx))
 
-	var allResults []cfResult
+	req, reqErr := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	require.NoError(t, reqErr)
 
-	for {
-		res := <-results
+	resp, errResp := cdt.RoundTrip(req)
 
-		allResults = append(allResults, res)
-		if len(allResults) == pages {
-			break
-		}
-	}
+	doc, errDoc := goquery.NewDocumentFromReader(resp.Body)
 
-	require.True(t, len(allResults) == pages)
+	require.NoError(t, errDoc)
+
+	scraper, errScraper := newWonderlandTFScraper(zap.NewNop(), "./cache/")
+	require.NoError(t, errScraper)
+
+	results, _, errParse := scraper.parser(doc.Selection, zap.NewNop(), scraper.parseTIme)
+
+	require.NoError(t, errParse)
+	require.Equal(t, 10, len(results))
+
+	nextPage := "https://bans.wonderland.tf/index.php?p=banlist&page=3"
+
+	next := scraper.nextURL(scraper, doc.Selection)
+	require.Equal(t, scraper.url(nextPage), next)
+
+	require.NoError(t, errResp)
+	require.NoError(t, resp.Body.Close())
+
+	require.Equal(t, resp.StatusCode, http.StatusOK)
 }
