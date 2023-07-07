@@ -14,6 +14,7 @@ import (
 	"github.com/gocolly/colly/debug"
 	"github.com/gocolly/colly/extensions"
 	"github.com/gocolly/colly/queue"
+	"github.com/leighmacdonald/bd-api/models"
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -249,7 +250,7 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 				continue
 			}
 
-			bRecord := sbBanRecord{
+			bRecord := models.SbBanRecord{
 				BanID:       0,
 				SiteName:    "",
 				SiteID:      int(scraper.ID),
@@ -258,7 +259,7 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 				Reason:      result.Reason,
 				Duration:    result.Length,
 				Permanent:   result.Permanent,
-				timeStamped: timeStamped{
+				TimeStamped: models.TimeStamped{
 					UpdatedOn: time.Now(),
 					CreatedOn: result.CreatedOn,
 				},

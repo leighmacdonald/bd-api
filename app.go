@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leighmacdonald/bd-api/models"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
@@ -61,7 +62,7 @@ func (a *App) initScrapers(ctx context.Context) error {
 
 	for _, scraper := range scrapers {
 		// Attach a site_id to the scraper, so we can keep track of the scrape source
-		var s sbSite
+		var s models.SbSite
 		if errSave := a.db.sbSiteGetOrCreate(ctx, scraper.name, &s); errSave != nil {
 			return errors.Wrap(errSave, "Database error")
 		}

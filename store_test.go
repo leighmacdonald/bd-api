@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/leighmacdonald/bd-api/models"
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/stretchr/testify/require"
@@ -43,15 +44,15 @@ func sourceBansStoreTest(database *pgStore) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Parallel()
 
-		var site sbSite
+		var site models.SbSite
 
 		require.Error(t, database.sbSiteGet(context.Background(), 99999, &site))
 
-		site2 := newSBSite("test-site")
+		site2 := NewSBSite("test-site")
 
 		require.NoError(t, database.sbSiteSave(context.Background(), &site2))
 
-		var site3 sbSite
+		var site3 models.SbSite
 
 		require.NoError(t, database.sbSiteGet(context.Background(), site2.SiteID, &site3))
 		require.Equal(t, site2.Name, site3.Name)
@@ -65,7 +66,7 @@ func sourceBansStoreTest(database *pgStore) func(t *testing.T) {
 
 		t0 := time.Now().AddDate(-1, 0, 0)
 		t1 := t0.AddDate(0, 1, 0)
-		recA := site3.newRecord(testIDCamper, "blah", "test", t0, t1.Sub(t0), false)
+		recA := newRecord(site3, testIDCamper, "blah", "test", t0, t1.Sub(t0), false)
 
 		require.NoError(t, database.sbBanSave(context.Background(), &recA))
 		require.NoError(t, database.sbSiteDelete(context.Background(), site3.SiteID))

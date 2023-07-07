@@ -15,6 +15,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/leighmacdonald/bd-api/models"
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
@@ -119,68 +120,12 @@ func (db *pgStore) migrate() error {
 	return nil
 }
 
-type timeStamped struct {
-	UpdatedOn time.Time `json:"-"`
-	CreatedOn time.Time `json:"created_on"`
+type PlayerRecord struct {
+	models.Player
+	isNewRecord bool
 }
 
-type playerNameRecord struct {
-	NameID      int64         `json:"name_id"`
-	SteamID     steamid.SID64 `json:"steam_id"`
-	PersonaName string        `json:"persona_name"`
-	CreatedOn   time.Time     `json:"created_on"`
-}
-
-type playerAvatarRecord struct {
-	AvatarID   int64         `json:"avatar_id"`
-	SteamID    steamid.SID64 `json:"steam_id"`
-	AvatarHash string        `json:"avatar_hash"`
-	CreatedOn  time.Time     `json:"created_on"`
-}
-
-type playerVanityRecord struct {
-	VanityID  int64         `json:"vanity_id"`
-	SteamID   steamid.SID64 `json:"steam_id"`
-	Vanity    string        `json:"vanity"`
-	CreatedOn time.Time     `json:"created_on"`
-}
-
-type econBanState int
-
-const (
-	econBanNone econBanState = iota
-	econBanProbation
-	econBanBanned
-)
-
-type playerRecord struct {
-	SteamID                  steamid.SID64            `json:"steam_id"`
-	CommunityVisibilityState steamweb.VisibilityState `json:"community_visibility_state"`
-	ProfileState             steamweb.ProfileState    `json:"profile_state"`
-	PersonaName              string                   `json:"persona_name"`
-	Vanity                   string                   `json:"vanity"`
-	AvatarHash               string                   `json:"avatar_hash"`
-	PersonaState             steamweb.PersonaState    `json:"persona_state"`
-	RealName                 string                   `json:"real_name"`
-	TimeCreated              time.Time                `json:"time_created"`
-	LocCountryCode           string                   `json:"loc_country_code"`
-	LocStateCode             string                   `json:"loc_state_code"`
-	LocCityID                int                      `json:"loc_city_id"`
-	CommunityBanned          bool                     `json:"community_banned"`
-	VacBanned                bool                     `json:"vac_banned"`
-	LastBannedOn             time.Time                `json:"last_banned_on"`
-	GameBans                 int                      `json:"game_bans"`
-	EconomyBanned            econBanState             `json:"economy_banned"`
-	LogsTFCount              int                      `json:"logs_tf_count"`
-	UGCUpdatedOn             time.Time                `json:"ugc_updated_on"`
-	RGLUpdatedOn             time.Time                `json:"rgl_updated_on"`
-	ETF2LUpdatedOn           time.Time                `json:"etf2_l_updated_on"`
-	LogsTFUpdatedOn          time.Time                `json:"logs_tf_updated_on"`
-	isNewRecord              bool
-	timeStamped
-}
-
-func (r *playerRecord) applyBans(ban steamweb.PlayerBanState) {
+func (r *PlayerRecord) applyBans(ban steamweb.PlayerBanState) {
 	r.CommunityBanned = ban.CommunityBanned
 	r.VacBanned = ban.VACBanned
 	r.GameBans = ban.NumberOfGameBans
@@ -191,17 +136,17 @@ func (r *playerRecord) applyBans(ban steamweb.PlayerBanState) {
 
 	switch ban.EconomyBan {
 	case steamweb.EconBanNone:
-		r.EconomyBanned = econBanNone
+		r.EconomyBanned = models.EconBanNone
 	case steamweb.EconBanProbation:
-		r.EconomyBanned = econBanProbation
+		r.EconomyBanned = models.EconBanProbation
 	case steamweb.EconBanBanned:
-		r.EconomyBanned = econBanBanned
+		r.EconomyBanned = models.EconBanBanned
 	}
 
 	r.UpdatedOn = time.Now()
 }
 
-func (r *playerRecord) applySummary(sum steamweb.PlayerSummary) {
+func (r *PlayerRecord) applySummary(sum steamweb.PlayerSummary) {
 	r.Vanity = sum.ProfileURL
 	r.AvatarHash = sum.AvatarHash
 	r.CommunityVisibilityState = sum.CommunityVisibilityState
@@ -221,41 +166,43 @@ func (r *playerRecord) applySummary(sum steamweb.PlayerSummary) {
 
 const defaultAvatar = "fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb"
 
-func newPlayerRecord(sid64 steamid.SID64) playerRecord {
+func newPlayerRecord(sid64 steamid.SID64) PlayerRecord {
 	createdOn := time.Now()
 
-	return playerRecord{
-		SteamID:                  sid64,
-		CommunityVisibilityState: steamweb.VisibilityPrivate,
-		ProfileState:             steamweb.ProfileStateNew,
-		PersonaName:              "",
-		Vanity:                   "",
-		AvatarHash:               defaultAvatar,
-		PersonaState:             steamweb.StateOffline,
-		RealName:                 "",
-		TimeCreated:              time.Time{},
-		LocCountryCode:           "",
-		LocStateCode:             "",
-		LocCityID:                0,
-		CommunityBanned:          false,
-		VacBanned:                false,
-		LastBannedOn:             time.Time{},
-		GameBans:                 0,
-		EconomyBanned:            0,
-		LogsTFCount:              0,
-		UGCUpdatedOn:             time.Time{},
-		RGLUpdatedOn:             time.Time{},
-		ETF2LUpdatedOn:           time.Time{},
-		LogsTFUpdatedOn:          time.Time{},
-		isNewRecord:              true,
-		timeStamped: timeStamped{
-			UpdatedOn: createdOn,
-			CreatedOn: createdOn,
+	return PlayerRecord{
+		Player: models.Player{
+			SteamID:                  sid64,
+			CommunityVisibilityState: steamweb.VisibilityPrivate,
+			ProfileState:             steamweb.ProfileStateNew,
+			PersonaName:              "",
+			Vanity:                   "",
+			AvatarHash:               defaultAvatar,
+			PersonaState:             steamweb.StateOffline,
+			RealName:                 "",
+			TimeCreated:              time.Time{},
+			LocCountryCode:           "",
+			LocStateCode:             "",
+			LocCityID:                0,
+			CommunityBanned:          false,
+			VacBanned:                false,
+			LastBannedOn:             time.Time{},
+			GameBans:                 0,
+			EconomyBanned:            0,
+			LogsTFCount:              0,
+			UGCUpdatedOn:             time.Time{},
+			RGLUpdatedOn:             time.Time{},
+			ETF2LUpdatedOn:           time.Time{},
+			LogsTFUpdatedOn:          time.Time{},
+			TimeStamped: models.TimeStamped{
+				UpdatedOn: createdOn,
+				CreatedOn: createdOn,
+			},
 		},
+		isNewRecord: true,
 	}
 }
 
-func playerNameSave(ctx context.Context, transaction pgx.Tx, record *playerRecord) error {
+func playerNameSave(ctx context.Context, transaction pgx.Tx, record *PlayerRecord) error {
 	query, args, errSQL := sb.
 		Insert("player_names").
 		Columns("steam_id", "persona_name").
@@ -272,7 +219,7 @@ func playerNameSave(ctx context.Context, transaction pgx.Tx, record *playerRecor
 	return nil
 }
 
-func playerAvatarSave(ctx context.Context, transaction pgx.Tx, record *playerRecord) error {
+func playerAvatarSave(ctx context.Context, transaction pgx.Tx, record *PlayerRecord) error {
 	query, args, errSQL := sb.
 		Insert("player_avatars").
 		Columns("steam_id", "avatar_hash").
@@ -289,7 +236,7 @@ func playerAvatarSave(ctx context.Context, transaction pgx.Tx, record *playerRec
 	return nil
 }
 
-func playerVanitySave(ctx context.Context, transaction pgx.Tx, record *playerRecord) error {
+func playerVanitySave(ctx context.Context, transaction pgx.Tx, record *PlayerRecord) error {
 	if record.Vanity == "" {
 		return nil
 	}
@@ -311,7 +258,7 @@ func playerVanitySave(ctx context.Context, transaction pgx.Tx, record *playerRec
 }
 
 //nolint:dupl
-func (db *pgStore) playerGetNames(ctx context.Context, sid64 steamid.SID64) ([]playerNameRecord, error) {
+func (db *pgStore) playerGetNames(ctx context.Context, sid64 steamid.SID64) ([]models.PlayerNameRecord, error) {
 	query, args, errSQL := sb.
 		Select("name_id", "persona_name", "created_on").
 		From("player_names").
@@ -328,10 +275,10 @@ func (db *pgStore) playerGetNames(ctx context.Context, sid64 steamid.SID64) ([]p
 
 	defer rows.Close()
 
-	var records []playerNameRecord
+	var records []models.PlayerNameRecord
 
 	for rows.Next() {
-		record := playerNameRecord{SteamID: sid64} //nolint:exhaustruct
+		record := models.PlayerNameRecord{SteamID: sid64} //nolint:exhaustruct
 		if errScan := rows.Scan(&record.NameID, &record.PersonaName, &record.CreatedOn); errScan != nil {
 			return nil, dbErr(errScan, "Failed to scan name record")
 		}
@@ -343,7 +290,7 @@ func (db *pgStore) playerGetNames(ctx context.Context, sid64 steamid.SID64) ([]p
 }
 
 //nolint:dupl
-func (db *pgStore) playerGetAvatars(ctx context.Context, sid64 steamid.SID64) ([]playerAvatarRecord, error) {
+func (db *pgStore) playerGetAvatars(ctx context.Context, sid64 steamid.SID64) ([]models.PlayerAvatarRecord, error) {
 	query, args, errSQL := sb.
 		Select("avatar_id", "avatar_hash", "created_on").
 		From("player_avatars").
@@ -360,10 +307,10 @@ func (db *pgStore) playerGetAvatars(ctx context.Context, sid64 steamid.SID64) ([
 
 	defer rows.Close()
 
-	var records []playerAvatarRecord
+	var records []models.PlayerAvatarRecord
 
 	for rows.Next() {
-		r := playerAvatarRecord{SteamID: sid64} //nolint:exhaustruct
+		r := models.PlayerAvatarRecord{SteamID: sid64} //nolint:exhaustruct
 		if errScan := rows.Scan(&r.AvatarID, &r.AvatarHash, &r.CreatedOn); errScan != nil {
 			return nil, dbErr(errScan, "Failed to scan avatar")
 		}
@@ -374,7 +321,7 @@ func (db *pgStore) playerGetAvatars(ctx context.Context, sid64 steamid.SID64) ([
 	return records, nil
 }
 
-func (db *pgStore) playerGetVanityNames(ctx context.Context, sid64 steamid.SID64) ([]playerVanityRecord, error) {
+func (db *pgStore) playerGetVanityNames(ctx context.Context, sid64 steamid.SID64) ([]models.PlayerVanityRecord, error) {
 	query, args, errSQL := sb.
 		Select("vanity_id", "vanity", "created_on").
 		From("player_vanity").
@@ -384,7 +331,7 @@ func (db *pgStore) playerGetVanityNames(ctx context.Context, sid64 steamid.SID64
 		return nil, dbErr(errSQL, "Failed to generate query")
 	}
 
-	var records []playerVanityRecord
+	var records []models.PlayerVanityRecord
 
 	rows, errQuery := db.pool.Query(ctx, query, args...)
 	if errQuery != nil {
@@ -394,7 +341,7 @@ func (db *pgStore) playerGetVanityNames(ctx context.Context, sid64 steamid.SID64
 	defer rows.Close()
 
 	for rows.Next() {
-		r := playerVanityRecord{SteamID: sid64} //nolint:exhaustruct
+		r := models.PlayerVanityRecord{SteamID: sid64} //nolint:exhaustruct
 		if errScan := rows.Scan(&r.VanityID, &r.Vanity, &r.CreatedOn); errScan != nil {
 			return nil, dbErr(errScan, "Failed to scan vanity name")
 		}
@@ -405,7 +352,7 @@ func (db *pgStore) playerGetVanityNames(ctx context.Context, sid64 steamid.SID64
 	return records, nil
 }
 
-func (db *pgStore) playerRecordSave(ctx context.Context, record *playerRecord) error {
+func (db *pgStore) playerRecordSave(ctx context.Context, record *PlayerRecord) error {
 	success := false
 
 	transaction, errTx := db.pool.BeginTx(ctx, pgx.TxOptions{}) //nolint:exhaustruct
@@ -510,41 +457,23 @@ func (db *pgStore) playerRecordSave(ctx context.Context, record *playerRecord) e
 // type teamRecord struct {
 //}
 
-type sbSite struct {
-	SiteID int    `json:"site_id"`
-	Name   string `json:"name"`
-	timeStamped
-}
-
-func newSBSite(name string) sbSite {
+func NewSBSite(name string) models.SbSite {
 	createdOn := time.Now()
 
-	return sbSite{
+	return models.SbSite{
 		SiteID: 0,
 		Name:   name,
-		timeStamped: timeStamped{
+		TimeStamped: models.TimeStamped{
 			UpdatedOn: createdOn,
 			CreatedOn: createdOn,
 		},
 	}
 }
 
-type sbBanRecord struct {
-	BanID       int           `json:"ban_id"`
-	SiteName    string        `json:"site_name"`
-	SiteID      int           `json:"site_id"`
-	PersonaName string        `json:"persona_name"`
-	SteamID     steamid.SID64 `json:"steam_id"`
-	Reason      string        `json:"reason"`
-	Duration    time.Duration `json:"duration"`
-	Permanent   bool          `json:"permanent"`
-	timeStamped
-}
-
-func (site sbSite) newRecord(sid64 steamid.SID64, personaName string, reason string,
+func newRecord(site models.SbSite, sid64 steamid.SID64, personaName string, reason string,
 	timeStamp time.Time, duration time.Duration, perm bool,
-) sbBanRecord {
-	return sbBanRecord{
+) models.SbBanRecord {
+	return models.SbBanRecord{
 		BanID:       0,
 		SiteName:    "",
 		SiteID:      site.SiteID,
@@ -553,14 +482,14 @@ func (site sbSite) newRecord(sid64 steamid.SID64, personaName string, reason str
 		Reason:      reason,
 		Duration:    duration,
 		Permanent:   perm,
-		timeStamped: timeStamped{
+		TimeStamped: models.TimeStamped{
 			UpdatedOn: timeStamp,
 			CreatedOn: timeStamp,
 		},
 	}
 }
 
-func (db *pgStore) playerGetOrCreate(ctx context.Context, sid64 steamid.SID64, record *playerRecord) error {
+func (db *pgStore) playerGetOrCreate(ctx context.Context, sid64 steamid.SID64, record *PlayerRecord) error {
 	query, args, errSQL := sb.
 		Select("steam_id", "community_visibility_state", "profile_state",
 			"persona_name", "vanity", "avatar_hash", "persona_state", "real_name", "time_created", "loc_country_code",
@@ -580,7 +509,7 @@ func (db *pgStore) playerGetOrCreate(ctx context.Context, sid64 steamid.SID64, r
 			&record.AvatarHash, &record.PersonaState, &record.RealName, &record.TimeCreated, &record.LocCountryCode,
 			&record.LocStateCode, &record.LocCityID, &record.CommunityBanned, &record.VacBanned, &record.GameBans,
 			&record.EconomyBanned, &record.LogsTFCount, &record.UGCUpdatedOn, &record.RGLUpdatedOn, &record.ETF2LUpdatedOn,
-			&record.LogsTFUpdatedOn, &record.timeStamped.UpdatedOn, &record.timeStamped.CreatedOn)
+			&record.LogsTFUpdatedOn, &record.TimeStamped.UpdatedOn, &record.TimeStamped.CreatedOn)
 	if errQuery != nil {
 		wrappedErr := dbErr(errQuery, "Failed to query player")
 		if errors.Is(wrappedErr, errNoRows) {
@@ -595,7 +524,7 @@ func (db *pgStore) playerGetOrCreate(ctx context.Context, sid64 steamid.SID64, r
 	return nil
 }
 
-func (db *pgStore) playerGetExpiredProfiles(ctx context.Context, limit int) ([]playerRecord, error) {
+func (db *pgStore) playerGetExpiredProfiles(ctx context.Context, limit int) ([]PlayerRecord, error) {
 	query, args, errSQL := sb.
 		Select("steam_id", "community_visibility_state", "profile_state",
 			"persona_name", "vanity", "avatar_hash", "persona_state", "real_name", "time_created", "loc_country_code",
@@ -618,17 +547,17 @@ func (db *pgStore) playerGetExpiredProfiles(ctx context.Context, limit int) ([]p
 
 	defer rows.Close()
 
-	var records []playerRecord
+	var records []PlayerRecord
 
 	for rows.Next() {
-		var record playerRecord
+		var record PlayerRecord
 		if errQuery := rows.
 			Scan(&record.SteamID, &record.CommunityVisibilityState, &record.ProfileState, &record.PersonaName,
 				&record.Vanity, &record.AvatarHash, &record.PersonaState, &record.RealName, &record.TimeCreated,
 				&record.LocCountryCode, &record.LocStateCode, &record.LocCityID, &record.CommunityBanned,
 				&record.VacBanned, &record.GameBans, &record.EconomyBanned, &record.LogsTFCount, &record.UGCUpdatedOn,
-				&record.RGLUpdatedOn, &record.ETF2LUpdatedOn, &record.LogsTFUpdatedOn, &record.timeStamped.UpdatedOn,
-				&record.timeStamped.CreatedOn); errQuery != nil {
+				&record.RGLUpdatedOn, &record.ETF2LUpdatedOn, &record.LogsTFUpdatedOn, &record.TimeStamped.UpdatedOn,
+				&record.TimeStamped.CreatedOn); errQuery != nil {
 			return nil, dbErr(errQuery, "Failed to scan expired ban")
 		}
 
@@ -638,7 +567,7 @@ func (db *pgStore) playerGetExpiredProfiles(ctx context.Context, limit int) ([]p
 	return records, nil
 }
 
-func (db *pgStore) sbSiteGetOrCreate(ctx context.Context, name string, site *sbSite) error {
+func (db *pgStore) sbSiteGetOrCreate(ctx context.Context, name string, site *models.SbSite) error {
 	query, args, errSQL := sb.
 		Select("sb_site_id", "name", "updated_on", "created_on").
 		From("sb_site").
@@ -664,7 +593,7 @@ func (db *pgStore) sbSiteGetOrCreate(ctx context.Context, name string, site *sbS
 	return nil
 }
 
-func (db *pgStore) sbSiteSave(ctx context.Context, site *sbSite) error {
+func (db *pgStore) sbSiteSave(ctx context.Context, site *models.SbSite) error {
 	site.UpdatedOn = time.Now()
 
 	if site.SiteID <= 0 {
@@ -703,7 +632,7 @@ func (db *pgStore) sbSiteSave(ctx context.Context, site *sbSite) error {
 	return nil
 }
 
-func (db *pgStore) sbSiteGet(ctx context.Context, siteID int, site *sbSite) error {
+func (db *pgStore) sbSiteGet(ctx context.Context, siteID int, site *models.SbSite) error {
 	query, args, errSQL := sb.
 		Select("sb_site_id", "name", "updated_on", "created_on").
 		From("sb_site").
@@ -750,7 +679,7 @@ func dbErr(err error, wrapMsg string) error {
 	return errors.Wrap(err, wrapMsg)
 }
 
-func (db *pgStore) sbBanSave(ctx context.Context, record *sbBanRecord) error {
+func (db *pgStore) sbBanSave(ctx context.Context, record *models.SbBanRecord) error {
 	record.UpdatedOn = time.Now()
 
 	if record.BanID <= 0 {
@@ -796,7 +725,7 @@ func (db *pgStore) sbBanSave(ctx context.Context, record *sbBanRecord) error {
 // Turn the saved usec back into seconds.
 const storeDurationSecondMulti = int64(time.Second)
 
-func (db *pgStore) sbGetBansBySID(ctx context.Context, sid64 steamid.SID64) ([]sbBanRecord, error) {
+func (db *pgStore) sbGetBansBySID(ctx context.Context, sid64 steamid.SID64) ([]models.SbBanRecord, error) {
 	query, args, errSQL := sb.
 		Select("b.sb_ban_id", "b.sb_site_id", "b.steam_id", "b.persona_name", "b.reason",
 			"b.created_on", "b.duration", "b.permanent", "s.name").
@@ -815,10 +744,10 @@ func (db *pgStore) sbGetBansBySID(ctx context.Context, sid64 steamid.SID64) ([]s
 
 	defer rows.Close()
 
-	var records []sbBanRecord
+	var records []models.SbBanRecord
 
 	for rows.Next() {
-		var bRecord sbBanRecord
+		var bRecord models.SbBanRecord
 
 		var duration int64
 		if errScan := rows.Scan(&bRecord.BanID, &bRecord.SiteID, &bRecord.SteamID, &bRecord.PersonaName,

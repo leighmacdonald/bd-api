@@ -183,7 +183,7 @@ func (a *App) profileUpdater(ctx context.Context) {
 
 			for len(expiredProfiles) < maxQueuedCount {
 				for _, sid64 := range updateQueue {
-					var pr playerRecord
+					var pr PlayerRecord
 					if errQueued := a.db.playerGetOrCreate(ctx, sid64, &pr); errQueued != nil {
 						continue
 					}

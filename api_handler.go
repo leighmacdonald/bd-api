@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leighmacdonald/bd-api/models"
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"go.uber.org/zap"
@@ -146,7 +147,7 @@ func (a *App) handleGetSourceBans() gin.HandlerFunc {
 
 		if bans == nil {
 			// Return empty list instead of null
-			bans = []sbBanRecord{}
+			bans = []models.SbBanRecord{}
 		}
 
 		renderSyntax(ctx, encoder, bans, "profiles", &baseTmplArgs{ //nolint:exhaustruct
