@@ -287,7 +287,7 @@ func createTestSourcebansRecord(t *testing.T, app *App) models.SbBanRecord {
 		t.Error(errPlayer)
 	}
 
-	site := NewSBSite(fmt.Sprintf("Test %s", curTime))
+	site := NewSBSite(models.SiteName(fmt.Sprintf("Test %s", curTime)))
 	if errSave := app.db.sbSiteSave(ctx, &site); errSave != nil {
 		t.Error(errSave)
 	}

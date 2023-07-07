@@ -8,6 +8,103 @@ import (
 	"github.com/leighmacdonald/steamweb/v2"
 )
 
+type SiteName string
+
+const (
+	Skial            SiteName = "skial"
+	GFL              SiteName = "gfl"
+	Spaceship        SiteName = "spaceship"
+	UGC              SiteName = "ugc"
+	SirPlease        SiteName = "sirplease"
+	Vidyagaems       SiteName = "vidyagaems"
+	OWL              SiteName = "owl"
+	ZMBrasil         SiteName = "zmbrasil"
+	Dixigame         SiteName = "dixigame"
+	ScrapTF          SiteName = "scraptf"
+	Wonderland       SiteName = "wonderland"
+	LazyPurple       SiteName = "lazypurple"
+	FirePowered      SiteName = "firepowered"
+	Harpoon          SiteName = "harpoongaming"
+	Panda            SiteName = "panda"
+	NeonHeights      SiteName = "neonheights"
+	Pancakes         SiteName = "pancakes"
+	Loos             SiteName = "loos"
+	PubsTF           SiteName = "pubstf"
+	ServiLiveCl      SiteName = "servilivecl"
+	CutiePie         SiteName = "cutiepie"
+	SGGaming         SiteName = "sggaming"
+	ApeMode          SiteName = "apemode"
+	MaxDB            SiteName = "maxdb"
+	SvdosBrothers    SiteName = "svdosbrothers"
+	Electric         SiteName = "electric"
+	GlobalParadise   SiteName = "globalparadise"
+	SavageServidores SiteName = "savageservidores"
+	CSIServers       SiteName = "csiservers"
+	LBGaming         SiteName = "lbgaming"
+	FluxTF           SiteName = "fluxtf"
+	DarkPyro         SiteName = "darkpyro"
+	OpstOnline       SiteName = "opstonline"
+	BouncyBall       SiteName = "bouncyball"
+	FurryPound       SiteName = "furrypound"
+	RetroServers     SiteName = "retroservers"
+	SwapShop         SiteName = "swapshop"
+	ECJ              SiteName = "ecj"
+	JumpAcademy      SiteName = "jumpacademy"
+	TF2Ro            SiteName = "tf2ro"
+	SameTeem         SiteName = "sameteem"
+	PowerFPS         SiteName = "powerfps"
+	SevenMau         SiteName = "7mau"
+	GhostCap         SiteName = "ghostcap"
+	Spectre          SiteName = "spectre"
+	DreamFire        SiteName = "dreamfire"
+	Setti            SiteName = "setti"
+	GunServer        SiteName = "gunserver"
+	HellClan         SiteName = "hellclan"
+	Sneaks           SiteName = "sneaks"
+	Nide             SiteName = "nide"
+	AstraMania       SiteName = "astramania"
+	TF2Maps          SiteName = "tf2maps"
+	PetrolTF         SiteName = "petroltf"
+	VaticanCity      SiteName = "vaticancity"
+	LazyNeer         SiteName = "lazyneer"
+	TheVille         SiteName = "theville"
+	Oreon            SiteName = "oreon"
+	TriggerHappy     SiteName = "triggerhappy"
+	Defusero         SiteName = "defusero"
+	Tawerna          SiteName = "tawerna"
+	TitanTF          SiteName = "titan"
+	DiscFF           SiteName = "discff"
+	Otaku            SiteName = "otaku"
+	AMSGaming        SiteName = "amsgaming"
+	BaitedCommunity  SiteName = "baitedcommunity"
+	CedaPug          SiteName = "cedapug"
+	GameSites        SiteName = "gamesites"
+	BachuruServas    SiteName = "bachuruservas"
+	Bierwiese        SiteName = "bierwiese"
+	AceKill          SiteName = "acekill"
+	Magyarhns        SiteName = "magyarhns"
+	GamesTown        SiteName = "gamestown"
+	ProGamesZet      SiteName = "progameszet"
+	G44              SiteName = "g44"
+	CuteProject      SiteName = "cuteproject"
+	PhoenixSource    SiteName = "phoenixsource"
+	SlavonServer     SiteName = "slavonserver"
+	GetSome          SiteName = "getsome"
+	Rushy            SiteName = "rushy"
+	MoeVsMachine     SiteName = "moevsmachine"
+	Prwh             SiteName = "prwh"
+	Vortex           SiteName = "vortex"
+	Casualness       SiteName = "casualness"
+	RandomTF2        SiteName = "randomtf2"
+	PlayersRo        SiteName = "playesro"
+	EOTLGaming       SiteName = "eotlgaming"
+	BioCrafting      SiteName = "biocrafting"
+	BigBangGamers    SiteName = "bigbanggamers"
+	EpicZone         SiteName = "epiczone"
+	Zubat            SiteName = "zubat"
+	Lunario          SiteName = "lunario"
+)
+
 type EconBanState int
 
 const (
@@ -70,7 +167,7 @@ type Player struct {
 
 type SbBanRecord struct {
 	BanID       int           `json:"ban_id"`
-	SiteName    string        `json:"site_name"`
+	SiteName    SiteName      `json:"site_name"`
 	SiteID      int           `json:"site_id"`
 	PersonaName string        `json:"persona_name"`
 	SteamID     steamid.SID64 `json:"steam_id"`
@@ -81,7 +178,7 @@ type SbBanRecord struct {
 }
 
 type SbSite struct {
-	SiteID int    `json:"site_id"`
-	Name   string `json:"name"`
+	SiteID int      `json:"site_id"`
+	Name   SiteName `json:"name"`
 	TimeStamped
 }

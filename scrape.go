@@ -158,7 +158,7 @@ func (r *sbRecord) setSteam(value string) {
 
 type sbScraper struct {
 	*colly.Collector
-	name      string
+	name      models.SiteName
 	theme     string
 	log       *zap.Logger
 	curPage   int
@@ -228,7 +228,8 @@ func createScrapers(logger *zap.Logger, cacheDir string) ([]*sbScraper, error) {
 }
 
 func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
-	scraper.log.Info("Starting scrape job", zap.String("name", scraper.name), zap.String("theme", scraper.theme))
+	scraper.log.Info("Starting scrape job",
+		zap.String("name", string(scraper.name)), zap.String("theme", scraper.theme))
 
 	lastURL := ""
 	startTime := time.Now()
@@ -300,7 +301,7 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 		scraper.log.Error("Queue returned error", zap.Error(errRun))
 	}
 
-	scraper.log.Info("Completed scrape job", zap.String("name", scraper.name),
+	scraper.log.Info("Completed scrape job", zap.String("name", string(scraper.name)),
 		zap.Int("valid", len(scraper.results)), zap.Int("skipped", totalErrorCount),
 		zap.Duration("duration", time.Since(startTime)))
 }
@@ -338,9 +339,22 @@ func (log *scrapeLogger) Event(event *debug.Event) {
 
 const defaultStartPath = "index.php?p=banlist"
 
-//nolint:unparam
-func newScraper(logger *zap.Logger, cacheDir string, name string, baseURL string, startPath string, parser parserFunc,
-	nextURL nextURLFunc, parseTime parseTimeFunc, transport http.RoundTripper,
+func newScraperWithTransport(logger *zap.Logger, cacheDir string, name models.SiteName,
+	baseURL string, startPath string, parser parserFunc, nextURL nextURLFunc, parseTime parseTimeFunc,
+	transport http.RoundTripper,
+) (*sbScraper, error) {
+	scraper, errScraper := newScraper(logger, cacheDir, name, baseURL, startPath, parser, nextURL, parseTime)
+	if errScraper != nil {
+		return nil, errScraper
+	}
+
+	scraper.Collector.WithTransport(transport)
+
+	return scraper, nil
+}
+
+func newScraper(logger *zap.Logger, cacheDir string, name models.SiteName, baseURL string,
+	startPath string, parser parserFunc, nextURL nextURLFunc, parseTime parseTimeFunc,
 ) (*sbScraper, error) {
 	const (
 		randomDelay    = 5 * time.Second
@@ -353,7 +367,7 @@ func newScraper(logger *zap.Logger, cacheDir string, name string, baseURL string
 		return nil, errors.Wrap(errURL, "Failed to parse base url")
 	}
 
-	log := logger.Named(name)
+	log := logger.Named(string(name))
 	debugLogger := scrapeLogger{logger: log} //nolint:exhaustruct
 
 	reqQueue, errQueue := queue.New(1, &queue.InMemoryQueueStorage{MaxSize: maxQueueSize})
@@ -371,10 +385,6 @@ func newScraper(logger *zap.Logger, cacheDir string, name string, baseURL string
 		colly.Debugger(&debugLogger),
 		colly.AllowedDomains(parsedURL.Hostname()),
 	)
-
-	if transport != nil {
-		collector.WithTransport(transport)
-	}
 
 	scraper := sbScraper{ //nolint:exhaustruct
 		baseURL:   baseURL,
