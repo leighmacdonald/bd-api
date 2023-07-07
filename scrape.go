@@ -1077,6 +1077,7 @@ func crawlCloudflare(ctx context.Context, baseURL string, pages int, results cha
 		userMode = launcher.
 				NewUserMode().
 				Leakless(true).
+				Headless(true).
 				UserDataDir("cache/t"). // *must* be this?
 				Set("disable-default-apps").
 				Set("no-first-run").
