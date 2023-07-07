@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"path/filepath"
 	"regexp"
@@ -10,6 +11,8 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/launcher"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/debug"
 	"github.com/gocolly/colly/extensions"
@@ -1059,3 +1062,55 @@ func parseDefault(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFu
 //	}
 //	return nil, nil
 //}
+
+type cfResult struct {
+	page int
+	body string
+}
+
+func crawlCloudflare(ctx context.Context, baseURL string, pages int, results chan cfResult) error {
+	const (
+		slowTimeout = time.Second * 5
+	)
+
+	var (
+		userMode = launcher.
+				NewUserMode().
+				Leakless(true).
+				UserDataDir("cache/t"). // *must* be this?
+				Set("disable-default-apps").
+				Set("no-first-run").
+				MustLaunch()
+		browser = rod.
+			New().
+			SlowMotion(slowTimeout).
+			Context(ctx).
+			ControlURL(userMode).
+			MustConnect().
+			NoDefaultDevice()
+		page    *rod.Page
+		curPage = 1
+	)
+
+	for curPage <= pages {
+		URL := fmt.Sprintf(baseURL, curPage)
+		if page == nil {
+			page = browser.MustPage(URL)
+		} else {
+			page = page.MustNavigate(URL)
+		}
+
+		page.MustWaitLoad()
+
+		body, errBody := page.HTML()
+		if errBody != nil {
+			return errors.Wrap(errBody, "Failed to read HTML body")
+		}
+
+		results <- cfResult{page: curPage, body: body}
+
+		curPage++
+	}
+
+	return nil
+}

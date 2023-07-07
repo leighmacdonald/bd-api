@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -583,3 +584,36 @@ func TestParseFluxTFTime(t *testing.T) {
 //	require.NoError(t, errBans)
 //	require.True(t, len(bans) > 100)
 //}
+
+func TestCFBotProtection(t *testing.T) { //nolint:paralleltest
+	if os.Getenv("$DISPLAY") == "" {
+		t.Skip("No display found")
+	}
+
+	var (
+		results = make(chan cfResult)
+		pages   = 4
+	)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+
+	go func() {
+		if err := crawlCloudflare(ctx, "https://bans.wonderland.tf/index.php?p=banlist&page=%d", pages, results); err != nil {
+			t.Error("Error returned")
+		}
+	}()
+
+	var allResults []cfResult
+
+	for {
+		res := <-results
+
+		allResults = append(allResults, res)
+		if len(allResults) == pages {
+			break
+		}
+	}
+
+	require.True(t, len(allResults) == pages)
+}
