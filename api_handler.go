@@ -49,7 +49,19 @@ func getSteamIDS(ctx *gin.Context) (steamid.Collection, bool) {
 			return nil, false
 		}
 
-		validIds = append(validIds, sid64)
+		unique := true
+
+		for _, knownID := range validIds {
+			if knownID == sid64 {
+				unique = false
+
+				break
+			}
+		}
+
+		if unique {
+			validIds = append(validIds, sid64)
+		}
 	}
 
 	if len(validIds) > maxResults {
