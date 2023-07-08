@@ -3,12 +3,15 @@
 Simple api that provides a caching proxy for fetching various TF2 related data points from 3rd party apis and scraped
 site data.
 
-
 ## SourceBans scraper
 
 The scraper functionality is currently designed to work via establishing a socks5 proxy over ssh (`ssh -D`). The scraper 
 cycles through all the configured ssh endpoints when making requests.
 
+## API
+
+For more detailed info on the api requests/responses, please check out the [API docs](docs/API.md)
+        
 ## Configuration
 
 Config can be set using either the config file or environment vars. There are no cli args supported currently. 
@@ -41,15 +44,10 @@ You can override these values using matching environment vars with the `BDAPI` p
 
     $ BDAPI_STEAM_API_KEY=ANOTHERSTEAMAPIKEY ./bd-api
 
-## Pretty JSON
-
-If you make API requests with a browser, or otherwise set the `Accept: text/html` header, the JSON output will be encoded 
-as "prettified" HTML with syntax highlighting of the JSON data returned. All other cases will return standard JSON output.
-
 ## Development Workflow
 
 First, you will want to ensure you are using the filesystem cache, so you don't hammer the servers unnecessarily. See
-`scrape_test.go` for examples on using a local saved copy.
+[scrape_test.go](scrape_test.go) for examples on using a local saved copy.
 
 ```yml
 enable_cache: true
