@@ -49,7 +49,7 @@ func MustCreateLogger(conf appConfig) *zap.Logger {
 		panic("Failed to create log config")
 	}
 
-	return l.Named("gb")
+	return l.Named("bd")
 }
 
 func main() {
