@@ -468,7 +468,7 @@ func newVortexScraper(logger *zap.Logger, cacheDir string) (*sbScraper, error) {
 }
 
 func newCasualFunScraper(logger *zap.Logger, cacheDir string) (*sbScraper, error) {
-	return newScraper(logger, cacheDir, models.Casualness, "https://tf2-casual-fun.de/sourcebans/", "",
+	return newScraper(logger, cacheDir, models.CasualFun, "https://tf2-casual-fun.de/sourcebans/", "",
 		parseDefault, nextURLLast, parsePRWHTime)
 }
 

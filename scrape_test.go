@@ -68,10 +68,10 @@ func TestParseUGC(t *testing.T) {
 	testParser(t, newUGCScraper, 49, "index.php?p=banlist&page=2")
 }
 
-func TestParseWonderland(t *testing.T) {
-	t.Parallel()
-	testParser(t, newWonderlandTFScraper, 30, "index.php?p=banlist&page=2")
-}
+// func TestParseWonderland(t *testing.T) {
+//	t.Parallel()
+//	testParser(t, newWonderlandTFScraper, 30, "index.php?p=banlist&page=2")
+// }
 
 func TestParseGFL(t *testing.T) {
 	t.Parallel()

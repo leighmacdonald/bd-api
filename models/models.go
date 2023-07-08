@@ -94,7 +94,7 @@ const (
 	MoeVsMachine     Site = "moevsmachine"
 	Prwh             Site = "prwh"
 	Vortex           Site = "vortex"
-	Casualness       Site = "casualness"
+	CasualFun        Site = "casualfun"
 	RandomTF2        Site = "randomtf2"
 	PlayersRo        Site = "playesro"
 	EOTLGaming       Site = "eotlgaming"
