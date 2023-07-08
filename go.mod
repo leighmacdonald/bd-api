@@ -9,7 +9,6 @@ require (
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-rod/rod v0.113.4
-	github.com/go-rod/stealth v0.4.9
 	github.com/gocolly/colly v1.2.0
 	github.com/golang-migrate/migrate/v4 v4.16.2
 	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
@@ -24,8 +23,8 @@ require (
 	github.com/testcontainers/testcontainers-go v0.20.1
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.20.1
 	go.uber.org/zap v1.24.0
-	golang.org/x/crypto v0.10.0
-	golang.org/x/net v0.11.0
+	golang.org/x/crypto v0.11.0
+	golang.org/x/net v0.12.0
 	golang.org/x/sync v0.3.0
 )
 
@@ -105,16 +104,16 @@ require (
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	github.com/ysmood/fetchup v0.2.3 // indirect
 	github.com/ysmood/goob v0.4.0 // indirect
-	github.com/ysmood/got v0.34.1 // indirect
+	github.com/ysmood/got v0.34.2 // indirect
 	github.com/ysmood/gson v0.7.3 // indirect
 	github.com/ysmood/leakless v0.8.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/goleak v1.1.12 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/arch v0.3.0 // indirect
+	golang.org/x/arch v0.4.0 // indirect
 	golang.org/x/mod v0.10.0 // indirect
-	golang.org/x/sys v0.9.0 // indirect
-	golang.org/x/text v0.10.0 // indirect
+	golang.org/x/sys v0.10.0 // indirect
+	golang.org/x/text v0.11.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.9.3 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
