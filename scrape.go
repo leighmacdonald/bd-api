@@ -158,7 +158,7 @@ func (r *sbRecord) setSteam(value string) {
 
 type sbScraper struct {
 	*colly.Collector
-	name      models.SiteName
+	name      models.Site
 	theme     string
 	log       *zap.Logger
 	curPage   int
@@ -339,7 +339,7 @@ func (log *scrapeLogger) Event(event *debug.Event) {
 
 const defaultStartPath = "index.php?p=banlist"
 
-func newScraperWithTransport(logger *zap.Logger, cacheDir string, name models.SiteName,
+func newScraperWithTransport(logger *zap.Logger, cacheDir string, name models.Site,
 	baseURL string, startPath string, parser parserFunc, nextURL nextURLFunc, parseTime parseTimeFunc,
 	transport http.RoundTripper,
 ) (*sbScraper, error) {
@@ -353,7 +353,7 @@ func newScraperWithTransport(logger *zap.Logger, cacheDir string, name models.Si
 	return scraper, nil
 }
 
-func newScraper(logger *zap.Logger, cacheDir string, name models.SiteName, baseURL string,
+func newScraper(logger *zap.Logger, cacheDir string, name models.Site, baseURL string,
 	startPath string, parser parserFunc, nextURL nextURLFunc, parseTime parseTimeFunc,
 ) (*sbScraper, error) {
 	const (
@@ -1110,7 +1110,7 @@ func (t *cfTransport) Open(ctx context.Context) error {
 	launchURL, errLauncher := launcher.
 		NewUserMode().
 		Leakless(true).
-		Headless(true).
+		Headless(false).
 		UserDataDir("cache/t"). // *must* be this?
 		Set("disable-default-apps").
 		Set("no-first-run").

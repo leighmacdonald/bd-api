@@ -457,7 +457,7 @@ func (db *pgStore) playerRecordSave(ctx context.Context, record *PlayerRecord) e
 // type teamRecord struct {
 //}
 
-func NewSBSite(name models.SiteName) models.SbSite {
+func NewSBSite(name models.Site) models.SbSite {
 	createdOn := time.Now()
 
 	return models.SbSite{
@@ -567,7 +567,7 @@ func (db *pgStore) playerGetExpiredProfiles(ctx context.Context, limit int) ([]P
 	return records, nil
 }
 
-func (db *pgStore) sbSiteGetOrCreate(ctx context.Context, name models.SiteName, site *models.SbSite) error {
+func (db *pgStore) sbSiteGetOrCreate(ctx context.Context, name models.Site, site *models.SbSite) error {
 	query, args, errSQL := sb.
 		Select("sb_site_id", "name", "updated_on", "created_on").
 		From("sb_site").

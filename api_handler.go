@@ -62,18 +62,23 @@ func getSteamIDS(ctx *gin.Context) (steamid.Collection, bool) {
 }
 
 func (a *App) handleGetFriendList() gin.HandlerFunc {
+	encoder := newStyleEncoder()
+
 	return func(ctx *gin.Context) {
 		ids, ok := getSteamIDS(ctx)
 		if !ok {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, a.getSteamFriends(ctx, ids))
+		renderSyntax(ctx, encoder, a.getSteamFriends(ctx, ids), "profiles", &baseTmplArgs{ //nolint:exhaustruct
+			Title: "Steam Summaries",
+		})
 	}
 }
 
 func (a *App) handleGetSummary() gin.HandlerFunc {
 	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
+	encoder := newStyleEncoder()
 
 	return func(ctx *gin.Context) {
 		ids, ok := getSteamIDS(ctx)
@@ -90,12 +95,15 @@ func (a *App) handleGetSummary() gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, summaries)
+		renderSyntax(ctx, encoder, summaries, "profiles", &baseTmplArgs{ //nolint:exhaustruct
+			Title: "Steam Summaries",
+		})
 	}
 }
 
 func (a *App) handleGetBans() gin.HandlerFunc {
 	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
+	encoder := newStyleEncoder()
 
 	return func(ctx *gin.Context) {
 		ids, ok := getSteamIDS(ctx)
@@ -111,12 +119,15 @@ func (a *App) handleGetBans() gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, bans)
+		renderSyntax(ctx, encoder, bans, "profiles", &baseTmplArgs{ //nolint:exhaustruct
+			Title: "Steam Bans",
+		})
 	}
 }
 
 func (a *App) handleGetProfile() gin.HandlerFunc {
 	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
+	encoder := newStyleEncoder()
 
 	return func(ctx *gin.Context) {
 		ids, ok := getSteamIDS(ctx)
@@ -132,7 +143,9 @@ func (a *App) handleGetProfile() gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, profiles)
+		renderSyntax(ctx, encoder, profiles, "profiles", &baseTmplArgs{ //nolint:exhaustruct
+			Title: "Profiles",
+		})
 	}
 }
 

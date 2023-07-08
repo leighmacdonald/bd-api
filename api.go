@@ -130,6 +130,7 @@ func steamIDFromSlug(ctx *gin.Context) (steamid.SID64, bool) {
 	return sid64, true
 }
 
+//nolint:unparam
 func renderSyntax(ctx *gin.Context, encoder *styleEncoder, value any, tmpl string, args syntaxTemplate) {
 	if !strings.Contains(strings.ToLower(ctx.GetHeader("Accept")), "text/html") {
 		ctx.JSON(http.StatusOK, value)
