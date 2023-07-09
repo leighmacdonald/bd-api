@@ -274,7 +274,7 @@ func apiTestGetProfile(app *App) func(t *testing.T) {
 	}
 }
 
-func createTestSourcebansRecord(t *testing.T, app *App) models.SbBanRecord {
+func createTestSourcebansRecord(t *testing.T, app *App, sid64 steamid.SID64) models.SbBanRecord {
 	t.Helper()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
@@ -282,8 +282,8 @@ func createTestSourcebansRecord(t *testing.T, app *App) models.SbBanRecord {
 
 	curTime := time.Now()
 
-	player := newPlayerRecord(testIDb4nny)
-	if errPlayer := app.db.playerGetOrCreate(ctx, testIDb4nny, &player); errPlayer != nil {
+	player := newPlayerRecord(sid64)
+	if errPlayer := app.db.playerGetOrCreate(ctx, sid64, &player); errPlayer != nil {
 		t.Error(errPlayer)
 	}
 
@@ -292,7 +292,7 @@ func createTestSourcebansRecord(t *testing.T, app *App) models.SbBanRecord {
 		t.Error(errSave)
 	}
 
-	record := newRecord(site, testIDb4nny, "Name Goes Here", "Smelly",
+	record := newRecord(site, sid64, "Name Goes Here", "Smelly",
 		curTime.AddDate(-1, 0, 0), time.Hour*24, false)
 	record.CreatedOn = curTime
 
@@ -305,24 +305,38 @@ func createTestSourcebansRecord(t *testing.T, app *App) models.SbBanRecord {
 
 func apiTestGetSourcebans(app *App) func(t *testing.T) {
 	return func(t *testing.T) {
-		t.Run("success", func(t *testing.T) {
+		recordA := createTestSourcebansRecord(t, app, testIDb4nny)
+		recordB := createTestSourcebansRecord(t, app, testIDCamper)
+
+		t.Run("single", func(t *testing.T) {
 			t.Parallel()
 
 			var (
-				record     = createTestSourcebansRecord(t, app)
 				banRecords []models.SbBanRecord
-				path       = fmt.Sprintf("/sourcebans/%s", record.SteamID)
+				path       = fmt.Sprintf("/sourcebans/%s", recordA.SteamID)
 			)
 
 			require.NoError(t, testReq(t, app, http.MethodGet, path, &banRecords))
-			require.Equal(t, record.BanID, banRecords[0].BanID)
-			require.Equal(t, record.SiteName, banRecords[0].SiteName)
-			require.Equal(t, record.SiteID, banRecords[0].SiteID)
-			require.Equal(t, record.PersonaName, banRecords[0].PersonaName)
-			require.Equal(t, record.SteamID, banRecords[0].SteamID)
-			require.Equal(t, record.Reason, banRecords[0].Reason)
-			require.Equal(t, record.Duration, banRecords[0].Duration)
-			require.Equal(t, record.Permanent, banRecords[0].Permanent)
+			require.Equal(t, recordA.BanID, banRecords[0].BanID)
+			require.Equal(t, recordA.SiteName, banRecords[0].SiteName)
+			require.Equal(t, recordA.SiteID, banRecords[0].SiteID)
+			require.Equal(t, recordA.PersonaName, banRecords[0].PersonaName)
+			require.Equal(t, recordA.SteamID, banRecords[0].SteamID)
+			require.Equal(t, recordA.Reason, banRecords[0].Reason)
+			require.Equal(t, recordA.Duration, banRecords[0].Duration)
+			require.Equal(t, recordA.Permanent, banRecords[0].Permanent)
+		})
+		t.Run("multi", func(t *testing.T) {
+			t.Parallel()
+
+			var (
+				banRecords BanRecordMap
+				path       = fmt.Sprintf("/sourcebans?steamids=%s",
+					SteamIDStringList(steamid.Collection{recordA.SteamID, recordB.SteamID}))
+			)
+
+			require.NoError(t, testReq(t, app, http.MethodGet, path, &banRecords))
+			require.Equal(t, 2, len(banRecords))
 		})
 		t.Run("emptyResults", func(t *testing.T) {
 			t.Parallel()

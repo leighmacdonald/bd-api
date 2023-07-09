@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leighmacdonald/bd-api/models"
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
@@ -23,20 +24,22 @@ const (
 
 // Profile is a high level meta profile of several services.
 type Profile struct {
-	Summary   steamweb.PlayerSummary  `json:"summary"`
-	BanState  steamweb.PlayerBanState `json:"ban_state"`
-	Seasons   []Season                `json:"seasons"`
-	Friends   []steamweb.Friend       `json:"friends"`
-	LogsCount int64                   `json:"logs_count"`
+	Summary    steamweb.PlayerSummary  `json:"summary"`
+	BanState   steamweb.PlayerBanState `json:"ban_state"`
+	Seasons    []Season                `json:"seasons"`
+	Friends    []steamweb.Friend       `json:"friends"`
+	SourceBans []models.SbBanRecord    `json:"source_bans"`
+	LogsCount  int64                   `json:"logs_count"`
 }
 
 func (a *App) loadProfiles(ctx context.Context, steamIDs steamid.Collection) ([]Profile, error) {
 	var ( //nolint:prealloc
-		waitGroup = &sync.WaitGroup{}
-		summaries []steamweb.PlayerSummary
-		bans      []steamweb.PlayerBanState
-		profiles  []Profile
-		friends   map[steamid.SID64][]steamweb.Friend
+		waitGroup  = &sync.WaitGroup{}
+		summaries  []steamweb.PlayerSummary
+		bans       []steamweb.PlayerBanState
+		profiles   []Profile
+		friends    map[steamid.SID64][]steamweb.Friend
+		sourceBans BanRecordMap
 	)
 
 	if len(steamIDs) > maxResults {
@@ -45,6 +48,19 @@ func (a *App) loadProfiles(ctx context.Context, steamIDs steamid.Collection) ([]
 
 	localCtx, cancel := context.WithTimeout(ctx, apiTimeout)
 	defer cancel()
+
+	waitGroup.Add(1)
+
+	go func() {
+		defer waitGroup.Done()
+
+		sbRecords, errSB := a.db.sbGetBansBySID(localCtx, steamIDs)
+		if errSB != nil {
+			a.log.Error("Failed to load sourcebans records", zap.Error(errSB))
+		}
+
+		sourceBans = sbRecords
+	}()
 
 	waitGroup.Add(1)
 
@@ -105,9 +121,20 @@ func (a *App) loadProfiles(ctx context.Context, steamIDs steamid.Collection) ([]
 			}
 		}
 
+		if records, ok := sourceBans[sid]; ok {
+			profile.SourceBans = records
+		} else {
+			// Dont return null json values
+			profile.SourceBans = []models.SbBanRecord{}
+		}
+
 		if friendsList, ok := friends[sid]; ok {
 			profile.Friends = friendsList
+		} else {
+			profile.Friends = []steamweb.Friend{}
 		}
+
+		profile.Seasons = []Season{}
 
 		sort.Slice(profile.Seasons, func(i, j int) bool {
 			return profile.Seasons[i].DivisionInt < profile.Seasons[j].DivisionInt
@@ -160,8 +187,10 @@ func apiErrorHandler(logger *zap.Logger) gin.HandlerFunc {
 	}
 }
 
+const defaultTemplate = "index"
+
 func (a *App) createRouter() (*gin.Engine, error) {
-	tmplProfiles, errTmpl := template.New("profiles").Parse(`<!DOCTYPE html>
+	tmplProfiles, errTmpl := template.New(defaultTemplate).Parse(`<!DOCTYPE html>
 <html>
 <head> 
 	<title>{{ .Title }}</title>
@@ -182,6 +211,7 @@ func (a *App) createRouter() (*gin.Engine, error) {
 	engine.GET("/summary", a.handleGetSummary())
 	engine.GET("/profile", a.handleGetProfile())
 	engine.GET("/friends", a.handleGetFriendList())
+	engine.GET("/sourcebans", a.handleGetSourceBansMany())
 	engine.GET("/sourcebans/:steam_id", a.handleGetSourceBans())
 
 	return engine, nil

@@ -231,22 +231,26 @@ temporary restriction (eg: votekick -> 30min temp ban) or a ban reversal after a
 There is no consideration taken into the game being played when the user gets banned, so there is a mix of 
 several games in the data such as: TF2, CSGO, GMod, etc. 
 
-Example: http://localhost:8888/sourcebans/76561198976058084
+
+Return a map of multiple steam ids: http://localhost:8888/sourcebans?steamids=76561198976058084
+Return a list for a single steam id: http://localhost:8888/sourcebans/76561198976058084
 
 ```json
-[
+{
+  "76561198976058084": [
     {
-        "ban_id": 6723,
-        "site_name": "lazypurple",
-        "site_id": 61,
-        "persona_name": "Shrek",
-        "steam_id": "76561198976058084",
-        "reason": "griefing; bigotry",
-        "duration": 0,
-        "permanent": true,
-        "created_on": "2023-06-01T17:48:54Z"
+      "ban_id": 6723,
+      "site_name": "lazypurple",
+      "site_id": 61,
+      "persona_name": "Shrek",
+      "steam_id": "76561198976058084",
+      "reason": "griefing; bigotry",
+      "duration": 0,
+      "permanent": true,
+      "created_on": "2023-06-01T17:48:54Z"
     }
-]
+  ]
+}
 ```
 
 

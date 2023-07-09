@@ -725,7 +725,9 @@ func (db *pgStore) sbBanSave(ctx context.Context, record *models.SbBanRecord) er
 // Turn the saved usec back into seconds.
 const storeDurationSecondMulti = int64(time.Second)
 
-func (db *pgStore) sbGetBansBySID(ctx context.Context, sid64 steamid.SID64) ([]models.SbBanRecord, error) {
+type BanRecordMap map[steamid.SID64][]models.SbBanRecord
+
+func (db *pgStore) sbGetBansBySID(ctx context.Context, sid64 steamid.Collection) (BanRecordMap, error) {
 	query, args, errSQL := sb.
 		Select("b.sb_ban_id", "b.sb_site_id", "b.steam_id", "b.persona_name", "b.reason",
 			"b.created_on", "b.duration", "b.permanent", "s.name").
@@ -744,7 +746,11 @@ func (db *pgStore) sbGetBansBySID(ctx context.Context, sid64 steamid.SID64) ([]m
 
 	defer rows.Close()
 
-	var records []models.SbBanRecord
+	records := BanRecordMap{}
+
+	for _, sid := range sid64 {
+		records[sid] = []models.SbBanRecord{}
+	}
 
 	for rows.Next() {
 		var bRecord models.SbBanRecord
@@ -757,7 +763,11 @@ func (db *pgStore) sbGetBansBySID(ctx context.Context, sid64 steamid.SID64) ([]m
 
 		bRecord.Duration = time.Duration(duration * storeDurationSecondMulti)
 
-		records = append(records, bRecord)
+		records[bRecord.SteamID] = append(records[bRecord.SteamID], bRecord)
+	}
+
+	if rows.Err() != nil {
+		return nil, errors.Wrap(rows.Err(), "Rows returned error")
 	}
 
 	return records, nil

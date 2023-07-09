@@ -82,7 +82,7 @@ func (a *App) handleGetFriendList() gin.HandlerFunc {
 			return
 		}
 
-		renderSyntax(ctx, encoder, a.getSteamFriends(ctx, ids), "profiles", &baseTmplArgs{ //nolint:exhaustruct
+		renderSyntax(ctx, encoder, a.getSteamFriends(ctx, ids), defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Steam Summaries",
 		})
 	}
@@ -107,7 +107,7 @@ func (a *App) handleGetSummary() gin.HandlerFunc {
 			return
 		}
 
-		renderSyntax(ctx, encoder, summaries, "profiles", &baseTmplArgs{ //nolint:exhaustruct
+		renderSyntax(ctx, encoder, summaries, defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Steam Summaries",
 		})
 	}
@@ -131,7 +131,7 @@ func (a *App) handleGetBans() gin.HandlerFunc {
 			return
 		}
 
-		renderSyntax(ctx, encoder, bans, "profiles", &baseTmplArgs{ //nolint:exhaustruct
+		renderSyntax(ctx, encoder, bans, defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Steam Bans",
 		})
 	}
@@ -155,13 +155,38 @@ func (a *App) handleGetProfile() gin.HandlerFunc {
 			return
 		}
 
-		renderSyntax(ctx, encoder, profiles, "profiles", &baseTmplArgs{ //nolint:exhaustruct
+		renderSyntax(ctx, encoder, profiles, defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Profiles",
 		})
 	}
 }
 
+func (a *App) handleGetSourceBansMany() gin.HandlerFunc {
+	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
+	encoder := newStyleEncoder()
+
+	return func(ctx *gin.Context) {
+		ids, ok := getSteamIDS(ctx)
+		if !ok {
+			return
+		}
+
+		bans, errBans := a.db.sbGetBansBySID(ctx, ids)
+		if errBans != nil {
+			log.Error("Failed to query bans from database", zap.Error(errBans))
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
+
+			return
+		}
+
+		renderSyntax(ctx, encoder, bans, defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
+			Title: "Source Bans",
+		})
+	}
+}
+
 func (a *App) handleGetSourceBans() gin.HandlerFunc {
+	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
 	encoder := newStyleEncoder()
 
 	return func(ctx *gin.Context) {
@@ -170,20 +195,22 @@ func (a *App) handleGetSourceBans() gin.HandlerFunc {
 			return
 		}
 
-		bans, errBans := a.db.sbGetBansBySID(ctx, sid)
+		bans, errBans := a.db.sbGetBansBySID(ctx, steamid.Collection{sid})
 		if errBans != nil {
+			log.Error("Failed to query bans from database", zap.Error(errBans))
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
 
 			return
 		}
 
-		if bans == nil {
+		out, found := bans[sid]
+		if !found || out == nil {
 			// Return empty list instead of null
-			bans = []models.SbBanRecord{}
+			out = []models.SbBanRecord{}
 		}
 
-		renderSyntax(ctx, encoder, bans, "profiles", &baseTmplArgs{ //nolint:exhaustruct
-			Title: "source bans",
+		renderSyntax(ctx, encoder, out, defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
+			Title: "Source Bans",
 		})
 	}
 }
