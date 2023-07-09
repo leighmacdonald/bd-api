@@ -8,6 +8,8 @@ import (
 	"github.com/leighmacdonald/steamweb/v2"
 )
 
+// http://delfy.tk/sourcebans/index.php?p=banlist.
+
 type Site string
 
 const (

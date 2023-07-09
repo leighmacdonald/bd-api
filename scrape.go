@@ -193,7 +193,7 @@ func createScrapers(logger *zap.Logger, cacheDir string) ([]*sbScraper, error) {
 		newSirPleaseScraper, newSkialScraper, newSlavonServerScraper, newSneaksScraper, newSpaceShipScraper,
 		newSpectreScraper, newSvdosBrothersScraper, newSwapShopScraper, newTF2MapsScraper, newTF2ROScraper,
 		/*newTawernaScraper,*/ newTheVilleScraper, newTitanScraper, newTriggerHappyScraper, newUGCScraper,
-		newVaticanCityScraper, newVidyaGaemsScraper, newVortexScraper, newWonderlandTFScraper,
+		newVaticanCityScraper, newVidyaGaemsScraper, newVortexScraper, /*newWonderlandTFScraper*/
 		newZMBrasilScraper, newZubatScraper,
 	}
 
