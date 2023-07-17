@@ -98,23 +98,27 @@ func (a *App) getSteamBans(ctx context.Context, steamIDs steamid.Collection) ([]
 		}
 	}
 
-	newBans, errBans := steamweb.GetPlayerBans(ctx, missed)
-	if errBans != nil {
-		return nil, errors.Wrap(errBans, "Failed to fetch ban state")
-	}
-
-	for _, ban := range newBans {
-		body, errMarshal := json.Marshal(ban)
-		if errMarshal != nil {
-			return nil, errors.Wrap(errMarshal, "Failed to marshal ban state")
+	if len(missed) > 0 {
+		newBans, errBans := steamweb.GetPlayerBans(ctx, missed)
+		if errBans != nil {
+			return nil, errors.Wrap(errBans, "Failed to fetch ban state")
 		}
 
-		if errSet := a.cache.set(makeKey(KeyBans, ban.SteamID), bytes.NewReader(body)); errSet != nil {
-			a.log.Error("Failed to update cache", zap.Error(errSet))
+		for _, ban := range newBans {
+			body, errMarshal := json.Marshal(ban)
+			if errMarshal != nil {
+				return nil, errors.Wrap(errMarshal, "Failed to marshal ban state")
+			}
+
+			if errSet := a.cache.set(makeKey(KeyBans, ban.SteamID), bytes.NewReader(body)); errSet != nil {
+				a.log.Error("Failed to update cache", zap.Error(errSet))
+			}
 		}
+
+		banStates = append(banStates, newBans...)
 	}
 
-	return append(banStates, newBans...), nil
+	return banStates, nil
 }
 
 func (a *App) getSteamSummaries(ctx context.Context, steamIDs steamid.Collection) ([]steamweb.PlayerSummary, error) {
@@ -140,23 +144,27 @@ func (a *App) getSteamSummaries(ctx context.Context, steamIDs steamid.Collection
 		}
 	}
 
-	newSummaries, errSummaries := steamweb.PlayerSummaries(ctx, missed)
-	if errSummaries != nil {
-		return nil, errors.Wrap(errSummaries, "Failed to fetch summaries")
-	}
-
-	for _, summary := range newSummaries {
-		body, errMarshal := json.Marshal(summary)
-		if errMarshal != nil {
-			return nil, errors.Wrap(errMarshal, "Failed to marshal friends")
+	if len(missed) > 0 {
+		newSummaries, errSummaries := steamweb.PlayerSummaries(ctx, missed)
+		if errSummaries != nil {
+			return nil, errors.Wrap(errSummaries, "Failed to fetch summaries")
 		}
 
-		if errSet := a.cache.set(makeKey(KeySummary, summary.SteamID), bytes.NewReader(body)); errSet != nil {
-			a.log.Error("Failed to update cache", zap.Error(errSet))
+		for _, summary := range newSummaries {
+			body, errMarshal := json.Marshal(summary)
+			if errMarshal != nil {
+				return nil, errors.Wrap(errMarshal, "Failed to marshal friends")
+			}
+
+			if errSet := a.cache.set(makeKey(KeySummary, summary.SteamID), bytes.NewReader(body)); errSet != nil {
+				a.log.Error("Failed to update cache", zap.Error(errSet))
+			}
 		}
+
+		summaries = append(summaries, newSummaries...)
 	}
 
-	return append(summaries, newSummaries...), nil
+	return summaries, nil
 }
 
 func (a *App) profileUpdater(ctx context.Context) {
