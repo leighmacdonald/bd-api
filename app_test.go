@@ -22,7 +22,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func newTestDB(ctx context.Context) (string, *postgres.PostgresContainer) {
+func newTestDB(ctx context.Context) (string, *postgres.PostgresContainer, error) {
 	const testInfo = "bdapi-test"
 	username, password, dbName := testInfo, testInfo, testInfo
 	cont, errContainer := postgres.RunContainer(
@@ -37,13 +37,13 @@ func newTestDB(ctx context.Context) (string, *postgres.PostgresContainer) {
 	)
 
 	if errContainer != nil {
-		panic(errContainer)
+		return "", nil, errors.Wrap(errContainer, "Failed to bring up test container")
 	}
 
 	port, _ := cont.MappedPort(ctx, "5432")
 	dsn := fmt.Sprintf("postgresql://%s:%s@localhost:%s/%s", username, password, port.Port(), dbName)
 
-	return dsn, cont
+	return dsn, cont, nil
 }
 
 func TestApp(t *testing.T) {
@@ -60,7 +60,12 @@ func TestApp(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	dsn, databaseContainer := newTestDB(ctx)
+
+	dsn, databaseContainer, errDB := newTestDB(ctx)
+	if errDB != nil {
+		t.Skipf("Failed to bring up testcontainer db: %v", errDB)
+	}
+
 	conf := appConfig{
 		ListenAddr:               "",
 		SteamAPIKey:              "",

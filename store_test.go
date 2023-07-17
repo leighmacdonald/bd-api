@@ -23,7 +23,11 @@ func TestStore(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	dsn, databaseContainer := newTestDB(ctx)
+	dsn, databaseContainer, errDB := newTestDB(ctx)
+
+	if errDB != nil {
+		t.Skipf("Failed to bring up testcontainer db: %v", errDB)
+	}
 
 	t.Cleanup(func() {
 		if errTerm := databaseContainer.Terminate(ctx); errTerm != nil {

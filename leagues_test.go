@@ -52,6 +52,11 @@ func TestRGL(t *testing.T) {
 	t.Parallel()
 
 	seasons, errSeasons := getRGL(context.Background(), steamid.New(76561198084134025))
+	if errSeasons != nil {
+		// Dumb hack because rgl api often just doesn't work on the first call...
+		seasons, errSeasons = getRGL(context.Background(), steamid.New(76561198084134025))
+	}
+
 	require.NoError(t, errSeasons)
 	require.LessOrEqual(t, 1, len(seasons))
 }
