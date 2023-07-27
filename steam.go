@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/leighmacdonald/rgl"
 	"sync"
 	"time"
 
@@ -121,6 +122,67 @@ func (a *App) getSteamBans(ctx context.Context, steamIDs steamid.Collection) ([]
 	return banStates, nil
 }
 
+func (a *App) getCompHistory(ctx context.Context, steamIDs steamid.Collection) compMap {
+	var (
+		results   = compMap{}
+		missed    steamid.Collection
+		startTime = time.Now()
+	)
+
+	for _, steamID := range steamIDs {
+		var seasons []Season
+		missed = append(missed, steamID)
+		continue
+		seasonsBody, errCache := a.cache.get(makeKey(KeyRGL, steamID))
+		if errCache != nil {
+			if errors.Is(errCache, errCacheExpired) {
+				missed = append(missed, steamID)
+
+				continue
+			}
+		}
+
+		if errUnmarshal := json.Unmarshal(seasonsBody, &seasons); errUnmarshal != nil {
+			a.log.Error("Failed to unmarshal cached result", zap.Error(errUnmarshal))
+
+			missed = append(missed, steamID)
+
+			continue
+		}
+
+		results[steamID] = append(results[steamID], seasons...)
+	}
+
+	for _, steamID := range missed {
+		rglSeasons, errRGL := getRGL(ctx, a.log.Named("rgl").With(zap.String("steam_id", steamID.String())), steamID)
+		if errRGL != nil {
+			if errors.Is(errRGL, rgl.ErrRateLimit) {
+				a.log.Warn("API Rate limited")
+			} else {
+				a.log.Error("Failed to fetch rgl data", zap.Error(errRGL))
+			}
+			continue
+		}
+
+		body, errMarshal := json.Marshal(rglSeasons)
+		if errMarshal != nil {
+			a.log.Error("Failed to marshal rgl data", zap.Error(errRGL))
+
+			continue
+		}
+
+		if errSet := a.cache.set(makeKey(KeyRGL, steamID), bytes.NewReader(body)); errSet != nil {
+			a.log.Error("Failed to update cache", zap.Error(errSet))
+		}
+
+		results[steamID] = append(results[steamID], rglSeasons...)
+	}
+
+	a.log.Debug("RGL Query time", zap.Duration("duration", time.Since(startTime)))
+
+	return results
+}
+
 func (a *App) getSteamSummaries(ctx context.Context, steamIDs steamid.Collection) ([]steamweb.PlayerSummary, error) {
 	var (
 		summaries []steamweb.PlayerSummary
@@ -159,6 +221,7 @@ func (a *App) getSteamSummaries(ctx context.Context, steamIDs steamid.Collection
 			if errSet := a.cache.set(makeKey(KeySummary, summary.SteamID), bytes.NewReader(body)); errSet != nil {
 				a.log.Error("Failed to update cache", zap.Error(errSet))
 			}
+
 		}
 
 		summaries = append(summaries, newSummaries...)

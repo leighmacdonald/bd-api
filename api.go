@@ -210,6 +210,7 @@ func (a *App) createRouter() (*gin.Engine, error) {
 	engine.GET("/bans", a.handleGetBans())
 	engine.GET("/summary", a.handleGetSummary())
 	engine.GET("/profile", a.handleGetProfile())
+	engine.GET("/comp", a.handleGetComp())
 	engine.GET("/friends", a.handleGetFriendList())
 	engine.GET("/sourcebans", a.handleGetSourceBansMany())
 	engine.GET("/sourcebans/:steam_id", a.handleGetSourceBans())

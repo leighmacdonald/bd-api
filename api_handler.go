@@ -87,6 +87,30 @@ func (a *App) handleGetFriendList() gin.HandlerFunc {
 		})
 	}
 }
+func (a *App) handleGetComp() gin.HandlerFunc {
+	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
+	encoder := newStyleEncoder()
+
+	return func(ctx *gin.Context) {
+		ids, ok := getSteamIDS(ctx)
+		if !ok {
+			return
+		}
+
+		compHistory := a.getCompHistory(ctx, ids)
+
+		if len(ids) != len(compHistory) {
+			log.Warn("Failed to fully fetch comp history")
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrLoadFailed)
+
+			return
+		}
+
+		renderSyntax(ctx, encoder, compHistory, defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
+			Title: "Comp History",
+		})
+	}
+}
 
 func (a *App) handleGetSummary() gin.HandlerFunc {
 	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())

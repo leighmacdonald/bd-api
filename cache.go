@@ -21,6 +21,7 @@ const (
 	KeySummary CacheKeyType = "summary"
 	KeyBans    CacheKeyType = "bans"
 	KeyFriends CacheKeyType = "friends"
+	KeyRGL                  = "rgl"
 )
 
 func makeKey(keyType CacheKeyType, sid64 steamid.SID64) string {

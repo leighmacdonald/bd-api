@@ -1169,7 +1169,7 @@ func (t *cfTransport) fetch(url string) (*cfResult, error) {
 		t.page = t.page.MustNavigate(url)
 	}
 
-	if errWait := t.page.WaitStable(t.waitStableTime, t.similarity); errWait != nil {
+	if errWait := t.page.WaitStable(t.waitStableTime); errWait != nil {
 		return nil, errors.Wrap(errWait, "Failed to wait for content to load")
 	}
 

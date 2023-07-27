@@ -22,7 +22,7 @@ type App struct {
 func NewApp(logger *zap.Logger, config appConfig, database *pgStore, cache cache, proxyManager *proxyManager) *App {
 	application := &App{
 		config:   config,
-		log:      logger.Named("api"),
+		log:      logger,
 		db:       database,
 		cache:    cache,
 		pm:       proxyManager,
