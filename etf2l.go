@@ -1,75 +1,56 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"io"
-	"sort"
-
 	"github.com/leighmacdonald/steamid/v3/steamid"
-	"github.com/pkg/errors"
+	"sort"
+	"time"
 )
 
-type comp struct {
-	Category    string `json:"category"`
-	Competition string `json:"competition"`
-	Division    struct {
-		Name string      `json:"name"`
-		Tier interface{} `json:"tier"`
-	} `json:"division"`
-	URL string `json:"url"`
+type TimeStamped struct {
+	CreatedOn time.Time `json:"created_on"`
+	UpdatedOn time.Time `json:"updated_on"`
 }
 
-type etf2lPlayer struct {
-	Player struct {
-		Bans       interface{} `json:"bans"`
-		Classes    []string    `json:"classes"`
-		Country    string      `json:"country"`
-		ID         int         `json:"id"`
-		Name       string      `json:"name"`
-		Registered int         `json:"registered"`
-		Steam      struct {
-			Avatar string `json:"avatar"`
-			ID     string `json:"id"`
-			ID3    string `json:"id3"`
-			ID64   string `json:"id64"`
-		} `json:"steam"`
-		Teams []struct {
-			Competitions map[string]comp `json:"competitions,omitempty"`
-			Country      string          `json:"country"`
-			Homepage     string          `json:"homepage"`
-			ID           int             `json:"id"`
-			Irc          struct {
-				Channel interface{} `json:"channel"`
-				Network interface{} `json:"network"`
-			} `json:"irc"`
-			Name   string `json:"name"`
-			Server string `json:"server"`
-			Steam  struct {
-				Avatar string `json:"avatar"`
-				Group  string `json:"group"`
-			} `json:"steam"`
-			Tag  string `json:"tag"`
-			Type string `json:"type"`
-			Urls struct {
-				Matches   string `json:"matches"`
-				Results   string `json:"results"`
-				Self      string `json:"self"`
-				Transfers string `json:"transfers"`
-			} `json:"urls"`
-		} `json:"teams"`
-		Title string `json:"title"`
-		Urls  struct {
-			Results   string `json:"results"`
-			Self      string `json:"self"`
-			Transfers string `json:"transfers"`
-		} `json:"urls"`
-	} `json:"player"`
-	Status struct {
-		Code    int    `json:"code"`
-		Message string `json:"message"`
-	} `json:"status"`
+func newTimeStamped() TimeStamped {
+	t0 := time.Now()
+	return TimeStamped{UpdatedOn: t0, CreatedOn: t0}
+}
+
+type ETF2LPlayer struct {
+	SteamID steamid.SID64 `json:"steam_id"`
+	ID      int           `json:"id"`
+	Name    string        `json:"name"`
+	Country string        `json:"country"`
+	TimeStamped
+}
+
+type ETF2LBan struct {
+	SteamID   steamid.SID64 `json:"steam_id"`
+	StartDate time.Time     `json:"start_date"`
+	EndDate   time.Time     `json:"end_date"`
+	Reason    string        `json:"reason"`
+	TimeStamped
+}
+
+type ETF2LTeam struct {
+	TeamID   int           `json:"team_id"`
+	SteamID  steamid.SID64 `json:"steam_id"`
+	ID       int           `json:"id"`
+	Name     string        `json:"name"`
+	Title    string        `json:"title"`
+	Country  string        `json:"country"`
+	TeamType string        `json:"teamType"`
+	TimeStamped
+}
+
+type ETF2LCompetition struct {
+	CompetitionID int    `json:"competition_id"`
+	TeamID        int    `json:"team_id"`
+	Category      string `json:"category"`
+	Competition   string `json:"competition"`
+	DivisionName  string `json:"division_name"`
+	DivisionTier  int    `json:"division_tier"`
+	TimeStamped
 }
 
 func sortSeasons(seasons []Season) []Season {
@@ -78,85 +59,4 @@ func sortSeasons(seasons []Season) []Season {
 	})
 
 	return seasons
-}
-
-func getETF2L(ctx context.Context, sid steamid.SID64) ([]Season, error) {
-	url := fmt.Sprintf("https://api.etf2l.org/player/%s.json", sid)
-
-	var player etf2lPlayer
-
-	resp, errGet := get(ctx, url, nil)
-	if errGet != nil {
-		return nil, errGet
-	}
-
-	body, errRead := io.ReadAll(resp.Body)
-	if errRead != nil {
-		return nil, errors.Wrap(errRead, "Failed to read response body")
-	}
-
-	defer logCloser(resp.Body)
-
-	if errUnmarshal := json.Unmarshal(body, &player); errUnmarshal != nil {
-		return nil, errors.Wrap(errUnmarshal, "Failed to decode response body")
-	}
-
-	return parseETF2L(player), nil
-}
-
-func parseETF2L(player etf2lPlayer) []Season {
-	var seasons []Season
-
-	for _, team := range player.Player.Teams {
-		for _, competition := range team.Competitions {
-			var (
-				div    = UnknownDivision
-				divStr = competition.Competition
-				format = "N/A"
-			)
-
-			if competition.Division.Name != "" {
-				switch competition.Division.Name {
-				case "Open":
-					div = ETF2LOpen
-					divStr = "Open"
-				case "Mid":
-					div = ETF2LMid
-					divStr = "Mid"
-				case "Division 4":
-					div = ETF2LLow
-					divStr = "Low"
-				case "Division 3":
-					div = ETF2LMid
-					divStr = "Div 3"
-				case "Division 2":
-					div = ETF2LDiv2
-					divStr = "Div 2"
-				case "Division 1":
-					div = ETF2LDiv1
-					divStr = "Div 1"
-				case "Premiership":
-					div = ETF2LPremiership
-					divStr = "Premiership"
-				}
-			}
-
-			switch team.Type {
-			case "Highlander":
-				format = "Highlander"
-			case "6on6":
-				format = "6s"
-			}
-
-			seasons = append(seasons, Season{
-				League:      "ETF2L",
-				Division:    divStr,
-				DivisionInt: div,
-				Format:      format,
-				TeamName:    team.Name,
-			})
-		}
-	}
-
-	return sortSeasons(seasons)
 }

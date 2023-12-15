@@ -249,7 +249,7 @@ func (a *App) profileUpdater(ctx context.Context) {
 		case <-triggerUpdate:
 			var expiredIds steamid.Collection
 
-			expiredProfiles, errProfiles := a.db.playerGetExpiredProfiles(ctx, maxQueuedCount)
+			expiredProfiles, errProfiles := playerGetExpiredProfiles(ctx, a.db, maxQueuedCount)
 			if errProfiles != nil {
 				a.log.Error("Failed to fetch expired profiles", zap.Error(errProfiles))
 			}
@@ -259,7 +259,7 @@ func (a *App) profileUpdater(ctx context.Context) {
 			for len(expiredProfiles) < maxQueuedCount {
 				for _, sid64 := range updateQueue {
 					var pr PlayerRecord
-					if errQueued := a.db.playerGetOrCreate(ctx, sid64, &pr); errQueued != nil {
+					if errQueued := playerGetOrCreate(ctx, a.db, sid64, &pr); errQueued != nil {
 						continue
 					}
 
@@ -310,7 +310,7 @@ func (a *App) profileUpdater(ctx context.Context) {
 					}
 				}
 
-				if errSave := a.db.playerRecordSave(ctx, &prof); errSave != nil {
+				if errSave := playerRecordSave(ctx, a.db, &prof); errSave != nil {
 					a.log.Error("Failed to update profile", zap.Int64("sid", prof.SteamID.Int64()), zap.Error(errSave))
 				}
 			}

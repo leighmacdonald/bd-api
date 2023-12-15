@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"github.com/leighmacdonald/etf2l"
 	"net/http"
 	"time"
 
@@ -32,8 +33,10 @@ var (
 	//go:embed migrations
 	migrations embed.FS
 
-	errDuplicate = errors.New("Duplicate entity")
-	errNoRows    = errors.New("No rows")
+	// ErrNoResult is returned on successful queries which return no rows.
+	ErrNoResult = errors.New("No results found")
+	// ErrDuplicate is returned when a duplicate row result is attempted to be inserted.
+	ErrDuplicate = errors.New("Duplicate entity")
 )
 
 func newStore(ctx context.Context, logger *zap.Logger, dsn string) (*pgStore, error) {
@@ -121,7 +124,7 @@ func (db *pgStore) migrate() error {
 }
 
 type PlayerRecord struct {
-	models.Player
+	models.SteamPlayer
 	isNewRecord bool
 }
 
@@ -170,7 +173,7 @@ func newPlayerRecord(sid64 steamid.SID64) PlayerRecord {
 	createdOn := time.Now()
 
 	return PlayerRecord{
-		Player: models.Player{
+		SteamPlayer: models.SteamPlayer{
 			SteamID:                  sid64,
 			CommunityVisibilityState: steamweb.VisibilityPrivate,
 			ProfileState:             steamweb.ProfileStateNew,
@@ -258,7 +261,7 @@ func playerVanitySave(ctx context.Context, transaction pgx.Tx, record *PlayerRec
 }
 
 //nolint:dupl
-func (db *pgStore) playerGetNames(ctx context.Context, sid64 steamid.SID64) ([]models.PlayerNameRecord, error) {
+func playerGetNames(ctx context.Context, db *pgStore, sid64 steamid.SID64) ([]models.PlayerNameRecord, error) {
 	query, args, errSQL := sb.
 		Select("name_id", "persona_name", "created_on").
 		From("player_names").
@@ -290,7 +293,7 @@ func (db *pgStore) playerGetNames(ctx context.Context, sid64 steamid.SID64) ([]m
 }
 
 //nolint:dupl
-func (db *pgStore) playerGetAvatars(ctx context.Context, sid64 steamid.SID64) ([]models.PlayerAvatarRecord, error) {
+func playerGetAvatars(ctx context.Context, db *pgStore, sid64 steamid.SID64) ([]models.PlayerAvatarRecord, error) {
 	query, args, errSQL := sb.
 		Select("avatar_id", "avatar_hash", "created_on").
 		From("player_avatars").
@@ -321,7 +324,7 @@ func (db *pgStore) playerGetAvatars(ctx context.Context, sid64 steamid.SID64) ([
 	return records, nil
 }
 
-func (db *pgStore) playerGetVanityNames(ctx context.Context, sid64 steamid.SID64) ([]models.PlayerVanityRecord, error) {
+func playerGetVanityNames(ctx context.Context, db *pgStore, sid64 steamid.SID64) ([]models.PlayerVanityRecord, error) {
 	query, args, errSQL := sb.
 		Select("vanity_id", "vanity", "created_on").
 		From("player_vanity").
@@ -352,7 +355,7 @@ func (db *pgStore) playerGetVanityNames(ctx context.Context, sid64 steamid.SID64
 	return records, nil
 }
 
-func (db *pgStore) playerRecordSave(ctx context.Context, record *PlayerRecord) error {
+func playerRecordSave(ctx context.Context, db *pgStore, record *PlayerRecord) error {
 	success := false
 
 	transaction, errTx := db.pool.BeginTx(ctx, pgx.TxOptions{}) //nolint:exhaustruct
@@ -489,7 +492,7 @@ func newRecord(site models.SbSite, sid64 steamid.SID64, personaName string, reas
 	}
 }
 
-func (db *pgStore) playerGetOrCreate(ctx context.Context, sid64 steamid.SID64, record *PlayerRecord) error {
+func playerGetOrCreate(ctx context.Context, db *pgStore, sid64 steamid.SID64, record *PlayerRecord) error {
 	query, args, errSQL := sb.
 		Select("steam_id", "community_visibility_state", "profile_state",
 			"persona_name", "vanity", "avatar_hash", "persona_state", "real_name", "time_created", "loc_country_code",
@@ -512,8 +515,8 @@ func (db *pgStore) playerGetOrCreate(ctx context.Context, sid64 steamid.SID64, r
 			&record.LogsTFUpdatedOn, &record.TimeStamped.UpdatedOn, &record.TimeStamped.CreatedOn)
 	if errQuery != nil {
 		wrappedErr := dbErr(errQuery, "Failed to query player")
-		if errors.Is(wrappedErr, errNoRows) {
-			return db.playerRecordSave(ctx, record)
+		if errors.Is(wrappedErr, ErrNoResult) {
+			return playerRecordSave(ctx, db, record)
 		}
 
 		return wrappedErr
@@ -524,7 +527,7 @@ func (db *pgStore) playerGetOrCreate(ctx context.Context, sid64 steamid.SID64, r
 	return nil
 }
 
-func (db *pgStore) playerGetExpiredProfiles(ctx context.Context, limit int) ([]PlayerRecord, error) {
+func playerGetExpiredProfiles(ctx context.Context, db *pgStore, limit int) ([]PlayerRecord, error) {
 	query, args, errSQL := sb.
 		Select("steam_id", "community_visibility_state", "profile_state",
 			"persona_name", "vanity", "avatar_hash", "persona_state", "real_name", "time_created", "loc_country_code",
@@ -567,7 +570,7 @@ func (db *pgStore) playerGetExpiredProfiles(ctx context.Context, limit int) ([]P
 	return records, nil
 }
 
-func (db *pgStore) sbSiteGetOrCreate(ctx context.Context, name models.Site, site *models.SbSite) error {
+func sbSiteGetOrCreate(ctx context.Context, db *pgStore, name models.Site, site *models.SbSite) error {
 	query, args, errSQL := sb.
 		Select("sb_site_id", "name", "updated_on", "created_on").
 		From("sb_site").
@@ -581,10 +584,10 @@ func (db *pgStore) sbSiteGetOrCreate(ctx context.Context, name models.Site, site
 		QueryRow(ctx, query, args...).
 		Scan(&site.SiteID, &site.Name, &site.UpdatedOn, &site.CreatedOn); errQuery != nil {
 		wrappedErr := dbErr(errQuery, "Failed to query sourcebans site")
-		if errors.Is(wrappedErr, errNoRows) {
+		if errors.Is(wrappedErr, ErrNoResult) {
 			site.Name = name
 
-			return db.sbSiteSave(ctx, site)
+			return sbSiteSave(ctx, db, site)
 		}
 
 		return wrappedErr
@@ -593,7 +596,7 @@ func (db *pgStore) sbSiteGetOrCreate(ctx context.Context, name models.Site, site
 	return nil
 }
 
-func (db *pgStore) sbSiteSave(ctx context.Context, site *models.SbSite) error {
+func sbSiteSave(ctx context.Context, db *pgStore, site *models.SbSite) error {
 	site.UpdatedOn = time.Now()
 
 	if site.SiteID <= 0 {
@@ -632,7 +635,7 @@ func (db *pgStore) sbSiteSave(ctx context.Context, site *models.SbSite) error {
 	return nil
 }
 
-func (db *pgStore) sbSiteGet(ctx context.Context, siteID int, site *models.SbSite) error {
+func sbSiteGet(ctx context.Context, db *pgStore, siteID int, site *models.SbSite) error {
 	query, args, errSQL := sb.
 		Select("sb_site_id", "name", "updated_on", "created_on").
 		From("sb_site").
@@ -650,7 +653,7 @@ func (db *pgStore) sbSiteGet(ctx context.Context, siteID int, site *models.SbSit
 	return nil
 }
 
-func (db *pgStore) sbSiteDelete(ctx context.Context, siteID int) error {
+func sbSiteDelete(ctx context.Context, db *pgStore, siteID int) error {
 	query, args, errSQL := sb.
 		Delete("sb_site").
 		Where(sq.Eq{"sb_site_id": siteID}).
@@ -670,16 +673,16 @@ func dbErr(err error, wrapMsg string) error {
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {
 		if pgErr.Code == pgerrcode.UniqueViolation {
-			return errors.Wrap(errDuplicate, wrapMsg)
+			return errors.Wrap(ErrDuplicate, wrapMsg)
 		}
 	} else if errors.Is(err, pgx.ErrNoRows) {
-		return errors.Wrap(errNoRows, "")
+		return errors.Wrap(ErrNoResult, "")
 	}
 
 	return errors.Wrap(err, wrapMsg)
 }
 
-func (db *pgStore) sbBanSave(ctx context.Context, record *models.SbBanRecord) error {
+func sbBanSave(ctx context.Context, db *pgStore, record *models.SbBanRecord) error {
 	record.UpdatedOn = time.Now()
 
 	if record.BanID <= 0 {
@@ -727,7 +730,7 @@ const storeDurationSecondMulti = int64(time.Second)
 
 type BanRecordMap map[steamid.SID64][]models.SbBanRecord
 
-func (db *pgStore) sbGetBansBySID(ctx context.Context, sid64 steamid.Collection) (BanRecordMap, error) {
+func sbGetBansBySID(ctx context.Context, db *pgStore, sid64 steamid.Collection) (BanRecordMap, error) {
 	query, args, errSQL := sb.
 		Select("b.sb_ban_id", "b.sb_site_id", "b.steam_id", "b.persona_name", "b.reason",
 			"b.created_on", "b.duration", "b.permanent", "s.name").
@@ -771,4 +774,144 @@ func (db *pgStore) sbGetBansBySID(ctx context.Context, sid64 steamid.Collection)
 	}
 
 	return records, nil
+}
+
+func Err(rootError error) error {
+	if rootError == nil {
+		return nil
+	}
+
+	var pgErr *pgconn.PgError
+
+	if errors.As(rootError, &pgErr) {
+		switch pgErr.Code {
+		case pgerrcode.UniqueViolation:
+			return ErrDuplicate
+		default:
+			return rootError
+		}
+	}
+
+	if rootError.Error() == "no rows in result set" {
+		return ErrNoResult
+	}
+
+	return rootError
+}
+
+//nolint:ireturn
+func (db *pgStore) QueryRowBuilder(ctx context.Context, builder sq.SelectBuilder) (pgx.Row, error) {
+	query, args, errQuery := builder.ToSql()
+	if errQuery != nil {
+		return nil, Err(errQuery)
+	}
+
+	return db.pool.QueryRow(ctx, query, args...), nil
+}
+
+func (db *pgStore) ExecInsertBuilder(ctx context.Context, builder sq.InsertBuilder) error {
+	query, args, errQuery := builder.ToSql()
+	if errQuery != nil {
+		return Err(errQuery)
+	}
+
+	_, err := db.pool.Exec(ctx, query, args...)
+
+	return Err(err)
+}
+
+func (db *pgStore) ExecDeleteBuilder(ctx context.Context, builder sq.DeleteBuilder) error {
+	query, args, errQuery := builder.ToSql()
+	if errQuery != nil {
+		return Err(errQuery)
+	}
+
+	_, err := db.pool.Exec(ctx, query, args...)
+
+	return Err(err)
+}
+
+func (db *pgStore) ExecUpdateBuilder(ctx context.Context, builder sq.UpdateBuilder) error {
+	query, args, errQuery := builder.ToSql()
+	if errQuery != nil {
+		return Err(errQuery)
+	}
+
+	_, err := db.pool.Exec(ctx, query, args...)
+
+	return Err(err)
+}
+
+func (db *pgStore) QueryRow(ctx context.Context, query string, args ...any) pgx.Row {
+	return db.pool.QueryRow(ctx, query, args...)
+}
+
+func (db *pgStore) ExecInsertBuilderWithReturnValue(ctx context.Context, builder sq.InsertBuilder, outID any) error {
+	query, args, errQuery := builder.ToSql()
+	if errQuery != nil {
+		return Err(errQuery)
+	}
+
+	if errScan := db.
+		QueryRow(ctx, query, args...).
+		Scan(outID); errScan != nil {
+		return Err(errScan)
+	}
+
+	return nil
+}
+
+func (db *pgStore) QueryBuilder(ctx context.Context, builder sq.SelectBuilder) (pgx.Rows, error) {
+	query, args, errQuery := builder.ToSql()
+	if errQuery != nil {
+		return nil, Err(errQuery)
+	}
+
+	rows, err := db.pool.Query(ctx, query, args...)
+
+	return rows, Err(err)
+}
+
+func etf2lSavePlayer(ctx context.Context, db *pgStore, player etf2l.Player) error {
+	now := time.Now()
+	builder := sb.
+		Insert("etf2l_player").
+		SetMap(map[string]interface{}{
+			"steam_id":   player.Steam.ID64.Int64(),
+			"id":         player.ID,
+			"name":       player.Name,
+			"country":    player.Country,
+			"created_on": now,
+			"updated_on": now,
+		})
+	return db.ExecInsertBuilder(ctx, builder)
+}
+
+func etf2lSaveBan(ctx context.Context, db *pgStore, ban etf2l.Ban) error {
+	now := time.Now()
+	builder := sb.
+		Insert("etf2l_bans").
+		SetMap(map[string]interface{}{
+			"steam_id":   ban.Steamid64.Int64(),
+			"start_date": time.Unix(int64(ban.Start), 0),
+			"end_date":   time.Unix(int64(ban.End), 0),
+			"reason":     ban.Reason,
+			"created_on": now,
+			"updated_on": now,
+		})
+	return db.ExecInsertBuilder(ctx, builder)
+}
+
+func etf2lSaveTeam(ctx context.Context, db *pgStore, team etf2l.Team) error {
+	now := time.Now()
+	builder := sb.
+		Insert("etf2l_team").
+		SetMap(map[string]interface{}{
+			"id":         team.ID,
+			"name":       team.Name,
+			"country":    team.Country,
+			"created_on": now,
+			"updated_on": now,
+		})
+	return db.ExecInsertBuilder(ctx, builder)
 }

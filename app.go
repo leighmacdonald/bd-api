@@ -2,6 +2,10 @@ package main
 
 import (
 	"context"
+	"github.com/leighmacdonald/etf2l"
+	"github.com/leighmacdonald/steamid/v3/steamid"
+	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leighmacdonald/bd-api/models"
@@ -17,6 +21,7 @@ type App struct {
 	scrapers []*sbScraper
 	pm       *proxyManager
 	router   *gin.Engine
+	etf2l    *etf2l.Client
 }
 
 func NewApp(logger *zap.Logger, config appConfig, database *pgStore, cache cache, proxyManager *proxyManager) *App {
@@ -28,6 +33,7 @@ func NewApp(logger *zap.Logger, config appConfig, database *pgStore, cache cache
 		pm:       proxyManager,
 		router:   nil,
 		scrapers: []*sbScraper{},
+		etf2l:    etf2l.New(),
 	}
 
 	router, errRouter := application.createRouter()
@@ -63,7 +69,7 @@ func (a *App) initScrapers(ctx context.Context) error {
 	for _, scraper := range scrapers {
 		// Attach a site_id to the scraper, so we can keep track of the scrape source
 		var s models.SbSite
-		if errSave := a.db.sbSiteGetOrCreate(ctx, scraper.name, &s); errSave != nil {
+		if errSave := sbSiteGetOrCreate(ctx, a.db, scraper.name, &s); errSave != nil {
 			return errors.Wrap(errSave, "Database error")
 		}
 
@@ -72,5 +78,52 @@ func (a *App) initScrapers(ctx context.Context) error {
 
 	a.scrapers = scrapers
 
+	return nil
+}
+
+func (a *App) updatePlayer(ctx context.Context, steamID steamid.SID64) error {
+	lCtx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+
+	startTime := time.Now()
+
+	// errgroup is not used since we want to update as much as possible even if some fail
+	wg := &sync.WaitGroup{}
+	wg.Add(2)
+
+	go func() {
+		wg.Done()
+		if err := a.updateETF2LPlayer(lCtx, steamID); err != nil {
+			a.log.Warn("Failed to updated ETF2L profile", zap.Int64("steam_id", steamID.Int64()), zap.Error(err))
+
+			return
+		}
+	}()
+
+	go func() {
+		wg.Done()
+		if err := a.updateRGLPlayer(lCtx, steamID); err != nil {
+			a.log.Warn("Failed to updated RGL profile", zap.Int64("steam_id", steamID.Int64()), zap.Error(err))
+			return
+		}
+	}()
+
+	wg.Wait()
+
+	a.log.Debug("Player update finished", zap.Int64("steam_id", steamID.Int64()), zap.Duration("duration", time.Since(startTime)))
+
+	return nil
+}
+
+func (a *App) updateETF2LPlayer(ctx context.Context, steamID steamid.SID64) error {
+	player, err := a.etf2l.Player(ctx, steamID.String())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *App) updateRGLPlayer(ctx context.Context, steamID steamid.SID64) error {
 	return nil
 }

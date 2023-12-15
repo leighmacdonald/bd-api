@@ -249,7 +249,7 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 		scraper.resultsMu.Unlock()
 		for _, result := range results {
 			pRecord := newPlayerRecord(result.SteamID)
-			if errPlayer := database.playerGetOrCreate(ctx, result.SteamID, &pRecord); errPlayer != nil {
+			if errPlayer := playerGetOrCreate(ctx, database, result.SteamID, &pRecord); errPlayer != nil {
 				scraper.log.Error("failed to get player record", zap.Int64("sid64", result.SteamID.Int64()), zap.Error(errPlayer))
 
 				continue
@@ -270,7 +270,7 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 				},
 			}
 
-			if errBanSave := database.sbBanSave(ctx, &bRecord); errBanSave != nil {
+			if errBanSave := sbBanSave(ctx, database, &bRecord); errBanSave != nil {
 				if errors.Is(errBanSave, errDuplicate) {
 					scraper.log.Debug("Failed to save ban record (duplicate)",
 						zap.Int64("sid64", pRecord.SteamID.Int64()), zap.Error(errBanSave))

@@ -54,7 +54,7 @@ func (a *App) loadProfiles(ctx context.Context, steamIDs steamid.Collection) ([]
 	go func() {
 		defer waitGroup.Done()
 
-		sbRecords, errSB := a.db.sbGetBansBySID(localCtx, steamIDs)
+		sbRecords, errSB := sbGetBansBySID(localCtx, a.db, steamIDs)
 		if errSB != nil {
 			a.log.Error("Failed to load sourcebans records", zap.Error(errSB))
 		}

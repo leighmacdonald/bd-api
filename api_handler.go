@@ -195,7 +195,7 @@ func (a *App) handleGetSourceBansMany() gin.HandlerFunc {
 			return
 		}
 
-		bans, errBans := a.db.sbGetBansBySID(ctx, ids)
+		bans, errBans := sbGetBansBySID(ctx, a.db, ids)
 		if errBans != nil {
 			log.Error("Failed to query bans from database", zap.Error(errBans))
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
@@ -219,7 +219,7 @@ func (a *App) handleGetSourceBans() gin.HandlerFunc {
 			return
 		}
 
-		bans, errBans := a.db.sbGetBansBySID(ctx, steamid.Collection{sid})
+		bans, errBans := sbGetBansBySID(ctx, a.db, steamid.Collection{sid})
 		if errBans != nil {
 			log.Error("Failed to query bans from database", zap.Error(errBans))
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
