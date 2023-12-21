@@ -97,6 +97,13 @@ func main() {
 	}
 
 	pm := newProxyManager(logger)
+	if config.ProxiesEnabled {
+		if errSetup := pm.setup(&config); errSetup != nil {
+			logger.Fatal("Failed to setup proxies", zap.Error(errSetup))
+		}
+
+		pm.start(&config)
+	}
 
 	app := NewApp(logger, config, database, cacheHandler, pm)
 

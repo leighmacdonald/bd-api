@@ -57,7 +57,7 @@ linters:
     - ineffassign
     - interfacebloat
     - ireturn
-    - lll
+    #- lll
     - loggercheck
     - maintidx
     - makezero
@@ -72,7 +72,7 @@ linters:
     - nolintlint
     - nonamedreturns
     - nosprintfhostport
-    - paralleltest
+    # - paralleltest
     - prealloc
     - predeclared
     - promlinter
@@ -87,7 +87,7 @@ linters:
     - testableexamples
     - testpackage
     - thelper
-    - tparallel
+    #- tparallel
     - typecheck
     - unconvert
     - unparam

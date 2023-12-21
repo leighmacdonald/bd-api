@@ -32,15 +32,11 @@ type parseTimeFunc func(s string) (time.Time, error)
 type parserFunc func(doc *goquery.Selection, logger *zap.Logger, timeParser parseTimeFunc) ([]sbRecord, int, error)
 
 func (a *App) runScrapers(ctx context.Context) {
-	if a.config.ProxiesEnabled {
-		a.pm.start(&a.config)
+	defer a.pm.stop()
 
-		defer a.pm.stop()
-
-		for _, scraper := range a.scrapers {
-			if errProxies := a.pm.setup(scraper.Collector, &a.config); errProxies != nil {
-				a.log.Panic("Failed to setup proxies", zap.Error(errProxies))
-			}
+	for _, scraper := range a.scrapers {
+		if errProxies := a.pm.setupColly(scraper.Collector, &a.config); errProxies != nil {
+			a.log.Panic("Failed to setup proxies", zap.Error(errProxies))
 		}
 	}
 
@@ -271,7 +267,7 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 			}
 
 			if errBanSave := sbBanSave(ctx, database, &bRecord); errBanSave != nil {
-				if errors.Is(errBanSave, errDuplicate) {
+				if errors.Is(errBanSave, ErrDuplicate) {
 					scraper.log.Debug("Failed to save ban record (duplicate)",
 						zap.Int64("sid64", pRecord.SteamID.Int64()), zap.Error(errBanSave))
 
@@ -1029,7 +1025,7 @@ func parseDefault(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFu
 
 //
 // type megaScatterNode struct {
-//	ID                  string `json:"id"`
+//	TeamID                  string `json:"id"`
 //	ID3                 string `json:"id3"`
 //	ID1                 string `json:"id1"`
 //	Label               string `json:"label"`

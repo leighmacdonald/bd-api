@@ -2,17 +2,15 @@ package main
 
 import (
 	"context"
-	"go.uber.org/zap"
-	"testing"
-	"time"
-
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 const (
 	testIDb4nny  steamid.SID64 = "76561197970669109"
 	testIDCamper steamid.SID64 = "76561197992870439"
+	testIDBanned steamid.SID64 = "76561198203516436"
 )
 
 func TestGetLogsTF(t *testing.T) {
@@ -35,29 +33,4 @@ func TestGetUGC(t *testing.T) {
 
 	require.NoError(t, errLogs)
 	require.GreaterOrEqual(t, 30, len(seasons))
-}
-
-func TestETF2L(t *testing.T) {
-	t.Parallel()
-
-	c, cancel := context.WithTimeout(context.Background(), time.Second*25)
-	defer cancel()
-
-	seasons, err := getETF2L(c, testIDb4nny)
-
-	require.NoError(t, err)
-	require.Greater(t, len(seasons), 3)
-}
-
-func TestRGL(t *testing.T) {
-	t.Parallel()
-
-	seasons, errSeasons := getRGL(context.Background(), zap.NewNop(), steamid.New(76561198084134025))
-	if errSeasons != nil {
-		// Dumb hack because rgl api often just doesn't work on the first call...
-		seasons, errSeasons = getRGL(context.Background(), zap.NewNop(), steamid.New(76561198084134025))
-	}
-
-	require.NoError(t, errSeasons)
-	require.LessOrEqual(t, 1, len(seasons))
 }

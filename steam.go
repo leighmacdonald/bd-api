@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/leighmacdonald/rgl"
 	"sync"
 	"time"
 
@@ -151,31 +150,6 @@ func (a *App) getCompHistory(ctx context.Context, steamIDs steamid.Collection) c
 		}
 
 		results[steamID] = append(results[steamID], seasons...)
-	}
-
-	for _, steamID := range missed {
-		rglSeasons, errRGL := getRGL(ctx, a.log.Named("rgl").With(zap.String("steam_id", steamID.String())), steamID)
-		if errRGL != nil {
-			if errors.Is(errRGL, rgl.ErrRateLimit) {
-				a.log.Warn("API Rate limited")
-			} else {
-				a.log.Error("Failed to fetch rgl data", zap.Error(errRGL))
-			}
-			continue
-		}
-
-		body, errMarshal := json.Marshal(rglSeasons)
-		if errMarshal != nil {
-			a.log.Error("Failed to marshal rgl data", zap.Error(errRGL))
-
-			continue
-		}
-
-		if errSet := a.cache.set(makeKey(KeyRGL, steamID), bytes.NewReader(body)); errSet != nil {
-			a.log.Error("Failed to update cache", zap.Error(errSet))
-		}
-
-		results[steamID] = append(results[steamID], rglSeasons...)
 	}
 
 	a.log.Debug("RGL Query time", zap.Duration("duration", time.Since(startTime)))

@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"embed"
-	"github.com/leighmacdonald/etf2l"
 	"net/http"
 	"time"
 
@@ -378,7 +377,7 @@ func playerRecordSave(ctx context.Context, db *pgStore, record *PlayerRecord) er
 				"avatar_hash", "persona_state", "real_name", "time_created", "loc_country_code", "loc_state_code", "loc_city_id",
 				"community_banned", "vac_banned", "game_bans", "economy_banned", "logstf_count", "ugc_updated_on", "rgl_updated_on",
 				"etf2l_updated_on", "logstf_updated_on", "steam_updated_on", "created_on").
-			Values(record.SteamID, record.CommunityVisibilityState, record.ProfileState, record.PersonaName, record.Vanity,
+			Values(record.SteamID.Int64(), record.CommunityVisibilityState, record.ProfileState, record.PersonaName, record.Vanity,
 				record.AvatarHash, record.PersonaState, record.RealName, record.TimeCreated, record.LocCountryCode,
 				record.LocStateCode, record.LocCityID, record.CommunityBanned, record.VacBanned, record.GameBans,
 				record.EconomyBanned, record.LogsTFCount, record.UGCUpdatedOn, record.RGLUpdatedOn, record.ETF2LUpdatedOn,
@@ -500,7 +499,7 @@ func playerGetOrCreate(ctx context.Context, db *pgStore, sid64 steamid.SID64, re
 			"logstf_count", "ugc_updated_on", "rgl_updated_on", "etf2l_updated_on", "logstf_updated_on",
 			"steam_updated_on", "created_on").
 		From("player").
-		Where(sq.Eq{"steam_id": sid64}).
+		Where(sq.Eq{"steam_id": sid64.Int64()}).
 		ToSql()
 	if errSQL != nil {
 		return dbErr(errSQL, "Failed to generate query")
@@ -870,48 +869,4 @@ func (db *pgStore) QueryBuilder(ctx context.Context, builder sq.SelectBuilder) (
 	rows, err := db.pool.Query(ctx, query, args...)
 
 	return rows, Err(err)
-}
-
-func etf2lSavePlayer(ctx context.Context, db *pgStore, player etf2l.Player) error {
-	now := time.Now()
-	builder := sb.
-		Insert("etf2l_player").
-		SetMap(map[string]interface{}{
-			"steam_id":   player.Steam.ID64.Int64(),
-			"id":         player.ID,
-			"name":       player.Name,
-			"country":    player.Country,
-			"created_on": now,
-			"updated_on": now,
-		})
-	return db.ExecInsertBuilder(ctx, builder)
-}
-
-func etf2lSaveBan(ctx context.Context, db *pgStore, ban etf2l.Ban) error {
-	now := time.Now()
-	builder := sb.
-		Insert("etf2l_bans").
-		SetMap(map[string]interface{}{
-			"steam_id":   ban.Steamid64.Int64(),
-			"start_date": time.Unix(int64(ban.Start), 0),
-			"end_date":   time.Unix(int64(ban.End), 0),
-			"reason":     ban.Reason,
-			"created_on": now,
-			"updated_on": now,
-		})
-	return db.ExecInsertBuilder(ctx, builder)
-}
-
-func etf2lSaveTeam(ctx context.Context, db *pgStore, team etf2l.Team) error {
-	now := time.Now()
-	builder := sb.
-		Insert("etf2l_team").
-		SetMap(map[string]interface{}{
-			"id":         team.ID,
-			"name":       team.Name,
-			"country":    team.Country,
-			"created_on": now,
-			"updated_on": now,
-		})
-	return db.ExecInsertBuilder(ctx, builder)
 }

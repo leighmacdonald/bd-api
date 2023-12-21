@@ -2,8 +2,12 @@ package main
 
 import (
 	"fmt"
+	goproxy "golang.org/x/net/proxy"
 	"net"
+	"net/http"
+	"net/url"
 	"sync"
+	"sync/atomic"
 
 	"github.com/armon/go-socks5"
 	"github.com/gocolly/colly"
@@ -15,8 +19,10 @@ import (
 )
 
 type proxyManager struct {
-	proxies map[string]*proxyConfig
-	log     *zap.Logger
+	proxies     map[string]*proxyConfig
+	log         *zap.Logger
+	curProxyIdx uint32
+	proxyURLs   []*url.URL
 }
 
 func newProxyManager(logger *zap.Logger) *proxyManager {
@@ -100,18 +106,70 @@ func (p *proxyManager) stop() {
 	waitGroup.Wait()
 }
 
-func (p *proxyManager) setup(collector *colly.Collector, config *appConfig) error {
-	proxyAddresses := make([]string, len(config.Proxies))
-	for i, p := range config.Proxies {
-		proxyAddresses[i] = fmt.Sprintf("socks5://%s", p.LocalAddr)
+// next creates a new http client with the next proxy transport set
+func (p *proxyManager) next() *http.Client {
+	u := p.proxyURLs[p.curProxyIdx%uint32(len(p.proxyURLs))]
+
+	p.log.Debug("Using proxy", zap.String("proxy", u.String()), zap.Uint32("idx", p.curProxyIdx%uint32(len(p.proxyURLs))))
+
+	atomic.AddUint32(&p.curProxyIdx, 1)
+
+	var dialer goproxy.Dialer
+	var err error
+
+	dialer = goproxy.Direct
+
+	dialer, err = goproxy.FromURL(u, goproxy.Direct)
+	if err != nil {
+		panic(err)
 	}
 
-	proxiesFunc, errProxies := proxy.RoundRobinProxySwitcher(proxyAddresses...)
-	if errProxies != nil {
-		return errors.Wrap(errProxies, "Failed to create proxy round robin proxy switcher")
+	// setup a http client
+	httpTransport := &http.Transport{}
+	httpClient := &http.Client{Transport: httpTransport}
+	httpTransport.Dial = dialer.Dial
+
+	return httpClient
+}
+
+func (p *proxyManager) setup(conf *appConfig) error {
+	p.log.Info("Initializing core proxy config")
+
+	// Make sure they use socks prefix
+	proxyAddresses := make([]string, len(conf.Proxies))
+	for i, pr := range conf.Proxies {
+		proxyAddresses[i] = fmt.Sprintf("socks5://%s", pr.LocalAddr)
 	}
 
-	collector.SetProxyFunc(proxiesFunc)
+	// Create addresses for non-colly use
+	urls := make([]*url.URL, len(proxyAddresses))
+	for i, u := range proxyAddresses {
+		parsedU, err := url.Parse(u)
+		if err != nil {
+			return err
+		}
+		urls[i] = parsedU
+	}
 
+	p.proxyURLs = urls
+
+	return nil
+}
+
+func (p *proxyManager) setupColly(collector *colly.Collector, conf *appConfig) error {
+	p.log.Info("Initializing coolly proxy config")
+
+	// Make sure they use socks prefix
+	proxyAddresses := make([]string, len(conf.Proxies))
+	for i, pr := range conf.Proxies {
+		proxyAddresses[i] = fmt.Sprintf("socks5://%s", pr.LocalAddr)
+	}
+	// Setup colly proxy func
+	proxyFunc, err := proxy.RoundRobinProxySwitcher(proxyAddresses...)
+	if err != nil {
+		return err
+	}
+
+	collector.SetProxyFunc(proxyFunc)
 	return nil
 }

@@ -2,69 +2,11 @@ package main
 
 import (
 	"context"
+	sq "github.com/Masterminds/squirrel"
 	"github.com/leighmacdonald/rgl"
 	"github.com/leighmacdonald/steamid/v3/steamid"
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
-	"strings"
 	"time"
 )
-
-// Current issues:
-// - Sometime api just fails on the first attempt
-// - Empty value
-func getRGL(ctx context.Context, log *zap.Logger, sid64 steamid.SID64) ([]Season, error) {
-	startTime := time.Now()
-
-	_, errProfile := rgl.Profile(ctx, sid64)
-	if errProfile != nil {
-		return nil, errors.Wrap(errProfile, "Failed tp fetch profile")
-	}
-
-	teams, errTeams := rgl.ProfileTeams(ctx, sid64)
-	if errTeams != nil {
-		return nil, errors.Wrap(errTeams, "Failed to fetch teams")
-	}
-
-	seasons := make([]Season, len(teams))
-
-	for index, team := range teams {
-		seasonStartTime := time.Now()
-
-		var season Season
-
-		seasonInfo, errSeason := rgl.Season(ctx, team.SeasonID)
-		if errSeason != nil {
-			return nil, errors.Wrap(errSeason, "Failed to fetch seasons")
-		}
-
-		season.League = "rgl"
-		season.Division = seasonInfo.Name
-		season.DivisionInt = parseRGLDivision(team.DivisionName)
-		season.TeamName = team.TeamName
-
-		if seasonInfo.FormatName == "" {
-			if strings.Contains(strings.ToLower(seasonInfo.Name), "sixes") {
-				seasonInfo.FormatName = "Sixes"
-			} else if strings.Contains(strings.ToLower(seasonInfo.Name), "prolander") {
-				seasonInfo.FormatName = "Prolander"
-			} else if strings.Contains(strings.ToLower(seasonInfo.Name), "hl season") {
-				seasonInfo.FormatName = "HL"
-			} else if strings.Contains(strings.ToLower(seasonInfo.Name), "p7 season") {
-				seasonInfo.FormatName = "Prolander"
-			}
-		}
-
-		season.Format = seasonInfo.FormatName
-		seasons[index] = season
-
-		log.Info("RGL season fetched", zap.Duration("duration", time.Since(seasonStartTime)))
-	}
-
-	log.Info("RGL Completed", zap.Duration("duration", time.Since(startTime)))
-
-	return seasons, nil
-}
 
 func parseRGLDivision(div string) Division {
 	switch div {
@@ -101,4 +43,157 @@ func parseRGLDivision(div string) Division {
 	default:
 		return RGLRankNone
 	}
+}
+
+type RGLTeam struct {
+	TeamID       int       `json:"team_id"`
+	Name         string    `json:"name"`
+	Tag          string    `json:"tag"`
+	DivisionName string    `json:"division_name"`
+	DivisionID   int       `json:"division_id"`
+	FinalRank    int       `json:"final_rank"`
+	SeasonID     int       `json:"season_id"`
+	CreatedOn    time.Time `json:"created_on"`
+	UpdatedOn    time.Time `json:"updated_on"`
+}
+
+func rglTeam(ctx context.Context, db *pgStore, teamID int, team *RGLTeam) error {
+	row, errRow := db.QueryRowBuilder(ctx, sb.
+		Select("team_id", "name", "tag", "division_name", "division_id",
+			"final_rank", "season_id", "created_on", "updated_on").
+		From("rgl_team").Where(sq.Eq{"team_id": teamID}))
+	if errRow != nil {
+		return errRow
+	}
+
+	return Err(row.Scan(&team.TeamID, &team.Name, &team.Tag, &team.DivisionName, &team.DivisionID, &team.FinalRank,
+		&team.SeasonID, &team.CreatedOn, &team.UpdatedOn))
+}
+
+func rglTeamSave(ctx context.Context, db *pgStore, overview *rgl.TeamOverview) error {
+	return Err(db.ExecInsertBuilder(ctx, sb.Insert("rgl_team").SetMap(map[string]interface{}{
+		"team_id":       overview.TeamID,
+		"name":          overview.Name,
+		"tag":           overview.Tag,
+		"division_name": overview.DivisionName,
+		"division_id":   overview.DivisionID,
+		"final_rank":    overview.FinalRank,
+		"season_id":     overview.SeasonID,
+		"created_on":    overview.CreatedAt,
+		"updated_on":    overview.UpdatedAt,
+	})))
+}
+
+type RGLPlayer struct {
+	SteamID       steamid.SID64 `json:"steam_id"`
+	Avatar        string        `json:"avatar"`
+	Name          string        `json:"name"`
+	UpdatedAt     time.Time     `json:"updated_at"`
+	IsVerified    bool          `json:"is_verified"`
+	IsBanned      bool          `json:"is_banned"`
+	IsOnProbation bool          `json:"is_on_probation"`
+	CreatedOn     time.Time     `json:"created_on"`
+	UpdatedOn     time.Time     `json:"updated_on"`
+}
+
+func rglPlayer(ctx context.Context, db *pgStore, steamID steamid.SID64, player *RGLPlayer) error {
+	row, errRow := db.QueryRowBuilder(ctx, sb.
+		Select("avatar", "name", "updated_at",
+			"is_verified", "is_banned", "is_on_probation", "created_on", "updated_on").
+		From("rgl_player").Where(sq.Eq{"steam_id": steamID.Int64()}))
+	if errRow != nil {
+		return errRow
+	}
+	player.SteamID = steamID
+
+	return Err(row.Scan(&player.Avatar, &player.Name, &player.UpdatedAt, &player.IsVerified,
+		&player.IsBanned, &player.IsOnProbation, &player.CreatedOn, &player.UpdatedOn))
+}
+
+func rglPlayerSave(ctx context.Context, db *pgStore, player *rgl.Player) error {
+	now := time.Now()
+
+	return db.ExecInsertBuilder(ctx, sb.
+		Insert("rgl_player").
+		SetMap(map[string]interface{}{
+			"steam_id":        player.SteamID.Int64(),
+			"avatar":          player.Avatar,
+			"name":            player.Name,
+			"updated_at":      player.UpdatedAt,
+			"is_verified":     player.Status.IsVerified,
+			"is_banned":       player.Status.IsBanned,
+			"is_on_probation": player.Status.IsOnProbation,
+			"created_on":      now,
+			"updated_on":      now,
+		}).Suffix("ON CONFLICT DO NOTHING"))
+}
+
+func rglTeamPlayerSave(ctx context.Context, db *pgStore, teamID int, player rgl.TeamPlayer) error {
+	now := time.Now()
+
+	return db.ExecInsertBuilder(ctx, sb.
+		Insert("rgl_team_player").
+		SetMap(map[string]interface{}{
+			"team_id":    teamID,
+			"steam_id":   player.SteamID.Int64(),
+			"name":       player.Name,
+			"is_leader":  player.IsLeader,
+			"joined_at":  player.JoinedAt,
+			"left_at":    player.LeftAt,
+			"created_on": now,
+			"updated_on": now,
+		}).
+		Suffix("ON CONFLICT DO NOTHING"))
+}
+
+type RGLBan struct {
+	SteamID   steamid.SID64 `json:"steam_id"`
+	Name      string        `json:"name"`
+	Reason    string        `json:"reason"`
+	CreatedAt time.Time     `json:"created_at"`
+	ExpiresAt time.Time     `json:"expires_at"`
+	CreatedOn time.Time     `json:"created_on"`
+	UpdatedOn time.Time     `json:"updated_on"`
+}
+
+func rglBansBySteamID(ctx context.Context, db *pgStore, steamID steamid.SID64) ([]RGLBan, error) {
+	rows, errRows := db.QueryBuilder(ctx, sb.
+		Select("name", "reason", "created_at", "expired_at", "created_on", "updated_on").
+		From("rgl_ban").
+		Where(sq.Eq{"steam_id": steamID.Int64()}))
+	if errRows != nil {
+		return nil, errRows
+	}
+
+	defer rows.Close()
+
+	var bans []RGLBan
+
+	for rows.Next() {
+		ban := RGLBan{SteamID: steamID}
+		if errScan := rows.Scan(&ban.Name, &ban.Reason, &ban.CreatedOn, &ban.ExpiresAt, &ban.CreatedOn, &ban.UpdatedOn); errScan != nil {
+			return nil, errScan
+		}
+
+		bans = append(bans, ban)
+	}
+
+	return bans, nil
+}
+
+func rglBanSave(ctx context.Context, db *pgStore, ban rgl.Ban) error {
+	now := time.Now()
+
+	return db.ExecInsertBuilder(ctx, sb.
+		Insert("rgl_ban").
+		SetMap(map[string]interface{}{
+			"steam_id":   steamid.New(ban.SteamID).Int64(),
+			"name":       ban.Alias,
+			"reason":     ban.Reason,
+			"created_at": ban.CreatedAt,
+			"expires_at": ban.ExpiresAt,
+			"created_on": now,
+			"updated_on": now,
+		}).
+		Suffix("ON CONFLICT DO NOTHING"))
 }

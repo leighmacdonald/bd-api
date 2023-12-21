@@ -288,12 +288,12 @@ func createTestSourcebansRecord(t *testing.T, app *App, sid64 steamid.SID64) mod
 	curTime := time.Now()
 
 	player := newPlayerRecord(sid64)
-	if errPlayer := app.db.playerGetOrCreate(ctx, sid64, &player); errPlayer != nil {
+	if errPlayer := playerGetOrCreate(ctx, app.db, sid64, &player); errPlayer != nil {
 		t.Error(errPlayer)
 	}
 
 	site := NewSBSite(models.Site(fmt.Sprintf("Test %s", curTime)))
-	if errSave := app.db.sbSiteSave(ctx, &site); errSave != nil {
+	if errSave := sbSiteSave(ctx, app.db, &site); errSave != nil {
 		t.Error(errSave)
 	}
 
@@ -301,7 +301,7 @@ func createTestSourcebansRecord(t *testing.T, app *App, sid64 steamid.SID64) mod
 		curTime.AddDate(-1, 0, 0), time.Hour*24, false)
 	record.CreatedOn = curTime
 
-	if errSave := app.db.sbBanSave(ctx, &record); errSave != nil {
+	if errSave := sbBanSave(ctx, app.db, &record); errSave != nil {
 		t.Error(errSave)
 	}
 
