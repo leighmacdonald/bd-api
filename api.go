@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"html/template"
+	"log/slog"
 	"net/http"
 	"sort"
 	"strings"
@@ -14,7 +15,6 @@ import (
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 const (
@@ -56,7 +56,7 @@ func (a *App) loadProfiles(ctx context.Context, steamIDs steamid.Collection) ([]
 
 		sbRecords, errSB := a.db.sbGetBansBySID(localCtx, steamIDs)
 		if errSB != nil {
-			a.log.Error("Failed to load sourcebans records", zap.Error(errSB))
+			slog.Error("Failed to load sourcebans records", ErrAttr(errSB))
 		}
 
 		sourceBans = sbRecords
@@ -69,7 +69,7 @@ func (a *App) loadProfiles(ctx context.Context, steamIDs steamid.Collection) ([]
 
 		sum, errSum := a.getSteamSummaries(localCtx, steamIDs)
 		if errSum != nil || len(sum) == 0 {
-			a.log.Error("Failed to load player summaries", zap.Error(errSum))
+			slog.Error("Failed to load player summaries", ErrAttr(errSum))
 		}
 
 		summaries = sum
@@ -82,7 +82,7 @@ func (a *App) loadProfiles(ctx context.Context, steamIDs steamid.Collection) ([]
 
 		banState, errBanState := a.getSteamBans(localCtx, steamIDs)
 		if errBanState != nil || len(banState) == 0 {
-			a.log.Error("Failed to load player ban states", zap.Error(errBanState))
+			slog.Error("Failed to load player ban states", ErrAttr(errBanState))
 		}
 
 		bans = banState
@@ -177,12 +177,12 @@ func renderSyntax(ctx *gin.Context, encoder *styleEncoder, value any, tmpl strin
 	ctx.HTML(http.StatusOK, tmpl, args)
 }
 
-func apiErrorHandler(logger *zap.Logger) gin.HandlerFunc {
+func apiErrorHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
 
 		for _, ginErr := range c.Errors {
-			logger.Error("Unhandled HTTP Error", zap.Error(ginErr))
+			slog.Error("Unhandled HTTP Error", ErrAttr(ginErr))
 		}
 	}
 }
@@ -206,7 +206,7 @@ func (a *App) createRouter() (*gin.Engine, error) {
 
 	engine := gin.New()
 	engine.SetHTMLTemplate(tmplProfiles)
-	engine.Use(apiErrorHandler(a.log), gin.Recovery())
+	engine.Use(apiErrorHandler(), gin.Recovery())
 	engine.GET("/bans", a.handleGetBans())
 	engine.GET("/summary", a.handleGetSummary())
 	engine.GET("/profile", a.handleGetProfile())
@@ -224,9 +224,7 @@ func (a *App) startAPI(ctx context.Context, addr string) error {
 		shutdownTimeout   = 10 * time.Second
 	)
 
-	log := a.log.Named("api")
-
-	defer log.Info("Service status changed", zap.String("state", "stopped"))
+	defer slog.Info("Service status changed", slog.String("state", "stopped"))
 
 	httpServer := &http.Server{ //nolint:exhaustruct
 		Addr:         addr,
@@ -235,7 +233,7 @@ func (a *App) startAPI(ctx context.Context, addr string) error {
 		WriteTimeout: apiHandlerTimeout,
 	}
 
-	log.Info("Service status changed", zap.String("state", "ready"))
+	slog.Info("Service status changed", slog.String("state", "ready"))
 
 	go func() {
 		<-ctx.Done()
@@ -244,7 +242,7 @@ func (a *App) startAPI(ctx context.Context, addr string) error {
 		defer cancel()
 
 		if errShutdown := httpServer.Shutdown(shutdownCtx); errShutdown != nil { //nolint:contextcheck
-			log.Error("Error shutting down http service", zap.Error(errShutdown))
+			slog.Error("Error shutting down http service", ErrAttr(errShutdown))
 		}
 	}()
 

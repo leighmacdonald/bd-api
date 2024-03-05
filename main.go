@@ -3,58 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
-	"time"
-
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
+	"os/signal"
+	"syscall"
 )
 
-func MustCreateLogger(conf appConfig) *zap.Logger {
-	var loggingConfig zap.Config
-
-	switch conf.RunMode {
-	case gin.ReleaseMode:
-		loggingConfig = zap.NewProductionConfig()
-		loggingConfig.DisableCaller = true
-	case gin.DebugMode:
-		loggingConfig = zap.NewDevelopmentConfig()
-		loggingConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	case gin.TestMode:
-		return zap.NewNop()
-	default:
-		panic(fmt.Sprintf("Unknown run mode: %s", conf.RunMode))
-	}
-
-	if conf.LogFileEnabled {
-		if exists(conf.LogFilePath) {
-			if err := os.Remove(conf.LogFilePath); err != nil {
-				panic(fmt.Sprintf("Failed to remove log file: %v", err))
-			}
-		}
-
-		loggingConfig.OutputPaths = append(loggingConfig.OutputPaths, conf.LogFilePath)
-	}
-
-	level, errLevel := zap.ParseAtomicLevel(conf.LogLevel)
-	if errLevel != nil {
-		panic(fmt.Sprintf("Failed to parse log level: %v", errLevel))
-	}
-
-	loggingConfig.Level.SetLevel(level.Level())
-
-	l, errLogger := loggingConfig.Build()
-	if errLogger != nil {
-		panic("Failed to create log config")
-	}
-
-	return l.Named("bd")
-}
-
-func main() {
-	startTime := time.Now()
-	ctx := context.Background()
+func run() int {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
 	var config appConfig
 
@@ -62,28 +19,19 @@ func main() {
 		panic(fmt.Sprintf("Failed to load config: %v", errConfig))
 	}
 
-	logger := MustCreateLogger(config)
+	loggerClose := MustCreateLogger(config.LogFilePath, config.LogLevel, config.LogFileEnabled)
+	defer loggerClose()
 
-	defer func() {
-		defer logger.Info("Exited", zap.Duration("uptime", time.Since(startTime)))
-
-		if !config.LogFileEnabled {
-			return
-		}
-
-		if errSync := logger.Sync(); errSync != nil {
-			logger.Panic("Failed to sync", zap.Error(errSync))
-		}
-	}()
-
-	logger.Info("Starting...")
+	slog.Info("Starting...")
 
 	var cacheHandler cache
 
 	if config.EnableCache {
-		localCache, cacheErr := newFSCache(logger, config.CacheDir)
+		localCache, cacheErr := newFSCache(config.CacheDir)
 		if cacheErr != nil {
-			logger.Panic("Failed to create fsCache", zap.Error(cacheErr))
+			slog.Error("Failed to create fsCache", ErrAttr(cacheErr))
+
+			return 1
 		}
 
 		cacheHandler = localCache
@@ -91,18 +39,29 @@ func main() {
 		cacheHandler = &nopCache{}
 	}
 
-	database, errDB := newStore(ctx, logger, config.DSN)
+	database, errDB := newStore(ctx, config.DSN)
 	if errDB != nil {
-		logger.Fatal("Failed to connect to database", zap.Error(errDB))
+		slog.Error("Failed to connect to database", ErrAttr(errDB))
 	}
 
-	pm := newProxyManager(logger)
+	pm := newProxyManager()
 
-	app := NewApp(logger, config, database, cacheHandler, pm)
+	app, errApp := NewApp(config, database, cacheHandler, pm)
+	if errApp != nil {
+		slog.Error("failed to create app", ErrAttr(errApp))
+
+		return 1
+	}
 
 	if errStart := app.Start(ctx); errStart != nil {
-		logger.Error("App returned error", zap.Error(errStart))
+		slog.Error("App returned error", ErrAttr(errStart))
 
-		return
+		return 1
 	}
+
+	return 0
+}
+
+func main() {
+	os.Exit(run())
 }

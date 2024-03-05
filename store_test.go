@@ -10,7 +10,6 @@ import (
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 )
 
 func TestStore(t *testing.T) {
@@ -35,7 +34,7 @@ func TestStore(t *testing.T) {
 		}
 	})
 
-	database, errStore := newStore(ctx, zap.NewNop(), dsn)
+	database, errStore := newStore(ctx, dsn)
 	if errStore != nil {
 		panic(errStore)
 	}

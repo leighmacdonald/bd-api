@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"testing"
@@ -10,15 +11,14 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 )
 
-type scraperFn func(logger *zap.Logger, cacheDir string) (*sbScraper, error)
+type scraperFn func(cacheDir string) (*sbScraper, error)
 
 func testParser(t *testing.T, scraperFn scraperFn, count int, nextPage string) {
 	t.Helper()
 
-	scraper, scraperErr := scraperFn(zap.NewNop(), "./cache/")
+	scraper, scraperErr := scraperFn("./cache/")
 	require.NoError(t, scraperErr, "Failed to create scraper")
 
 	testBody, errOpen := os.Open(fmt.Sprintf("testdata/%s.html", scraper.name))
@@ -31,7 +31,7 @@ func testParser(t *testing.T, scraperFn scraperFn, count int, nextPage string) {
 
 	require.NoError(t, errDoc)
 
-	results, _, errParse := scraper.parser(doc.Selection, zap.NewNop(), scraper.parseTIme)
+	results, _, errParse := scraper.parser(doc.Selection, slog.Default(), scraper.parseTIme)
 
 	require.NoError(t, errParse)
 	require.Equal(t, count, len(results))
@@ -52,9 +52,9 @@ func testParser(t *testing.T, scraperFn scraperFn, count int, nextPage string) {
 			require.False(t, result.Permanent)
 		}
 
-		const nintyFive = 788943600
+		const ninetyFive = 788943600
 
-		require.Truef(t, result.CreatedOn.Unix() > nintyFive, "Date: %s", result.CreatedOn)
+		require.Truef(t, result.CreatedOn.Unix() > ninetyFive, "Date: %s", result.CreatedOn)
 	}
 }
 
@@ -607,10 +607,10 @@ func TestCFBotProtectedRequest(t *testing.T) { //nolint:paralleltest
 
 	require.NoError(t, errDoc)
 
-	scraper, errScraper := newWonderlandTFScraper(zap.NewNop(), "./cache/")
+	scraper, errScraper := newWonderlandTFScraper("./cache/")
 	require.NoError(t, errScraper)
 
-	results, _, errParse := scraper.parser(doc.Selection, zap.NewNop(), scraper.parseTIme)
+	results, _, errParse := scraper.parser(doc.Selection, slog.Default(), scraper.parseTIme)
 
 	require.NoError(t, errParse)
 	require.Equal(t, 10, len(results))

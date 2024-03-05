@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"net"
 	"sync"
 
@@ -9,18 +10,16 @@ import (
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/proxy"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/net/context"
 )
 
 type proxyManager struct {
 	proxies map[string]*proxyConfig
-	log     *zap.Logger
 }
 
-func newProxyManager(logger *zap.Logger) *proxyManager {
-	return &proxyManager{proxies: map[string]*proxyConfig{}, log: logger.Named("proxy")}
+func newProxyManager() *proxyManager {
+	return &proxyManager{proxies: map[string]*proxyConfig{}}
 }
 
 func (p *proxyManager) start(config *appConfig) {
@@ -35,17 +34,17 @@ func (p *proxyManager) start(config *appConfig) {
 
 			conn, errConn := ssh.Dial("tcp", cfg.RemoteAddr, &sshConf)
 			if errConn != nil {
-				p.log.Error("Failed to connect to host", zap.Error(errConn))
+				slog.Error("Failed to connect to host", ErrAttr(errConn))
 				waitGroup.Done()
 
 				return
 			}
 
-			p.log.Info("Connect to ssh host", zap.String("addr", cfg.RemoteAddr))
+			slog.Info("Connect to ssh host", slog.String("addr", cfg.RemoteAddr))
 
 			socksConf := &socks5.Config{ //nolint:exhaustruct
-				Dial: func(ctx context.Context, network, addr string) (net.Conn, error) {
-					dialedConn, errDial := conn.Dial(network, addr)
+				Dial: func(ctx context.Context, network string, addr string) (net.Conn, error) {
+					dialedConn, errDial := conn.DialContext(ctx, network, addr)
 					if errDial != nil {
 						return nil, errors.Wrap(errDial, "Failed to dial network")
 					}
@@ -56,13 +55,13 @@ func (p *proxyManager) start(config *appConfig) {
 
 			server, errServer := socks5.New(socksConf)
 			if errServer != nil {
-				p.log.Error("Failed to initialize socks5", zap.Error(errServer))
+				slog.Error("Failed to initialize socks5", ErrAttr(errServer))
 				waitGroup.Done()
 
 				return
 			}
 
-			p.log.Info("Starting socks5 service", zap.String("addr", cfg.LocalAddr))
+			slog.Info("Starting socks5 service", slog.String("addr", cfg.LocalAddr))
 
 			cfg.conn = conn
 			cfg.socks = server
@@ -71,7 +70,7 @@ func (p *proxyManager) start(config *appConfig) {
 			waitGroup.Done()
 
 			if errListen := server.ListenAndServe("tcp", cfg.LocalAddr); errListen != nil {
-				p.log.Error("Socks5 listener returned error", zap.Error(errListen))
+				slog.Error("Socks5 listener returned error", ErrAttr(errListen))
 			}
 		}(serverCfg)
 	}
@@ -88,12 +87,12 @@ func (p *proxyManager) stop() {
 			defer waitGroup.Done()
 
 			if errClose := proxyConf.conn.Close(); errClose != nil {
-				p.log.Error("Error closing connection", zap.Error(errClose), zap.String("addr", proxyConf.RemoteAddr))
+				slog.Error("Error closing connection", ErrAttr(errClose), slog.String("addr", proxyConf.RemoteAddr))
 
 				return
 			}
 
-			p.log.Info("Closed connection", zap.String("addr", proxyConf.RemoteAddr))
+			slog.Info("Closed connection", slog.String("addr", proxyConf.RemoteAddr))
 		}(curProxy)
 	}
 

@@ -50,10 +50,10 @@ func parseUGCRank(body string) ([]Season, error) {
 
 	var seasons []Season
 
-	dom.Find("h5").Each(func(i int, selection *goquery.Selection) {
+	dom.Find("h5").Each(func(_ int, selection *goquery.Selection) {
 		text := selection.Text()
 		if text == ugcHLHeader || text == ugc6sHeader || text == ugc4sHeader {
-			selection.Next().ChildrenFiltered("li").Each(func(i int, selection *goquery.Selection) {
+			selection.Next().ChildrenFiltered("li").Each(func(_ int, selection *goquery.Selection) {
 				curRank, curRankStr := parseRankField(selection.Text())
 				var format string
 				switch text {

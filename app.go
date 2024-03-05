@@ -6,23 +6,20 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leighmacdonald/bd-api/models"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 type App struct {
 	config   appConfig
 	db       *pgStore
-	log      *zap.Logger
 	cache    cache
 	scrapers []*sbScraper
 	pm       *proxyManager
 	router   *gin.Engine
 }
 
-func NewApp(logger *zap.Logger, config appConfig, database *pgStore, cache cache, proxyManager *proxyManager) *App {
+func NewApp(config appConfig, database *pgStore, cache cache, proxyManager *proxyManager) (*App, error) {
 	application := &App{
 		config:   config,
-		log:      logger,
 		db:       database,
 		cache:    cache,
 		pm:       proxyManager,
@@ -32,12 +29,12 @@ func NewApp(logger *zap.Logger, config appConfig, database *pgStore, cache cache
 
 	router, errRouter := application.createRouter()
 	if errRouter != nil {
-		logger.Fatal("Failed to create router", zap.Error(errRouter))
+		return nil, errRouter
 	}
 
 	application.router = router
 
-	return application
+	return application, nil
 }
 
 func (a *App) Start(ctx context.Context) error {
@@ -55,7 +52,7 @@ func (a *App) Start(ctx context.Context) error {
 }
 
 func (a *App) initScrapers(ctx context.Context) error {
-	scrapers, errScrapers := createScrapers(a.log, a.config.CacheDir)
+	scrapers, errScrapers := createScrapers(a.config.CacheDir)
 	if errScrapers != nil {
 		return errScrapers
 	}

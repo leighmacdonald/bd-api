@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -21,7 +22,6 @@ import (
 	"github.com/leighmacdonald/bd-api/models"
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -29,7 +29,7 @@ type nextURLFunc func(scraper *sbScraper, doc *goquery.Selection) string
 
 type parseTimeFunc func(s string) (time.Time, error)
 
-type parserFunc func(doc *goquery.Selection, logger *zap.Logger, timeParser parseTimeFunc) ([]sbRecord, int, error)
+type parserFunc func(doc *goquery.Selection, log *slog.Logger, timeParser parseTimeFunc) ([]sbRecord, int, error)
 
 func (a *App) runScrapers(ctx context.Context) {
 	if a.config.ProxiesEnabled {
@@ -39,7 +39,9 @@ func (a *App) runScrapers(ctx context.Context) {
 
 		for _, scraper := range a.scrapers {
 			if errProxies := a.pm.setup(scraper.Collector, &a.config); errProxies != nil {
-				a.log.Panic("Failed to setup proxies", zap.Error(errProxies))
+				slog.Error("Failed to setup proxies", ErrAttr(errProxies))
+
+				return
 			}
 		}
 	}
@@ -160,7 +162,7 @@ type sbScraper struct {
 	*colly.Collector
 	name      models.Site
 	theme     string
-	log       *zap.Logger
+	log       *slog.Logger
 	curPage   int
 	results   []sbRecord
 	queue     *queue.Queue
@@ -173,9 +175,9 @@ type sbScraper struct {
 	parseTIme parseTimeFunc
 }
 
-func createScrapers(logger *zap.Logger, cacheDir string) ([]*sbScraper, error) {
-	// scraperConstructors:= []func(logger *zap.Logger, cacheDir string) (*sbScraper, error){newProGamesZetScraper}.
-	scraperConstructors := []func(logger *zap.Logger, cacheDir string) (*sbScraper, error){
+func createScrapers(cacheDir string) ([]*sbScraper, error) {
+	// scraperConstructors:= []func(cacheDir string) (*sbScraper, error){newProGamesZetScraper}.
+	scraperConstructors := []func(cacheDir string) (*sbScraper, error){
 		new7MauScraper, newAceKillScraper, newAMSGamingScraper, newApeModeScraper, newAstraManiaScraper,
 		newBachuruServasScraper, newBaitedCommunityScraper, newBierwieseScraper, newBigBangGamersScraper,
 		newBioCraftingScraper, newBouncyBallScraper, newCasualFunScraper, newCedaPugScraper, newCSIServersScraper,
@@ -207,7 +209,7 @@ func createScrapers(logger *zap.Logger, cacheDir string) ([]*sbScraper, error) {
 		setupFn := scraperSetupFunc
 
 		errGroup.Go(func() error {
-			scraper, errScraper := setupFn(logger, cacheDir)
+			scraper, errScraper := setupFn(cacheDir)
 			if errScraper != nil {
 				return errScraper
 			}
@@ -228,8 +230,8 @@ func createScrapers(logger *zap.Logger, cacheDir string) ([]*sbScraper, error) {
 }
 
 func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
-	scraper.log.Info("Starting scrape job",
-		zap.String("name", string(scraper.name)), zap.String("theme", scraper.theme))
+	slog.Info("Starting scrape job",
+		slog.String("name", string(scraper.name)), slog.String("theme", scraper.theme))
 
 	lastURL := ""
 	startTime := time.Now()
@@ -238,7 +240,7 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 	scraper.Collector.OnHTML("body", func(element *colly.HTMLElement) {
 		results, errorCount, parseErr := scraper.parser(element.DOM, scraper.log, scraper.parseTIme)
 		if parseErr != nil {
-			scraper.log.Error("Parser returned error", zap.Error(parseErr))
+			slog.Error("Parser returned error", ErrAttr(parseErr))
 
 			return
 		}
@@ -250,7 +252,7 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 		for _, result := range results {
 			pRecord := newPlayerRecord(result.SteamID)
 			if errPlayer := database.playerGetOrCreate(ctx, result.SteamID, &pRecord); errPlayer != nil {
-				scraper.log.Error("failed to get player record", zap.Int64("sid64", result.SteamID.Int64()), zap.Error(errPlayer))
+				slog.Error("failed to get player record", slog.Int64("sid64", result.SteamID.Int64()), ErrAttr(errPlayer))
 
 				continue
 			}
@@ -272,13 +274,13 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 
 			if errBanSave := database.sbBanSave(ctx, &bRecord); errBanSave != nil {
 				if errors.Is(errBanSave, errDuplicate) {
-					scraper.log.Debug("Failed to save ban record (duplicate)",
-						zap.Int64("sid64", pRecord.SteamID.Int64()), zap.Error(errBanSave))
+					slog.Debug("Failed to save ban record (duplicate)",
+						slog.Int64("sid64", pRecord.SteamID.Int64()), ErrAttr(errBanSave))
 
 					continue
 				}
-				scraper.log.Error("Failed to save ban record",
-					zap.Int64("sid64", pRecord.SteamID.Int64()), zap.Error(errBanSave))
+				slog.Error("Failed to save ban record",
+					slog.Int64("sid64", pRecord.SteamID.Int64()), ErrAttr(errBanSave))
 			}
 		}
 		if nextURL != "" && nextURL != lastURL {
@@ -286,28 +288,34 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 			if scraper.sleepTime > 0 {
 				time.Sleep(scraper.sleepTime)
 			}
-			scraper.log.Debug("Visiting next url", zap.String("url", nextURL))
+			slog.Debug("Visiting next url", slog.String("url", nextURL))
 			if errAdd := scraper.queue.AddURL(nextURL); errAdd != nil {
-				scraper.log.Panic("Failed to add queue error", zap.Error(errAdd))
+				slog.Error("Failed to add queue error", ErrAttr(errAdd))
+
+				return
 			}
 		}
 	})
 
 	if errAdd := scraper.queue.AddURL(scraper.url(scraper.startPath)); errAdd != nil {
-		scraper.log.Panic("Failed to add queue error", zap.Error(errAdd))
+		slog.Error("Failed to add queue error", ErrAttr(errAdd))
+
+		return
 	}
 
 	if errRun := scraper.queue.Run(scraper.Collector); errRun != nil {
-		scraper.log.Error("Queue returned error", zap.Error(errRun))
+		slog.Error("Queue returned error", ErrAttr(errRun))
+
+		return
 	}
 
-	scraper.log.Info("Completed scrape job", zap.String("name", string(scraper.name)),
-		zap.Int("valid", len(scraper.results)), zap.Int("skipped", totalErrorCount),
-		zap.Duration("duration", time.Since(startTime)))
+	slog.Info("Completed scrape job", slog.String("name", string(scraper.name)),
+		slog.Int("valid", len(scraper.results)), slog.Int("skipped", totalErrorCount),
+		slog.Duration("duration", time.Since(startTime)))
 }
 
 type scrapeLogger struct {
-	logger *zap.Logger
+	logger *slog.Logger
 	start  time.Time
 }
 
@@ -318,32 +326,33 @@ func (log *scrapeLogger) Init() error {
 }
 
 func (log *scrapeLogger) Event(event *debug.Event) {
-	args := []zap.Field{
-		zap.Uint32("col_id", event.CollectorID),
-		zap.Uint32("req_id", event.RequestID), zap.Duration("duration", time.Since(log.start)),
+	args := []any{
+		slog.Uint64("col_id", uint64(event.CollectorID)),
+		slog.Uint64("req_id", uint64(event.RequestID)),
+		slog.Duration("duration", time.Since(log.start)),
 	}
 
 	u, ok := event.Values["url"]
 	if ok {
-		args = append(args, zap.String("url", u))
+		args = append(args, slog.String("url", u))
 	}
 
 	switch event.Type {
 	case "error":
 		log.logger.Error("Error scraping url", args...)
 	default:
-		args = append(args, zap.String("type", event.Type))
+		args = append(args, slog.String("type", event.Type))
 		log.logger.Debug("Scraped url", args...)
 	}
 }
 
 const defaultStartPath = "index.php?p=banlist"
 
-func newScraperWithTransport(logger *zap.Logger, cacheDir string, name models.Site,
+func newScraperWithTransport(cacheDir string, name models.Site,
 	baseURL string, startPath string, parser parserFunc, nextURL nextURLFunc, parseTime parseTimeFunc,
 	transport http.RoundTripper,
 ) (*sbScraper, error) {
-	scraper, errScraper := newScraper(logger, cacheDir, name, baseURL, startPath, parser, nextURL, parseTime)
+	scraper, errScraper := newScraper(cacheDir, name, baseURL, startPath, parser, nextURL, parseTime)
 	if errScraper != nil {
 		return nil, errScraper
 	}
@@ -353,7 +362,7 @@ func newScraperWithTransport(logger *zap.Logger, cacheDir string, name models.Si
 	return scraper, nil
 }
 
-func newScraper(logger *zap.Logger, cacheDir string, name models.Site, baseURL string,
+func newScraper(cacheDir string, name models.Site, baseURL string,
 	startPath string, parser parserFunc, nextURL nextURLFunc, parseTime parseTimeFunc,
 ) (*sbScraper, error) {
 	const (
@@ -367,8 +376,8 @@ func newScraper(logger *zap.Logger, cacheDir string, name models.Site, baseURL s
 		return nil, errors.Wrap(errURL, "Failed to parse base url")
 	}
 
-	log := logger.Named(string(name))
-	debugLogger := scrapeLogger{logger: log} //nolint:exhaustruct
+	logger := slog.With("name", string(name))
+	debugLogger := scrapeLogger{logger: logger} //nolint:exhaustruct
 
 	reqQueue, errQueue := queue.New(1, &queue.InMemoryQueueStorage{MaxSize: maxQueueSize})
 	if errQueue != nil {
@@ -393,16 +402,16 @@ func newScraper(logger *zap.Logger, cacheDir string, name models.Site, baseURL s
 		startPath: startPath,
 		queue:     reqQueue,
 		curPage:   1,
+		log:       logger,
 		parser:    parser,
 		nextURL:   nextURL,
 		parseTIme: parseTime,
-		log:       log,
 		Collector: collector,
 	}
 
 	scraper.SetRequestTimeout(requestTimeout)
 	scraper.OnRequest(func(r *colly.Request) {
-		scraper.log.Debug("Visiting", zap.String("url", r.URL.String()))
+		slog.Debug("Visiting", slog.String("url", r.URL.String()))
 	})
 	extensions.RandomUserAgent(scraper.Collector)
 
@@ -410,11 +419,11 @@ func newScraper(logger *zap.Logger, cacheDir string, name models.Site, baseURL s
 		DomainGlob:  "*" + parsedURL.Hostname(),
 		RandomDelay: randomDelay,
 	}); errLimit != nil {
-		scraper.log.Panic("Failed to set limit", zap.Error(errLimit))
+		return nil, errors.Wrap(errLimit, "Failed to set limit")
 	}
 
 	scraper.OnError(func(r *colly.Response, err error) {
-		scraper.log.Error("Request error", zap.String("url", r.Request.URL.String()), zap.Error(err))
+		slog.Error("Request error", slog.String("url", r.Request.URL.String()), ErrAttr(err))
 	})
 
 	return &scraper, nil
@@ -657,7 +666,7 @@ func parseWonderlandTime(timeStr string) (time.Time, error) {
 func nextURLFluent(scraper *sbScraper, doc *goquery.Selection) string {
 	nextPage := ""
 	nodes := doc.Find(".pagination a[href]")
-	nodes.EachWithBreak(func(i int, selection *goquery.Selection) bool {
+	nodes.EachWithBreak(func(_ int, selection *goquery.Selection) bool {
 		v := selection.Text()
 		if strings.Contains(strings.ToLower(v), "next") {
 			nextPage, _ = selection.Attr("href")
@@ -751,7 +760,7 @@ func (n normalizer) getMappedKey(s string) (mappedKey, bool) {
 }
 
 // https://github.com/SB-MaterialAdmin/Web/tree/stable-dev
-func parseMaterial(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFunc) ([]sbRecord, int, error) {
+func parseMaterial(doc *goquery.Selection, log *slog.Logger, parseTime parseTimeFunc) ([]sbRecord, int, error) {
 	var (
 		bans      []sbRecord
 		curBan    sbRecord
@@ -761,7 +770,7 @@ func parseMaterial(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeF
 	norm := newNormalizer()
 
 	doc.Find("div.opener .card-body").Each(func(_ int, selection *goquery.Selection) {
-		selection.First().Children().Children().Each(func(i int, selection *goquery.Selection) {
+		selection.First().Children().Children().Each(func(_ int, selection *goquery.Selection) {
 			children := selection.First().Children()
 			first := children.First()
 			second := children.Last()
@@ -788,13 +797,13 @@ func parseMaterial(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeF
 				curBan.setSteam(pts[0])
 			case keyInvokedOn:
 				if errInvoke := curBan.setInvokedOn(parseTime, value); errInvoke != nil {
-					log.Error("failed to set invoke time", zap.String("input", value), zap.Error(errInvoke))
+					log.Error("failed to set invoke time", slog.String("input", value), ErrAttr(errInvoke))
 				}
 			case keyBanLength:
 				curBan.setBanLength(value)
 			case keyExpiredOn:
 				if errExpiration := curBan.setExpiredOn(parseTime, value); errExpiration != nil {
-					log.Error("failed to set expiration time", zap.String("input", value), zap.Error(errExpiration))
+					log.Error("failed to set expiration time", slog.String("input", value), ErrAttr(errExpiration))
 				}
 			case keyReason:
 				curBan.setReason(value)
@@ -813,7 +822,7 @@ func parseMaterial(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeF
 }
 
 // https://github.com/brhndursun/SourceBans-StarTheme
-func parseStar(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFunc) ([]sbRecord, int, error) {
+func parseStar(doc *goquery.Selection, log *slog.Logger, parseTime parseTimeFunc) ([]sbRecord, int, error) {
 	const expectedNodes = 3
 
 	var (
@@ -867,13 +876,13 @@ func parseStar(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFunc)
 				curBan.setSteam(pts[0])
 			case keyInvokedOn:
 				if errInvoke := curBan.setInvokedOn(parseTime, value); errInvoke != nil {
-					log.Error("failed to set invoke time", zap.String("input", value), zap.Error(errInvoke))
+					log.Error("failed to set invoke time", slog.String("input", value), ErrAttr(errInvoke))
 				}
 			case keyBanLength:
 				curBan.setBanLength(value)
 			case keyExpiredOn:
 				if errExpiration := curBan.setExpiredOn(parseTime, value); errExpiration != nil {
-					log.Error("failed to set expiration time", zap.String("input", value), zap.Error(errExpiration))
+					log.Error("failed to set expiration time", slog.String("input", value), ErrAttr(errExpiration))
 				}
 
 			case keyReason:
@@ -892,7 +901,7 @@ func parseStar(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFunc)
 }
 
 // https://github.com/aXenDeveloper/sourcebans-web-theme-fluent
-func parseFluent(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFunc) ([]sbRecord, int, error) {
+func parseFluent(doc *goquery.Selection, log *slog.Logger, parseTime parseTimeFunc) ([]sbRecord, int, error) {
 	var (
 		bans      []sbRecord
 		curBan    sbRecord
@@ -901,7 +910,7 @@ func parseFluent(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFun
 
 	norm := newNormalizer()
 
-	doc.Find("ul.ban_list_detal li").Each(func(i int, selection *goquery.Selection) {
+	doc.Find("ul.ban_list_detal li").Each(func(_ int, selection *goquery.Selection) {
 		child := selection.Children()
 		key := norm.key(child.First().Contents().Text())
 		value := strings.TrimSpace(child.Last().Contents().Text())
@@ -919,13 +928,13 @@ func parseFluent(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFun
 			curBan.setSteam(pts[0])
 		case keyInvokedOn:
 			if errInvoke := curBan.setInvokedOn(parseTime, value); errInvoke != nil {
-				log.Error("failed to set invoke time", zap.String("input", value), zap.Error(errInvoke))
+				log.Error("failed to set invoke time", slog.String("input", value), ErrAttr(errInvoke))
 			}
 		case keyBanLength:
 			curBan.setBanLength(value)
 		case keyExpiredOn:
 			if errExpiration := curBan.setExpiredOn(parseTime, value); errExpiration != nil {
-				log.Error("failed to set expiration time", zap.String("input", value), zap.Error(errExpiration))
+				log.Error("failed to set expiration time", slog.String("input", value), ErrAttr(errExpiration))
 			}
 		case keyReason:
 			curBan.setReason(value)
@@ -941,7 +950,7 @@ func parseFluent(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFun
 	return bans, skipCount, nil
 }
 
-func parseDefault(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFunc) ([]sbRecord, int, error) {
+func parseDefault(doc *goquery.Selection, log *slog.Logger, parseTime parseTimeFunc) ([]sbRecord, int, error) {
 	var (
 		bans     []sbRecord
 		curBan   sbRecord
@@ -952,7 +961,7 @@ func parseDefault(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFu
 
 	norm := newNormalizer()
 
-	doc.Find("#banlist .listtable table tr td").Each(func(i int, selection *goquery.Selection) {
+	doc.Find("#banlist .listtable table tr td").Each(func(_ int, selection *goquery.Selection) {
 		value := strings.TrimSpace(selection.Text())
 
 		if !isValue {
@@ -1005,13 +1014,13 @@ func parseDefault(doc *goquery.Selection, log *zap.Logger, parseTime parseTimeFu
 			curBan.setSteam(pts[0])
 		case keyInvokedOn:
 			if errInvoke := curBan.setInvokedOn(parseTime, value); errInvoke != nil {
-				log.Error("failed to set invoke time", zap.String("input", value), zap.Error(errInvoke))
+				log.Error("failed to set invoke time", slog.String("input", value), ErrAttr(errInvoke))
 			}
 		case keyBanLength:
 			curBan.setBanLength(value)
 		case keyExpiredOn:
 			if errExpiration := curBan.setExpiredOn(parseTime, value); errExpiration != nil {
-				log.Error("failed to set expiration time", zap.String("input", value), zap.Error(errExpiration))
+				log.Error("failed to set expiration time", slog.String("input", value), ErrAttr(errExpiration))
 			}
 		case keyReason:
 			curBan.setReason(value)

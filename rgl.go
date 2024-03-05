@@ -2,26 +2,27 @@ package main
 
 import (
 	"context"
+	"log/slog"
+	"strings"
+	"time"
+
 	"github.com/leighmacdonald/rgl"
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
-	"strings"
-	"time"
 )
 
 // Current issues:
 // - Sometime api just fails on the first attempt
-// - Empty value
-func getRGL(ctx context.Context, log *zap.Logger, sid64 steamid.SID64) ([]Season, error) {
+// - Empty value.
+func getRGL(ctx context.Context, log *slog.Logger, sid64 steamid.SID64) ([]Season, error) {
 	startTime := time.Now()
-
-	_, errProfile := rgl.Profile(ctx, sid64)
+	client := NewHTTPClient()
+	_, errProfile := rgl.Profile(ctx, client, sid64)
 	if errProfile != nil {
 		return nil, errors.Wrap(errProfile, "Failed tp fetch profile")
 	}
 
-	teams, errTeams := rgl.ProfileTeams(ctx, sid64)
+	teams, errTeams := rgl.ProfileTeams(ctx, client, sid64)
 	if errTeams != nil {
 		return nil, errors.Wrap(errTeams, "Failed to fetch teams")
 	}
@@ -33,7 +34,7 @@ func getRGL(ctx context.Context, log *zap.Logger, sid64 steamid.SID64) ([]Season
 
 		var season Season
 
-		seasonInfo, errSeason := rgl.Season(ctx, team.SeasonID)
+		seasonInfo, errSeason := rgl.Season(ctx, client, team.SeasonID)
 		if errSeason != nil {
 			return nil, errors.Wrap(errSeason, "Failed to fetch seasons")
 		}
@@ -44,13 +45,14 @@ func getRGL(ctx context.Context, log *zap.Logger, sid64 steamid.SID64) ([]Season
 		season.TeamName = team.TeamName
 
 		if seasonInfo.FormatName == "" {
-			if strings.Contains(strings.ToLower(seasonInfo.Name), "sixes") {
+			switch {
+			case strings.Contains(strings.ToLower(seasonInfo.Name), "sixes"):
 				seasonInfo.FormatName = "Sixes"
-			} else if strings.Contains(strings.ToLower(seasonInfo.Name), "prolander") {
+			case strings.Contains(strings.ToLower(seasonInfo.Name), "prolander"):
 				seasonInfo.FormatName = "Prolander"
-			} else if strings.Contains(strings.ToLower(seasonInfo.Name), "hl season") {
+			case strings.Contains(strings.ToLower(seasonInfo.Name), "hl season"):
 				seasonInfo.FormatName = "HL"
-			} else if strings.Contains(strings.ToLower(seasonInfo.Name), "p7 season") {
+			case strings.Contains(strings.ToLower(seasonInfo.Name), "p7 season"):
 				seasonInfo.FormatName = "Prolander"
 			}
 		}
@@ -58,10 +60,10 @@ func getRGL(ctx context.Context, log *zap.Logger, sid64 steamid.SID64) ([]Season
 		season.Format = seasonInfo.FormatName
 		seasons[index] = season
 
-		log.Info("RGL season fetched", zap.Duration("duration", time.Since(seasonStartTime)))
+		log.Info("RGL season fetched", slog.Duration("duration", time.Since(seasonStartTime)))
 	}
 
-	log.Info("RGL Completed", zap.Duration("duration", time.Since(startTime)))
+	log.Info("RGL Completed", slog.Duration("duration", time.Since(startTime)))
 
 	return seasons, nil
 }

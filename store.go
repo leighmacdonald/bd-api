@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -19,7 +20,6 @@ import (
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 var (
@@ -36,8 +36,8 @@ var (
 	errNoRows    = errors.New("No rows")
 )
 
-func newStore(ctx context.Context, logger *zap.Logger, dsn string) (*pgStore, error) {
-	log := logger.Named("db")
+func newStore(ctx context.Context, dsn string) (*pgStore, error) {
+	log := slog.With(slog.String("name", "db"))
 	cfg, errConfig := pgxpool.ParseConfig(dsn)
 
 	if errConfig != nil {
@@ -72,7 +72,7 @@ func newStore(ctx context.Context, logger *zap.Logger, dsn string) (*pgStore, er
 
 type pgStore struct {
 	dsn  string
-	log  *zap.Logger
+	log  *slog.Logger
 	pool *pgxpool.Pool
 }
 
@@ -363,7 +363,7 @@ func (db *pgStore) playerRecordSave(ctx context.Context, record *PlayerRecord) e
 	defer func() {
 		if !success {
 			if errRollback := transaction.Rollback(ctx); errRollback != nil {
-				db.log.Error("Failed to rollback player transaction", zap.Error(errRollback))
+				db.log.Error("Failed to rollback player transaction", ErrAttr(errRollback))
 			}
 		}
 	}()

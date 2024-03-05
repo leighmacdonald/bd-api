@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log/slog"
 	"net/http"
 	"runtime"
 	"strings"
@@ -10,7 +11,6 @@ import (
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 const funcSize = 10
@@ -31,7 +31,7 @@ func newAPIErr(err error) apiErr {
 	return apiErr{Error: err.Error()}
 }
 
-func getSteamIDS(ctx *gin.Context) (steamid.Collection, bool) {
+func getSteamIDs(ctx *gin.Context) (steamid.Collection, bool) {
 	steamIDQuery, ok := ctx.GetQuery("steamids")
 	if !ok {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, newAPIErr(ErrInvalidQueryParams))
@@ -39,7 +39,7 @@ func getSteamIDS(ctx *gin.Context) (steamid.Collection, bool) {
 		return nil, false
 	}
 
-	var validIds steamid.Collection
+	var validIDs steamid.Collection
 
 	for _, steamID := range strings.Split(steamIDQuery, ",") {
 		sid64 := steamid.New(steamID)
@@ -51,7 +51,7 @@ func getSteamIDS(ctx *gin.Context) (steamid.Collection, bool) {
 
 		unique := true
 
-		for _, knownID := range validIds {
+		for _, knownID := range validIDs {
 			if knownID == sid64 {
 				unique = false
 
@@ -60,24 +60,24 @@ func getSteamIDS(ctx *gin.Context) (steamid.Collection, bool) {
 		}
 
 		if unique {
-			validIds = append(validIds, sid64)
+			validIDs = append(validIDs, sid64)
 		}
 	}
 
-	if len(validIds) > maxResults {
+	if len(validIDs) > maxResults {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, newAPIErr(ErrTooMany))
 
 		return nil, false
 	}
 
-	return validIds, true
+	return validIDs, true
 }
 
 func (a *App) handleGetFriendList() gin.HandlerFunc {
 	encoder := newStyleEncoder()
 
 	return func(ctx *gin.Context) {
-		ids, ok := getSteamIDS(ctx)
+		ids, ok := getSteamIDs(ctx)
 		if !ok {
 			return
 		}
@@ -87,12 +87,13 @@ func (a *App) handleGetFriendList() gin.HandlerFunc {
 		})
 	}
 }
+
 func (a *App) handleGetComp() gin.HandlerFunc {
-	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
+	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 	encoder := newStyleEncoder()
 
 	return func(ctx *gin.Context) {
-		ids, ok := getSteamIDS(ctx)
+		ids, ok := getSteamIDs(ctx)
 		if !ok {
 			return
 		}
@@ -113,11 +114,11 @@ func (a *App) handleGetComp() gin.HandlerFunc {
 }
 
 func (a *App) handleGetSummary() gin.HandlerFunc {
-	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
+	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 	encoder := newStyleEncoder()
 
 	return func(ctx *gin.Context) {
-		ids, ok := getSteamIDS(ctx)
+		ids, ok := getSteamIDs(ctx)
 		if !ok {
 			return
 		}
@@ -125,7 +126,7 @@ func (a *App) handleGetSummary() gin.HandlerFunc {
 		summaries, errSum := a.getSteamSummaries(ctx, ids)
 
 		if errSum != nil || len(ids) != len(summaries) {
-			log.Error("Failed to fetch summary", zap.Error(errSum))
+			log.Error("Failed to fetch summary", ErrAttr(errSum))
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, ErrLoadFailed)
 
 			return
@@ -138,18 +139,18 @@ func (a *App) handleGetSummary() gin.HandlerFunc {
 }
 
 func (a *App) handleGetBans() gin.HandlerFunc {
-	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
+	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 	encoder := newStyleEncoder()
 
 	return func(ctx *gin.Context) {
-		ids, ok := getSteamIDS(ctx)
+		ids, ok := getSteamIDs(ctx)
 		if !ok {
 			return
 		}
 
 		bans, errBans := steamweb.GetPlayerBans(ctx, ids)
 		if errBans != nil || len(ids) != len(bans) {
-			log.Error("Failed to fetch player bans", zap.Error(errBans))
+			log.Error("Failed to fetch player bans", ErrAttr(errBans))
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrLoadFailed)
 
 			return
@@ -162,18 +163,18 @@ func (a *App) handleGetBans() gin.HandlerFunc {
 }
 
 func (a *App) handleGetProfile() gin.HandlerFunc {
-	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
+	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 	encoder := newStyleEncoder()
 
 	return func(ctx *gin.Context) {
-		ids, ok := getSteamIDS(ctx)
+		ids, ok := getSteamIDs(ctx)
 		if !ok {
 			return
 		}
 
 		profiles, errProfile := a.loadProfiles(ctx, ids)
 		if errProfile != nil || len(profiles) == 0 {
-			log.Error("Failed to load profile", zap.Error(errProfile))
+			log.Error("Failed to load profile", ErrAttr(errProfile))
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrLoadFailed)
 
 			return
@@ -186,18 +187,18 @@ func (a *App) handleGetProfile() gin.HandlerFunc {
 }
 
 func (a *App) handleGetSourceBansMany() gin.HandlerFunc {
-	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
+	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 	encoder := newStyleEncoder()
 
 	return func(ctx *gin.Context) {
-		ids, ok := getSteamIDS(ctx)
+		ids, ok := getSteamIDs(ctx)
 		if !ok {
 			return
 		}
 
 		bans, errBans := a.db.sbGetBansBySID(ctx, ids)
 		if errBans != nil {
-			log.Error("Failed to query bans from database", zap.Error(errBans))
+			log.Error("Failed to query bans from database", ErrAttr(errBans))
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
 
 			return
@@ -210,7 +211,7 @@ func (a *App) handleGetSourceBansMany() gin.HandlerFunc {
 }
 
 func (a *App) handleGetSourceBans() gin.HandlerFunc {
-	log := a.log.Named(runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name())
+	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 	encoder := newStyleEncoder()
 
 	return func(ctx *gin.Context) {
@@ -221,7 +222,7 @@ func (a *App) handleGetSourceBans() gin.HandlerFunc {
 
 		bans, errBans := a.db.sbGetBansBySID(ctx, steamid.Collection{sid})
 		if errBans != nil {
-			log.Error("Failed to query bans from database", zap.Error(errBans))
+			log.Error("Failed to query bans from database", ErrAttr(errBans))
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
 
 			return
