@@ -12,28 +12,29 @@ jobs:
     environment: master
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go 1.x
-        uses: actions/setup-go@v3
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v4
         with:
           go-version: 'stable'
-
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v3
 
       - name: Install Analyzer Dependencies
         run: make check_deps
 
-      - name: Lint golangci-lint
-        run: make lint_golangci
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: 'latest'
+          args: --timeout=10m
 
   staticcheck:
     runs-on: ubuntu-20.04
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
         with:
           go-version: 'stable'
       - run: go install honnef.co/go/tools/cmd/staticcheck@latest
-      - uses: actions/checkout@v3
       - run: make static
 
   test:
@@ -42,11 +43,8 @@ jobs:
     environment: master
     needs: [lint, staticcheck]
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - run: git fetch --force --tags
-      - uses: actions/setup-go@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
         with:
           go-version: 'stable'
           cache: true
