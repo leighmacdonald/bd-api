@@ -1,5 +1,4 @@
-// Package models provides exported models that can be used by client applications.
-package models
+package main
 
 import (
 	"time"
@@ -7,8 +6,6 @@ import (
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 )
-
-// http://delfy.tk/sourcebans/index.php?p=banlist.
 
 type Site string
 

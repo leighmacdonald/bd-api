@@ -12,7 +12,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-type proxyConfig struct {
+type proxyContext struct {
 	Username   string `mapstructure:"username"`
 	RemoteAddr string `mapstructure:"remote_addr"`
 	LocalAddr  string `mapstructure:"local_addr"`
@@ -22,19 +22,19 @@ type proxyConfig struct {
 }
 
 type appConfig struct {
-	ListenAddr               string         `mapstructure:"listen_addr"`
-	SteamAPIKey              string         `mapstructure:"steam_api_key"`
-	DSN                      string         `mapstructure:"dsn"`
-	RunMode                  string         `mapstructure:"run_mode"`
-	LogLevel                 string         `mapstructure:"log_level"`
-	LogFileEnabled           bool           `mapstructure:"log_file_enabled"`
-	LogFilePath              string         `mapstructure:"log_file_path"`
-	SourcebansScraperEnabled bool           `mapstructure:"sourcebans_scraper_enabled"`
-	ProxiesEnabled           bool           `mapstructure:"proxies_enabled"`
-	Proxies                  []*proxyConfig `mapstructure:"proxies"`
-	PrivateKeyPath           string         `mapstructure:"private_key_path"`
-	EnableCache              bool           `mapstructure:"enable_cache"`
-	CacheDir                 string         `mapstructure:"cache_dir"`
+	ListenAddr               string          `mapstructure:"listen_addr"`
+	SteamAPIKey              string          `mapstructure:"steam_api_key"`
+	DSN                      string          `mapstructure:"dsn"`
+	RunMode                  string          `mapstructure:"run_mode"`
+	LogLevel                 string          `mapstructure:"log_level"`
+	LogFileEnabled           bool            `mapstructure:"log_file_enabled"`
+	LogFilePath              string          `mapstructure:"log_file_path"`
+	SourcebansScraperEnabled bool            `mapstructure:"sourcebans_scraper_enabled"`
+	ProxiesEnabled           bool            `mapstructure:"proxies_enabled"`
+	Proxies                  []*proxyContext `mapstructure:"proxies"`
+	PrivateKeyPath           string          `mapstructure:"private_key_path"`
+	EnableCache              bool            `mapstructure:"enable_cache"`
+	CacheDir                 string          `mapstructure:"cache_dir"`
 }
 
 func makeSigner(keyPath string) (ssh.Signer, error) { //nolint:ireturn

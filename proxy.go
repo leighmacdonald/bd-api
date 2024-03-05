@@ -15,11 +15,11 @@ import (
 )
 
 type proxyManager struct {
-	proxies map[string]*proxyConfig
+	proxies map[string]*proxyContext
 }
 
 func newProxyManager() *proxyManager {
-	return &proxyManager{proxies: map[string]*proxyConfig{}}
+	return &proxyManager{proxies: map[string]*proxyContext{}}
 }
 
 func (p *proxyManager) start(config *appConfig) {
@@ -27,7 +27,7 @@ func (p *proxyManager) start(config *appConfig) {
 	for _, serverCfg := range config.Proxies {
 		waitGroup.Add(1)
 
-		go func(cfg *proxyConfig) {
+		go func(cfg *proxyContext) {
 			sshConf := ssh.ClientConfig{User: cfg.Username, Auth: []ssh.AuthMethod{ //nolint:exhaustruct
 				ssh.PublicKeys(cfg.signer),
 			}, HostKeyCallback: ssh.InsecureIgnoreHostKey()} //nolint:gosec
@@ -83,7 +83,7 @@ func (p *proxyManager) stop() {
 	for _, curProxy := range p.proxies {
 		waitGroup.Add(1)
 
-		go func(proxyConf *proxyConfig) {
+		go func(proxyConf *proxyContext) {
 			defer waitGroup.Done()
 
 			if errClose := proxyConf.conn.Close(); errClose != nil {

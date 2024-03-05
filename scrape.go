@@ -19,7 +19,6 @@ import (
 	"github.com/gocolly/colly/debug"
 	"github.com/gocolly/colly/extensions"
 	"github.com/gocolly/colly/queue"
-	"github.com/leighmacdonald/bd-api/models"
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
@@ -31,14 +30,33 @@ type parseTimeFunc func(s string) (time.Time, error)
 
 type parserFunc func(doc *goquery.Selection, log *slog.Logger, timeParser parseTimeFunc) ([]sbRecord, int, error)
 
-func (a *App) runScrapers(ctx context.Context) {
-	if a.config.ProxiesEnabled {
-		a.pm.start(&a.config)
+func initScrapers(ctx context.Context, db *pgStore, cacheDir string) ([]*sbScraper, error) {
+	scrapers, errScrapers := createScrapers(cacheDir)
+	if errScrapers != nil {
+		return nil, errScrapers
+	}
 
-		defer a.pm.stop()
+	for _, scraper := range scrapers {
+		// Attach a site_id to the scraper, so we can keep track of the scrape source
+		var s SbSite
+		if errSave := db.sbSiteGetOrCreate(ctx, scraper.name, &s); errSave != nil {
+			return nil, errors.Wrap(errSave, "Database error")
+		}
 
-		for _, scraper := range a.scrapers {
-			if errProxies := a.pm.setup(scraper.Collector, &a.config); errProxies != nil {
+		scraper.ID = uint32(s.SiteID)
+	}
+
+	return scrapers, nil
+}
+
+func runScrapers(ctx context.Context, config appConfig, pm *proxyManager, db *pgStore, scrapers []*sbScraper) {
+	if config.ProxiesEnabled {
+		pm.start(&config)
+
+		defer pm.stop()
+
+		for _, scraper := range scrapers {
+			if errProxies := pm.setup(scraper.Collector, &config); errProxies != nil {
 				slog.Error("Failed to setup proxies", ErrAttr(errProxies))
 
 				return
@@ -48,20 +66,20 @@ func (a *App) runScrapers(ctx context.Context) {
 
 	waitGroup := &sync.WaitGroup{}
 
-	for _, scraper := range a.scrapers {
+	for _, scraper := range scrapers {
 		waitGroup.Add(1)
 
 		go func(s *sbScraper) {
 			defer waitGroup.Done()
 
-			s.start(ctx, a.db)
+			s.start(ctx, db)
 		}(scraper)
 	}
 
 	waitGroup.Wait()
 }
 
-func (a *App) startScrapers(ctx context.Context) {
+func startScrapers(ctx context.Context, config appConfig, pm *proxyManager, db *pgStore, scrapers []*sbScraper) {
 	const scraperInterval = time.Hour * 24
 	scraperTicker := time.NewTicker(scraperInterval)
 	trigger := make(chan any)
@@ -73,7 +91,7 @@ func (a *App) startScrapers(ctx context.Context) {
 	for {
 		select {
 		case <-trigger:
-			a.runScrapers(ctx)
+			runScrapers(ctx, config, pm, db, scrapers)
 		case <-scraperTicker.C:
 			trigger <- true
 		case <-ctx.Done():
@@ -160,7 +178,7 @@ func (r *sbRecord) setSteam(value string) {
 
 type sbScraper struct {
 	*colly.Collector
-	name      models.Site
+	name      Site
 	theme     string
 	log       *slog.Logger
 	curPage   int
@@ -257,7 +275,7 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 				continue
 			}
 
-			bRecord := models.SbBanRecord{
+			bRecord := SbBanRecord{
 				BanID:       0,
 				SiteName:    "",
 				SiteID:      int(scraper.ID),
@@ -266,7 +284,7 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 				Reason:      result.Reason,
 				Duration:    result.Length,
 				Permanent:   result.Permanent,
-				TimeStamped: models.TimeStamped{
+				TimeStamped: TimeStamped{
 					UpdatedOn: time.Now(),
 					CreatedOn: result.CreatedOn,
 				},
@@ -348,7 +366,7 @@ func (log *scrapeLogger) Event(event *debug.Event) {
 
 const defaultStartPath = "index.php?p=banlist"
 
-func newScraperWithTransport(cacheDir string, name models.Site,
+func newScraperWithTransport(cacheDir string, name Site,
 	baseURL string, startPath string, parser parserFunc, nextURL nextURLFunc, parseTime parseTimeFunc,
 	transport http.RoundTripper,
 ) (*sbScraper, error) {
@@ -362,7 +380,7 @@ func newScraperWithTransport(cacheDir string, name models.Site,
 	return scraper, nil
 }
 
-func newScraper(cacheDir string, name models.Site, baseURL string,
+func newScraper(cacheDir string, name Site, baseURL string,
 	startPath string, parser parserFunc, nextURL nextURLFunc, parseTime parseTimeFunc,
 ) (*sbScraper, error) {
 	const (

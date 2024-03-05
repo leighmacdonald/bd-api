@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/leighmacdonald/bd-api/models"
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
@@ -28,11 +27,11 @@ type Profile struct {
 	BanState   steamweb.PlayerBanState `json:"ban_state"`
 	Seasons    []Season                `json:"seasons"`
 	Friends    []steamweb.Friend       `json:"friends"`
-	SourceBans []models.SbBanRecord    `json:"source_bans"`
+	SourceBans []SbBanRecord           `json:"source_bans"`
 	LogsCount  int64                   `json:"logs_count"`
 }
 
-func (a *App) loadProfiles(ctx context.Context, steamIDs steamid.Collection) ([]Profile, error) {
+func loadProfiles(ctx context.Context, db *pgStore, cache cache, steamIDs steamid.Collection) ([]Profile, error) {
 	var ( //nolint:prealloc
 		waitGroup  = &sync.WaitGroup{}
 		summaries  []steamweb.PlayerSummary
@@ -54,7 +53,7 @@ func (a *App) loadProfiles(ctx context.Context, steamIDs steamid.Collection) ([]
 	go func() {
 		defer waitGroup.Done()
 
-		sbRecords, errSB := a.db.sbGetBansBySID(localCtx, steamIDs)
+		sbRecords, errSB := db.sbGetBansBySID(localCtx, steamIDs)
 		if errSB != nil {
 			slog.Error("Failed to load sourcebans records", ErrAttr(errSB))
 		}
@@ -67,7 +66,7 @@ func (a *App) loadProfiles(ctx context.Context, steamIDs steamid.Collection) ([]
 	go func() {
 		defer waitGroup.Done()
 
-		sum, errSum := a.getSteamSummaries(localCtx, steamIDs)
+		sum, errSum := getSteamSummaries(localCtx, cache, steamIDs)
 		if errSum != nil || len(sum) == 0 {
 			slog.Error("Failed to load player summaries", ErrAttr(errSum))
 		}
@@ -80,7 +79,7 @@ func (a *App) loadProfiles(ctx context.Context, steamIDs steamid.Collection) ([]
 	go func() {
 		defer waitGroup.Done()
 
-		banState, errBanState := a.getSteamBans(localCtx, steamIDs)
+		banState, errBanState := getSteamBans(localCtx, cache, steamIDs)
 		if errBanState != nil || len(banState) == 0 {
 			slog.Error("Failed to load player ban states", ErrAttr(errBanState))
 		}
@@ -93,7 +92,7 @@ func (a *App) loadProfiles(ctx context.Context, steamIDs steamid.Collection) ([]
 	go func() {
 		defer waitGroup.Done()
 
-		friends = a.getSteamFriends(localCtx, steamIDs)
+		friends = getSteamFriends(localCtx, cache, steamIDs)
 	}()
 
 	waitGroup.Wait()
@@ -125,7 +124,7 @@ func (a *App) loadProfiles(ctx context.Context, steamIDs steamid.Collection) ([]
 			profile.SourceBans = records
 		} else {
 			// Dont return null json values
-			profile.SourceBans = []models.SbBanRecord{}
+			profile.SourceBans = []SbBanRecord{}
 		}
 
 		if friendsList, ok := friends[sid]; ok {
@@ -189,7 +188,7 @@ func apiErrorHandler() gin.HandlerFunc {
 
 const defaultTemplate = "index"
 
-func (a *App) createRouter() (*gin.Engine, error) {
+func createRouter(runMode string, db *pgStore, c cache) (*gin.Engine, error) {
 	tmplProfiles, errTmpl := template.New(defaultTemplate).Parse(`<!DOCTYPE html>
 <html>
 <head> 
@@ -202,49 +201,57 @@ func (a *App) createRouter() (*gin.Engine, error) {
 		return nil, errors.Wrap(errTmpl, "Failed to parse html template")
 	}
 
-	gin.SetMode(a.config.RunMode)
+	gin.SetMode(runMode)
 
 	engine := gin.New()
 	engine.SetHTMLTemplate(tmplProfiles)
 	engine.Use(apiErrorHandler(), gin.Recovery())
-	engine.GET("/bans", a.handleGetBans())
-	engine.GET("/summary", a.handleGetSummary())
-	engine.GET("/profile", a.handleGetProfile())
-	engine.GET("/comp", a.handleGetComp())
-	engine.GET("/friends", a.handleGetFriendList())
-	engine.GET("/sourcebans", a.handleGetSourceBansMany())
-	engine.GET("/sourcebans/:steam_id", a.handleGetSourceBans())
+	engine.GET("/bans", handleGetBans())
+	engine.GET("/summary", handleGetSummary(c))
+	engine.GET("/profile", handleGetProfile(db, c))
+	engine.GET("/comp", handleGetComp(c))
+	engine.GET("/friends", handleGetFriendList(c))
+	engine.GET("/sourcebans", handleGetSourceBansMany(db))
+	engine.GET("/sourcebans/:steam_id", handleGetSourceBans(db))
 
 	return engine, nil
 }
 
-func (a *App) startAPI(ctx context.Context, addr string) error {
-	const (
-		apiHandlerTimeout = 10 * time.Second
-		shutdownTimeout   = 10 * time.Second
-	)
+const (
+	apiHandlerTimeout = 10 * time.Second
+	shutdownTimeout   = 10 * time.Second
+)
 
-	defer slog.Info("Service status changed", slog.String("state", "stopped"))
-
+func newHTTPServer(ctx context.Context, router *gin.Engine, addr string) *http.Server {
 	httpServer := &http.Server{ //nolint:exhaustruct
 		Addr:         addr,
-		Handler:      a.router,
+		Handler:      router,
 		ReadTimeout:  apiHandlerTimeout,
 		WriteTimeout: apiHandlerTimeout,
 	}
 
-	slog.Info("Service status changed", slog.String("state", "ready"))
+	return httpServer
+}
+
+func runHTTP(ctx context.Context, router *gin.Engine, listenAddr string) int {
+	httpServer := newHTTPServer(ctx, router, listenAddr)
 
 	go func() {
-		<-ctx.Done()
-
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
-		defer cancel()
-
-		if errShutdown := httpServer.Shutdown(shutdownCtx); errShutdown != nil { //nolint:contextcheck
-			slog.Error("Error shutting down http service", ErrAttr(errShutdown))
+		if errServe := httpServer.ListenAndServe(); errServe != nil && !errors.Is(errServe, http.ErrServerClosed) {
+			slog.Error("error trying to shutdown http service", ErrAttr(errServe))
 		}
 	}()
 
-	return errors.Wrap(httpServer.ListenAndServe(), "Error returned from HTTP server")
+	<-ctx.Done()
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	defer cancel()
+
+	if errShutdown := httpServer.Shutdown(shutdownCtx); errShutdown != nil { //nolint:contextcheck
+		slog.Error("Error shutting down http service", ErrAttr(errShutdown))
+
+		return 1
+	}
+
+	return 0
 }

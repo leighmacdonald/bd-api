@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const defaultHTTPTimeoutMs = 15 * 1000
+const defaultHTTPTimeoutMs = 30 * 1000
 
 // NewHTTPClient allocates a preconfigured *http.Client.
 func NewHTTPClient() *http.Client {

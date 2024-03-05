@@ -41,25 +41,40 @@ func run() int {
 
 	database, errDB := newStore(ctx, config.DSN)
 	if errDB != nil {
-		slog.Error("Failed to connect to database", ErrAttr(errDB))
+		slog.Error("Failed to instantiate database", ErrAttr(errDB))
+
+		return 1
+	}
+
+	if errPing := database.pool.Ping(ctx); errPing != nil {
+		slog.Error("failed to connect to database")
+
+		return 1
 	}
 
 	pm := newProxyManager()
 
-	app, errApp := NewApp(config, database, cacheHandler, pm)
-	if errApp != nil {
-		slog.Error("failed to create app", ErrAttr(errApp))
+	router, errRouter := createRouter(config.RunMode, database, cacheHandler)
+	if errRouter != nil {
+		slog.Error("failed to create router", ErrAttr(errRouter))
 
 		return 1
 	}
 
-	if errStart := app.Start(ctx); errStart != nil {
-		slog.Error("App returned error", ErrAttr(errStart))
+	if config.SourcebansScraperEnabled {
+		scrapers, errScrapers := initScrapers(ctx, database, config.CacheDir)
+		if errScrapers != nil {
+			slog.Error("failed to setup scrapers")
 
-		return 1
+			return 1
+		}
+
+		go startScrapers(ctx, config, pm, database, scrapers)
 	}
 
-	return 0
+	go profileUpdater(ctx, database)
+
+	return runHTTP(ctx, router, config.ListenAddr)
 }
 
 func main() {

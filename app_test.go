@@ -11,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/leighmacdonald/bd-api/models"
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
@@ -280,7 +279,7 @@ func apiTestGetProfile(app *App) func(t *testing.T) {
 	}
 }
 
-func createTestSourcebansRecord(t *testing.T, app *App, sid64 steamid.SID64) models.SbBanRecord {
+func createTestSourcebansRecord(t *testing.T, app *App, sid64 steamid.SID64) SbBanRecord {
 	t.Helper()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
@@ -293,7 +292,7 @@ func createTestSourcebansRecord(t *testing.T, app *App, sid64 steamid.SID64) mod
 		t.Error(errPlayer)
 	}
 
-	site := NewSBSite(models.Site(fmt.Sprintf("Test %s", curTime)))
+	site := NewSBSite(Site(fmt.Sprintf("Test %s", curTime)))
 	if errSave := app.db.sbSiteSave(ctx, &site); errSave != nil {
 		t.Error(errSave)
 	}
@@ -318,7 +317,7 @@ func apiTestGetSourcebans(app *App) func(t *testing.T) {
 			t.Parallel()
 
 			var (
-				banRecords []models.SbBanRecord
+				banRecords []SbBanRecord
 				path       = fmt.Sprintf("/sourcebans/%s", recordA.SteamID)
 			)
 
@@ -349,12 +348,12 @@ func apiTestGetSourcebans(app *App) func(t *testing.T) {
 
 			var (
 				steamID    = steamid.RandSID64()
-				banRecords []models.SbBanRecord
+				banRecords []SbBanRecord
 				path       = fmt.Sprintf("/sourcebans/%s", steamID)
 			)
 
 			require.NoError(t, testReq(t, app, http.MethodGet, path, &banRecords))
-			require.Equal(t, []models.SbBanRecord{}, banRecords)
+			require.Equal(t, []SbBanRecord{}, banRecords)
 		})
 	}
 }

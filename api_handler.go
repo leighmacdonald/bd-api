@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/leighmacdonald/bd-api/models"
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
@@ -73,7 +72,7 @@ func getSteamIDs(ctx *gin.Context) (steamid.Collection, bool) {
 	return validIDs, true
 }
 
-func (a *App) handleGetFriendList() gin.HandlerFunc {
+func handleGetFriendList(cache cache) gin.HandlerFunc {
 	encoder := newStyleEncoder()
 
 	return func(ctx *gin.Context) {
@@ -82,13 +81,13 @@ func (a *App) handleGetFriendList() gin.HandlerFunc {
 			return
 		}
 
-		renderSyntax(ctx, encoder, a.getSteamFriends(ctx, ids), defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
+		renderSyntax(ctx, encoder, getSteamFriends(ctx, cache, ids), defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Steam Summaries",
 		})
 	}
 }
 
-func (a *App) handleGetComp() gin.HandlerFunc {
+func handleGetComp(cache cache) gin.HandlerFunc {
 	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 	encoder := newStyleEncoder()
 
@@ -98,7 +97,7 @@ func (a *App) handleGetComp() gin.HandlerFunc {
 			return
 		}
 
-		compHistory := a.getCompHistory(ctx, ids)
+		compHistory := getCompHistory(ctx, cache, ids)
 
 		if len(ids) != len(compHistory) {
 			log.Warn("Failed to fully fetch comp history")
@@ -113,7 +112,7 @@ func (a *App) handleGetComp() gin.HandlerFunc {
 	}
 }
 
-func (a *App) handleGetSummary() gin.HandlerFunc {
+func handleGetSummary(cache cache) gin.HandlerFunc {
 	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 	encoder := newStyleEncoder()
 
@@ -123,7 +122,7 @@ func (a *App) handleGetSummary() gin.HandlerFunc {
 			return
 		}
 
-		summaries, errSum := a.getSteamSummaries(ctx, ids)
+		summaries, errSum := getSteamSummaries(ctx, cache, ids)
 
 		if errSum != nil || len(ids) != len(summaries) {
 			log.Error("Failed to fetch summary", ErrAttr(errSum))
@@ -138,7 +137,7 @@ func (a *App) handleGetSummary() gin.HandlerFunc {
 	}
 }
 
-func (a *App) handleGetBans() gin.HandlerFunc {
+func handleGetBans() gin.HandlerFunc {
 	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 	encoder := newStyleEncoder()
 
@@ -162,7 +161,7 @@ func (a *App) handleGetBans() gin.HandlerFunc {
 	}
 }
 
-func (a *App) handleGetProfile() gin.HandlerFunc {
+func handleGetProfile(db *pgStore, cache cache) gin.HandlerFunc {
 	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 	encoder := newStyleEncoder()
 
@@ -172,7 +171,7 @@ func (a *App) handleGetProfile() gin.HandlerFunc {
 			return
 		}
 
-		profiles, errProfile := a.loadProfiles(ctx, ids)
+		profiles, errProfile := loadProfiles(ctx, db, cache, ids)
 		if errProfile != nil || len(profiles) == 0 {
 			log.Error("Failed to load profile", ErrAttr(errProfile))
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrLoadFailed)
@@ -186,7 +185,7 @@ func (a *App) handleGetProfile() gin.HandlerFunc {
 	}
 }
 
-func (a *App) handleGetSourceBansMany() gin.HandlerFunc {
+func handleGetSourceBansMany(db *pgStore) gin.HandlerFunc {
 	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 	encoder := newStyleEncoder()
 
@@ -196,7 +195,7 @@ func (a *App) handleGetSourceBansMany() gin.HandlerFunc {
 			return
 		}
 
-		bans, errBans := a.db.sbGetBansBySID(ctx, ids)
+		bans, errBans := db.sbGetBansBySID(ctx, ids)
 		if errBans != nil {
 			log.Error("Failed to query bans from database", ErrAttr(errBans))
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
@@ -210,7 +209,7 @@ func (a *App) handleGetSourceBansMany() gin.HandlerFunc {
 	}
 }
 
-func (a *App) handleGetSourceBans() gin.HandlerFunc {
+func handleGetSourceBans(db *pgStore) gin.HandlerFunc {
 	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 	encoder := newStyleEncoder()
 
@@ -220,7 +219,7 @@ func (a *App) handleGetSourceBans() gin.HandlerFunc {
 			return
 		}
 
-		bans, errBans := a.db.sbGetBansBySID(ctx, steamid.Collection{sid})
+		bans, errBans := db.sbGetBansBySID(ctx, steamid.Collection{sid})
 		if errBans != nil {
 			log.Error("Failed to query bans from database", ErrAttr(errBans))
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
@@ -231,7 +230,7 @@ func (a *App) handleGetSourceBans() gin.HandlerFunc {
 		out, found := bans[sid]
 		if !found || out == nil {
 			// Return empty list instead of null
-			out = []models.SbBanRecord{}
+			out = []SbBanRecord{}
 		}
 
 		renderSyntax(ctx, encoder, out, defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
