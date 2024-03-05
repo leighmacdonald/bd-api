@@ -19,7 +19,6 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
-	"go.uber.org/zap"
 )
 
 func newTestDB(ctx context.Context) (string, *postgres.PostgresContainer, error) {
@@ -81,7 +80,6 @@ func TestApp(t *testing.T) {
 		EnableCache:              false,
 		CacheDir:                 ".",
 	}
-	logger := zap.NewNop()
 
 	t.Cleanup(func() {
 		if errTerm := databaseContainer.Terminate(ctx); errTerm != nil {
@@ -89,12 +87,15 @@ func TestApp(t *testing.T) {
 		}
 	})
 
-	db, errStore := newStore(ctx, logger, dsn)
+	db, errStore := newStore(ctx, dsn)
 	if errStore != nil {
 		panic(errStore)
 	}
 
-	app := NewApp(logger, conf, db, &nopCache{}, newProxyManager(logger))
+	app, errApp := NewApp(conf, db, &nopCache{}, newProxyManager())
+	if errApp != nil {
+		t.Fatal(errApp)
+	}
 
 	if !steamid.KeyConfigured() {
 		t.Skip("BDAPI_STEAM_API_KEY not set")
@@ -108,7 +109,7 @@ func TestApp(t *testing.T) {
 	t.Run("apiTestInvalidQueries", apiTestInvalidQueries(app)) //nolint:paralleltest
 }
 
-func generateIds(count int) steamid.Collection {
+func generateIDs(count int) steamid.Collection {
 	var collection steamid.Collection
 
 	for i := 0; i < count; i++ {
@@ -155,7 +156,7 @@ func apiTestBans(app *App) func(t *testing.T) {
 			t.Parallel()
 
 			var (
-				sids = generateIds(maxResults + 10)
+				sids = generateIDs(maxResults + 10)
 				err  apiErr
 				path = fmt.Sprintf("/bans?steamids=%s", SteamIDStringList(sids))
 			)
@@ -194,7 +195,7 @@ func apiTestInvalidQueries(app *App) func(t *testing.T) {
 			t.Parallel()
 
 			var (
-				sids = generateIds(maxResults + 10)
+				sids = generateIDs(maxResults + 10)
 				err  apiErr
 				path = fmt.Sprintf("/summary?steamids=%s", SteamIDStringList(sids))
 			)
@@ -257,7 +258,7 @@ func apiTestGetProfile(app *App) func(t *testing.T) {
 			sids     = steamid.Collection{testIDb4nny, testIDCamper}
 			path     = fmt.Sprintf("/profile?steamids=%s", SteamIDStringList(sids))
 			profiles []Profile
-			validIds steamid.Collection
+			validIDs steamid.Collection
 		)
 
 		require.NoError(t, testReq(t, app, http.MethodGet, path, &profiles))
@@ -270,12 +271,12 @@ func apiTestGetProfile(app *App) func(t *testing.T) {
 					require.Equal(t, sid, profile.Summary.SteamID)
 					require.Equal(t, sid, profile.BanState.SteamID)
 
-					validIds = append(validIds, profile.Summary.SteamID)
+					validIDs = append(validIDs, profile.Summary.SteamID)
 				}
 			}
 		}
 
-		require.EqualValues(t, sids, validIds)
+		require.EqualValues(t, sids, validIDs)
 	}
 }
 

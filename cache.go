@@ -4,13 +4,13 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"path"
 	"time"
 
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 var errCacheExpired = errors.New("cache expired")
@@ -45,10 +45,9 @@ func (c *nopCache) set(_ string, _ io.Reader) error {
 
 type fsCache struct {
 	cacheDir string
-	log      *zap.Logger
 }
 
-func newFSCache(logger *zap.Logger, cacheDir string) (*fsCache, error) {
+func newFSCache(cacheDir string) (*fsCache, error) {
 	const cachePerms = 0o755
 
 	if !exists(cacheDir) {
@@ -57,7 +56,7 @@ func newFSCache(logger *zap.Logger, cacheDir string) (*fsCache, error) {
 		}
 	}
 
-	return &fsCache{cacheDir: cacheDir, log: logger.Named("fsCache")}, nil
+	return &fsCache{cacheDir: cacheDir}, nil
 }
 
 func (c *fsCache) hashKey(fullURL string) (string, string) {
@@ -83,8 +82,8 @@ func (c *fsCache) get(url string) ([]byte, error) {
 
 	stat, errStat := cachedFile.Stat()
 	if errStat != nil {
-		c.log.Error("Could not stat file",
-			zap.Error(errStat), zap.String("file", fullPath))
+		slog.Error("Could not stat file",
+			ErrAttr(errStat), slog.String("file", fullPath))
 
 		return nil, errCacheExpired
 	}

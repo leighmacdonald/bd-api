@@ -9,6 +9,17 @@ import (
 	"github.com/pkg/errors"
 )
 
+const defaultHTTPTimeoutMs = 15 * 1000
+
+// NewHTTPClient allocates a preconfigured *http.Client.
+func NewHTTPClient() *http.Client {
+	c := &http.Client{ //nolint:exhaustruct
+		Timeout: defaultHTTPTimeoutMs,
+	}
+
+	return c
+}
+
 func get(ctx context.Context, url string, receiver interface{}) (*http.Response, error) {
 	req, errNewReq := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if errNewReq != nil {
@@ -19,7 +30,7 @@ func get(ctx context.Context, url string, receiver interface{}) (*http.Response,
 
 	client := &http.Client{ //nolint:exhaustruct
 		// Don't follow redirects
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
 	}
