@@ -22,51 +22,40 @@ func run() int {
 	loggerClose := MustCreateLogger(config.LogFilePath, config.LogLevel, config.LogFileEnabled)
 	defer loggerClose()
 
-	slog.Info("Starting...")
+	cacheHandler, errCache := createCache(config.EnableCache, config.CacheDir)
+	if errCache != nil {
+		slog.Error("failed to setup cache", ErrAttr(errCache))
 
-	var cacheHandler cache
-
-	if config.EnableCache {
-		localCache, cacheErr := newFSCache(config.CacheDir)
-		if cacheErr != nil {
-			slog.Error("Failed to create fsCache", ErrAttr(cacheErr))
-
-			return 1
-		}
-
-		cacheHandler = localCache
-	} else {
-		cacheHandler = &nopCache{}
+		return 1
 	}
 
 	database, errDB := newStore(ctx, config.DSN)
 	if errDB != nil {
 		slog.Error("Failed to instantiate database", ErrAttr(errDB))
 
-		return 1
+		return 2
 	}
 
 	if errPing := database.pool.Ping(ctx); errPing != nil {
 		slog.Error("failed to connect to database")
 
-		return 1
+		return 3
 	}
-
-	pm := newProxyManager()
 
 	router, errRouter := createRouter(config.RunMode, database, cacheHandler)
 	if errRouter != nil {
 		slog.Error("failed to create router", ErrAttr(errRouter))
 
-		return 1
+		return 4
 	}
 
 	if config.SourcebansScraperEnabled {
+		pm := newProxyManager()
 		scrapers, errScrapers := initScrapers(ctx, database, config.CacheDir)
 		if errScrapers != nil {
 			slog.Error("failed to setup scrapers")
 
-			return 1
+			return 5
 		}
 
 		go startScrapers(ctx, config, pm, database, scrapers)

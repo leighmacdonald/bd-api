@@ -11,6 +11,8 @@ services:
       - postgres
     environment:
       BDAPI_DATABASE_DSN: postgresql://bdapi:bdapi@postgres:5445/bdapi
+    networks:
+      - bdapi_dev_network
     command: ./bd-api serve
   postgres:
     image: postgres:15-bullseye
@@ -21,3 +23,8 @@ services:
       POSTGRES_USER: bdapi
       POSTGRES_DB: bdapi
       POSTGRES_PASSWORD: bdapi
+    networks:
+      - bdapi_dev_network
+
+networks:
+  bdapi_dev_network:
