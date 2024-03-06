@@ -22,44 +22,48 @@ func run() int {
 	loggerClose := MustCreateLogger(config.LogFilePath, config.LogLevel, config.LogFileEnabled)
 	defer loggerClose()
 
-	slog.Info("Starting...")
+	cacheHandler, errCache := createCache(config.EnableCache, config.CacheDir)
+	if errCache != nil {
+		slog.Error("failed to setup cache", ErrAttr(errCache))
 
-	var cacheHandler cache
-
-	if config.EnableCache {
-		localCache, cacheErr := newFSCache(config.CacheDir)
-		if cacheErr != nil {
-			slog.Error("Failed to create fsCache", ErrAttr(cacheErr))
-
-			return 1
-		}
-
-		cacheHandler = localCache
-	} else {
-		cacheHandler = &nopCache{}
+		return 1
 	}
 
 	database, errDB := newStore(ctx, config.DSN)
 	if errDB != nil {
-		slog.Error("Failed to connect to database", ErrAttr(errDB))
+		slog.Error("Failed to instantiate database", ErrAttr(errDB))
+
+		return 2
 	}
 
-	pm := newProxyManager()
+	if errPing := database.pool.Ping(ctx); errPing != nil {
+		slog.Error("failed to connect to database")
 
-	app, errApp := NewApp(config, database, cacheHandler, pm)
-	if errApp != nil {
-		slog.Error("failed to create app", ErrAttr(errApp))
-
-		return 1
+		return 3
 	}
 
-	if errStart := app.Start(ctx); errStart != nil {
-		slog.Error("App returned error", ErrAttr(errStart))
+	router, errRouter := createRouter(config.RunMode, database, cacheHandler)
+	if errRouter != nil {
+		slog.Error("failed to create router", ErrAttr(errRouter))
 
-		return 1
+		return 4
 	}
 
-	return 0
+	if config.SourcebansScraperEnabled {
+		pm := newProxyManager()
+		scrapers, errScrapers := initScrapers(ctx, database, config.CacheDir)
+		if errScrapers != nil {
+			slog.Error("failed to setup scrapers")
+
+			return 5
+		}
+
+		go startScrapers(ctx, config, pm, database, scrapers)
+	}
+
+	go profileUpdater(ctx, database)
+
+	return runHTTP(ctx, router, config.ListenAddr)
 }
 
 func main() {

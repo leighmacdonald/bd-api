@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/leighmacdonald/bd-api/models"
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/stretchr/testify/require"
@@ -47,7 +46,7 @@ func sourceBansStoreTest(database *pgStore) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Parallel()
 
-		var site models.SbSite
+		var site SbSite
 
 		require.Error(t, database.sbSiteGet(context.Background(), 99999, &site))
 
@@ -55,7 +54,7 @@ func sourceBansStoreTest(database *pgStore) func(t *testing.T) {
 
 		require.NoError(t, database.sbSiteSave(context.Background(), &site2))
 
-		var site3 models.SbSite
+		var site3 SbSite
 
 		require.NoError(t, database.sbSiteGet(context.Background(), site2.SiteID, &site3))
 		require.Equal(t, site2.Name, site3.Name)

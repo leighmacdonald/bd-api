@@ -43,6 +43,19 @@ func (c *nopCache) set(_ string, _ io.Reader) error {
 	return nil
 }
 
+func createCache(enabled bool, cacheDir string) (cache, error) {
+	if !enabled {
+		return &nopCache{}, nil
+	}
+
+	localCache, cacheErr := newFSCache(cacheDir)
+	if cacheErr != nil {
+		return nil, cacheErr
+	}
+
+	return localCache, nil
+}
+
 type fsCache struct {
 	cacheDir string
 }

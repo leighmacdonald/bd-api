@@ -16,7 +16,7 @@ import (
 
 type friendMap map[steamid.SID64][]steamweb.Friend
 
-func (a *App) getSteamFriends(ctx context.Context, steamIDs steamid.Collection) friendMap {
+func getSteamFriends(ctx context.Context, cache cache, steamIDs steamid.Collection) friendMap {
 	var (
 		mutex     = sync.RWMutex{}
 		output    = make(friendMap)
@@ -38,7 +38,7 @@ func (a *App) getSteamFriends(ctx context.Context, steamIDs steamid.Collection) 
 				key     = makeKey(KeyFriends, steamID)
 			)
 
-			friendsBody, errCache := a.cache.get(key)
+			friendsBody, errCache := cache.get(key)
 			if errCache == nil {
 				if err := json.Unmarshal(friendsBody, &friends); err != nil {
 					slog.Error("Failed to unmarshal cached result", ErrAttr(err))
@@ -61,7 +61,7 @@ func (a *App) getSteamFriends(ctx context.Context, steamIDs steamid.Collection) 
 				return
 			}
 
-			if errSet := a.cache.set(key, bytes.NewReader(body)); errSet != nil {
+			if errSet := cache.set(key, bytes.NewReader(body)); errSet != nil {
 				slog.Error("Failed to update cache", ErrAttr(errSet), slog.String("site", "ugc"))
 			}
 
@@ -76,7 +76,7 @@ func (a *App) getSteamFriends(ctx context.Context, steamIDs steamid.Collection) 
 	return output
 }
 
-func (a *App) getSteamBans(ctx context.Context, steamIDs steamid.Collection) ([]steamweb.PlayerBanState, error) {
+func getSteamBans(ctx context.Context, cache cache, steamIDs steamid.Collection) ([]steamweb.PlayerBanState, error) {
 	var (
 		banStates []steamweb.PlayerBanState
 		missed    steamid.Collection
@@ -85,7 +85,7 @@ func (a *App) getSteamBans(ctx context.Context, steamIDs steamid.Collection) ([]
 	for _, steamID := range steamIDs {
 		var banState steamweb.PlayerBanState
 
-		summaryBody, errCache := a.cache.get(makeKey(KeyBans, steamID))
+		summaryBody, errCache := cache.get(makeKey(KeyBans, steamID))
 		if errCache == nil {
 			if err := json.Unmarshal(summaryBody, &banState); err != nil {
 				slog.Error("Failed to unmarshal cached result", ErrAttr(err))
@@ -111,7 +111,7 @@ func (a *App) getSteamBans(ctx context.Context, steamIDs steamid.Collection) ([]
 				return nil, errors.Wrap(errMarshal, "Failed to marshal ban state")
 			}
 
-			if errSet := a.cache.set(makeKey(KeyBans, ban.SteamID), bytes.NewReader(body)); errSet != nil {
+			if errSet := cache.set(makeKey(KeyBans, ban.SteamID), bytes.NewReader(body)); errSet != nil {
 				slog.Error("Failed to update cache", ErrAttr(errSet))
 			}
 		}
@@ -122,7 +122,7 @@ func (a *App) getSteamBans(ctx context.Context, steamIDs steamid.Collection) ([]
 	return banStates, nil
 }
 
-func (a *App) getCompHistory(ctx context.Context, steamIDs steamid.Collection) compMap {
+func getCompHistory(ctx context.Context, cache cache, steamIDs steamid.Collection) compMap {
 	var (
 		results   = compMap{}
 		missed    steamid.Collection
@@ -175,7 +175,7 @@ func (a *App) getCompHistory(ctx context.Context, steamIDs steamid.Collection) c
 			continue
 		}
 
-		if errSet := a.cache.set(makeKey(KeyRGL, steamID), bytes.NewReader(body)); errSet != nil {
+		if errSet := cache.set(makeKey(KeyRGL, steamID), bytes.NewReader(body)); errSet != nil {
 			logger.Error("Failed to update cache", ErrAttr(errSet))
 		}
 
@@ -187,7 +187,7 @@ func (a *App) getCompHistory(ctx context.Context, steamIDs steamid.Collection) c
 	return results
 }
 
-func (a *App) getSteamSummaries(ctx context.Context, steamIDs steamid.Collection) ([]steamweb.PlayerSummary, error) {
+func getSteamSummaries(ctx context.Context, cache cache, steamIDs steamid.Collection) ([]steamweb.PlayerSummary, error) {
 	var (
 		summaries []steamweb.PlayerSummary
 		missed    steamid.Collection
@@ -196,7 +196,7 @@ func (a *App) getSteamSummaries(ctx context.Context, steamIDs steamid.Collection
 	for _, steamID := range steamIDs {
 		var summary steamweb.PlayerSummary
 
-		summaryBody, errCache := a.cache.get(makeKey(KeySummary, steamID))
+		summaryBody, errCache := cache.get(makeKey(KeySummary, steamID))
 		if errCache == nil {
 			if err := json.Unmarshal(summaryBody, &summary); err != nil {
 				slog.Error("Failed to unmarshal cached result", ErrAttr(err))
@@ -222,7 +222,7 @@ func (a *App) getSteamSummaries(ctx context.Context, steamIDs steamid.Collection
 				return nil, errors.Wrap(errMarshal, "Failed to marshal friends")
 			}
 
-			if errSet := a.cache.set(makeKey(KeySummary, summary.SteamID), bytes.NewReader(body)); errSet != nil {
+			if errSet := cache.set(makeKey(KeySummary, summary.SteamID), bytes.NewReader(body)); errSet != nil {
 				slog.Error("Failed to update cache", ErrAttr(errSet))
 			}
 		}
@@ -233,7 +233,7 @@ func (a *App) getSteamSummaries(ctx context.Context, steamIDs steamid.Collection
 	return summaries, nil
 }
 
-func (a *App) profileUpdater(ctx context.Context) {
+func profileUpdater(ctx context.Context, db *pgStore) {
 	const (
 		maxQueuedCount = 100
 		updateInterval = time.Second
@@ -252,7 +252,7 @@ func (a *App) profileUpdater(ctx context.Context) {
 		case <-triggerUpdate:
 			var expiredIDs steamid.Collection
 
-			expiredProfiles, errProfiles := a.db.playerGetExpiredProfiles(ctx, maxQueuedCount)
+			expiredProfiles, errProfiles := db.playerGetExpiredProfiles(ctx, maxQueuedCount)
 			if errProfiles != nil {
 				slog.Error("Failed to fetch expired profiles", ErrAttr(errProfiles))
 			}
@@ -262,7 +262,7 @@ func (a *App) profileUpdater(ctx context.Context) {
 			for len(expiredProfiles) < maxQueuedCount {
 				for _, sid64 := range updateQueue {
 					var pr PlayerRecord
-					if errQueued := a.db.playerGetOrCreate(ctx, sid64, &pr); errQueued != nil {
+					if errQueued := db.playerGetOrCreate(ctx, sid64, &pr); errQueued != nil {
 						continue
 					}
 
@@ -313,7 +313,7 @@ func (a *App) profileUpdater(ctx context.Context) {
 					}
 				}
 
-				if errSave := a.db.playerRecordSave(ctx, &prof); errSave != nil {
+				if errSave := db.playerRecordSave(ctx, &prof); errSave != nil {
 					slog.Error("Failed to update profile", slog.Int64("sid", prof.SteamID.Int64()), ErrAttr(errSave))
 				}
 			}
