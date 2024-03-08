@@ -771,3 +771,128 @@ func (db *pgStore) sbGetBansBySID(ctx context.Context, sid64 steamid.Collection)
 
 	return records, nil
 }
+
+func (db *pgStore) bdLists(ctx context.Context) ([]BDList, error) {
+	query, args, errSQL := sb.
+		Select("bd_list_id", "bd_list_name", "url", "game", "deleted", "created_on", "updated_on").
+		From("bd_list").
+		ToSql()
+	if errSQL != nil {
+		return nil, dbErr(errSQL, "Failed to build bd list query")
+	}
+
+	rows, errQuery := db.pool.Query(ctx, query, args...)
+	if errQuery != nil {
+		return nil, dbErr(errQuery, "failed to query lists")
+	}
+
+	defer rows.Close()
+
+	var lists []BDList
+	for rows.Next() {
+		var list BDList
+		if errScan := rows.Scan(&list.BDListID, &list.BDListName, &list.URL, &list.Game, &list.Deleted, &list.CreatedOn, &list.UpdatedOn); errScan != nil {
+			return nil, dbErr(errScan, "failed to scan list result")
+		}
+
+		lists = append(lists, list)
+	}
+
+	return lists, nil
+}
+
+func (db *pgStore) bdListCreate(ctx context.Context, list BDList) (BDList, error) {
+	query, args, errSQL := sb.
+		Insert("bd_list").
+		Columns("bd_list_name", "url", "game", "deleted", "created_on", "updated_on").
+		Values(list.BDListName, list.URL, list.Game, list.Deleted, list.CreatedOn, list.UpdatedOn).
+		Suffix("RETURNING bd_list_id").
+		ToSql()
+	if errSQL != nil {
+		return BDList{}, dbErr(errSQL, "Failed to build bd list create query")
+	}
+
+	if errRow := db.pool.QueryRow(ctx, query, args).Scan(&list.BDListID); errRow != nil {
+		return BDList{}, dbErr(errSQL, "Failed to insert bd list create query")
+	}
+
+	return list, nil
+}
+
+func (db *pgStore) bdListSave(ctx context.Context, list BDList) error {
+	query, args, errSQL := sb.
+		Update("bd_list").
+		SetMap(map[string]interface{}{
+			"bd_list_name": list.BDListName,
+			"url":          list.URL,
+			"game":         list.Game,
+			"deleted":      list.Deleted,
+			"updated_on":   list.UpdatedOn,
+		}).
+		Where(sq.Eq{"bd_list_id": list.BDListID}).
+		ToSql()
+	if errSQL != nil {
+		return dbErr(errSQL, "Failed to build bd list save query")
+	}
+
+	if _, errExec := db.pool.Exec(ctx, query, args...); errExec != nil {
+		return dbErr(errSQL, "Failed to exec bd list save query")
+	}
+
+	return nil
+}
+
+func (db *pgStore) bdListEntries(ctx context.Context, listID int) ([]BDListEntry, error) {
+	query, args, errSQL := sb.
+		Select("bd_list_entry_id", "bd_list_id", "steam_id", "attribute",
+			"last_seen", "last_name", "deleted", "created_on", "updated_on").
+		From("bd_list_entries").
+		Where(sq.Eq{"bd_list_id": listID}).
+		ToSql()
+	if errSQL != nil {
+		return nil, dbErr(errSQL, "Failed to build bd list entries query")
+	}
+
+	rows, errRows := db.pool.Query(ctx, query, args...)
+	if errRows != nil {
+		return nil, dbErr(errSQL, "Failed to execute bd list entries query")
+	}
+
+	defer rows.Close()
+
+	var results []BDListEntry
+
+	for rows.Next() {
+		var e BDListEntry
+		if errScan := rows.Scan(&e.BDListEntryID, &e.BDListID, &e.SteamID, &e.Attribute, &e.LastName,
+			&e.LastName, &e.Deleted, &e.CreatedOn, &e.UpdatedOn); errScan != nil {
+			return nil, dbErr(errSQL, "Failed to scan bd list entry result")
+		}
+		results = append(results, e)
+	}
+
+	return results, nil
+}
+
+func (db *pgStore) bdListEntriesUpdate(ctx context.Context, entry BDListEntry) error {
+	query, args, errSQL := sb.
+		Update("bd_list_entries").
+		SetMap(map[string]interface{}{
+			"attribute":  entry.Attribute,
+			"last_seen":  entry.LastSeen,
+			"last_name":  entry.LastName,
+			"deleted":    entry.Deleted,
+			"updated_on": entry.UpdatedOn,
+		}).
+		Where(sq.Eq{"bd_list_entry_id": entry.BDListEntryID}).
+		ToSql()
+	if errSQL != nil {
+		return dbErr(errSQL, "Failed to build bd list entry update query")
+	}
+
+	if _, errExec := db.pool.Exec(ctx, query, args...); errExec != nil {
+		return dbErr(errSQL, "Failed to execute bd list entry update query")
+	}
+
+	return nil
+}

@@ -61,6 +61,7 @@ func run() int {
 		go startScrapers(ctx, config, pm, database, scrapers)
 	}
 
+	go listUpdater(ctx, database)
 	go profileUpdater(ctx, database)
 
 	return runHTTP(ctx, router, config.ListenAddr)
