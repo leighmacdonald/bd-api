@@ -19,9 +19,12 @@ type CacheKeyType string
 
 const (
 	KeySummary CacheKeyType = "summary"
-	KeyBans    CacheKeyType = "bans"
+
+	KeyBans CacheKeyType = "bans"
+
 	KeyFriends CacheKeyType = "friends"
-	KeyRGL                  = "rgl"
+
+	KeyRGL = "rgl"
 )
 
 func makeKey(keyType CacheKeyType, sid64 steamid.SID64) string {
@@ -30,6 +33,7 @@ func makeKey(keyType CacheKeyType, sid64 steamid.SID64) string {
 
 type cache interface {
 	get(url string) ([]byte, error)
+
 	set(key string, reader io.Reader) error
 }
 
@@ -49,6 +53,7 @@ func createCache(enabled bool, cacheDir string) (cache, error) {
 	}
 
 	localCache, cacheErr := newFSCache(cacheDir)
+
 	if cacheErr != nil {
 		return nil, cacheErr
 	}
@@ -74,6 +79,7 @@ func newFSCache(cacheDir string) (*fsCache, error) {
 
 func (c *fsCache) hashKey(fullURL string) (string, string) {
 	hash := fmt.Sprintf("%x", sha256.Sum256([]byte(fullURL)))
+
 	dir := c.hashedPath(hash)
 
 	return dir, path.Join(dir, hash)
@@ -89,16 +95,21 @@ func (c *fsCache) get(url string) ([]byte, error) {
 	_, fullPath := c.hashKey(url)
 
 	cachedFile, errOpen := os.Open(fullPath)
+
 	if errOpen != nil {
 		return nil, errCacheExpired
 	}
 
 	stat, errStat := cachedFile.Stat()
+
 	if errStat != nil {
+
 		slog.Error("Could not stat file",
+
 			ErrAttr(errStat), slog.String("file", fullPath))
 
 		return nil, errCacheExpired
+
 	}
 
 	defer logCloser(cachedFile)
@@ -108,6 +119,7 @@ func (c *fsCache) get(url string) ([]byte, error) {
 	}
 
 	body, errRead := io.ReadAll(cachedFile)
+
 	if errRead != nil {
 		return nil, errors.Wrap(errRead, "Failed to reach cached file")
 	}
@@ -117,11 +129,13 @@ func (c *fsCache) get(url string) ([]byte, error) {
 
 func (c *fsCache) set(key string, reader io.Reader) error {
 	dir, fullPath := c.hashKey(key)
+
 	if errDir := os.MkdirAll(dir, os.ModePerm); errDir != nil {
 		return errors.Wrap(errDir, "Failed to make cache dir")
 	}
 
 	outFile, errOF := os.Create(fullPath)
+
 	if errOF != nil {
 		return errors.Wrap(errOF, "Error creating cache file")
 	}
@@ -129,6 +143,7 @@ func (c *fsCache) set(key string, reader io.Reader) error {
 	defer logCloser(outFile)
 
 	_, errWrite := io.Copy(outFile, reader)
+
 	if errWrite != nil {
 		return errors.Wrap(errWrite, "Failed to write content to file")
 	}

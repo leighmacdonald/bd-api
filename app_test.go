@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/leighmacdonald/steamid/v3/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
@@ -64,21 +65,21 @@ func TestApp(t *testing.T) {
 		t.Skipf("Failed to bring up testcontainer db: %v", errDB)
 	}
 
-	conf := appConfig{
-		ListenAddr:               "",
-		SteamAPIKey:              "",
-		DSN:                      dsn,
-		RunMode:                  "test",
-		LogLevel:                 "info",
-		LogFileEnabled:           false,
-		LogFilePath:              "",
-		SourcebansScraperEnabled: false,
-		ProxiesEnabled:           false,
-		Proxies:                  nil,
-		PrivateKeyPath:           "",
-		EnableCache:              false,
-		CacheDir:                 ".",
-	}
+	// conf := appConfig{
+	//	ListenAddr:               "",
+	//	SteamAPIKey:              "",
+	//	DSN:                      dsn,
+	//	RunMode:                  "test",
+	//	LogLevel:                 "info",
+	//	LogFileEnabled:           false,
+	//	LogFilePath:              "",
+	//	SourcebansScraperEnabled: false,
+	//	ProxiesEnabled:           false,
+	//	Proxies:                  nil,
+	//	PrivateKeyPath:           "",
+	//	EnableCache:              false,
+	//	CacheDir:                 ".",
+	// }
 
 	t.Cleanup(func() {
 		if errTerm := databaseContainer.Terminate(ctx); errTerm != nil {
@@ -91,21 +92,21 @@ func TestApp(t *testing.T) {
 		panic(errStore)
 	}
 
-	app, errApp := NewApp(conf, db, &nopCache{}, newProxyManager())
-	if errApp != nil {
-		t.Fatal(errApp)
-	}
+	c := &nopCache{}
 
 	if !steamid.KeyConfigured() {
 		t.Skip("BDAPI_STEAM_API_KEY not set")
 	}
 
-	t.Run("apiTestBans", apiTestBans(app))                     //nolint:paralleltest
-	t.Run("apiTestSummary", apiTestSummary(app))               //nolint:paralleltest
-	t.Run("apiTestGetProfile", apiTestGetProfile(app))         //nolint:paralleltest
-	t.Run("apiTestGetSourcebans", apiTestGetSourcebans(app))   //nolint:paralleltest
-	t.Run("apiTestGetFriends", apiTestGetFriends(app))         //nolint:paralleltest
-	t.Run("apiTestInvalidQueries", apiTestInvalidQueries(app)) //nolint:paralleltest
+	router, err := createRouter("test", db, c)
+	require.NoError(t, err)
+
+	t.Run("apiTestBans", apiTestBans(router))                       //nolint:paralleltest
+	t.Run("apiTestSummary", apiTestSummary(router))                 //nolint:paralleltest
+	t.Run("apiTestGetProfile", apiTestGetProfile(router))           //nolint:paralleltest
+	t.Run("apiTestGetSourcebans", apiTestGetSourcebans(router, db)) //nolint:paralleltest
+	t.Run("apiTestGetFriends", apiTestGetFriends(router))           //nolint:paralleltest
+	t.Run("apiTestInvalidQueries", apiTestInvalidQueries(router))   //nolint:paralleltest
 }
 
 func generateIDs(count int) steamid.Collection {
@@ -119,25 +120,19 @@ func generateIDs(count int) steamid.Collection {
 }
 
 //nolint:unparam
-func testReq(t *testing.T, app *App, method string, path string, target any) error {
+func testReq(t *testing.T, router *gin.Engine, method string, path string, target any) error {
 	t.Helper()
 
 	request := httptest.NewRequest(method, path, nil)
 	recorder := httptest.NewRecorder()
 
-	app.router.ServeHTTP(recorder, request)
-
-	body, err := io.ReadAll(recorder.Body)
-	if err != nil {
-		return errors.Wrap(err, "Failed to read test response body")
-	}
-
-	require.NoError(t, json.Unmarshal(body, &target))
+	router.ServeHTTP(recorder, request)
+	require.NoError(t, json.NewDecoder(recorder.Body).Decode(&target))
 
 	return nil
 }
 
-func apiTestBans(app *App) func(t *testing.T) {
+func apiTestBans(router *gin.Engine) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
 			t.Parallel()
@@ -148,7 +143,7 @@ func apiTestBans(app *App) func(t *testing.T) {
 				path      = fmt.Sprintf("/bans?steamids=%s", SteamIDStringList(sids))
 			)
 
-			require.NoError(t, testReq(t, app, http.MethodGet, path, &banStates))
+			require.NoError(t, testReq(t, router, http.MethodGet, path, &banStates))
 			require.Equal(t, len(sids), len(banStates))
 		})
 		t.Run("tooManyError", func(t *testing.T) {
@@ -160,13 +155,13 @@ func apiTestBans(app *App) func(t *testing.T) {
 				path = fmt.Sprintf("/bans?steamids=%s", SteamIDStringList(sids))
 			)
 
-			require.NoError(t, testReq(t, app, http.MethodGet, path, &err))
+			require.NoError(t, testReq(t, router, http.MethodGet, path, &err))
 			require.Equal(t, err.Error, ErrTooMany.Error())
 		})
 	}
 }
 
-func apiTestInvalidQueries(app *App) func(t *testing.T) {
+func apiTestInvalidQueries(router *gin.Engine) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Run("invalidParams", func(t *testing.T) {
 			t.Parallel()
@@ -176,7 +171,7 @@ func apiTestInvalidQueries(app *App) func(t *testing.T) {
 				path = "/summary?blah"
 			)
 
-			require.NoError(t, testReq(t, app, http.MethodGet, path, &err))
+			require.NoError(t, testReq(t, router, http.MethodGet, path, &err))
 			require.Equal(t, err.Error, ErrInvalidQueryParams.Error())
 		})
 		t.Run("invalidSteamID", func(t *testing.T) {
@@ -187,7 +182,7 @@ func apiTestInvalidQueries(app *App) func(t *testing.T) {
 				path = "/summary?steamids=ABC,12X"
 			)
 
-			require.NoError(t, testReq(t, app, http.MethodGet, path, &err))
+			require.NoError(t, testReq(t, router, http.MethodGet, path, &err))
 			require.Equal(t, err.Error, ErrInvalidSteamID.Error())
 		})
 		t.Run("tooManyRequested", func(t *testing.T) {
@@ -199,13 +194,13 @@ func apiTestInvalidQueries(app *App) func(t *testing.T) {
 				path = fmt.Sprintf("/summary?steamids=%s", SteamIDStringList(sids))
 			)
 
-			require.NoError(t, testReq(t, app, http.MethodGet, path, &err))
+			require.NoError(t, testReq(t, router, http.MethodGet, path, &err))
 			require.Equal(t, err.Error, ErrTooMany.Error())
 		})
 	}
 }
 
-func apiTestSummary(app *App) func(t *testing.T) {
+func apiTestSummary(router *gin.Engine) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
 			t.Parallel()
@@ -216,13 +211,13 @@ func apiTestSummary(app *App) func(t *testing.T) {
 				path      = fmt.Sprintf("/summary?steamids=%s", SteamIDStringList(sids))
 			)
 
-			require.NoError(t, testReq(t, app, http.MethodGet, path, &summaries))
+			require.NoError(t, testReq(t, router, http.MethodGet, path, &summaries))
 			require.Equal(t, len(sids), len(summaries))
 		})
 	}
 }
 
-func apiTestGetFriends(app *App) func(t *testing.T) {
+func apiTestGetFriends(router *gin.Engine) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
 			t.Parallel()
@@ -233,7 +228,7 @@ func apiTestGetFriends(app *App) func(t *testing.T) {
 				fmt.Sprintf("/friends?steamids=%s", SteamIDStringList(sids)), nil)
 			recorder := httptest.NewRecorder()
 
-			app.router.ServeHTTP(recorder, request)
+			router.ServeHTTP(recorder, request)
 
 			data, err := io.ReadAll(recorder.Body)
 			if err != nil {
@@ -249,7 +244,7 @@ func apiTestGetFriends(app *App) func(t *testing.T) {
 	}
 }
 
-func apiTestGetProfile(app *App) func(t *testing.T) {
+func apiTestGetProfile(router *gin.Engine) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Parallel()
 
@@ -260,7 +255,7 @@ func apiTestGetProfile(app *App) func(t *testing.T) {
 			validIDs steamid.Collection
 		)
 
-		require.NoError(t, testReq(t, app, http.MethodGet, path, &profiles))
+		require.NoError(t, testReq(t, router, http.MethodGet, path, &profiles))
 
 		for _, sid := range sids {
 			for _, profile := range profiles {
@@ -279,7 +274,7 @@ func apiTestGetProfile(app *App) func(t *testing.T) {
 	}
 }
 
-func createTestSourcebansRecord(t *testing.T, app *App, sid64 steamid.SID64) SbBanRecord {
+func createTestSourcebansRecord(t *testing.T, router *gin.Engine, db *pgStore, sid64 steamid.SID64) SbBanRecord {
 	t.Helper()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
@@ -288,12 +283,12 @@ func createTestSourcebansRecord(t *testing.T, app *App, sid64 steamid.SID64) SbB
 	curTime := time.Now()
 
 	player := newPlayerRecord(sid64)
-	if errPlayer := app.db.playerGetOrCreate(ctx, sid64, &player); errPlayer != nil {
+	if errPlayer := db.playerGetOrCreate(ctx, sid64, &player); errPlayer != nil {
 		t.Error(errPlayer)
 	}
 
 	site := NewSBSite(Site(fmt.Sprintf("Test %s", curTime)))
-	if errSave := app.db.sbSiteSave(ctx, &site); errSave != nil {
+	if errSave := db.sbSiteSave(ctx, &site); errSave != nil {
 		t.Error(errSave)
 	}
 
@@ -301,17 +296,17 @@ func createTestSourcebansRecord(t *testing.T, app *App, sid64 steamid.SID64) SbB
 		curTime.AddDate(-1, 0, 0), time.Hour*24, false)
 	record.CreatedOn = curTime
 
-	if errSave := app.db.sbBanSave(ctx, &record); errSave != nil {
+	if errSave := db.sbBanSave(ctx, &record); errSave != nil {
 		t.Error(errSave)
 	}
 
 	return record
 }
 
-func apiTestGetSourcebans(app *App) func(t *testing.T) {
+func apiTestGetSourcebans(router *gin.Engine, db *pgStore) func(t *testing.T) {
 	return func(t *testing.T) {
-		recordA := createTestSourcebansRecord(t, app, testIDb4nny)
-		recordB := createTestSourcebansRecord(t, app, testIDCamper)
+		recordA := createTestSourcebansRecord(t, router, db, testIDb4nny)
+		recordB := createTestSourcebansRecord(t, router, db, testIDCamper)
 
 		t.Run("single", func(t *testing.T) {
 			t.Parallel()
@@ -321,7 +316,7 @@ func apiTestGetSourcebans(app *App) func(t *testing.T) {
 				path       = fmt.Sprintf("/sourcebans/%s", recordA.SteamID)
 			)
 
-			require.NoError(t, testReq(t, app, http.MethodGet, path, &banRecords))
+			require.NoError(t, testReq(t, router, http.MethodGet, path, &banRecords))
 			require.Equal(t, recordA.BanID, banRecords[0].BanID)
 			require.Equal(t, recordA.SiteName, banRecords[0].SiteName)
 			require.Equal(t, recordA.SiteID, banRecords[0].SiteID)
@@ -340,7 +335,7 @@ func apiTestGetSourcebans(app *App) func(t *testing.T) {
 					SteamIDStringList(steamid.Collection{recordA.SteamID, recordB.SteamID}))
 			)
 
-			require.NoError(t, testReq(t, app, http.MethodGet, path, &banRecords))
+			require.NoError(t, testReq(t, router, http.MethodGet, path, &banRecords))
 			require.Equal(t, 2, len(banRecords))
 		})
 		t.Run("emptyResults", func(t *testing.T) {
@@ -352,7 +347,7 @@ func apiTestGetSourcebans(app *App) func(t *testing.T) {
 				path       = fmt.Sprintf("/sourcebans/%s", steamID)
 			)
 
-			require.NoError(t, testReq(t, app, http.MethodGet, path, &banRecords))
+			require.NoError(t, testReq(t, router, http.MethodGet, path, &banRecords))
 			require.Equal(t, []SbBanRecord{}, banRecords)
 		})
 	}

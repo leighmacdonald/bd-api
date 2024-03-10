@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/leighmacdonald/steamid/v3/steamid"
 	"log/slog"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/leighmacdonald/steamid/v3/steamid"
 )
 
 type FileInfo struct {
@@ -136,17 +137,52 @@ func updateLists(ctx context.Context, lists []BDList, db *pgStore) {
 			slog.Error("failed to update entries", ErrAttr(errUpdate))
 		}
 	}
-
 }
 
-func updateListEntries(ctx context.Context, db *pgStore, mapping listMapping) error {
-	//existingList, errExisting := db.bdListEntries(ctx, mapping.list.BDListID)
-	//if errExisting != nil {
-	//	return errExisting
-	//}
+var (
+	errUpdateEntryFailed = errors.New("failed to commit updated bd entry")
+	errCreateEntryFailed = errors.New("failed to commit created bd entry")
+	errDeleteEntryFailed = errors.New("failed to commit deleted bd entry")
+)
 
-	//newEntries, updatedEntries := findNewAndUpdated(existingList, mapping)
-	//deletedEnties := findDeleted(existingList, mapping)
+func updateListEntries(ctx context.Context, db *pgStore, mapping listMapping) error {
+	existingList, errExisting := db.bdListEntries(ctx, mapping.list.BDListID)
+	if errExisting != nil {
+		return errExisting
+	}
+
+	newEntries, updatedEntries := findNewAndUpdated(existingList, mapping)
+	deletedEntries := findDeleted(existingList, mapping)
+
+	for _, entry := range newEntries {
+		if _, err := db.bdListEntryCreate(ctx, entry); err != nil {
+			return errors.Join(err, errCreateEntryFailed)
+		}
+	}
+	if len(newEntries) > 0 {
+		slog.Info("Added new list entries", slog.Int("count", len(newEntries)),
+			slog.String("list", mapping.list.BDListName), slog.Int("bd_list_id", mapping.list.BDListID))
+	}
+
+	for _, updated := range updatedEntries {
+		if err := db.bdListEntryUpdate(ctx, updated); err != nil {
+			return errors.Join(err, errUpdateEntryFailed)
+		}
+	}
+	if len(updatedEntries) > 0 {
+		slog.Info("Updated list entries", slog.Int("count", len(updatedEntries)),
+			slog.String("list", mapping.list.BDListName), slog.Int("bd_list_id", mapping.list.BDListID))
+	}
+
+	for _, entry := range deletedEntries {
+		if err := db.bdListEntryDelete(ctx, entry.BDListEntryID); err != nil {
+			return errors.Join(err, errDeleteEntryFailed)
+		}
+	}
+	if len(deletedEntries) > 0 {
+		slog.Info("Deleted list entries", slog.Int("count", len(deletedEntries)),
+			slog.String("list", mapping.list.BDListName), slog.Int("bd_list_id", mapping.list.BDListID))
+	}
 
 	return nil
 }
@@ -159,7 +195,7 @@ func findNewAndUpdated(existingList []BDListEntry, mapping listMapping) ([]BDLis
 	)
 
 	for _, player := range mapping.result.Players {
-		sid := steamid.New(player)
+		sid := steamid.New(player.Steamid)
 		if !sid.Valid() {
 			slog.Warn("got invalid steam id", slog.Any("sid", sid))
 			continue
@@ -170,7 +206,9 @@ func findNewAndUpdated(existingList []BDListEntry, mapping listMapping) ([]BDLis
 				found = true
 				lastSeen := time.Unix(int64(player.LastSeen.Time), 0)
 				attrs := strings.Join(player.Attributes, ",")
-				if existing.LastName != player.LastSeen.PlayerName || existing.LastSeen != lastSeen || existing.Attribute != attrs {
+				els := existing.LastSeen.Unix()
+				ls := lastSeen.Unix()
+				if existing.LastName != player.LastSeen.PlayerName || els != ls || existing.Attribute != attrs {
 					u := existing
 					u.LastSeen = lastSeen
 					u.Attribute = attrs
@@ -221,17 +259,26 @@ func findDeleted(existingList []BDListEntry, mapping listMapping) []BDListEntry 
 	return deleted
 }
 
+func doListUpdate(ctx context.Context, db *pgStore) {
+	lists, errLists := db.bdLists(ctx)
+	if errLists != nil {
+		slog.Error("failed to load lists", ErrAttr(errLists))
+		return
+	}
+	updateLists(ctx, lists, db)
+}
+
 func listUpdater(ctx context.Context, db *pgStore) {
 	ticker := time.NewTicker(time.Hour * 6)
+
+	sync.OnceFunc(func() {
+		doListUpdate(ctx, db)
+	})
+
 	for {
 		select {
 		case <-ticker.C:
-			lists, errLists := db.bdLists(ctx)
-			if errLists != nil {
-				slog.Error("failed to load lists", ErrAttr(errLists))
-				continue
-			}
-			updateLists(ctx, lists, db)
+			doListUpdate(ctx, db)
 		case <-ctx.Done():
 			return
 		}

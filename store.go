@@ -874,7 +874,7 @@ func (db *pgStore) bdListEntries(ctx context.Context, listID int) ([]BDListEntry
 	return results, nil
 }
 
-func (db *pgStore) bdListEntriesUpdate(ctx context.Context, entry BDListEntry) error {
+func (db *pgStore) bdListEntryUpdate(ctx context.Context, entry BDListEntry) error {
 	query, args, errSQL := sb.
 		Update("bd_list_entries").
 		SetMap(map[string]interface{}{
@@ -892,6 +892,52 @@ func (db *pgStore) bdListEntriesUpdate(ctx context.Context, entry BDListEntry) e
 
 	if _, errExec := db.pool.Exec(ctx, query, args...); errExec != nil {
 		return dbErr(errSQL, "Failed to execute bd list entry update query")
+	}
+
+	return nil
+}
+
+func (db *pgStore) bdListEntryCreate(ctx context.Context, entry BDListEntry) (BDListEntry, error) {
+	query, args, errSQL := sb.
+		Insert("bd_list_entries").
+		SetMap(map[string]interface{}{
+			"bd_list_id": entry.BDListID,
+			"steam_id":   entry.SteamID,
+			"attribute":  entry.Attribute,
+			"last_seen":  entry.LastSeen,
+			"last_name":  entry.LastName,
+			"deleted":    entry.Deleted,
+			"created_on": entry.CreatedOn,
+			"updated_on": entry.UpdatedOn,
+		}).
+		Suffix("RETURNING bd_list_entry_id").
+		ToSql()
+	if errSQL != nil {
+		return entry, dbErr(errSQL, "Failed to build bd list entry update query")
+	}
+
+	if errScan := db.pool.QueryRow(ctx, query, args...).Scan(&entry.BDListEntryID); errScan != nil {
+		return entry, errScan
+	}
+
+	return entry, nil
+}
+
+func (db *pgStore) bdListEntryDelete(ctx context.Context, entryID int64) error {
+	if entryID <= 0 {
+		return errors.New("invalid id")
+	}
+
+	query, args, errSQL := sb.
+		Delete("bd_list_entries").
+		Where(sq.Eq{"bd_list_entry_id": entryID}).
+		ToSql()
+	if errSQL != nil {
+		return dbErr(errSQL, "Failed to build bd list entry delete query")
+	}
+
+	if _, err := db.pool.Exec(ctx, query, args...); err != nil {
+		return dbErr(err, "failed to execute delete list entry")
 	}
 
 	return nil
