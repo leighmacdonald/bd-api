@@ -50,7 +50,6 @@ func run() int {
 	}
 
 	if config.SourcebansScraperEnabled {
-		pm := newProxyManager()
 		scrapers, errScrapers := initScrapers(ctx, database, config.CacheDir)
 		if errScrapers != nil {
 			slog.Error("failed to setup scrapers")
@@ -58,7 +57,22 @@ func run() int {
 			return 5
 		}
 
-		go startScrapers(ctx, config, pm, database, scrapers)
+		pm := newProxyManager()
+		if config.ProxiesEnabled {
+			pm.start(&config)
+
+			defer pm.stop()
+
+			for _, scraper := range scrapers {
+				if errProxies := pm.setup(scraper.Collector, &config); errProxies != nil {
+					slog.Error("Failed to setup proxies", ErrAttr(errProxies))
+
+					continue
+				}
+			}
+		}
+
+		go startScrapers(ctx, database, scrapers)
 	}
 
 	go listUpdater(ctx, database)

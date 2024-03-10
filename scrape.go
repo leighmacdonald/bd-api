@@ -49,21 +49,7 @@ func initScrapers(ctx context.Context, db *pgStore, cacheDir string) ([]*sbScrap
 	return scrapers, nil
 }
 
-func runScrapers(ctx context.Context, config appConfig, pm *proxyManager, db *pgStore, scrapers []*sbScraper) {
-	if config.ProxiesEnabled {
-		pm.start(&config)
-
-		defer pm.stop()
-
-		for _, scraper := range scrapers {
-			if errProxies := pm.setup(scraper.Collector, &config); errProxies != nil {
-				slog.Error("Failed to setup proxies", ErrAttr(errProxies))
-
-				return
-			}
-		}
-	}
-
+func runScrapers(ctx context.Context, db *pgStore, scrapers []*sbScraper) {
 	waitGroup := &sync.WaitGroup{}
 
 	for _, scraper := range scrapers {
@@ -79,21 +65,18 @@ func runScrapers(ctx context.Context, config appConfig, pm *proxyManager, db *pg
 	waitGroup.Wait()
 }
 
-func startScrapers(ctx context.Context, config appConfig, pm *proxyManager, db *pgStore, scrapers []*sbScraper) {
+func startScrapers(ctx context.Context, db *pgStore, scrapers []*sbScraper) {
 	const scraperInterval = time.Hour * 24
 	scraperTicker := time.NewTicker(scraperInterval)
-	trigger := make(chan any)
 
-	go func() {
-		trigger <- true
-	}()
+	sync.OnceFunc(func() {
+		runScrapers(ctx, db, scrapers)
+	})()
 
 	for {
 		select {
-		case <-trigger:
-			runScrapers(ctx, config, pm, db, scrapers)
 		case <-scraperTicker.C:
-			trigger <- true
+			runScrapers(ctx, db, scrapers)
 		case <-ctx.Done():
 			return
 		}
@@ -270,7 +253,7 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 		for _, result := range results {
 			pRecord := newPlayerRecord(result.SteamID)
 			if errPlayer := database.playerGetOrCreate(ctx, result.SteamID, &pRecord); errPlayer != nil {
-				slog.Error("failed to get player record", slog.Int64("sid64", result.SteamID.Int64()), ErrAttr(errPlayer))
+				slog.Error("failed to get player record", slog.String("sid64", result.SteamID.String()), ErrAttr(errPlayer))
 
 				continue
 			}
@@ -293,12 +276,12 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 			if errBanSave := database.sbBanSave(ctx, &bRecord); errBanSave != nil {
 				if errors.Is(errBanSave, errDuplicate) {
 					slog.Debug("Failed to save ban record (duplicate)",
-						slog.Int64("sid64", pRecord.SteamID.Int64()), ErrAttr(errBanSave))
+						slog.String("sid64", pRecord.SteamID.String()), ErrAttr(errBanSave))
 
 					continue
 				}
 				slog.Error("Failed to save ban record",
-					slog.Int64("sid64", pRecord.SteamID.Int64()), ErrAttr(errBanSave))
+					slog.String("sid64", pRecord.SteamID.String()), ErrAttr(errBanSave))
 			}
 		}
 		if nextURL != "" && nextURL != lastURL {

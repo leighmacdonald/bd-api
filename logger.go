@@ -30,7 +30,7 @@ func MustCreateLogger(debugLogPath string, levelString string, logFileEnabled bo
 	opts := slug.HandlerOptions{ //nolint:exhaustruct
 		HandlerOptions: slog.HandlerOptions{ //nolint:exhaustruct
 			Level:     level,
-			AddSource: true,
+			AddSource: false,
 		},
 	}
 
