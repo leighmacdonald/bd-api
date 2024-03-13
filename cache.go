@@ -9,7 +9,7 @@ import (
 	"path"
 	"time"
 
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/pkg/errors"
 )
 
@@ -27,7 +27,7 @@ const (
 	KeyRGL = "rgl"
 )
 
-func makeKey(keyType CacheKeyType, sid64 steamid.SID64) string {
+func makeKey(keyType CacheKeyType, sid64 steamid.SteamID) string {
 	return fmt.Sprintf("steam-%s-%d", keyType, sid64.Int64())
 }
 

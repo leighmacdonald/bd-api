@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/pkg/errors"
 )
 
@@ -22,16 +22,14 @@ const (
 
 var reUGCRank = regexp.MustCompile(`Season (\d+) (\D+) (\S+)`)
 
-func getUGC(ctx context.Context, steam steamid.SID64) ([]Season, error) {
+func getUGC(ctx context.Context, steam steamid.SteamID) ([]Season, error) {
 	resp, err := get(ctx,
-
 		fmt.Sprintf("https://www.ugcleague.com/players_page.cfm?player_id=%d", steam.Int64()), nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Failed to get ugc response: %v", err)
 	}
 
 	body, errRead := io.ReadAll(resp.Body)
-
 	if errRead != nil {
 		return nil, errors.Wrapf(errRead, "Failed to read response body: %v", errRead)
 	}
@@ -39,7 +37,6 @@ func getUGC(ctx context.Context, steam steamid.SID64) ([]Season, error) {
 	defer logCloser(resp.Body)
 
 	seasons, errSeasons := parseUGCRank(string(body))
-
 	if errSeasons != nil {
 		return seasons, errors.Wrapf(errSeasons, "Failed to parse ugc response: %v", errSeasons)
 	}
@@ -66,31 +63,20 @@ func parseUGCRank(body string) ([]Season, error) {
 				var format string
 
 				switch text {
-
 				case ugcHLHeader:
-
 					format = "highlander"
-
 				case ugc6sHeader:
-
 					format = "6s"
-
 				case ugc4sHeader:
-
 					format = "4s"
-
 				}
 
 				seasons = append(seasons, Season{
-					League: "UGC",
-
-					Division: curRankStr,
-
+					League:      "UGC",
+					Division:    curRankStr,
 					DivisionInt: curRank,
-
-					Format: format,
-
-					TeamName: "",
+					Format:      format,
+					TeamName:    "",
 				})
 			})
 		}
@@ -110,25 +96,15 @@ func parseRankField(field string) (Division, string) {
 		switch results[3] {
 
 		case "Platinum":
-
 			return UGCRankPlatinum, "platinum"
-
 		case "Gold":
-
 			return UGCRankGold, "gold"
-
 		case "Silver":
-
 			return UGCRankSilver, "silver"
-
 		case "Steel":
-
 			return UGCRankSteel, "steel"
-
 		case "Iron":
-
 			return UGCRankIron, "iron"
-
 		}
 	}
 

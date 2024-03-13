@@ -19,7 +19,7 @@ import (
 	"github.com/gocolly/colly/debug"
 	"github.com/gocolly/colly/extensions"
 	"github.com/gocolly/colly/queue"
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 )
@@ -85,7 +85,7 @@ func startScrapers(ctx context.Context, db *pgStore, scrapers []*sbScraper) {
 
 type sbRecord struct {
 	Name      string
-	SteamID   steamid.SID64
+	SteamID   steamid.SteamID
 	Reason    string
 	CreatedOn time.Time
 	Length    time.Duration
@@ -114,7 +114,7 @@ func (r *sbRecord) setInvokedOn(parseTime parseTimeFunc, value string) error {
 func (r *sbRecord) setBanLength(value string) {
 	lowerVal := strings.ToLower(value)
 	if strings.Contains(lowerVal, "unbanned") {
-		r.SteamID = "" // invalidate it
+		r.SteamID = steamid.SteamID{} // invalidate it
 	} else if lowerVal == "permanent" {
 		r.Permanent = true
 	}
@@ -137,7 +137,7 @@ func (r *sbRecord) setExpiredOn(parseTime parseTimeFunc, value string) error {
 
 	if r.Length < 0 {
 		// Some temp ban/actions use a negative duration?, just invalidate these
-		r.SteamID = ""
+		r.SteamID = steamid.SteamID{}
 	}
 
 	return nil
@@ -275,8 +275,8 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 
 			if errBanSave := database.sbBanSave(ctx, &bRecord); errBanSave != nil {
 				if errors.Is(errBanSave, errDuplicate) {
-					slog.Debug("Failed to save ban record (duplicate)",
-						slog.String("sid64", pRecord.SteamID.String()), ErrAttr(errBanSave))
+					// slog.Debug("Failed to save ban record (duplicate)",
+					//	slog.String("sid64", pRecord.SteamID.String()), ErrAttr(errBanSave))
 
 					continue
 				}

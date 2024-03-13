@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
 )
@@ -15,15 +15,11 @@ import (
 const funcSize = 10
 
 var (
-	ErrTooMany = errors.New("Too many results requested")
-
+	ErrTooMany            = errors.New("Too many results requested")
 	ErrInvalidQueryParams = errors.New("Invalid query parameters")
-
-	ErrInvalidSteamID = errors.New("Invalid steamid")
-
-	ErrLoadFailed = errors.New("Could not load remote resource")
-
-	ErrInternalError = errors.New("Internal server error, please try again later")
+	ErrInvalidSteamID     = errors.New("Invalid steamid")
+	ErrLoadFailed         = errors.New("Could not load remote resource")
+	ErrInternalError      = errors.New("Internal server error, please try again later")
 )
 
 type apiErr struct {
@@ -38,51 +34,40 @@ func getSteamIDs(ctx *gin.Context) (steamid.Collection, bool) {
 	steamIDQuery, ok := ctx.GetQuery("steamids")
 
 	if !ok {
-
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, newAPIErr(ErrInvalidQueryParams))
 
 		return nil, false
-
 	}
 
 	var validIDs steamid.Collection
 
 	for _, steamID := range strings.Split(steamIDQuery, ",") {
-
 		sid64 := steamid.New(steamID)
 
 		if !sid64.Valid() {
-
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, newAPIErr(ErrInvalidSteamID))
 
 			return nil, false
-
 		}
 
 		unique := true
-
 		for _, knownID := range validIDs {
 			if knownID == sid64 {
-
 				unique = false
 
 				break
-
 			}
 		}
 
 		if unique {
 			validIDs = append(validIDs, sid64)
 		}
-
 	}
 
 	if len(validIDs) > maxResults {
-
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, newAPIErr(ErrTooMany))
 
 		return nil, false
-
 	}
 
 	return validIDs, true
@@ -99,7 +84,6 @@ func handleGetFriendList(cache cache) gin.HandlerFunc {
 		}
 
 		renderSyntax(ctx, encoder, getSteamFriends(ctx, cache, ids), defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
-
 			Title: "Steam Summaries",
 		})
 	}
@@ -120,13 +104,10 @@ func handleGetComp(cache cache) gin.HandlerFunc {
 		compHistory := getCompHistory(ctx, cache, ids)
 
 		if len(ids) != len(compHistory) {
-
 			log.Warn("Failed to fully fetch comp history")
-
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrLoadFailed)
 
 			return
-
 		}
 
 		renderSyntax(ctx, encoder, compHistory, defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
@@ -151,17 +132,13 @@ func handleGetSummary(cache cache) gin.HandlerFunc {
 		summaries, errSum := getSteamSummaries(ctx, cache, ids)
 
 		if errSum != nil || len(ids) != len(summaries) {
-
 			log.Error("Failed to fetch summary", ErrAttr(errSum))
-
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, ErrLoadFailed)
 
 			return
-
 		}
 
 		renderSyntax(ctx, encoder, summaries, defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
-
 			Title: "Steam Summaries",
 		})
 	}
@@ -182,17 +159,13 @@ func handleGetBans() gin.HandlerFunc {
 		bans, errBans := steamweb.GetPlayerBans(ctx, ids)
 
 		if errBans != nil || len(ids) != len(bans) {
-
 			log.Error("Failed to fetch player bans", ErrAttr(errBans))
-
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrLoadFailed)
 
 			return
-
 		}
 
 		renderSyntax(ctx, encoder, bans, defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
-
 			Title: "Steam Bans",
 		})
 	}
@@ -213,17 +186,13 @@ func handleGetProfile(db *pgStore, cache cache) gin.HandlerFunc {
 		profiles, errProfile := loadProfiles(ctx, db, cache, ids)
 
 		if errProfile != nil || len(profiles) == 0 {
-
 			log.Error("Failed to load profile", ErrAttr(errProfile))
-
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrLoadFailed)
 
 			return
-
 		}
 
 		renderSyntax(ctx, encoder, profiles, defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
-
 			Title: "Profiles",
 		})
 	}
@@ -242,19 +211,14 @@ func handleGetSourceBansMany(db *pgStore) gin.HandlerFunc {
 		}
 
 		bans, errBans := db.sbGetBansBySID(ctx, ids)
-
 		if errBans != nil {
-
 			log.Error("Failed to query bans from database", ErrAttr(errBans))
-
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
 
 			return
-
 		}
 
 		renderSyntax(ctx, encoder, bans, defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
-
 			Title: "Source Bans",
 		})
 	}
@@ -273,27 +237,21 @@ func handleGetSourceBans(db *pgStore) gin.HandlerFunc {
 		}
 
 		bans, errBans := db.sbGetBansBySID(ctx, steamid.Collection{sid})
-
 		if errBans != nil {
-
 			log.Error("Failed to query bans from database", ErrAttr(errBans))
-
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
 
 			return
-
 		}
 
-		out, found := bans[sid]
+		out, found := bans[sid.String()]
 
 		if !found || out == nil {
 			// Return empty list instead of null
-
 			out = []SbBanRecord{}
 		}
 
 		renderSyntax(ctx, encoder, out, defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
-
 			Title: "Source Bans",
 		})
 	}

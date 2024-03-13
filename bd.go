@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 )
 
 type FileInfo struct {
@@ -52,7 +52,7 @@ type BDList struct {
 type BDListEntry struct {
 	BDListEntryID int64
 	BDListID      int
-	SteamID       steamid.SID64
+	SteamID       steamid.SteamID
 	Attribute     string
 	LastSeen      time.Time
 	LastName      string
@@ -112,15 +112,15 @@ func updateLists(ctx context.Context, lists []BDList, db *pgStore) {
 			continue
 		}
 		wg.Add(1)
-		go func(l BDList) {
+		go func(lCtx context.Context, l BDList) {
 			defer wg.Done()
-			bdList, errFetch := fetchList(ctx, client, l)
+			bdList, errFetch := fetchList(lCtx, client, l)
 			if errFetch != nil {
 				errs <- errFetch
 				return
 			}
 			results <- listMapping{list: l, result: bdList}
-		}(list)
+		}(ctx, list)
 	}
 	go func() {
 		wg.Wait()
@@ -143,6 +143,7 @@ var (
 	errUpdateEntryFailed = errors.New("failed to commit updated bd entry")
 	errCreateEntryFailed = errors.New("failed to commit created bd entry")
 	errDeleteEntryFailed = errors.New("failed to commit deleted bd entry")
+	errPlayerGetOrCreate = errors.New("failed to get/create player record")
 )
 
 func updateListEntries(ctx context.Context, db *pgStore, mapping listMapping) error {
@@ -155,6 +156,10 @@ func updateListEntries(ctx context.Context, db *pgStore, mapping listMapping) er
 	deletedEntries := findDeleted(existingList, mapping)
 
 	for _, entry := range newEntries {
+		pr := newPlayerRecord(entry.SteamID)
+		if err := db.playerGetOrCreate(ctx, entry.SteamID, &pr); err != nil {
+			return errors.Join(err, errPlayerGetOrCreate)
+		}
 		if _, err := db.bdListEntryCreate(ctx, entry); err != nil {
 			return errors.Join(err, errCreateEntryFailed)
 		}
@@ -271,9 +276,7 @@ func doListUpdate(ctx context.Context, db *pgStore) {
 func listUpdater(ctx context.Context, db *pgStore) {
 	ticker := time.NewTicker(time.Hour * 6)
 
-	sync.OnceFunc(func() {
-		doListUpdate(ctx, db)
-	})
+	doListUpdate(ctx, db)
 
 	for {
 		select {

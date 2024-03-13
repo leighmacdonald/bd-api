@@ -3,316 +3,181 @@ package main
 import (
 	"time"
 
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 )
 
 type Site string
 
 const (
-	Skial Site = "skial"
-
-	GFL Site = "gfl"
-
-	Spaceship Site = "spaceship"
-
-	UGC Site = "ugc"
-
-	SirPlease Site = "sirplease"
-
-	Vidyagaems Site = "vidyagaems"
-
-	OWL Site = "owl"
-
-	ZMBrasil Site = "zmbrasil"
-
-	Dixigame Site = "dixigame"
-
-	ScrapTF Site = "scraptf"
-
-	Wonderland Site = "wonderland"
-
-	LazyPurple Site = "lazypurple"
-
-	FirePowered Site = "firepowered"
-
-	Harpoon Site = "harpoongaming"
-
-	Panda Site = "panda"
-
-	NeonHeights Site = "neonheights"
-
-	Pancakes Site = "pancakes"
-
-	Loos Site = "loos"
-
-	PubsTF Site = "pubstf"
-
-	ServiLiveCl Site = "servilivecl"
-
-	CutiePie Site = "cutiepie"
-
-	SGGaming Site = "sggaming"
-
-	ApeMode Site = "apemode"
-
-	MaxDB Site = "maxdb"
-
-	SvdosBrothers Site = "svdosbrothers"
-
-	Electric Site = "electric"
-
-	GlobalParadise Site = "globalparadise"
-
+	Skial            Site = "skial"
+	GFL              Site = "gfl"
+	Spaceship        Site = "spaceship"
+	UGC              Site = "ugc"
+	SirPlease        Site = "sirplease"
+	Vidyagaems       Site = "vidyagaems"
+	OWL              Site = "owl"
+	ZMBrasil         Site = "zmbrasil"
+	Dixigame         Site = "dixigame"
+	ScrapTF          Site = "scraptf"
+	Wonderland       Site = "wonderland"
+	LazyPurple       Site = "lazypurple"
+	FirePowered      Site = "firepowered"
+	Harpoon          Site = "harpoongaming"
+	Panda            Site = "panda"
+	NeonHeights      Site = "neonheights"
+	Pancakes         Site = "pancakes"
+	Loos             Site = "loos"
+	PubsTF           Site = "pubstf"
+	ServiLiveCl      Site = "servilivecl"
+	CutiePie         Site = "cutiepie"
+	SGGaming         Site = "sggaming"
+	ApeMode          Site = "apemode"
+	MaxDB            Site = "maxdb"
+	SvdosBrothers    Site = "svdosbrothers"
+	Electric         Site = "electric"
+	GlobalParadise   Site = "globalparadise"
 	SavageServidores Site = "savageservidores"
-
-	CSIServers Site = "csiservers"
-
-	LBGaming Site = "lbgaming"
-
-	FluxTF Site = "fluxtf"
-
-	DarkPyro Site = "darkpyro"
-
-	OpstOnline Site = "opstonline"
-
-	BouncyBall Site = "bouncyball"
-
-	FurryPound Site = "furrypound"
-
-	RetroServers Site = "retroservers"
-
-	SwapShop Site = "swapshop"
-
-	ECJ Site = "ecj"
-
-	JumpAcademy Site = "jumpacademy"
-
-	TF2Ro Site = "tf2ro"
-
-	SameTeem Site = "sameteem"
-
-	PowerFPS Site = "powerfps"
-
-	SevenMau Site = "7mau"
-
-	GhostCap Site = "ghostcap"
-
-	Spectre Site = "spectre"
-
-	DreamFire Site = "dreamfire"
-
-	Setti Site = "setti"
-
-	GunServer Site = "gunserver"
-
-	HellClan Site = "hellclan"
-
-	Sneaks Site = "sneaks"
-
-	Nide Site = "nide"
-
-	AstraMania Site = "astramania"
-
-	TF2Maps Site = "tf2maps"
-
-	PetrolTF Site = "petroltf"
-
-	VaticanCity Site = "vaticancity"
-
-	LazyNeer Site = "lazyneer"
-
-	TheVille Site = "theville"
-
-	Oreon Site = "oreon"
-
-	TriggerHappy Site = "triggerhappy"
-
-	Defusero Site = "defusero"
-
-	Tawerna Site = "tawerna"
-
-	TitanTF Site = "titan"
-
-	DiscFF Site = "discff"
-
-	Otaku Site = "otaku"
-
-	AMSGaming Site = "amsgaming"
-
-	BaitedCommunity Site = "baitedcommunity"
-
-	CedaPug Site = "cedapug"
-
-	GameSites Site = "gamesites"
-
-	BachuruServas Site = "bachuruservas"
-
-	Bierwiese Site = "bierwiese"
-
-	AceKill Site = "acekill"
-
-	Magyarhns Site = "magyarhns"
-
-	GamesTown Site = "gamestown"
-
-	ProGamesZet Site = "progameszet"
-
-	G44 Site = "g44"
-
-	CuteProject Site = "cuteproject"
-
-	PhoenixSource Site = "phoenixsource"
-
-	SlavonServer Site = "slavonserver"
-
-	GetSome Site = "getsome"
-
-	Rushy Site = "rushy"
-
-	MoeVsMachine Site = "moevsmachine"
-
-	Prwh Site = "prwh"
-
-	Vortex Site = "vortex"
-
-	CasualFun Site = "casualfun"
-
-	RandomTF2 Site = "randomtf2"
-
-	PlayersRo Site = "playesro"
-
-	EOTLGaming Site = "eotlgaming"
-
-	BioCrafting Site = "biocrafting"
-
-	BigBangGamers Site = "bigbanggamers"
-
-	EpicZone Site = "epiczone"
-
-	Zubat Site = "zubat"
-
-	Lunario Site = "lunario"
+	CSIServers       Site = "csiservers"
+	LBGaming         Site = "lbgaming"
+	FluxTF           Site = "fluxtf"
+	DarkPyro         Site = "darkpyro"
+	OpstOnline       Site = "opstonline"
+	BouncyBall       Site = "bouncyball"
+	FurryPound       Site = "furrypound"
+	RetroServers     Site = "retroservers"
+	SwapShop         Site = "swapshop"
+	ECJ              Site = "ecj"
+	JumpAcademy      Site = "jumpacademy"
+	TF2Ro            Site = "tf2ro"
+	SameTeem         Site = "sameteem"
+	PowerFPS         Site = "powerfps"
+	SevenMau         Site = "7mau"
+	GhostCap         Site = "ghostcap"
+	Spectre          Site = "spectre"
+	DreamFire        Site = "dreamfire"
+	Setti            Site = "setti"
+	GunServer        Site = "gunserver"
+	HellClan         Site = "hellclan"
+	Sneaks           Site = "sneaks"
+	Nide             Site = "nide"
+	AstraMania       Site = "astramania"
+	TF2Maps          Site = "tf2maps"
+	PetrolTF         Site = "petroltf"
+	VaticanCity      Site = "vaticancity"
+	LazyNeer         Site = "lazyneer"
+	TheVille         Site = "theville"
+	Oreon            Site = "oreon"
+	TriggerHappy     Site = "triggerhappy"
+	Defusero         Site = "defusero"
+	Tawerna          Site = "tawerna"
+	TitanTF          Site = "titan"
+	DiscFF           Site = "discff"
+	Otaku            Site = "otaku"
+	AMSGaming        Site = "amsgaming"
+	BaitedCommunity  Site = "baitedcommunity"
+	CedaPug          Site = "cedapug"
+	GameSites        Site = "gamesites"
+	BachuruServas    Site = "bachuruservas"
+	Bierwiese        Site = "bierwiese"
+	AceKill          Site = "acekill"
+	Magyarhns        Site = "magyarhns"
+	GamesTown        Site = "gamestown"
+	ProGamesZet      Site = "progameszet"
+	G44              Site = "g44"
+	CuteProject      Site = "cuteproject"
+	PhoenixSource    Site = "phoenixsource"
+	SlavonServer     Site = "slavonserver"
+	GetSome          Site = "getsome"
+	Rushy            Site = "rushy"
+	MoeVsMachine     Site = "moevsmachine"
+	Prwh             Site = "prwh"
+	Vortex           Site = "vortex"
+	CasualFun        Site = "casualfun"
+	RandomTF2        Site = "randomtf2"
+	PlayersRo        Site = "playesro"
+	EOTLGaming       Site = "eotlgaming"
+	BioCrafting      Site = "biocrafting"
+	BigBangGamers    Site = "bigbanggamers"
+	EpicZone         Site = "epiczone"
+	Zubat            Site = "zubat"
+	Lunario          Site = "lunario"
 )
 
 type EconBanState int
 
 const (
 	EconBanNone EconBanState = iota
-
 	EconBanProbation
-
 	EconBanBanned
 )
 
 type TimeStamped struct {
 	UpdatedOn time.Time `json:"-"`
-
 	CreatedOn time.Time `json:"created_on"`
 }
 
 type PlayerNameRecord struct {
-	NameID int64 `json:"name_id"`
-
-	SteamID steamid.SID64 `json:"steam_id"`
-
-	PersonaName string `json:"persona_name"`
-
-	CreatedOn time.Time `json:"created_on"`
+	NameID      int64           `json:"name_id"`
+	SteamID     steamid.SteamID `json:"steam_id"`
+	PersonaName string          `json:"persona_name"`
+	CreatedOn   time.Time       `json:"created_on"`
 }
 
 type PlayerAvatarRecord struct {
-	AvatarID int64 `json:"avatar_id"`
-
-	SteamID steamid.SID64 `json:"steam_id"`
-
-	AvatarHash string `json:"avatar_hash"`
-
-	CreatedOn time.Time `json:"created_on"`
+	AvatarID   int64           `json:"avatar_id"`
+	SteamID    steamid.SteamID `json:"steam_id"`
+	AvatarHash string          `json:"avatar_hash"`
+	CreatedOn  time.Time       `json:"created_on"`
 }
 
 type PlayerVanityRecord struct {
-	VanityID int64 `json:"vanity_id"`
-
-	SteamID steamid.SID64 `json:"steam_id"`
-
-	Vanity string `json:"vanity"`
-
-	CreatedOn time.Time `json:"created_on"`
+	VanityID  int64           `json:"vanity_id"`
+	SteamID   steamid.SteamID `json:"steam_id"`
+	Vanity    string          `json:"vanity"`
+	CreatedOn time.Time       `json:"created_on"`
 }
 
 type Player struct {
-	SteamID steamid.SID64 `json:"steam_id"`
-
+	SteamID                  steamid.SteamID          `json:"steam_id"`
 	CommunityVisibilityState steamweb.VisibilityState `json:"community_visibility_state"`
-
-	ProfileState steamweb.ProfileState `json:"profile_state"`
-
-	PersonaName string `json:"persona_name"`
-
-	Vanity string `json:"vanity"`
-
-	AvatarHash string `json:"avatar_hash"`
-
-	PersonaState steamweb.PersonaState `json:"persona_state"`
-
-	RealName string `json:"real_name"`
-
-	TimeCreated time.Time `json:"time_created"`
-
-	LocCountryCode string `json:"loc_country_code"`
-
-	LocStateCode string `json:"loc_state_code"`
-
-	LocCityID int `json:"loc_city_id"`
-
-	CommunityBanned bool `json:"community_banned"`
-
-	VacBanned bool `json:"vac_banned"`
-
-	LastBannedOn time.Time `json:"last_banned_on"`
-
-	GameBans int `json:"game_bans"`
-
-	EconomyBanned EconBanState `json:"economy_banned"`
-
-	LogsTFCount int `json:"logs_tf_count"`
-
-	UGCUpdatedOn time.Time `json:"ugc_updated_on"`
-
-	RGLUpdatedOn time.Time `json:"rgl_updated_on"`
-
-	ETF2LUpdatedOn time.Time `json:"etf2_l_updated_on"`
-
-	LogsTFUpdatedOn time.Time `json:"logs_tf_updated_on"`
-
+	ProfileState             steamweb.ProfileState    `json:"profile_state"`
+	PersonaName              string                   `json:"persona_name"`
+	Vanity                   string                   `json:"vanity"`
+	AvatarHash               string                   `json:"avatar_hash"`
+	PersonaState             steamweb.PersonaState    `json:"persona_state"`
+	RealName                 string                   `json:"real_name"`
+	TimeCreated              time.Time                `json:"time_created"`
+	LocCountryCode           string                   `json:"loc_country_code"`
+	LocStateCode             string                   `json:"loc_state_code"`
+	LocCityID                int                      `json:"loc_city_id"`
+	CommunityBanned          bool                     `json:"community_banned"`
+	VacBanned                bool                     `json:"vac_banned"`
+	LastBannedOn             time.Time                `json:"last_banned_on"`
+	GameBans                 int                      `json:"game_bans"`
+	EconomyBanned            EconBanState             `json:"economy_banned"`
+	LogsTFCount              int                      `json:"logs_tf_count"`
+	UGCUpdatedOn             time.Time                `json:"ugc_updated_on"`
+	RGLUpdatedOn             time.Time                `json:"rgl_updated_on"`
+	ETF2LUpdatedOn           time.Time                `json:"etf2_l_updated_on"`
+	LogsTFUpdatedOn          time.Time                `json:"logs_tf_updated_on"`
 	TimeStamped
 }
 
 type SbBanRecord struct {
-	BanID int `json:"ban_id"`
-
-	SiteName Site `json:"site_name"`
-
-	SiteID int `json:"site_id"`
-
-	PersonaName string `json:"persona_name"`
-
-	SteamID steamid.SID64 `json:"steam_id"`
-
-	Reason string `json:"reason"`
-
-	Duration time.Duration `json:"duration"`
-
-	Permanent bool `json:"permanent"`
-
+	BanID       int             `json:"ban_id"`
+	SiteName    Site            `json:"site_name"`
+	SiteID      int             `json:"site_id"`
+	PersonaName string          `json:"persona_name"`
+	SteamID     steamid.SteamID `json:"steam_id"`
+	Reason      string          `json:"reason"`
+	Duration    time.Duration   `json:"duration"`
+	Permanent   bool            `json:"permanent"`
 	TimeStamped
 }
 
 type SbSite struct {
-	SiteID int `json:"site_id"`
-
-	Name Site `json:"name"`
-
+	SiteID int  `json:"site_id"`
+	Name   Site `json:"name"`
 	TimeStamped
 }

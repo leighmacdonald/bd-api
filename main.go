@@ -10,7 +10,8 @@ import (
 )
 
 func run() int {
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	gCtx := context.Background()
+	ctx, stop := signal.NotifyContext(gCtx, os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
 	var config appConfig
@@ -75,7 +76,7 @@ func run() int {
 		go startScrapers(ctx, database, scrapers)
 	}
 
-	go listUpdater(ctx, database)
+	go listUpdater(gCtx, database)
 	go profileUpdater(ctx, database)
 
 	return runHTTP(ctx, router, config.ListenAddr)

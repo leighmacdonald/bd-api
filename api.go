@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
 )
@@ -25,32 +25,21 @@ const (
 // Profile is a high level meta profile of several services.
 
 type Profile struct {
-	Summary steamweb.PlayerSummary `json:"summary"`
-
-	BanState steamweb.PlayerBanState `json:"ban_state"`
-
-	Seasons []Season `json:"seasons"`
-
-	Friends []steamweb.Friend `json:"friends"`
-
-	SourceBans []SbBanRecord `json:"source_bans"`
-
-	LogsCount int64 `json:"logs_count"`
+	Summary    steamweb.PlayerSummary  `json:"summary"`
+	BanState   steamweb.PlayerBanState `json:"ban_state"`
+	Seasons    []Season                `json:"seasons"`
+	Friends    []steamweb.Friend       `json:"friends"`
+	SourceBans []SbBanRecord           `json:"source_bans"`
+	LogsCount  int64                   `json:"logs_count"`
 }
 
 func loadProfiles(ctx context.Context, db *pgStore, cache cache, steamIDs steamid.Collection) ([]Profile, error) {
 	var ( //nolint:prealloc
-
-		waitGroup = &sync.WaitGroup{}
-
-		summaries []steamweb.PlayerSummary
-
-		bans []steamweb.PlayerBanState
-
-		profiles []Profile
-
-		friends map[steamid.SID64][]steamweb.Friend
-
+		waitGroup  = &sync.WaitGroup{}
+		summaries  []steamweb.PlayerSummary
+		bans       []steamweb.PlayerBanState
+		profiles   []Profile
+		friends    friendMap
 		sourceBans BanRecordMap
 	)
 
@@ -59,7 +48,6 @@ func loadProfiles(ctx context.Context, db *pgStore, cache cache, steamIDs steami
 	}
 
 	localCtx, cancel := context.WithTimeout(ctx, apiTimeout)
-
 	defer cancel()
 
 	waitGroup.Add(1)
@@ -68,7 +56,6 @@ func loadProfiles(ctx context.Context, db *pgStore, cache cache, steamIDs steami
 		defer waitGroup.Done()
 
 		sbRecords, errSB := db.sbGetBansBySID(localCtx, steamIDs)
-
 		if errSB != nil {
 			slog.Error("Failed to load sourcebans records", ErrAttr(errSB))
 		}
@@ -82,7 +69,6 @@ func loadProfiles(ctx context.Context, db *pgStore, cache cache, steamIDs steami
 		defer waitGroup.Done()
 
 		sum, errSum := getSteamSummaries(localCtx, cache, steamIDs)
-
 		if errSum != nil || len(sum) == 0 {
 			slog.Error("Failed to load player summaries", ErrAttr(errSum))
 		}
@@ -96,7 +82,6 @@ func loadProfiles(ctx context.Context, db *pgStore, cache cache, steamIDs steami
 		defer waitGroup.Done()
 
 		banState, errBanState := getSteamBans(localCtx, cache, steamIDs)
-
 		if errBanState != nil || len(banState) == 0 {
 			slog.Error("Failed to load player ban states", ErrAttr(errBanState))
 		}
@@ -124,90 +109,67 @@ func loadProfiles(ctx context.Context, db *pgStore, cache cache, steamIDs steami
 
 		for _, summary := range summaries {
 			if summary.SteamID == sid {
-
 				profile.Summary = summary
 
 				break
-
 			}
 		}
 
 		for _, ban := range bans {
 			if ban.SteamID == sid {
-
 				profile.BanState = ban
 
 				break
-
 			}
 		}
 
-		if records, ok := sourceBans[sid]; ok {
+		if records, ok := sourceBans[sid.String()]; ok {
 			profile.SourceBans = records
 		} else {
 			// Dont return null json values
-
 			profile.SourceBans = []SbBanRecord{}
 		}
 
-		if friendsList, ok := friends[sid]; ok {
+		if friendsList, ok := friends[sid.String()]; ok {
 			profile.Friends = friendsList
 		} else {
 			profile.Friends = []steamweb.Friend{}
 		}
 
 		profile.Seasons = []Season{}
-
 		sort.Slice(profile.Seasons, func(i, j int) bool {
 			return profile.Seasons[i].DivisionInt < profile.Seasons[j].DivisionInt
 		})
-
 		profiles = append(profiles, profile)
-
 	}
 
 	return profiles, nil
 }
 
-func steamIDFromSlug(ctx *gin.Context) (steamid.SID64, bool) {
+func steamIDFromSlug(ctx *gin.Context) (steamid.SteamID, bool) {
 	sid64 := steamid.New(ctx.Param("steam_id"))
-
 	if !sid64.Valid() {
-
 		ctx.AbortWithStatusJSON(http.StatusNotFound, "not found")
-
-		return "", false
-
+		return steamid.SteamID{}, false
 	}
 
 	return sid64, true
 }
 
-//nolint:unparam
-
 func renderSyntax(ctx *gin.Context, encoder *styleEncoder, value any, tmpl string, args syntaxTemplate) {
 	if !strings.Contains(strings.ToLower(ctx.GetHeader("Accept")), "text/html") {
-
 		ctx.JSON(http.StatusOK, value)
-
 		return
-
 	}
 
 	css, body, errEncode := encoder.Encode(value)
-
 	if errEncode != nil {
-
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to load profile")
-
 		return
-
 	}
 
 	args.setCSS(css)
-
 	args.setBody(body)
-
 	ctx.HTML(http.StatusOK, tmpl, args)
 }
 
@@ -249,21 +211,13 @@ func createRouter(runMode string, db *pgStore, c cache) (*gin.Engine, error) {
 	engine := gin.New()
 
 	engine.SetHTMLTemplate(tmplProfiles)
-
 	engine.Use(apiErrorHandler(), gin.Recovery())
-
 	engine.GET("/bans", handleGetBans())
-
 	engine.GET("/summary", handleGetSummary(c))
-
 	engine.GET("/profile", handleGetProfile(db, c))
-
 	engine.GET("/comp", handleGetComp(c))
-
 	engine.GET("/friends", handleGetFriendList(c))
-
 	engine.GET("/sourcebans", handleGetSourceBansMany(db))
-
 	engine.GET("/sourcebans/:steam_id", handleGetSourceBans(db))
 
 	return engine, nil
@@ -275,15 +229,11 @@ const (
 	shutdownTimeout = 10 * time.Second
 )
 
-func newHTTPServer(ctx context.Context, router *gin.Engine, addr string) *http.Server {
+func newHTTPServer(router *gin.Engine, addr string) *http.Server {
 	httpServer := &http.Server{ //nolint:exhaustruct
-
-		Addr: addr,
-
-		Handler: router,
-
-		ReadTimeout: apiHandlerTimeout,
-
+		Addr:         addr,
+		Handler:      router,
+		ReadTimeout:  apiHandlerTimeout,
 		WriteTimeout: apiHandlerTimeout,
 	}
 
@@ -291,7 +241,7 @@ func newHTTPServer(ctx context.Context, router *gin.Engine, addr string) *http.S
 }
 
 func runHTTP(ctx context.Context, router *gin.Engine, listenAddr string) int {
-	httpServer := newHTTPServer(ctx, router, listenAddr)
+	httpServer := newHTTPServer(router, listenAddr)
 
 	go func() {
 		if errServe := httpServer.ListenAndServe(); errServe != nil && !errors.Is(errServe, http.ErrServerClosed) {
@@ -302,15 +252,11 @@ func runHTTP(ctx context.Context, router *gin.Engine, listenAddr string) int {
 	<-ctx.Done()
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
-
 	defer cancel()
 
 	if errShutdown := httpServer.Shutdown(shutdownCtx); errShutdown != nil { //nolint:contextcheck
-
 		slog.Error("Error shutting down http service", ErrAttr(errShutdown))
-
 		return 1
-
 	}
 
 	return 0

@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
@@ -238,8 +238,8 @@ func apiTestGetFriends(router *gin.Engine) func(t *testing.T) {
 			var friends friendMap
 
 			require.NoError(t, json.Unmarshal(data, &friends))
-			require.True(t, len(friends[sids[0]]) > 0)
-			require.True(t, len(friends[sids[1]]) == 0)
+			require.True(t, len(friends[sids[0].String()]) > 0)
+			require.True(t, len(friends[sids[1].String()]) == 0)
 		})
 	}
 }
@@ -274,7 +274,7 @@ func apiTestGetProfile(router *gin.Engine) func(t *testing.T) {
 	}
 }
 
-func createTestSourcebansRecord(t *testing.T, router *gin.Engine, db *pgStore, sid64 steamid.SID64) SbBanRecord {
+func createTestSourcebansRecord(t *testing.T, router *gin.Engine, db *pgStore, sid64 steamid.SteamID) SbBanRecord {
 	t.Helper()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
@@ -313,7 +313,7 @@ func apiTestGetSourcebans(router *gin.Engine, db *pgStore) func(t *testing.T) {
 
 			var (
 				banRecords []SbBanRecord
-				path       = fmt.Sprintf("/sourcebans/%s", recordA.SteamID)
+				path       = fmt.Sprintf("/sourcebans/%d", recordA.SteamID.Int64())
 			)
 
 			require.NoError(t, testReq(t, router, http.MethodGet, path, &banRecords))
@@ -344,7 +344,7 @@ func apiTestGetSourcebans(router *gin.Engine, db *pgStore) func(t *testing.T) {
 			var (
 				steamID    = steamid.RandSID64()
 				banRecords []SbBanRecord
-				path       = fmt.Sprintf("/sourcebans/%s", steamID)
+				path       = fmt.Sprintf("/sourcebans/%d", steamID.Int64())
 			)
 
 			require.NoError(t, testReq(t, router, http.MethodGet, path, &banRecords))

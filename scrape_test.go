@@ -19,39 +19,29 @@ func testParser(t *testing.T, scraperFn scraperFn, count int, nextPage string) {
 	t.Helper()
 
 	scraper, scraperErr := scraperFn("./cache/")
-
 	require.NoError(t, scraperErr, "Failed to create scraper")
 
 	testBody, errOpen := os.Open(fmt.Sprintf("testdata/%s.html", scraper.name))
-
 	require.NoError(t, errOpen)
 
 	defer logCloser(testBody)
 
 	doc, errDoc := goquery.NewDocumentFromReader(testBody)
-
 	require.NoError(t, errDoc)
 
 	results, _, errParse := scraper.parser(doc.Selection, slog.Default(), scraper.parseTIme)
-
 	require.NoError(t, errParse)
-
 	require.Equal(t, count, len(results))
 
 	if nextPage != "" {
-
 		next := scraper.nextURL(scraper, doc.Selection)
-
 		require.Equal(t, scraper.url(nextPage), next)
 
 	}
 
 	for _, result := range results {
-
 		require.NotEqual(t, "", result.Name)
-
 		require.Truef(t, result.SteamID.Valid(), "Invalid steamid: %s", result.SteamID.String())
-
 		require.True(t, result.Length >= 0, "negative duration")
 
 		if result.Length == 0 {
@@ -61,9 +51,7 @@ func testParser(t *testing.T, scraperFn scraperFn, count int, nextPage string) {
 		}
 
 		const ninetyFive = 788943600
-
 		require.Truef(t, result.CreatedOn.Unix() > ninetyFive, "Date: %s", result.CreatedOn)
-
 	}
 }
 
@@ -627,9 +615,7 @@ func TestParseGFLTime(t *testing.T) {
 	t.Parallel()
 
 	parsed, e := parseDefaultTime("2023-05-17 03:07:05")
-
 	require.NoError(t, e)
-
 	require.Equal(t, time.Date(2023, time.May, 17, 3, 7, 5, 0, time.UTC), parsed)
 }
 
@@ -637,9 +623,7 @@ func TestParseWonderlandTime(t *testing.T) {
 	t.Parallel()
 
 	parsed, e := parseWonderlandTime("May 17th, 2023 (3:07)")
-
 	require.NoError(t, e)
-
 	require.Equal(t, time.Date(2023, time.May, 17, 3, 7, 0, 0, time.UTC), parsed)
 }
 
@@ -647,15 +631,11 @@ func TestParseSkialTime(t *testing.T) {
 	t.Parallel()
 
 	parsed, e := parseSkialTime("05-17-23 03:07")
-
 	require.NoError(t, e)
-
 	require.Equal(t, time.Date(2023, time.May, 17, 3, 7, 0, 0, time.UTC), parsed)
 
 	perm, ePerm := parseSkialTime("Permanent")
-
 	require.NoError(t, ePerm)
-
 	require.Equal(t, time.Time{}, perm)
 }
 
@@ -663,15 +643,11 @@ func TestParsePancakesTime(t *testing.T) {
 	t.Parallel()
 
 	parsed, e := parsePancakesTime("Thu, May 17, 2023 3:07 AM")
-
 	require.NoError(t, e)
-
 	require.Equal(t, time.Date(2023, time.May, 17, 3, 7, 0, 0, time.UTC), parsed)
 
 	perm, ePerm := parsePancakesTime("never, this is permanent")
-
 	require.NoError(t, ePerm)
-
 	require.Equal(t, time.Time{}, perm)
 }
 
@@ -679,26 +655,17 @@ func TestParseFluxTFTime(t *testing.T) {
 	t.Parallel()
 
 	parsed, e := parseFluxTime("Tuesday 30th of August 2022 08:30:45 PM")
-
 	require.NoError(t, e)
-
 	require.Equal(t, time.Date(2022, time.August, 30, 20, 30, 45, 0, time.UTC), parsed)
 }
 
 // func TestParseMegaScatter(t *testing.T) {
-
 //	testBody, errOpen := os.Open("testdata/megascatter.html")
-
 //	require.NoError(t, errOpen)
-
 //	defer logCloser(testBody)
-
 //	bans, errBans := parseMegaScatter(testBody)
-
 //	require.NoError(t, errBans)
-
 //	require.True(t, len(bans) > 100)
-
 //}
 
 func TestCFBotProtectedRequest(t *testing.T) { //nolint:paralleltest
@@ -711,45 +678,32 @@ func TestCFBotProtectedRequest(t *testing.T) { //nolint:paralleltest
 
 	var (
 		url = "https://bans.wonderland.tf/index.php?p=banlist&page=2"
-
 		cdt = newCFTransport()
 	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-
 	defer cancel()
 
 	require.NoError(t, cdt.Open(ctx))
 
 	req, reqErr := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-
 	require.NoError(t, reqErr)
 
 	resp, errResp := cdt.RoundTrip(req)
-
 	doc, errDoc := goquery.NewDocumentFromReader(resp.Body)
-
 	require.NoError(t, errDoc)
 
 	scraper, errScraper := newWonderlandTFScraper("./cache/")
-
 	require.NoError(t, errScraper)
 
 	results, _, errParse := scraper.parser(doc.Selection, slog.Default(), scraper.parseTIme)
-
 	require.NoError(t, errParse)
-
 	require.Equal(t, 10, len(results))
 
 	nextPage := "https://bans.wonderland.tf/index.php?p=banlist&page=3"
-
 	next := scraper.nextURL(scraper, doc.Selection)
-
 	require.Equal(t, scraper.url(nextPage), next)
-
 	require.NoError(t, errResp)
-
 	require.NoError(t, resp.Body.Close())
-
 	require.Equal(t, resp.StatusCode, http.StatusOK)
 }

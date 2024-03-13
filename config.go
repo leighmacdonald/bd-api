@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/armon/go-socks5"
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"

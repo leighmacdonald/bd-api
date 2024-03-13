@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"slices"
 	"testing"
 	"time"
@@ -24,7 +25,7 @@ func TestBDUpdates(t *testing.T) {
 		{
 			BDListEntryID: 1,
 			BDListID:      1,
-			SteamID:       "76561197960265729",
+			SteamID:       steamid.New("76561197960265729"),
 			Attribute:     "cheater",
 			LastSeen:      time.Now(),
 			LastName:      "player1",
@@ -35,7 +36,7 @@ func TestBDUpdates(t *testing.T) {
 		{
 			BDListEntryID: 2,
 			BDListID:      1,
-			SteamID:       "76561197960265730",
+			SteamID:       steamid.New("76561197960265730"),
 			Attribute:     "cheater",
 			LastSeen:      time.Now(),
 			LastName:      "player2",

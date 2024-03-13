@@ -7,7 +7,7 @@ import (
 	"io"
 	"sort"
 
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/pkg/errors"
 )
 
@@ -115,19 +115,17 @@ func sortSeasons(seasons []Season) []Season {
 	return seasons
 }
 
-func getETF2L(ctx context.Context, sid steamid.SID64) ([]Season, error) {
-	url := fmt.Sprintf("https://api.etf2l.org/player/%s.json", sid)
+func getETF2L(ctx context.Context, sid steamid.SteamID) ([]Season, error) {
+	url := fmt.Sprintf("https://api.etf2l.org/player/%d.json", sid.Int64())
 
 	var player etf2lPlayer
 
 	resp, errGet := get(ctx, url, nil)
-
 	if errGet != nil {
 		return nil, errGet
 	}
 
 	body, errRead := io.ReadAll(resp.Body)
-
 	if errRead != nil {
 		return nil, errors.Wrap(errRead, "Failed to read response body")
 	}
@@ -148,10 +146,8 @@ func parseETF2L(player etf2lPlayer) []Season {
 		for _, competition := range team.Competitions {
 
 			var (
-				div = UnknownDivision
-
+				div    = UnknownDivision
 				divStr = competition.Competition
-
 				format = "N/A"
 			)
 
@@ -159,74 +155,45 @@ func parseETF2L(player etf2lPlayer) []Season {
 				switch competition.Division.Name {
 
 				case "Open":
-
 					div = ETF2LOpen
-
 					divStr = "Open"
-
 				case "Mid":
-
 					div = ETF2LMid
-
 					divStr = "Mid"
-
 				case "Division 4":
-
 					div = ETF2LLow
-
 					divStr = "Low"
-
 				case "Division 3":
-
 					div = ETF2LMid
-
 					divStr = "Div 3"
-
 				case "Division 2":
-
 					div = ETF2LDiv2
-
 					divStr = "Div 2"
-
 				case "Division 1":
-
 					div = ETF2LDiv1
-
 					divStr = "Div 1"
-
 				case "Premiership":
-
 					div = ETF2LPremiership
-
 					divStr = "Premiership"
-
 				}
 			}
 
 			switch team.Type {
-
 			case "Highlander":
 
 				format = "Highlander"
-
 			case "6on6":
 
 				format = "6s"
-
 			}
 
 			seasons = append(seasons, Season{
-				League: "ETF2L",
-
-				Division: divStr,
-
+				League:      "ETF2L",
+				Division:    divStr,
 				DivisionInt: div,
-
-				Format: format,
-
-				TeamName: team.Name,
+				Format:      format,
+				TeamName:    team.Name,
 			})
-
 		}
 	}
 
