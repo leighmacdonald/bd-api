@@ -826,7 +826,7 @@ func (db *pgStore) bdListCreate(ctx context.Context, list BDList) (BDList, error
 		return BDList{}, dbErr(errSQL, "Failed to build bd list create query")
 	}
 
-	if errRow := db.pool.QueryRow(ctx, query, args).Scan(&list.BDListID); errRow != nil {
+	if errRow := db.pool.QueryRow(ctx, query, args...).Scan(&list.BDListID); errRow != nil {
 		return BDList{}, dbErr(errSQL, "Failed to insert bd list create query")
 	}
 
@@ -881,7 +881,7 @@ func (db *pgStore) bdListEntries(ctx context.Context, listID int) ([]BDListEntry
 			entry BDListEntry
 			sid   int64
 		)
-		if errScan := rows.Scan(&entry.BDListEntryID, &entry.BDListID, &sid, &entry.Attribute, &entry.LastName,
+		if errScan := rows.Scan(&entry.BDListEntryID, &entry.BDListID, &sid, &entry.Attributes, &entry.LastName,
 			&entry.LastName, &entry.Deleted, &entry.CreatedOn, &entry.UpdatedOn); errScan != nil {
 			return nil, dbErr(errSQL, "Failed to scan bd list entry result")
 		}
@@ -897,7 +897,7 @@ func (db *pgStore) bdListEntryUpdate(ctx context.Context, entry BDListEntry) err
 	query, args, errSQL := sb.
 		Update("bd_list_entries").
 		SetMap(map[string]interface{}{
-			"attribute":  entry.Attribute,
+			"attribute":  entry.Attributes,
 			"last_seen":  entry.LastSeen,
 			"last_name":  entry.LastName,
 			"deleted":    entry.Deleted,
@@ -922,7 +922,7 @@ func (db *pgStore) bdListEntryCreate(ctx context.Context, entry BDListEntry) (BD
 		SetMap(map[string]interface{}{
 			"bd_list_id": entry.BDListID,
 			"steam_id":   entry.SteamID.Int64(),
-			"attribute":  entry.Attribute,
+			"attribute":  entry.Attributes,
 			"last_seen":  entry.LastSeen,
 			"last_name":  entry.LastName,
 			"deleted":    entry.Deleted,

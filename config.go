@@ -13,63 +13,41 @@ import (
 )
 
 type proxyContext struct {
-	Username string `mapstructure:"username"`
-
+	Username   string `mapstructure:"username"`
 	RemoteAddr string `mapstructure:"remote_addr"`
-
-	LocalAddr string `mapstructure:"local_addr"`
-
-	conn *ssh.Client
-
-	socks *socks5.Server
-
-	signer ssh.Signer
+	LocalAddr  string `mapstructure:"local_addr"`
+	conn       *ssh.Client
+	socks      *socks5.Server
+	signer     ssh.Signer
 }
 
 type appConfig struct {
-	ListenAddr string `mapstructure:"listen_addr"`
-
-	SteamAPIKey string `mapstructure:"steam_api_key"`
-
-	DSN string `mapstructure:"dsn"`
-
-	RunMode string `mapstructure:"run_mode"`
-
-	LogLevel string `mapstructure:"log_level"`
-
-	LogFileEnabled bool `mapstructure:"log_file_enabled"`
-
-	LogFilePath string `mapstructure:"log_file_path"`
-
-	SourcebansScraperEnabled bool `mapstructure:"sourcebans_scraper_enabled"`
-
-	ProxiesEnabled bool `mapstructure:"proxies_enabled"`
-
-	Proxies []*proxyContext `mapstructure:"proxies"`
-
-	PrivateKeyPath string `mapstructure:"private_key_path"`
-
-	EnableCache bool `mapstructure:"enable_cache"`
-
-	CacheDir string `mapstructure:"cache_dir"`
+	ListenAddr               string          `mapstructure:"listen_addr"`
+	SteamAPIKey              string          `mapstructure:"steam_api_key"`
+	DSN                      string          `mapstructure:"dsn"`
+	RunMode                  string          `mapstructure:"run_mode"`
+	LogLevel                 string          `mapstructure:"log_level"`
+	LogFileEnabled           bool            `mapstructure:"log_file_enabled"`
+	LogFilePath              string          `mapstructure:"log_file_path"`
+	SourcebansScraperEnabled bool            `mapstructure:"sourcebans_scraper_enabled"`
+	ProxiesEnabled           bool            `mapstructure:"proxies_enabled"`
+	Proxies                  []*proxyContext `mapstructure:"proxies"`
+	PrivateKeyPath           string          `mapstructure:"private_key_path"`
+	EnableCache              bool            `mapstructure:"enable_cache"`
+	CacheDir                 string          `mapstructure:"cache_dir"`
 }
 
 func makeSigner(keyPath string) (ssh.Signer, error) { //nolint:ireturn
-
 	privateKeyBody, errPKBody := os.ReadFile(keyPath)
-
 	if errPKBody != nil {
 		return nil, errors.Wrap(errPKBody, "Cannot read private key")
 	}
 
 	var signer ssh.Signer
-
 	key, keyFound := os.LookupEnv("PASSWORD")
 
 	if keyFound {
-
 		newSigner, errSigner := ssh.ParsePrivateKeyWithPassphrase(privateKeyBody, []byte(key))
-
 		if errSigner != nil {
 			return nil, errors.Wrap(errSigner, "Failed to parse private key")
 		}
@@ -77,15 +55,12 @@ func makeSigner(keyPath string) (ssh.Signer, error) { //nolint:ireturn
 		signer = newSigner
 
 	} else {
-
 		newSigner, errSigner := ssh.ParsePrivateKey(privateKeyBody)
-
 		if errSigner != nil {
 			return nil, errors.Wrap(errSigner, "Failed to parse private key")
 		}
 
 		signer = newSigner
-
 	}
 
 	return signer, nil
@@ -97,13 +72,9 @@ func readConfig(config *appConfig) error {
 	}
 
 	viper.AddConfigPath(".")
-
 	viper.SetConfigName("bdapi")
-
 	viper.SetConfigType("yml")
-
 	viper.SetEnvPrefix("bdapi")
-
 	viper.AutomaticEnv()
 
 	if errReadConfig := viper.ReadInConfig(); errReadConfig != nil {
@@ -127,9 +98,7 @@ func readConfig(config *appConfig) error {
 	}
 
 	if config.ProxiesEnabled {
-
 		signer, errSigner := makeSigner(config.PrivateKeyPath)
-
 		if errSigner != nil {
 			return errors.Wrap(errSigner, "Failed to setup SSH signer")
 		}
@@ -137,7 +106,6 @@ func readConfig(config *appConfig) error {
 		for _, cfg := range config.Proxies {
 			cfg.signer = signer
 		}
-
 	}
 
 	return nil

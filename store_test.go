@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -40,6 +41,7 @@ func TestStore(t *testing.T) {
 
 	t.Run("sourceBansStoreTest", sourceBansStoreTest(database))               //nolint:paralleltest
 	t.Run("sourceBansPlayerRecordTest", sourceBansPlayerRecordTest(database)) //nolint:paralleltest
+	t.Run("bot_detector", bdTest(database))
 }
 
 func sourceBansStoreTest(database *pgStore) func(t *testing.T) {
@@ -119,5 +121,56 @@ func sourceBansPlayerRecordTest(database *pgStore) func(t *testing.T) {
 		}
 
 		require.True(t, avatarOk, "Avatar not found")
+	}
+}
+
+func bdTest(database *pgStore) func(t *testing.T) {
+	var (
+		a = BDList{
+			BDListName:  "list a",
+			URL:         "http://localhost/a",
+			Game:        "tf2",
+			TrustWeight: 5,
+			Deleted:     false,
+			CreatedOn:   time.Now(),
+			UpdatedOn:   time.Now(),
+		}
+		b = BDList{
+			BDListName:  "list b",
+			URL:         "http://localhost/b",
+			Game:        "tf2",
+			TrustWeight: 9,
+			Deleted:     false,
+			CreatedOn:   time.Now(),
+			UpdatedOn:   time.Now(),
+		}
+	)
+
+	return func(t *testing.T) {
+		ctx := context.Background()
+		listA, errA := database.bdListCreate(ctx, a)
+		require.NoError(t, errA)
+		require.True(t, listA.BDListID > 0)
+		listB, errB := database.bdListCreate(ctx, b)
+		require.NoError(t, errB)
+		require.True(t, listB.BDListID > 0)
+		require.NotEqual(t, listA.BDListID, listB.BDListID)
+
+		var entriesA []BDListEntry
+		for i := 0; i < 5; i++ {
+			entry, errEntry := database.bdListEntryCreate(ctx, BDListEntry{
+				BDListID:   listA.BDListID,
+				SteamID:    steamid.RandSID64(),
+				Attributes: []string{"cheater"},
+				LastSeen:   time.Now(),
+				LastName:   fmt.Sprintf("name_%d", i),
+				Deleted:    false,
+				CreatedOn:  time.Now(),
+				UpdatedOn:  time.Now(),
+			})
+			require.NotNil(t, errEntry)
+			require.True(t, entry.BDListEntryID > 0)
+			entriesA = append(entriesA, entry)
+		}
 	}
 }

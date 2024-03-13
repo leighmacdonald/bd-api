@@ -6,6 +6,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -53,7 +54,7 @@ type BDListEntry struct {
 	BDListEntryID int64
 	BDListID      int
 	SteamID       steamid.SteamID
-	Attribute     string
+	Attributes    []string
 	LastSeen      time.Time
 	LastName      string
 	Deleted       bool
@@ -81,7 +82,11 @@ func fetchList(ctx context.Context, client *http.Client, list BDList) (*TF2BDSch
 		return nil, errors.Join(errResp, errRequestPerform)
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		if errClose := resp.Body.Close(); errClose != nil {
+			slog.Error("failed to close response body", ErrAttr(errClose))
+		}
+	}()
 
 	var schema TF2BDSchema
 	if errDecode := json.NewDecoder(resp.Body).Decode(&schema); errDecode != nil {
@@ -100,7 +105,7 @@ type listMapping struct {
 //
 // - If the entry is not known locally, it is created
 // - If a known entry is no longer in the downloaded list, it is marked as deleted.
-// - If a entry contains differing data, it will be updated.
+// - If an entry contains differing data, it will be updated.
 func updateLists(ctx context.Context, lists []BDList, db *pgStore) {
 	client := NewHTTPClient()
 	wg := sync.WaitGroup{}
@@ -192,6 +197,17 @@ func updateListEntries(ctx context.Context, db *pgStore, mapping listMapping) er
 	return nil
 }
 
+func normalizeAttrs(inputAttrs []string) []string {
+	var attrs []string
+	for _, ia := range inputAttrs {
+		attrs = append(attrs, strings.ToLower(ia))
+	}
+
+	slices.Sort(attrs)
+
+	return attrs
+}
+
 // Search results for existing entries with new attrs
 func findNewAndUpdated(existingList []BDListEntry, mapping listMapping) ([]BDListEntry, []BDListEntry) {
 	var (
@@ -210,13 +226,13 @@ func findNewAndUpdated(existingList []BDListEntry, mapping listMapping) ([]BDLis
 			if existing.SteamID == sid {
 				found = true
 				lastSeen := time.Unix(int64(player.LastSeen.Time), 0)
-				attrs := strings.Join(player.Attributes, ",")
+				attrs := normalizeAttrs(player.Attributes)
 				els := existing.LastSeen.Unix()
 				ls := lastSeen.Unix()
-				if existing.LastName != player.LastSeen.PlayerName || els != ls || existing.Attribute != attrs {
+				if existing.LastName != player.LastSeen.PlayerName || els != ls || !slices.Equal(existing.Attributes, attrs) {
 					u := existing
 					u.LastSeen = lastSeen
-					u.Attribute = attrs
+					u.Attributes = attrs
 					u.LastName = player.LastSeen.PlayerName
 					u.UpdatedOn = time.Now()
 					updated = append(updated, u)
@@ -230,7 +246,7 @@ func findNewAndUpdated(existingList []BDListEntry, mapping listMapping) ([]BDLis
 				BDListEntryID: 0,
 				BDListID:      mapping.list.BDListID,
 				SteamID:       sid,
-				Attribute:     strings.Join(player.Attributes, ","),
+				Attributes:    normalizeAttrs(player.Attributes),
 				LastSeen:      time.Unix(int64(player.LastSeen.Time), 0),
 				LastName:      player.LastSeen.PlayerName,
 				Deleted:       false,

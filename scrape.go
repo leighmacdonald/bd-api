@@ -1113,9 +1113,7 @@ func newCFTransport() *cfTransport {
 }
 
 func (t *cfTransport) Open(ctx context.Context) error {
-	const (
-		slowTimeout = time.Second * 5
-	)
+	const slowTimeout = time.Second * 5
 
 	launchURL, errLauncher := launcher.
 		NewUserMode().
