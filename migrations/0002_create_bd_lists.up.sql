@@ -3,8 +3,8 @@ begin;
 create table if not exists bd_list
 (
     bd_list_id   serial primary key,
-    bd_list_name text      not null unique,
-    url          text      not null unique,
+    bd_list_name text      not null unique CHECK ( length(bd_list_name) > 0 ),
+    url          text      not null unique CHECK ( length(url) > 0 ),
     game         text      not null default 'tf2',
     trust_weight int       not null default 1 CHECK ( trust_weight >= 0 AND trust_weight <= 10 ),
     deleted      bool      not null default false,

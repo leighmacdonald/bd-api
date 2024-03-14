@@ -51,12 +51,12 @@ func newStore(ctx context.Context, dsn string) (*pgStore, error) {
 
 	if errMigrate := database.migrate(); errMigrate != nil {
 		if errMigrate.Error() == "no change" {
-			database.log.Info("Migration at latest version")
+			database.log.Debug("Migration at latest version")
 		} else {
 			return nil, errors.Errorf("Could not migrate schema: %v", errMigrate)
 		}
 	} else {
-		database.log.Info("Migration completed successfully")
+		database.log.Debug("Migration completed successfully")
 	}
 
 	dbConn, errConnectConfig := pgxpool.NewWithConfig(ctx, cfg)
@@ -815,6 +815,25 @@ func (db *pgStore) bdLists(ctx context.Context) ([]BDList, error) {
 	return lists, nil
 }
 
+func (db *pgStore) bdListByName(ctx context.Context, name string) (BDList, error) {
+	var list BDList
+	query, args, errSQL := sb.
+		Select("bd_list_id", "bd_list_name", "url", "game", "deleted", "created_on", "updated_on").
+		From("bd_list").
+		Where(sq.Eq{"bd_list_name": name}).
+		ToSql()
+	if errSQL != nil {
+		return list, dbErr(errSQL, "Failed to build bd list query")
+	}
+
+	if errQuery := db.pool.QueryRow(ctx, query, args...).
+		Scan(&list.BDListID, &list.BDListName, &list.URL, &list.Game, &list.Deleted, &list.CreatedOn, &list.UpdatedOn); errQuery != nil {
+		return list, dbErr(errQuery, "failed to scan list result")
+	}
+
+	return list, nil
+}
+
 func (db *pgStore) bdListCreate(ctx context.Context, list BDList) (BDList, error) {
 	query, args, errSQL := sb.
 		Insert("bd_list").
@@ -842,15 +861,27 @@ func (db *pgStore) bdListSave(ctx context.Context, list BDList) error {
 			"game":         list.Game,
 			"deleted":      list.Deleted,
 			"updated_on":   list.UpdatedOn,
-		}).
-		Where(sq.Eq{"bd_list_id": list.BDListID}).
+		}).Where(sq.Eq{"bd_list_id": list.BDListID}).
 		ToSql()
 	if errSQL != nil {
 		return dbErr(errSQL, "Failed to build bd list save query")
 	}
 
 	if _, errExec := db.pool.Exec(ctx, query, args...); errExec != nil {
-		return dbErr(errSQL, "Failed to exec bd list save query")
+		return dbErr(errSQL, "Failed to exec bd	list save query")
+	}
+
+	return nil
+}
+
+func (db *pgStore) bdListDelete(ctx context.Context, bdListID int) error {
+	query, args, errSQL := sb.Delete("bd_list").Where(sq.Eq{"bd_list_id": bdListID}).ToSql()
+	if errSQL != nil {
+		return dbErr(errSQL, "Failed to build bd list delete query")
+	}
+
+	if _, err := db.pool.Exec(ctx, query, args...); err != nil {
+		return dbErr(err, "failed to exec delete list query")
 	}
 
 	return nil

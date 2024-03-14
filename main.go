@@ -2,22 +2,14 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
-func run() int {
-	gCtx := context.Background()
-	ctx, stop := signal.NotifyContext(gCtx, os.Interrupt, syscall.SIGTERM)
-	defer stop()
-
+func createAppDeps(ctx context.Context) (appConfig, cache, *pgStore, error) {
 	var config appConfig
 
 	if errConfig := readConfig(&config); errConfig != nil {
-		panic(fmt.Sprintf("Failed to load config: %v", errConfig))
+		return config, nil, nil, errConfig
 	}
 
 	loggerClose := MustCreateLogger(config.LogFilePath, config.LogLevel, config.LogFileEnabled)
@@ -25,29 +17,32 @@ func run() int {
 
 	cacheHandler, errCache := createCache(config.EnableCache, config.CacheDir)
 	if errCache != nil {
-		slog.Error("failed to setup cache", ErrAttr(errCache))
-
-		return 1
+		return config, nil, nil, errCache
 	}
 
 	database, errDB := newStore(ctx, config.DSN)
 	if errDB != nil {
-		slog.Error("Failed to instantiate database", ErrAttr(errDB))
-
-		return 2
+		return config, nil, nil, errDB
+	}
+	if errPing := database.pool.Ping(ctx); errPing != nil {
+		return config, nil, nil, errPing
 	}
 
-	if errPing := database.pool.Ping(ctx); errPing != nil {
-		slog.Error("failed to connect to database")
+	return config, cacheHandler, database, nil
+}
 
-		return 3
+func run(ctx context.Context) int {
+	config, cacheHandler, database, errSetup := createAppDeps(ctx)
+	if errSetup != nil {
+		slog.Error("failed to setup app dependencies", ErrAttr(errSetup))
+		return 1
 	}
 
 	router, errRouter := createRouter(config.RunMode, database, cacheHandler)
 	if errRouter != nil {
 		slog.Error("failed to create router", ErrAttr(errRouter))
 
-		return 4
+		return 1
 	}
 
 	if config.SourcebansScraperEnabled {
@@ -55,7 +50,7 @@ func run() int {
 		if errScrapers != nil {
 			slog.Error("failed to setup scrapers")
 
-			return 5
+			return 1
 		}
 
 		pm := newProxyManager()
@@ -76,12 +71,12 @@ func run() int {
 		go startScrapers(ctx, database, scrapers)
 	}
 
-	go listUpdater(gCtx, database)
+	go listUpdater(ctx, database)
 	go profileUpdater(ctx, database)
 
 	return runHTTP(ctx, router, config.ListenAddr)
 }
 
 func main() {
-	os.Exit(run())
+	execute()
 }
