@@ -12,97 +12,64 @@ import (
 )
 
 type comp struct {
-	Category string `json:"category"`
-
+	Category    string `json:"category"`
 	Competition string `json:"competition"`
-
-	Division struct {
-		Name string `json:"name"`
-
+	Division    struct {
+		Name string      `json:"name"`
 		Tier interface{} `json:"tier"`
 	} `json:"division"`
-
 	URL string `json:"url"`
 }
 
 type etf2lPlayer struct {
 	Player struct {
-		Bans interface{} `json:"bans"`
-
-		Classes []string `json:"classes"`
-
-		Country string `json:"country"`
-
-		ID int `json:"id"`
-
-		Name string `json:"name"`
-
-		Registered int `json:"registered"`
-
-		Steam struct {
+		Bans       interface{} `json:"bans"`
+		Classes    []string    `json:"classes"`
+		Country    string      `json:"country"`
+		ID         int         `json:"id"`
+		Name       string      `json:"name"`
+		Registered int         `json:"registered"`
+		Steam      struct {
 			Avatar string `json:"avatar"`
-
-			ID string `json:"id"`
-
-			ID3 string `json:"id3"`
-
-			ID64 string `json:"id64"`
+			ID     string `json:"id"`
+			ID3    string `json:"id3"`
+			ID64   string `json:"id64"`
 		} `json:"steam"`
 
 		Teams []struct {
 			Competitions map[string]comp `json:"competitions,omitempty"`
-
-			Country string `json:"country"`
-
-			Homepage string `json:"homepage"`
-
-			ID int `json:"id"`
-
-			Irc struct {
+			Country      string          `json:"country"`
+			Homepage     string          `json:"homepage"`
+			ID           int             `json:"id"`
+			Irc          struct {
 				Channel interface{} `json:"channel"`
 
 				Network interface{} `json:"network"`
 			} `json:"irc"`
-
-			Name string `json:"name"`
-
+			Name   string `json:"name"`
 			Server string `json:"server"`
-
-			Steam struct {
+			Steam  struct {
 				Avatar string `json:"avatar"`
-
-				Group string `json:"group"`
+				Group  string `json:"group"`
 			} `json:"steam"`
-
-			Tag string `json:"tag"`
-
+			Tag  string `json:"tag"`
 			Type string `json:"type"`
-
 			Urls struct {
-				Matches string `json:"matches"`
-
-				Results string `json:"results"`
-
-				Self string `json:"self"`
-
+				Matches   string `json:"matches"`
+				Results   string `json:"results"`
+				Self      string `json:"self"`
 				Transfers string `json:"transfers"`
 			} `json:"urls"`
 		} `json:"teams"`
-
 		Title string `json:"title"`
-
-		Urls struct {
-			Results string `json:"results"`
-
-			Self string `json:"self"`
-
+		Urls  struct {
+			Results   string `json:"results"`
+			Self      string `json:"self"`
 			Transfers string `json:"transfers"`
 		} `json:"urls"`
 	} `json:"player"`
-
 	Status struct {
-		Code int `json:"code"`
-
+		Code    int    `json:"code"`
 		Message string `json:"message"`
 	} `json:"status"`
 }
@@ -144,7 +111,6 @@ func parseETF2L(player etf2lPlayer) []Season {
 
 	for _, team := range player.Player.Teams {
 		for _, competition := range team.Competitions {
-
 			var (
 				div    = UnknownDivision
 				divStr = competition.Competition
@@ -153,7 +119,6 @@ func parseETF2L(player etf2lPlayer) []Season {
 
 			if competition.Division.Name != "" {
 				switch competition.Division.Name {
-
 				case "Open":
 					div = ETF2LOpen
 					divStr = "Open"

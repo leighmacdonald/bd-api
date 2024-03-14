@@ -126,7 +126,7 @@ func sourceBansPlayerRecordTest(database *pgStore) func(t *testing.T) {
 
 func bdTest(database *pgStore) func(t *testing.T) {
 	var (
-		a = BDList{
+		aList = BDList{
 			BDListName:  "list a",
 			URL:         "http://localhost/a",
 			Game:        "tf2",
@@ -135,7 +135,7 @@ func bdTest(database *pgStore) func(t *testing.T) {
 			CreatedOn:   time.Now(),
 			UpdatedOn:   time.Now(),
 		}
-		b = BDList{
+		bList = BDList{
 			BDListName:  "list b",
 			URL:         "http://localhost/b",
 			Game:        "tf2",
@@ -147,30 +147,44 @@ func bdTest(database *pgStore) func(t *testing.T) {
 	)
 
 	return func(t *testing.T) {
+		t.Parallel()
+
 		ctx := context.Background()
-		listA, errA := database.bdListCreate(ctx, a)
+		listA, errA := database.bdListCreate(ctx, aList)
 		require.NoError(t, errA)
 		require.True(t, listA.BDListID > 0)
-		listB, errB := database.bdListCreate(ctx, b)
+		listB, errB := database.bdListCreate(ctx, bList)
 		require.NoError(t, errB)
 		require.True(t, listB.BDListID > 0)
 		require.NotEqual(t, listA.BDListID, listB.BDListID)
 
 		var entriesA []BDListEntry
-		for i := 0; i < 5; i++ {
+		for idx := 0; idx < 5; idx++ {
+			record := newPlayerRecord(steamid.RandSID64())
+			require.NoError(t, database.playerRecordSave(ctx, &record))
 			entry, errEntry := database.bdListEntryCreate(ctx, BDListEntry{
 				BDListID:   listA.BDListID,
-				SteamID:    steamid.RandSID64(),
+				SteamID:    record.SteamID,
 				Attributes: []string{"cheater"},
 				LastSeen:   time.Now(),
-				LastName:   fmt.Sprintf("name_%d", i),
+				LastName:   fmt.Sprintf("name_%d", idx),
 				Deleted:    false,
 				CreatedOn:  time.Now(),
 				UpdatedOn:  time.Now(),
 			})
-			require.NotNil(t, errEntry)
+			require.Nil(t, errEntry)
 			require.True(t, entry.BDListEntryID > 0)
 			entriesA = append(entriesA, entry)
 		}
+
+		require.Equal(t, 5, len(entriesA))
+
+		newName := listA.BDListName + listA.BDListName
+		listA.BDListName = newName
+		require.NoError(t, database.bdListSave(ctx, listA))
+
+		listAEdited, errEdited := database.bdListByName(ctx, listA.BDListName)
+		require.NoError(t, errEdited)
+		require.Equal(t, newName, listAEdited.BDListName)
 	}
 }

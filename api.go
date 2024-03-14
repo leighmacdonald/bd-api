@@ -33,7 +33,7 @@ type Profile struct {
 	LogsCount  int64                   `json:"logs_count"`
 }
 
-func loadProfiles(ctx context.Context, db *pgStore, cache cache, steamIDs steamid.Collection) ([]Profile, error) {
+func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs steamid.Collection) ([]Profile, error) {
 	var ( //nolint:prealloc
 		waitGroup  = &sync.WaitGroup{}
 		summaries  []steamweb.PlayerSummary
@@ -55,7 +55,7 @@ func loadProfiles(ctx context.Context, db *pgStore, cache cache, steamIDs steami
 	go func() {
 		defer waitGroup.Done()
 
-		sbRecords, errSB := db.sbGetBansBySID(localCtx, steamIDs)
+		sbRecords, errSB := database.sbGetBansBySID(localCtx, steamIDs)
 		if errSB != nil {
 			slog.Error("Failed to load sourcebans records", ErrAttr(errSB))
 		}
@@ -104,7 +104,6 @@ func loadProfiles(ctx context.Context, db *pgStore, cache cache, steamIDs steami
 	}
 
 	for _, sid := range steamIDs {
-
 		var profile Profile
 
 		for _, summary := range summaries {
@@ -150,27 +149,30 @@ func steamIDFromSlug(ctx *gin.Context) (steamid.SteamID, bool) {
 	sid64 := steamid.New(ctx.Param("steam_id"))
 	if !sid64.Valid() {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, "not found")
+
 		return steamid.SteamID{}, false
 	}
 
 	return sid64, true
 }
 
-func renderSyntax(ctx *gin.Context, encoder *styleEncoder, value any, tmpl string, args syntaxTemplate) {
+func renderSyntax(ctx *gin.Context, encoder *styleEncoder, value any, args syntaxTemplate) {
 	if !strings.Contains(strings.ToLower(ctx.GetHeader("Accept")), "text/html") {
 		ctx.JSON(http.StatusOK, value)
+
 		return
 	}
 
 	css, body, errEncode := encoder.Encode(value)
 	if errEncode != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to load profile")
+
 		return
 	}
 
 	args.setCSS(css)
 	args.setBody(body)
-	ctx.HTML(http.StatusOK, tmpl, args)
+	ctx.HTML(http.StatusOK, "", args)
 }
 
 func apiErrorHandler() gin.HandlerFunc {
@@ -183,10 +185,8 @@ func apiErrorHandler() gin.HandlerFunc {
 	}
 }
 
-const defaultTemplate = "index"
-
-func createRouter(runMode string, db *pgStore, c cache) (*gin.Engine, error) {
-	tmplProfiles, errTmpl := template.New(defaultTemplate).Parse(`<!DOCTYPE html>
+func createRouter(runMode string, database *pgStore, cacheHandler cache) (*gin.Engine, error) {
+	tmplProfiles, errTmpl := template.New("").Parse(`<!DOCTYPE html>
 
 <html>
 
@@ -213,12 +213,12 @@ func createRouter(runMode string, db *pgStore, c cache) (*gin.Engine, error) {
 	engine.SetHTMLTemplate(tmplProfiles)
 	engine.Use(apiErrorHandler(), gin.Recovery())
 	engine.GET("/bans", handleGetBans())
-	engine.GET("/summary", handleGetSummary(c))
-	engine.GET("/profile", handleGetProfile(db, c))
-	engine.GET("/comp", handleGetComp(c))
-	engine.GET("/friends", handleGetFriendList(c))
-	engine.GET("/sourcebans", handleGetSourceBansMany(db))
-	engine.GET("/sourcebans/:steam_id", handleGetSourceBans(db))
+	engine.GET("/summary", handleGetSummary(cacheHandler))
+	engine.GET("/profile", handleGetProfile(database, cacheHandler))
+	engine.GET("/comp", handleGetComp(cacheHandler))
+	engine.GET("/friends", handleGetFriendList(cacheHandler))
+	engine.GET("/sourcebans", handleGetSourceBansMany(database))
+	engine.GET("/sourcebans/:steam_id", handleGetSourceBans(database))
 
 	return engine, nil
 }
@@ -256,6 +256,7 @@ func runHTTP(ctx context.Context, router *gin.Engine, listenAddr string) int {
 
 	if errShutdown := httpServer.Shutdown(shutdownCtx); errShutdown != nil { //nolint:contextcheck
 		slog.Error("Error shutting down http service", ErrAttr(errShutdown))
+
 		return 1
 	}
 

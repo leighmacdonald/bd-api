@@ -31,8 +31,9 @@ var (
 	//go:embed migrations
 	migrations embed.FS
 
-	errDuplicate = errors.New("Duplicate entity")
-	errNoRows    = errors.New("No rows")
+	errDuplicate = errors.New("duplicate entity")
+	errNoRows    = errors.New("no rows")
+	errPing      = errors.New("failed to ping database")
 )
 
 func newStore(ctx context.Context, dsn string) (*pgStore, error) {
@@ -733,9 +734,9 @@ const storeDurationSecondMulti = int64(time.Second)
 type BanRecordMap map[string][]SbBanRecord
 
 func (db *pgStore) sbGetBansBySID(ctx context.Context, sids steamid.Collection) (BanRecordMap, error) {
-	var ids []int64
-	for _, id := range sids {
-		ids = append(ids, id.Int64())
+	ids := make([]int64, len(sids))
+	for idx := range sids {
+		ids[idx] = sids[idx].Int64()
 	}
 
 	query, args, errSQL := sb.
@@ -788,7 +789,7 @@ func (db *pgStore) sbGetBansBySID(ctx context.Context, sids steamid.Collection) 
 
 func (db *pgStore) bdLists(ctx context.Context) ([]BDList, error) {
 	query, args, errSQL := sb.
-		Select("bd_list_id", "bd_list_name", "url", "game", "deleted", "created_on", "updated_on").
+		Select("bd_list_id", "bd_list_name", "url", "game", "trust_weight", "deleted", "created_on", "updated_on").
 		From("bd_list").
 		ToSql()
 	if errSQL != nil {
@@ -805,7 +806,7 @@ func (db *pgStore) bdLists(ctx context.Context) ([]BDList, error) {
 	var lists []BDList
 	for rows.Next() {
 		var list BDList
-		if errScan := rows.Scan(&list.BDListID, &list.BDListName, &list.URL, &list.Game, &list.Deleted, &list.CreatedOn, &list.UpdatedOn); errScan != nil {
+		if errScan := rows.Scan(&list.BDListID, &list.BDListName, &list.URL, &list.Game, &list.TrustWeight, &list.Deleted, &list.CreatedOn, &list.UpdatedOn); errScan != nil {
 			return nil, dbErr(errScan, "failed to scan list result")
 		}
 
@@ -818,7 +819,7 @@ func (db *pgStore) bdLists(ctx context.Context) ([]BDList, error) {
 func (db *pgStore) bdListByName(ctx context.Context, name string) (BDList, error) {
 	var list BDList
 	query, args, errSQL := sb.
-		Select("bd_list_id", "bd_list_name", "url", "game", "deleted", "created_on", "updated_on").
+		Select("bd_list_id", "bd_list_name", "url", "game", "trust_weight", "deleted", "created_on", "updated_on").
 		From("bd_list").
 		Where(sq.Eq{"bd_list_name": name}).
 		ToSql()
@@ -827,7 +828,7 @@ func (db *pgStore) bdListByName(ctx context.Context, name string) (BDList, error
 	}
 
 	if errQuery := db.pool.QueryRow(ctx, query, args...).
-		Scan(&list.BDListID, &list.BDListName, &list.URL, &list.Game, &list.Deleted, &list.CreatedOn, &list.UpdatedOn); errQuery != nil {
+		Scan(&list.BDListID, &list.BDListName, &list.URL, &list.Game, &list.TrustWeight, &list.Deleted, &list.CreatedOn, &list.UpdatedOn); errQuery != nil {
 		return list, dbErr(errQuery, "failed to scan list result")
 	}
 
@@ -837,8 +838,8 @@ func (db *pgStore) bdListByName(ctx context.Context, name string) (BDList, error
 func (db *pgStore) bdListCreate(ctx context.Context, list BDList) (BDList, error) {
 	query, args, errSQL := sb.
 		Insert("bd_list").
-		Columns("bd_list_name", "url", "game", "deleted", "created_on", "updated_on").
-		Values(list.BDListName, list.URL, list.Game, list.Deleted, list.CreatedOn, list.UpdatedOn).
+		Columns("bd_list_name", "url", "game", "trust_weight", "deleted", "created_on", "updated_on").
+		Values(list.BDListName, list.URL, list.Game, list.TrustWeight, list.Deleted, list.CreatedOn, list.UpdatedOn).
 		Suffix("RETURNING bd_list_id").
 		ToSql()
 	if errSQL != nil {
@@ -859,6 +860,7 @@ func (db *pgStore) bdListSave(ctx context.Context, list BDList) error {
 			"bd_list_name": list.BDListName,
 			"url":          list.URL,
 			"game":         list.Game,
+			"trust_weight": list.TrustWeight,
 			"deleted":      list.Deleted,
 			"updated_on":   list.UpdatedOn,
 		}).Where(sq.Eq{"bd_list_id": list.BDListID}).
@@ -967,7 +969,7 @@ func (db *pgStore) bdListEntryCreate(ctx context.Context, entry BDListEntry) (BD
 	}
 
 	if errScan := db.pool.QueryRow(ctx, query, args...).Scan(&entry.BDListEntryID); errScan != nil {
-		return entry, errScan
+		return entry, dbErr(errScan, "failed to scan list entry id")
 	}
 
 	return entry, nil

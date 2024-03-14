@@ -36,7 +36,6 @@ func testParser(t *testing.T, scraperFn scraperFn, count int, nextPage string) {
 	if nextPage != "" {
 		next := scraper.nextURL(scraper, doc.Selection)
 		require.Equal(t, scraper.url(nextPage), next)
-
 	}
 
 	for _, result := range results {
@@ -669,7 +668,6 @@ func TestParseFluxTFTime(t *testing.T) {
 //}
 
 func TestCFBotProtectedRequest(t *testing.T) { //nolint:paralleltest
-
 	if os.Getenv("$DISPLAY") == "" && os.Getenv("DISPLAY") == "" {
 		t.Skip("No display found")
 	}

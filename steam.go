@@ -46,7 +46,6 @@ func getSteamFriends(ctx context.Context, cache cache, steamIDs steamid.Collecti
 				}
 
 				return
-
 			}
 
 			newFriends, errFriends := steamweb.GetFriendList(ctx, steamID)
@@ -54,7 +53,6 @@ func getSteamFriends(ctx context.Context, cache cache, steamIDs steamid.Collecti
 				slog.Warn("Failed to fetch friends", ErrAttr(errFriends))
 
 				return
-
 			}
 
 			body, errMarshal := json.Marshal(newFriends)
@@ -62,7 +60,6 @@ func getSteamFriends(ctx context.Context, cache cache, steamIDs steamid.Collecti
 				slog.Error("Failed to unmarshal friends", ErrAttr(errMarshal))
 
 				return
-
 			}
 
 			if errSet := cache.set(key, bytes.NewReader(body)); errSet != nil {
@@ -117,11 +114,9 @@ func getSteamBans(ctx context.Context, cache cache, steamIDs steamid.Collection)
 			if errSet := cache.set(makeKey(KeyBans, ban.SteamID), bytes.NewReader(body)); errSet != nil {
 				slog.Error("Failed to update cache", ErrAttr(errSet))
 			}
-
 		}
 
 		banStates = append(banStates, newBans...)
-
 	}
 
 	return banStates, nil
@@ -177,6 +172,7 @@ func getCompHistory(ctx context.Context, cache cache, steamIDs steamid.Collectio
 		body, errMarshal := json.Marshal(rglSeasons)
 		if errMarshal != nil {
 			logger.Error("Failed to marshal rgl data", ErrAttr(errRGL))
+
 			continue
 		}
 
@@ -238,7 +234,7 @@ func getSteamSummaries(ctx context.Context, cache cache, steamIDs steamid.Collec
 	return summaries, nil
 }
 
-func profileUpdater(ctx context.Context, db *pgStore) {
+func profileUpdater(ctx context.Context, database *pgStore) {
 	const (
 		maxQueuedCount = 100
 		updateInterval = time.Second
@@ -256,7 +252,7 @@ func profileUpdater(ctx context.Context, db *pgStore) {
 			triggerUpdate <- true
 		case <-triggerUpdate:
 			var expiredIDs steamid.Collection
-			expiredProfiles, errProfiles := db.playerGetExpiredProfiles(ctx, maxQueuedCount)
+			expiredProfiles, errProfiles := database.playerGetExpiredProfiles(ctx, maxQueuedCount)
 			if errProfiles != nil {
 				slog.Error("Failed to fetch expired profiles", ErrAttr(errProfiles))
 			}
@@ -266,7 +262,7 @@ func profileUpdater(ctx context.Context, db *pgStore) {
 			for len(expiredProfiles) < maxQueuedCount {
 				for _, sid64 := range updateQueue {
 					var pr PlayerRecord
-					if errQueued := db.playerGetOrCreate(ctx, sid64, &pr); errQueued != nil {
+					if errQueued := database.playerGetOrCreate(ctx, sid64, &pr); errQueued != nil {
 						continue
 					}
 
@@ -317,11 +313,10 @@ func profileUpdater(ctx context.Context, db *pgStore) {
 					}
 				}
 
-				if errSave := db.playerRecordSave(ctx, &prof); errSave != nil {
+				if errSave := database.playerRecordSave(ctx, &prof); errSave != nil {
 					slog.Error("Failed to update profile", slog.Int64("sid", prof.SteamID.Int64()), ErrAttr(errSave))
 				}
 			}
-
 		case <-ctx.Done():
 			return
 		}

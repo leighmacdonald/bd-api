@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/spf13/cobra"
 	"log/slog"
 	"net/url"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -21,7 +22,7 @@ var (
 func bdListCmd() *cobra.Command {
 	var (
 		name    string
-		listUrl string
+		listURL string
 		game    string
 		weight  = 5
 	)
@@ -31,7 +32,7 @@ func bdListCmd() *cobra.Command {
 	}
 
 	bdCmd.PersistentFlags().StringVar(&name, "name", "", "Unique name of the list")
-	bdCmd.PersistentFlags().StringVar(&listUrl, "url", "", "Unique url for the list to download from")
+	bdCmd.PersistentFlags().StringVar(&listURL, "url", "", "Unique url for the list to download from")
 	bdCmd.PersistentFlags().StringVar(&game, "game", "tf2", "Shorthand for the game that the list is from")
 	bdCmd.PersistentFlags().IntVar(&weight, "weight", 5, "Weight/confidence of the lists. 0-10")
 
@@ -72,13 +73,13 @@ func bdListCmd() *cobra.Command {
 				return
 			}
 
-			if listUrl == "" {
+			if listURL == "" {
 				slog.Error("URL cannot be empty")
 
 				return
 			}
 
-			_, err := url.Parse(listUrl)
+			_, err := url.Parse(listURL)
 			if err != nil {
 				slog.Error("Invalid URL, cannot parse", ErrAttr(err))
 
@@ -96,7 +97,7 @@ func bdListCmd() *cobra.Command {
 
 			list, errCreate := database.bdListCreate(cmd.Context(), BDList{ //nolint:exhaustruct
 				BDListName:  name,
-				URL:         listUrl,
+				URL:         listURL,
 				Game:        game,
 				TrustWeight: weight,
 				Deleted:     false,

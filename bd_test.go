@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/leighmacdonald/steamid/v4/steamid"
 	"slices"
 	"testing"
 	"time"
 
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/stretchr/testify/require"
 )
 

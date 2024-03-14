@@ -94,7 +94,6 @@ func parseRankField(field string) (Division, string) {
 
 	if len(results) == expectedFieldCount {
 		switch results[3] {
-
 		case "Platinum":
 			return UGCRankPlatinum, "platinum"
 		case "Gold":

@@ -106,9 +106,9 @@ type listMapping struct {
 // - If the entry is not known locally, it is created
 // - If a known entry is no longer in the downloaded list, it is marked as deleted.
 // - If an entry contains differing data, it will be updated.
-func updateLists(ctx context.Context, lists []BDList, db *pgStore) {
+func updateLists(ctx context.Context, lists []BDList, database *pgStore) {
 	client := NewHTTPClient()
-	wg := sync.WaitGroup{}
+	waitGroup := sync.WaitGroup{}
 	errs := make(chan error, len(lists))
 	results := make(chan listMapping, len(lists))
 
@@ -116,19 +116,20 @@ func updateLists(ctx context.Context, lists []BDList, db *pgStore) {
 		if list.Deleted {
 			continue
 		}
-		wg.Add(1)
-		go func(lCtx context.Context, l BDList) {
-			defer wg.Done()
-			bdList, errFetch := fetchList(lCtx, client, l)
+		waitGroup.Add(1)
+		go func(lCtx context.Context, localList BDList) {
+			defer waitGroup.Done()
+			bdList, errFetch := fetchList(lCtx, client, localList)
 			if errFetch != nil {
 				errs <- errFetch
+
 				return
 			}
-			results <- listMapping{list: l, result: bdList}
+			results <- listMapping{list: localList, result: bdList}
 		}(ctx, list)
 	}
 	go func() {
-		wg.Wait()
+		waitGroup.Wait()
 		close(results)
 		close(errs)
 	}()
@@ -138,7 +139,7 @@ func updateLists(ctx context.Context, lists []BDList, db *pgStore) {
 	}
 
 	for res := range results {
-		if errUpdate := updateListEntries(ctx, db, res); errUpdate != nil {
+		if errUpdate := updateListEntries(ctx, database, res); errUpdate != nil {
 			slog.Error("failed to update entries", ErrAttr(errUpdate))
 		}
 	}
@@ -151,8 +152,8 @@ var (
 	errPlayerGetOrCreate = errors.New("failed to get/create player record")
 )
 
-func updateListEntries(ctx context.Context, db *pgStore, mapping listMapping) error {
-	existingList, errExisting := db.bdListEntries(ctx, mapping.list.BDListID)
+func updateListEntries(ctx context.Context, database *pgStore, mapping listMapping) error {
+	existingList, errExisting := database.bdListEntries(ctx, mapping.list.BDListID)
 	if errExisting != nil {
 		return errExisting
 	}
@@ -162,10 +163,10 @@ func updateListEntries(ctx context.Context, db *pgStore, mapping listMapping) er
 
 	for _, entry := range newEntries {
 		pr := newPlayerRecord(entry.SteamID)
-		if err := db.playerGetOrCreate(ctx, entry.SteamID, &pr); err != nil {
+		if err := database.playerGetOrCreate(ctx, entry.SteamID, &pr); err != nil {
 			return errors.Join(err, errPlayerGetOrCreate)
 		}
-		if _, err := db.bdListEntryCreate(ctx, entry); err != nil {
+		if _, err := database.bdListEntryCreate(ctx, entry); err != nil {
 			return errors.Join(err, errCreateEntryFailed)
 		}
 	}
@@ -175,7 +176,7 @@ func updateListEntries(ctx context.Context, db *pgStore, mapping listMapping) er
 	}
 
 	for _, updated := range updatedEntries {
-		if err := db.bdListEntryUpdate(ctx, updated); err != nil {
+		if err := database.bdListEntryUpdate(ctx, updated); err != nil {
 			return errors.Join(err, errUpdateEntryFailed)
 		}
 	}
@@ -185,7 +186,7 @@ func updateListEntries(ctx context.Context, db *pgStore, mapping listMapping) er
 	}
 
 	for _, entry := range deletedEntries {
-		if err := db.bdListEntryDelete(ctx, entry.BDListEntryID); err != nil {
+		if err := database.bdListEntryDelete(ctx, entry.BDListEntryID); err != nil {
 			return errors.Join(err, errDeleteEntryFailed)
 		}
 	}
@@ -198,9 +199,9 @@ func updateListEntries(ctx context.Context, db *pgStore, mapping listMapping) er
 }
 
 func normalizeAttrs(inputAttrs []string) []string {
-	var attrs []string
-	for _, ia := range inputAttrs {
-		attrs = append(attrs, strings.ToLower(ia))
+	attrs := make([]string, len(inputAttrs))
+	for idx := range inputAttrs {
+		attrs[idx] = strings.ToLower(inputAttrs[idx])
 	}
 
 	slices.Sort(attrs)
@@ -208,7 +209,7 @@ func normalizeAttrs(inputAttrs []string) []string {
 	return attrs
 }
 
-// Search results for existing entries with new attrs
+// Search results for existing entries with new attrs.
 func findNewAndUpdated(existingList []BDListEntry, mapping listMapping) ([]BDListEntry, []BDListEntry) {
 	var (
 		newEntries []BDListEntry
@@ -219,6 +220,7 @@ func findNewAndUpdated(existingList []BDListEntry, mapping listMapping) ([]BDLis
 		sid := steamid.New(player.Steamid)
 		if !sid.Valid() {
 			slog.Warn("got invalid steam id", slog.Any("sid", sid))
+
 			continue
 		}
 		found := false
@@ -237,6 +239,7 @@ func findNewAndUpdated(existingList []BDListEntry, mapping listMapping) ([]BDLis
 					u.UpdatedOn = time.Now()
 					updated = append(updated, u)
 				}
+
 				break
 			}
 		}
@@ -260,7 +263,7 @@ func findNewAndUpdated(existingList []BDListEntry, mapping listMapping) ([]BDLis
 	return newEntries, updated
 }
 
-// Search results for deleted entries
+// Search results for deleted entries.
 func findDeleted(existingList []BDListEntry, mapping listMapping) []BDListEntry {
 	var deleted []BDListEntry
 	for _, player := range existingList {
@@ -270,6 +273,7 @@ func findDeleted(existingList []BDListEntry, mapping listMapping) []BDListEntry 
 
 			if sid == player.SteamID {
 				found = true
+
 				break
 			}
 		}
@@ -277,27 +281,29 @@ func findDeleted(existingList []BDListEntry, mapping listMapping) []BDListEntry 
 			deleted = append(deleted, player)
 		}
 	}
+
 	return deleted
 }
 
-func doListUpdate(ctx context.Context, db *pgStore) {
-	lists, errLists := db.bdLists(ctx)
+func doListUpdate(ctx context.Context, database *pgStore) {
+	lists, errLists := database.bdLists(ctx)
 	if errLists != nil {
 		slog.Error("failed to load lists", ErrAttr(errLists))
+
 		return
 	}
-	updateLists(ctx, lists, db)
+	updateLists(ctx, lists, database)
 }
 
-func listUpdater(ctx context.Context, db *pgStore) {
+func listUpdater(ctx context.Context, database *pgStore) {
 	ticker := time.NewTicker(time.Hour * 6)
 
-	doListUpdate(ctx, db)
+	doListUpdate(ctx, database)
 
 	for {
 		select {
 		case <-ticker.C:
-			doListUpdate(ctx, db)
+			doListUpdate(ctx, database)
 		case <-ctx.Done():
 			return
 		}

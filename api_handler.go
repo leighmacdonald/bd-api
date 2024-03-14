@@ -83,7 +83,7 @@ func handleGetFriendList(cache cache) gin.HandlerFunc {
 			return
 		}
 
-		renderSyntax(ctx, encoder, getSteamFriends(ctx, cache, ids), defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
+		renderSyntax(ctx, encoder, getSteamFriends(ctx, cache, ids), &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Steam Summaries",
 		})
 	}
@@ -110,8 +110,7 @@ func handleGetComp(cache cache) gin.HandlerFunc {
 			return
 		}
 
-		renderSyntax(ctx, encoder, compHistory, defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
-
+		renderSyntax(ctx, encoder, compHistory, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Comp History",
 		})
 	}
@@ -138,7 +137,7 @@ func handleGetSummary(cache cache) gin.HandlerFunc {
 			return
 		}
 
-		renderSyntax(ctx, encoder, summaries, defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
+		renderSyntax(ctx, encoder, summaries, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Steam Summaries",
 		})
 	}
@@ -165,13 +164,13 @@ func handleGetBans() gin.HandlerFunc {
 			return
 		}
 
-		renderSyntax(ctx, encoder, bans, defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
+		renderSyntax(ctx, encoder, bans, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Steam Bans",
 		})
 	}
 }
 
-func handleGetProfile(db *pgStore, cache cache) gin.HandlerFunc {
+func handleGetProfile(database *pgStore, cache cache) gin.HandlerFunc {
 	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 
 	encoder := newStyleEncoder()
@@ -183,7 +182,7 @@ func handleGetProfile(db *pgStore, cache cache) gin.HandlerFunc {
 			return
 		}
 
-		profiles, errProfile := loadProfiles(ctx, db, cache, ids)
+		profiles, errProfile := loadProfiles(ctx, database, cache, ids)
 
 		if errProfile != nil || len(profiles) == 0 {
 			log.Error("Failed to load profile", ErrAttr(errProfile))
@@ -192,13 +191,13 @@ func handleGetProfile(db *pgStore, cache cache) gin.HandlerFunc {
 			return
 		}
 
-		renderSyntax(ctx, encoder, profiles, defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
+		renderSyntax(ctx, encoder, profiles, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Profiles",
 		})
 	}
 }
 
-func handleGetSourceBansMany(db *pgStore) gin.HandlerFunc {
+func handleGetSourceBansMany(database *pgStore) gin.HandlerFunc {
 	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 
 	encoder := newStyleEncoder()
@@ -210,7 +209,7 @@ func handleGetSourceBansMany(db *pgStore) gin.HandlerFunc {
 			return
 		}
 
-		bans, errBans := db.sbGetBansBySID(ctx, ids)
+		bans, errBans := database.sbGetBansBySID(ctx, ids)
 		if errBans != nil {
 			log.Error("Failed to query bans from database", ErrAttr(errBans))
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
@@ -218,13 +217,13 @@ func handleGetSourceBansMany(db *pgStore) gin.HandlerFunc {
 			return
 		}
 
-		renderSyntax(ctx, encoder, bans, defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
+		renderSyntax(ctx, encoder, bans, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Source Bans",
 		})
 	}
 }
 
-func handleGetSourceBans(db *pgStore) gin.HandlerFunc {
+func handleGetSourceBans(database *pgStore) gin.HandlerFunc {
 	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 
 	encoder := newStyleEncoder()
@@ -236,7 +235,7 @@ func handleGetSourceBans(db *pgStore) gin.HandlerFunc {
 			return
 		}
 
-		bans, errBans := db.sbGetBansBySID(ctx, steamid.Collection{sid})
+		bans, errBans := database.sbGetBansBySID(ctx, steamid.Collection{sid})
 		if errBans != nil {
 			log.Error("Failed to query bans from database", ErrAttr(errBans))
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
@@ -251,7 +250,7 @@ func handleGetSourceBans(db *pgStore) gin.HandlerFunc {
 			out = []SbBanRecord{}
 		}
 
-		renderSyntax(ctx, encoder, out, defaultTemplate, &baseTmplArgs{ //nolint:exhaustruct
+		renderSyntax(ctx, encoder, out, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Source Bans",
 		})
 	}

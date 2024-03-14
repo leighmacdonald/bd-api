@@ -30,7 +30,7 @@ type parseTimeFunc func(s string) (time.Time, error)
 
 type parserFunc func(doc *goquery.Selection, log *slog.Logger, timeParser parseTimeFunc) ([]sbRecord, int, error)
 
-func initScrapers(ctx context.Context, db *pgStore, cacheDir string) ([]*sbScraper, error) {
+func initScrapers(ctx context.Context, database *pgStore, cacheDir string) ([]*sbScraper, error) {
 	scrapers, errScrapers := createScrapers(cacheDir)
 	if errScrapers != nil {
 		return nil, errScrapers
@@ -39,7 +39,7 @@ func initScrapers(ctx context.Context, db *pgStore, cacheDir string) ([]*sbScrap
 	for _, scraper := range scrapers {
 		// Attach a site_id to the scraper, so we can keep track of the scrape source
 		var s SbSite
-		if errSave := db.sbSiteGetOrCreate(ctx, scraper.name, &s); errSave != nil {
+		if errSave := database.sbSiteGetOrCreate(ctx, scraper.name, &s); errSave != nil {
 			return nil, errors.Wrap(errSave, "Database error")
 		}
 
@@ -49,7 +49,7 @@ func initScrapers(ctx context.Context, db *pgStore, cacheDir string) ([]*sbScrap
 	return scrapers, nil
 }
 
-func runScrapers(ctx context.Context, db *pgStore, scrapers []*sbScraper) {
+func runScrapers(ctx context.Context, database *pgStore, scrapers []*sbScraper) {
 	waitGroup := &sync.WaitGroup{}
 
 	for _, scraper := range scrapers {
@@ -58,25 +58,25 @@ func runScrapers(ctx context.Context, db *pgStore, scrapers []*sbScraper) {
 		go func(s *sbScraper) {
 			defer waitGroup.Done()
 
-			s.start(ctx, db)
+			s.start(ctx, database)
 		}(scraper)
 	}
 
 	waitGroup.Wait()
 }
 
-func startScrapers(ctx context.Context, db *pgStore, scrapers []*sbScraper) {
+func startScrapers(ctx context.Context, database *pgStore, scrapers []*sbScraper) {
 	const scraperInterval = time.Hour * 24
 	scraperTicker := time.NewTicker(scraperInterval)
 
 	sync.OnceFunc(func() {
-		runScrapers(ctx, db, scrapers)
+		runScrapers(ctx, database, scrapers)
 	})()
 
 	for {
 		select {
 		case <-scraperTicker.C:
-			runScrapers(ctx, db, scrapers)
+			runScrapers(ctx, database, scrapers)
 		case <-ctx.Done():
 			return
 		}

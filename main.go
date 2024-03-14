@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 )
 
@@ -24,8 +25,8 @@ func createAppDeps(ctx context.Context) (appConfig, cache, *pgStore, error) {
 	if errDB != nil {
 		return config, nil, nil, errDB
 	}
-	if errPing := database.pool.Ping(ctx); errPing != nil {
-		return config, nil, nil, errPing
+	if err := database.pool.Ping(ctx); err != nil {
+		return config, nil, nil, errors.Join(err, errPing)
 	}
 
 	return config, cacheHandler, database, nil
@@ -35,6 +36,7 @@ func run(ctx context.Context) int {
 	config, cacheHandler, database, errSetup := createAppDeps(ctx)
 	if errSetup != nil {
 		slog.Error("failed to setup app dependencies", ErrAttr(errSetup))
+
 		return 1
 	}
 
@@ -53,14 +55,14 @@ func run(ctx context.Context) int {
 			return 1
 		}
 
-		pm := newProxyManager()
+		proxyMgr := newProxyManager()
 		if config.ProxiesEnabled {
-			pm.start(&config)
+			proxyMgr.start(&config)
 
-			defer pm.stop()
+			defer proxyMgr.stop()
 
 			for _, scraper := range scrapers {
-				if errProxies := pm.setup(scraper.Collector, &config); errProxies != nil {
+				if errProxies := proxyMgr.setup(scraper.Collector, &config); errProxies != nil {
 					slog.Error("Failed to setup proxies", ErrAttr(errProxies))
 
 					continue

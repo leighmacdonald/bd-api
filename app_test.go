@@ -87,26 +87,26 @@ func TestApp(t *testing.T) {
 		}
 	})
 
-	db, errStore := newStore(ctx, dsn)
+	database, errStore := newStore(ctx, dsn)
 	if errStore != nil {
 		panic(errStore)
 	}
 
-	c := &nopCache{}
+	cacheHandler := &nopCache{}
 
 	if !steamid.KeyConfigured() {
 		t.Skip("BDAPI_STEAM_API_KEY not set")
 	}
 
-	router, err := createRouter("test", db, c)
+	router, err := createRouter("test", database, cacheHandler)
 	require.NoError(t, err)
 
-	t.Run("apiTestBans", apiTestBans(router))                       //nolint:paralleltest
-	t.Run("apiTestSummary", apiTestSummary(router))                 //nolint:paralleltest
-	t.Run("apiTestGetProfile", apiTestGetProfile(router))           //nolint:paralleltest
-	t.Run("apiTestGetSourcebans", apiTestGetSourcebans(router, db)) //nolint:paralleltest
-	t.Run("apiTestGetFriends", apiTestGetFriends(router))           //nolint:paralleltest
-	t.Run("apiTestInvalidQueries", apiTestInvalidQueries(router))   //nolint:paralleltest
+	t.Run("apiTestBans", apiTestBans(router))                             //nolint:paralleltest
+	t.Run("apiTestSummary", apiTestSummary(router))                       //nolint:paralleltest
+	t.Run("apiTestGetProfile", apiTestGetProfile(router))                 //nolint:paralleltest
+	t.Run("apiTestGetSourcebans", apiTestGetSourcebans(router, database)) //nolint:paralleltest
+	t.Run("apiTestGetFriends", apiTestGetFriends(router))                 //nolint:paralleltest
+	t.Run("apiTestInvalidQueries", apiTestInvalidQueries(router))         //nolint:paralleltest
 }
 
 func generateIDs(count int) steamid.Collection {
@@ -274,7 +274,7 @@ func apiTestGetProfile(router *gin.Engine) func(t *testing.T) {
 	}
 }
 
-func createTestSourcebansRecord(t *testing.T, router *gin.Engine, db *pgStore, sid64 steamid.SteamID) SbBanRecord {
+func createTestSourcebansRecord(t *testing.T, database *pgStore, sid64 steamid.SteamID) SbBanRecord {
 	t.Helper()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
@@ -283,12 +283,12 @@ func createTestSourcebansRecord(t *testing.T, router *gin.Engine, db *pgStore, s
 	curTime := time.Now()
 
 	player := newPlayerRecord(sid64)
-	if errPlayer := db.playerGetOrCreate(ctx, sid64, &player); errPlayer != nil {
+	if errPlayer := database.playerGetOrCreate(ctx, sid64, &player); errPlayer != nil {
 		t.Error(errPlayer)
 	}
 
 	site := NewSBSite(Site(fmt.Sprintf("Test %s", curTime)))
-	if errSave := db.sbSiteSave(ctx, &site); errSave != nil {
+	if errSave := database.sbSiteSave(ctx, &site); errSave != nil {
 		t.Error(errSave)
 	}
 
@@ -296,17 +296,17 @@ func createTestSourcebansRecord(t *testing.T, router *gin.Engine, db *pgStore, s
 		curTime.AddDate(-1, 0, 0), time.Hour*24, false)
 	record.CreatedOn = curTime
 
-	if errSave := db.sbBanSave(ctx, &record); errSave != nil {
+	if errSave := database.sbBanSave(ctx, &record); errSave != nil {
 		t.Error(errSave)
 	}
 
 	return record
 }
 
-func apiTestGetSourcebans(router *gin.Engine, db *pgStore) func(t *testing.T) {
+func apiTestGetSourcebans(router *gin.Engine, database *pgStore) func(t *testing.T) {
 	return func(t *testing.T) {
-		recordA := createTestSourcebansRecord(t, router, db, testIDb4nny)
-		recordB := createTestSourcebansRecord(t, router, db, testIDCamper)
+		recordA := createTestSourcebansRecord(t, database, testIDb4nny)
+		recordB := createTestSourcebansRecord(t, database, testIDCamper)
 
 		t.Run("single", func(t *testing.T) {
 			t.Parallel()

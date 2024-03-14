@@ -53,7 +53,6 @@ func makeSigner(keyPath string) (ssh.Signer, error) { //nolint:ireturn
 		}
 
 		signer = newSigner
-
 	} else {
 		newSigner, errSigner := ssh.ParsePrivateKey(privateKeyBody)
 		if errSigner != nil {

@@ -86,6 +86,7 @@ func newWonderlandTFScraper(cacheDir string) (*sbScraper, error) {
 	// Cached versions do not have a proper next link, so we have to generate one.
 	scraper.nextURL = func(scraper *sbScraper, _ *goquery.Selection) string {
 		scraper.curPage++
+
 		return scraper.url(fmt.Sprintf("index.php?p=banlist&page=%d", scraper.curPage))
 	}
 
