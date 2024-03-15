@@ -224,20 +224,17 @@ func handleGetSourceBansMany(database *pgStore) gin.HandlerFunc {
 }
 
 func handleGetSourceBans(database *pgStore) gin.HandlerFunc {
-	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
-
 	encoder := newStyleEncoder()
 
 	return func(ctx *gin.Context) {
 		sid, ok := steamIDFromSlug(ctx)
-
 		if !ok {
 			return
 		}
 
 		bans, errBans := database.sbGetBansBySID(ctx, steamid.Collection{sid})
 		if errBans != nil {
-			log.Error("Failed to query bans from database", ErrAttr(errBans))
+			slog.Error("Failed to query bans from database", ErrAttr(errBans))
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
 
 			return
@@ -252,6 +249,52 @@ func handleGetSourceBans(database *pgStore) gin.HandlerFunc {
 
 		renderSyntax(ctx, encoder, out, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Source Bans",
+		})
+	}
+}
+
+func getAttrs(ctx *gin.Context) ([]string, bool) {
+	steamIDQuery, ok := ctx.GetQuery("attrs")
+	if !ok {
+		return []string{"cheater"}, true
+	}
+
+	attrs := normalizeAttrs(strings.Split(steamIDQuery, ","))
+	if len(attrs) == 0 {
+		return nil, false
+	}
+
+	return attrs, true
+}
+
+func handleGetBotDetector(database *pgStore) gin.HandlerFunc {
+	encoder := newStyleEncoder()
+
+	return func(ctx *gin.Context) {
+		sid, sidOk := getSteamIDs(ctx)
+		if !sidOk {
+			return
+		}
+
+		attrs, attrOk := getAttrs(ctx)
+		if !attrOk {
+			return
+		}
+
+		results, errSearch := database.bdListSearch(ctx, sid, attrs)
+		if errSearch != nil {
+			slog.Error("Failed to query bd lists from database", ErrAttr(errSearch))
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
+
+			return
+		}
+
+		if results == nil {
+			results = []BDSearchResult{}
+		}
+
+		renderSyntax(ctx, encoder, results, &baseTmplArgs{ //nolint:exhaustruct
+			Title: "TF2BD Search Results",
 		})
 	}
 }

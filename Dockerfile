@@ -13,4 +13,4 @@ RUN apk add dumb-init
 WORKDIR /app
 COPY --from=build /build/bd-api .
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["./bd-api"]
+CMD ["./bd-api", "run"]

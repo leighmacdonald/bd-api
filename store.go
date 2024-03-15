@@ -6,6 +6,7 @@ import (
 	"embed"
 	"log/slog"
 	"net/http"
+	"slices"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -993,4 +994,62 @@ func (db *pgStore) bdListEntryDelete(ctx context.Context, entryID int64) error {
 	}
 
 	return nil
+}
+
+func steamIDCollectionToInt64Slice(collection steamid.Collection) []int64 {
+	ids := make([]int64, len(collection))
+	for idx := range collection {
+		ids[idx] = collection[idx].Int64()
+	}
+
+	return ids
+}
+
+type BDSearchResult struct {
+	ListName string `json:"list_name"`
+	Player   Player
+}
+
+func (db *pgStore) bdListSearch(ctx context.Context, collection steamid.Collection, attrs []string) ([]BDSearchResult, error) {
+	if len(collection) == 0 {
+		return []BDSearchResult{}, nil
+	}
+
+	if len(attrs) == 0 {
+		attrs = []string{"cheater"}
+	}
+	attrs = normalizeAttrs(attrs)
+	conditions := sq.And{sq.Eq{"steam_id": steamIDCollectionToInt64Slice(collection)}}
+
+	if !slices.Contains(attrs, "all") {
+		conditions = append(conditions, sq.Eq{"attribute": attrs})
+	}
+
+	query, args, errSQL := sb.
+		Select("l.bd_list_name").
+		LeftJoin("bd_list_entries e ON (bd_list_id").
+		Where(conditions).
+		ToSql()
+	if errSQL != nil {
+		return nil, dbErr(errSQL, "Failed to build bd list entry delete query")
+	}
+
+	rows, errRows := db.pool.Query(ctx, query, args...)
+	if errRows != nil {
+		return nil, dbErr(errRows, "failed to execute list search entry")
+	}
+	defer rows.Close()
+
+	var results []BDSearchResult
+
+	for rows.Next() {
+		var res BDSearchResult
+		if errScan := rows.Scan(&res); errScan != nil {
+			return nil, dbErr(errScan, "failed to scan list search result")
+		}
+
+		results = append(results, res)
+	}
+
+	return results, nil
 }

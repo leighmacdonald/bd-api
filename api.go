@@ -219,6 +219,7 @@ func createRouter(runMode string, database *pgStore, cacheHandler cache) (*gin.E
 	engine.GET("/friends", handleGetFriendList(cacheHandler))
 	engine.GET("/sourcebans", handleGetSourceBansMany(database))
 	engine.GET("/sourcebans/:steam_id", handleGetSourceBans(database))
+	engine.GET("/bd", handleGetBotDetector(database))
 
 	return engine, nil
 }

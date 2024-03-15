@@ -26,7 +26,7 @@ type LastSeen struct {
 	Time       int    `json:"time,omitempty"`
 }
 
-type Players struct {
+type TF2BDPlayer struct {
 	Attributes []string `json:"attributes"`
 	LastSeen   LastSeen `json:"last_seen,omitempty"`
 	Steamid    any      `json:"steamid"`
@@ -34,9 +34,9 @@ type Players struct {
 }
 
 type TF2BDSchema struct {
-	Schema   string    `json:"$schema"` //nolint:tagliatelle
-	FileInfo FileInfo  `json:"file_info"`
-	Players  []Players `json:"players"`
+	Schema   string        `json:"$schema"` //nolint:tagliatelle
+	FileInfo FileInfo      `json:"file_info"`
+	Players  []TF2BDPlayer `json:"players"`
 }
 
 type BDList struct {
@@ -198,10 +198,19 @@ func updateListEntries(ctx context.Context, database *pgStore, mapping listMappi
 	return nil
 }
 
+// normalizeAttrs will filter all attributes, ensuring they are lowercase, unique, not empty, have any surrounding
+// whitespace removed and sorted.
 func normalizeAttrs(inputAttrs []string) []string {
-	attrs := make([]string, len(inputAttrs))
+	var attrs []string
 	for idx := range inputAttrs {
-		attrs[idx] = strings.ToLower(inputAttrs[idx])
+		value := strings.TrimSpace(strings.ToLower(inputAttrs[idx]))
+		if value == "" {
+			continue
+		}
+
+		if !slices.Contains(attrs, value) {
+			attrs = append(attrs, value)
+		}
 	}
 
 	slices.Sort(attrs)

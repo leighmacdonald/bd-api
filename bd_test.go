@@ -51,7 +51,7 @@ func TestBDUpdates(t *testing.T) {
 		result: &TF2BDSchema{
 			Schema:   "",
 			FileInfo: FileInfo{},
-			Players: []Players{
+			Players: []TF2BDPlayer{
 				{
 					Attributes: []string{"cheater"},
 					LastSeen: LastSeen{
