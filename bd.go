@@ -30,7 +30,7 @@ type TF2BDPlayer struct {
 	Attributes []string `json:"attributes"`
 	LastSeen   LastSeen `json:"last_seen,omitempty"`
 	Steamid    any      `json:"steamid"`
-	Proof      []string `json:"proof,omitempty"`
+	Proof      []string `json:"proof"`
 }
 
 type TF2BDSchema struct {
@@ -55,6 +55,7 @@ type BDListEntry struct {
 	BDListID      int
 	SteamID       steamid.SteamID
 	Attributes    []string
+	Proof         []string
 	LastSeen      time.Time
 	LastName      string
 	Deleted       bool
@@ -167,7 +168,12 @@ func updateListEntries(ctx context.Context, database *pgStore, mapping listMappi
 			return errors.Join(err, errPlayerGetOrCreate)
 		}
 		if _, err := database.bdListEntryCreate(ctx, entry); err != nil {
-			return errors.Join(err, errCreateEntryFailed)
+			if errors.Is(err, errDuplicate) {
+				continue
+			}
+			slog.Error("Failed to create list entry", ErrAttr(err))
+
+			continue
 		}
 	}
 	if len(newEntries) > 0 {
@@ -228,7 +234,7 @@ func findNewAndUpdated(existingList []BDListEntry, mapping listMapping) ([]BDLis
 	for _, player := range mapping.result.Players {
 		sid := steamid.New(player.Steamid)
 		if !sid.Valid() {
-			slog.Warn("got invalid steam id", slog.Any("sid", sid))
+			slog.Warn("got invalid steam id", slog.Any("sid", sid), slog.String("list", mapping.list.BDListName))
 
 			continue
 		}
@@ -240,10 +246,11 @@ func findNewAndUpdated(existingList []BDListEntry, mapping listMapping) ([]BDLis
 				attrs := normalizeAttrs(player.Attributes)
 				els := existing.LastSeen.Unix()
 				ls := lastSeen.Unix()
-				if existing.LastName != player.LastSeen.PlayerName || els != ls || !slices.Equal(existing.Attributes, attrs) {
+				if existing.LastName != player.LastSeen.PlayerName || els != ls || !slices.Equal(existing.Attributes, attrs) || !slices.Equal(existing.Proof, player.Proof) {
 					u := existing
 					u.LastSeen = lastSeen
 					u.Attributes = attrs
+					u.Proof = player.Proof
 					u.LastName = player.LastSeen.PlayerName
 					u.UpdatedOn = time.Now()
 					updated = append(updated, u)
@@ -259,6 +266,7 @@ func findNewAndUpdated(existingList []BDListEntry, mapping listMapping) ([]BDLis
 				BDListID:      mapping.list.BDListID,
 				SteamID:       sid,
 				Attributes:    normalizeAttrs(player.Attributes),
+				Proof:         player.Proof,
 				LastSeen:      time.Unix(int64(player.LastSeen.Time), 0),
 				LastName:      player.LastSeen.PlayerName,
 				Deleted:       false,

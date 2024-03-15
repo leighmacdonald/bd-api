@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"slices"
@@ -892,7 +893,7 @@ func (db *pgStore) bdListDelete(ctx context.Context, bdListID int) error {
 
 func (db *pgStore) bdListEntries(ctx context.Context, listID int) ([]BDListEntry, error) {
 	query, args, errSQL := sb.
-		Select("bd_list_entry_id", "bd_list_id", "steam_id", "attribute",
+		Select("bd_list_entry_id", "bd_list_id", "steam_id", "attribute", "proof",
 			"last_seen", "last_name", "deleted", "created_on", "updated_on").
 		From("bd_list_entries").
 		Where(sq.Eq{"bd_list_id": listID}).
@@ -915,7 +916,7 @@ func (db *pgStore) bdListEntries(ctx context.Context, listID int) ([]BDListEntry
 			entry BDListEntry
 			sid   int64
 		)
-		if errScan := rows.Scan(&entry.BDListEntryID, &entry.BDListID, &sid, &entry.Attributes, &entry.LastName,
+		if errScan := rows.Scan(&entry.BDListEntryID, &entry.BDListID, &sid, &entry.Attributes, &entry.Proof, &entry.LastName,
 			&entry.LastName, &entry.Deleted, &entry.CreatedOn, &entry.UpdatedOn); errScan != nil {
 			return nil, dbErr(errSQL, "Failed to scan bd list entry result")
 		}
@@ -928,10 +929,14 @@ func (db *pgStore) bdListEntries(ctx context.Context, listID int) ([]BDListEntry
 }
 
 func (db *pgStore) bdListEntryUpdate(ctx context.Context, entry BDListEntry) error {
+	if entry.Proof == nil {
+		entry.Proof = []string{}
+	}
 	query, args, errSQL := sb.
 		Update("bd_list_entries").
 		SetMap(map[string]interface{}{
 			"attribute":  entry.Attributes,
+			"proof":      entry.Proof,
 			"last_seen":  entry.LastSeen,
 			"last_name":  entry.LastName,
 			"deleted":    entry.Deleted,
@@ -951,12 +956,16 @@ func (db *pgStore) bdListEntryUpdate(ctx context.Context, entry BDListEntry) err
 }
 
 func (db *pgStore) bdListEntryCreate(ctx context.Context, entry BDListEntry) (BDListEntry, error) {
+	if entry.Proof == nil {
+		entry.Proof = []string{}
+	}
 	query, args, errSQL := sb.
 		Insert("bd_list_entries").
 		SetMap(map[string]interface{}{
 			"bd_list_id": entry.BDListID,
 			"steam_id":   entry.SteamID.Int64(),
 			"attribute":  entry.Attributes,
+			"proof":      entry.Proof,
 			"last_seen":  entry.LastSeen,
 			"last_name":  entry.LastName,
 			"deleted":    entry.Deleted,
@@ -1006,8 +1015,8 @@ func steamIDCollectionToInt64Slice(collection steamid.Collection) []int64 {
 }
 
 type BDSearchResult struct {
-	ListName string `json:"list_name"`
-	Player   Player
+	ListName string      `json:"list_name"`
+	Match    TF2BDPlayer `json:"match"`
 }
 
 func (db *pgStore) bdListSearch(ctx context.Context, collection steamid.Collection, attrs []string) ([]BDSearchResult, error) {
@@ -1019,15 +1028,16 @@ func (db *pgStore) bdListSearch(ctx context.Context, collection steamid.Collecti
 		attrs = []string{"cheater"}
 	}
 	attrs = normalizeAttrs(attrs)
-	conditions := sq.And{sq.Eq{"steam_id": steamIDCollectionToInt64Slice(collection)}}
+	conditions := sq.And{sq.Eq{"e.steam_id": steamIDCollectionToInt64Slice(collection)}}
 
 	if !slices.Contains(attrs, "all") {
-		conditions = append(conditions, sq.Eq{"attribute": attrs})
+		conditions = append(conditions, sq.Expr("e.attribute && ?", attrs))
 	}
 
 	query, args, errSQL := sb.
-		Select("l.bd_list_name").
-		LeftJoin("bd_list_entries e ON (bd_list_id").
+		Select("l.bd_list_name", "e.attribute", "e.proof", "e.last_name", "e.last_seen", "e.steam_id").
+		From("bd_list l").
+		LeftJoin("bd_list_entries e ON e.bd_list_id = l.bd_list_id").
 		Where(conditions).
 		ToSql()
 	if errSQL != nil {
@@ -1044,9 +1054,14 @@ func (db *pgStore) bdListSearch(ctx context.Context, collection steamid.Collecti
 
 	for rows.Next() {
 		var res BDSearchResult
-		if errScan := rows.Scan(&res); errScan != nil {
+		var lastSeen time.Time
+		var steamID int64
+		if errScan := rows.Scan(&res.ListName, &res.Match.Attributes, &res.Match.Proof,
+			&res.Match.LastSeen.PlayerName, &lastSeen, &steamID); errScan != nil {
 			return nil, dbErr(errScan, "failed to scan list search result")
 		}
+		res.Match.LastSeen.Time = int(lastSeen.Unix())
+		res.Match.Steamid = fmt.Sprintf("%d", steamID)
 
 		results = append(results, res)
 	}
