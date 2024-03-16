@@ -148,7 +148,6 @@ func updateLists(ctx context.Context, lists []BDList, database *pgStore) {
 
 var (
 	errUpdateEntryFailed = errors.New("failed to commit updated bd entry")
-	errCreateEntryFailed = errors.New("failed to commit created bd entry")
 	errDeleteEntryFailed = errors.New("failed to commit deleted bd entry")
 	errPlayerGetOrCreate = errors.New("failed to get/create player record")
 )
@@ -247,13 +246,13 @@ func findNewAndUpdated(existingList []BDListEntry, mapping listMapping) ([]BDLis
 				els := existing.LastSeen.Unix()
 				ls := lastSeen.Unix()
 				if existing.LastName != player.LastSeen.PlayerName || els != ls || !slices.Equal(existing.Attributes, attrs) || !slices.Equal(existing.Proof, player.Proof) {
-					u := existing
-					u.LastSeen = lastSeen
-					u.Attributes = attrs
-					u.Proof = player.Proof
-					u.LastName = player.LastSeen.PlayerName
-					u.UpdatedOn = time.Now()
-					updated = append(updated, u)
+					updatedEntry := existing
+					updatedEntry.LastSeen = lastSeen
+					updatedEntry.Attributes = attrs
+					updatedEntry.Proof = player.Proof
+					updatedEntry.LastName = player.LastSeen.PlayerName
+					updatedEntry.UpdatedOn = time.Now()
+					updated = append(updated, updatedEntry)
 				}
 
 				break

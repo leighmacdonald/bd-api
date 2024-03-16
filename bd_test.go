@@ -39,6 +39,7 @@ func TestBDUpdates(t *testing.T) {
 			BDListID:      1,
 			SteamID:       steamid.New("76561197960265730"),
 			Attributes:    []string{"cheater"},
+			Proof:         []string{"lol"},
 			LastSeen:      time.Now(),
 			LastName:      "player2",
 			Deleted:       false,
@@ -59,7 +60,7 @@ func TestBDUpdates(t *testing.T) {
 						PlayerName: "player1",
 						Time:       int(entries1[0].LastSeen.Unix()),
 					},
-					Steamid: 76561197960265729, Proof: []string{},
+					Steamid: 76561197960265729, Proof: []string{"lol"},
 				},
 				{
 					Attributes: []string{"cheater"},

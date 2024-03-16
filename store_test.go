@@ -166,6 +166,7 @@ func bdTest(database *pgStore) func(t *testing.T) {
 				BDListID:   listA.BDListID,
 				SteamID:    record.SteamID,
 				Attributes: []string{"cheater"},
+				Proof:      []string{"proof", "prooof"},
 				LastSeen:   time.Now(),
 				LastName:   fmt.Sprintf("name_%d", idx),
 				Deleted:    false,
