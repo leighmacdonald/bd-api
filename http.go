@@ -5,16 +5,16 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/pkg/errors"
 )
 
-const defaultHTTPTimeoutMs = 30 * 1000
-
 // NewHTTPClient allocates a preconfigured *http.Client.
+
 func NewHTTPClient() *http.Client {
 	c := &http.Client{ //nolint:exhaustruct
-		Timeout: defaultHTTPTimeoutMs,
+		Timeout: time.Second * 10,
 	}
 
 	return c

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 )
 
 // Division tries to define a generalized ranked division order.
@@ -54,4 +54,4 @@ type Season struct {
 	TeamName    string   `json:"team_name"`
 }
 
-type compMap map[steamid.SID64][]Season
+type compMap map[steamid.SteamID][]Season

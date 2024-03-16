@@ -421,6 +421,7 @@ func newCuteProjectScraper(cacheDir string) (*sbScraper, error) {
 
 	scraper, errScraper := newScraper(cacheDir, CuteProject, "https://bans.cute-project.net/", "",
 		parseMaterial, nextURLLast, parseProGamesZetTime)
+
 	if errScraper != nil {
 		return nil, errScraper
 	}

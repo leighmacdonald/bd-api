@@ -19,7 +19,7 @@ import (
 	"github.com/gocolly/colly/debug"
 	"github.com/gocolly/colly/extensions"
 	"github.com/gocolly/colly/queue"
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 )
@@ -30,7 +30,7 @@ type parseTimeFunc func(s string) (time.Time, error)
 
 type parserFunc func(doc *goquery.Selection, log *slog.Logger, timeParser parseTimeFunc) ([]sbRecord, int, error)
 
-func initScrapers(ctx context.Context, db *pgStore, cacheDir string) ([]*sbScraper, error) {
+func initScrapers(ctx context.Context, database *pgStore, cacheDir string) ([]*sbScraper, error) {
 	scrapers, errScrapers := createScrapers(cacheDir)
 	if errScrapers != nil {
 		return nil, errScrapers
@@ -39,7 +39,7 @@ func initScrapers(ctx context.Context, db *pgStore, cacheDir string) ([]*sbScrap
 	for _, scraper := range scrapers {
 		// Attach a site_id to the scraper, so we can keep track of the scrape source
 		var s SbSite
-		if errSave := db.sbSiteGetOrCreate(ctx, scraper.name, &s); errSave != nil {
+		if errSave := database.sbSiteGetOrCreate(ctx, scraper.name, &s); errSave != nil {
 			return nil, errors.Wrap(errSave, "Database error")
 		}
 
@@ -49,21 +49,7 @@ func initScrapers(ctx context.Context, db *pgStore, cacheDir string) ([]*sbScrap
 	return scrapers, nil
 }
 
-func runScrapers(ctx context.Context, config appConfig, pm *proxyManager, db *pgStore, scrapers []*sbScraper) {
-	if config.ProxiesEnabled {
-		pm.start(&config)
-
-		defer pm.stop()
-
-		for _, scraper := range scrapers {
-			if errProxies := pm.setup(scraper.Collector, &config); errProxies != nil {
-				slog.Error("Failed to setup proxies", ErrAttr(errProxies))
-
-				return
-			}
-		}
-	}
-
+func runScrapers(ctx context.Context, database *pgStore, scrapers []*sbScraper) {
 	waitGroup := &sync.WaitGroup{}
 
 	for _, scraper := range scrapers {
@@ -72,28 +58,25 @@ func runScrapers(ctx context.Context, config appConfig, pm *proxyManager, db *pg
 		go func(s *sbScraper) {
 			defer waitGroup.Done()
 
-			s.start(ctx, db)
+			s.start(ctx, database)
 		}(scraper)
 	}
 
 	waitGroup.Wait()
 }
 
-func startScrapers(ctx context.Context, config appConfig, pm *proxyManager, db *pgStore, scrapers []*sbScraper) {
+func startScrapers(ctx context.Context, database *pgStore, scrapers []*sbScraper) {
 	const scraperInterval = time.Hour * 24
 	scraperTicker := time.NewTicker(scraperInterval)
-	trigger := make(chan any)
 
-	go func() {
-		trigger <- true
-	}()
+	sync.OnceFunc(func() {
+		runScrapers(ctx, database, scrapers)
+	})()
 
 	for {
 		select {
-		case <-trigger:
-			runScrapers(ctx, config, pm, db, scrapers)
 		case <-scraperTicker.C:
-			trigger <- true
+			runScrapers(ctx, database, scrapers)
 		case <-ctx.Done():
 			return
 		}
@@ -102,7 +85,7 @@ func startScrapers(ctx context.Context, config appConfig, pm *proxyManager, db *
 
 type sbRecord struct {
 	Name      string
-	SteamID   steamid.SID64
+	SteamID   steamid.SteamID
 	Reason    string
 	CreatedOn time.Time
 	Length    time.Duration
@@ -131,7 +114,7 @@ func (r *sbRecord) setInvokedOn(parseTime parseTimeFunc, value string) error {
 func (r *sbRecord) setBanLength(value string) {
 	lowerVal := strings.ToLower(value)
 	if strings.Contains(lowerVal, "unbanned") {
-		r.SteamID = "" // invalidate it
+		r.SteamID = steamid.SteamID{} // invalidate it
 	} else if lowerVal == "permanent" {
 		r.Permanent = true
 	}
@@ -154,7 +137,7 @@ func (r *sbRecord) setExpiredOn(parseTime parseTimeFunc, value string) error {
 
 	if r.Length < 0 {
 		// Some temp ban/actions use a negative duration?, just invalidate these
-		r.SteamID = ""
+		r.SteamID = steamid.SteamID{}
 	}
 
 	return nil
@@ -270,7 +253,7 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 		for _, result := range results {
 			pRecord := newPlayerRecord(result.SteamID)
 			if errPlayer := database.playerGetOrCreate(ctx, result.SteamID, &pRecord); errPlayer != nil {
-				slog.Error("failed to get player record", slog.Int64("sid64", result.SteamID.Int64()), ErrAttr(errPlayer))
+				slog.Error("failed to get player record", slog.String("sid64", result.SteamID.String()), ErrAttr(errPlayer))
 
 				continue
 			}
@@ -292,13 +275,13 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 
 			if errBanSave := database.sbBanSave(ctx, &bRecord); errBanSave != nil {
 				if errors.Is(errBanSave, errDuplicate) {
-					slog.Debug("Failed to save ban record (duplicate)",
-						slog.Int64("sid64", pRecord.SteamID.Int64()), ErrAttr(errBanSave))
+					// slog.Debug("Failed to save ban record (duplicate)",
+					//	slog.String("sid64", pRecord.SteamID.String()), ErrAttr(errBanSave))
 
 					continue
 				}
 				slog.Error("Failed to save ban record",
-					slog.Int64("sid64", pRecord.SteamID.Int64()), ErrAttr(errBanSave))
+					slog.String("sid64", pRecord.SteamID.String()), ErrAttr(errBanSave))
 			}
 		}
 		if nextURL != "" && nextURL != lastURL {
@@ -1130,9 +1113,7 @@ func newCFTransport() *cfTransport {
 }
 
 func (t *cfTransport) Open(ctx context.Context) error {
-	const (
-		slowTimeout = time.Second * 5
-	)
+	const slowTimeout = time.Second * 5
 
 	launchURL, errLauncher := launcher.
 		NewUserMode().

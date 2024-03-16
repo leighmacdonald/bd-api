@@ -9,12 +9,12 @@ import (
 	"time"
 
 	"github.com/leighmacdonald/rgl"
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
 )
 
-type friendMap map[steamid.SID64][]steamweb.Friend
+type friendMap map[string][]steamweb.Friend
 
 func getSteamFriends(ctx context.Context, cache cache, steamIDs steamid.Collection) friendMap {
 	var (
@@ -24,13 +24,13 @@ func getSteamFriends(ctx context.Context, cache cache, steamIDs steamid.Collecti
 	)
 
 	for _, sid := range steamIDs {
-		output[sid] = []steamweb.Friend{}
+		output[sid.String()] = []steamweb.Friend{}
 	}
 
 	for _, currentID := range steamIDs {
 		waitGroup.Add(1)
 
-		go func(steamID steamid.SID64) {
+		go func(steamID steamid.SteamID) {
 			defer waitGroup.Done()
 
 			var (
@@ -39,6 +39,7 @@ func getSteamFriends(ctx context.Context, cache cache, steamIDs steamid.Collecti
 			)
 
 			friendsBody, errCache := cache.get(key)
+
 			if errCache == nil {
 				if err := json.Unmarshal(friendsBody, &friends); err != nil {
 					slog.Error("Failed to unmarshal cached result", ErrAttr(err))
@@ -66,7 +67,7 @@ func getSteamFriends(ctx context.Context, cache cache, steamIDs steamid.Collecti
 			}
 
 			mutex.Lock()
-			output[steamID] = newFriends
+			output[steamID.String()] = newFriends
 			mutex.Unlock()
 		}(currentID)
 	}
@@ -84,7 +85,6 @@ func getSteamBans(ctx context.Context, cache cache, steamIDs steamid.Collection)
 
 	for _, steamID := range steamIDs {
 		var banState steamweb.PlayerBanState
-
 		summaryBody, errCache := cache.get(makeKey(KeyBans, steamID))
 		if errCache == nil {
 			if err := json.Unmarshal(summaryBody, &banState); err != nil {
@@ -158,6 +158,7 @@ func getCompHistory(ctx context.Context, cache cache, steamIDs steamid.Collectio
 	for _, steamID := range missed {
 		logger := slog.With(slog.String("site", "rgl"), slog.String("steam_id", steamID.String()))
 		rglSeasons, errRGL := getRGL(ctx, logger, steamID)
+
 		if errRGL != nil {
 			if errors.Is(errRGL, rgl.ErrRateLimit) {
 				logger.Warn("API Rate limited")
@@ -195,8 +196,8 @@ func getSteamSummaries(ctx context.Context, cache cache, steamIDs steamid.Collec
 
 	for _, steamID := range steamIDs {
 		var summary steamweb.PlayerSummary
-
 		summaryBody, errCache := cache.get(makeKey(KeySummary, steamID))
+
 		if errCache == nil {
 			if err := json.Unmarshal(summaryBody, &summary); err != nil {
 				slog.Error("Failed to unmarshal cached result", ErrAttr(err))
@@ -233,7 +234,7 @@ func getSteamSummaries(ctx context.Context, cache cache, steamIDs steamid.Collec
 	return summaries, nil
 }
 
-func profileUpdater(ctx context.Context, db *pgStore) {
+func profileUpdater(ctx context.Context, database *pgStore) {
 	const (
 		maxQueuedCount = 100
 		updateInterval = time.Second
@@ -251,8 +252,7 @@ func profileUpdater(ctx context.Context, db *pgStore) {
 			triggerUpdate <- true
 		case <-triggerUpdate:
 			var expiredIDs steamid.Collection
-
-			expiredProfiles, errProfiles := db.playerGetExpiredProfiles(ctx, maxQueuedCount)
+			expiredProfiles, errProfiles := database.playerGetExpiredProfiles(ctx, maxQueuedCount)
 			if errProfiles != nil {
 				slog.Error("Failed to fetch expired profiles", ErrAttr(errProfiles))
 			}
@@ -262,7 +262,7 @@ func profileUpdater(ctx context.Context, db *pgStore) {
 			for len(expiredProfiles) < maxQueuedCount {
 				for _, sid64 := range updateQueue {
 					var pr PlayerRecord
-					if errQueued := db.playerGetOrCreate(ctx, sid64, &pr); errQueued != nil {
+					if errQueued := database.playerGetOrCreate(ctx, sid64, &pr); errQueued != nil {
 						continue
 					}
 
@@ -313,11 +313,10 @@ func profileUpdater(ctx context.Context, db *pgStore) {
 					}
 				}
 
-				if errSave := db.playerRecordSave(ctx, &prof); errSave != nil {
+				if errSave := database.playerRecordSave(ctx, &prof); errSave != nil {
 					slog.Error("Failed to update profile", slog.Int64("sid", prof.SteamID.Int64()), ErrAttr(errSave))
 				}
 			}
-
 		case <-ctx.Done():
 			return
 		}

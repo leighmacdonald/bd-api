@@ -2,21 +2,15 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"log/slog"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
-func run() int {
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
-
+func createAppDeps(ctx context.Context) (appConfig, cache, *pgStore, error) {
 	var config appConfig
 
 	if errConfig := readConfig(&config); errConfig != nil {
-		panic(fmt.Sprintf("Failed to load config: %v", errConfig))
+		return config, nil, nil, errConfig
 	}
 
 	loggerClose := MustCreateLogger(config.LogFilePath, config.LogLevel, config.LogFileEnabled)
@@ -24,48 +18,67 @@ func run() int {
 
 	cacheHandler, errCache := createCache(config.EnableCache, config.CacheDir)
 	if errCache != nil {
-		slog.Error("failed to setup cache", ErrAttr(errCache))
-
-		return 1
+		return config, nil, nil, errCache
 	}
 
 	database, errDB := newStore(ctx, config.DSN)
 	if errDB != nil {
-		slog.Error("Failed to instantiate database", ErrAttr(errDB))
-
-		return 2
+		return config, nil, nil, errDB
+	}
+	if err := database.pool.Ping(ctx); err != nil {
+		return config, nil, nil, errors.Join(err, errPing)
 	}
 
-	if errPing := database.pool.Ping(ctx); errPing != nil {
-		slog.Error("failed to connect to database")
+	return config, cacheHandler, database, nil
+}
 
-		return 3
+func run(ctx context.Context) int {
+	config, cacheHandler, database, errSetup := createAppDeps(ctx)
+	if errSetup != nil {
+		slog.Error("failed to setup app dependencies", ErrAttr(errSetup))
+
+		return 1
 	}
 
 	router, errRouter := createRouter(config.RunMode, database, cacheHandler)
 	if errRouter != nil {
 		slog.Error("failed to create router", ErrAttr(errRouter))
 
-		return 4
+		return 1
 	}
 
 	if config.SourcebansScraperEnabled {
-		pm := newProxyManager()
 		scrapers, errScrapers := initScrapers(ctx, database, config.CacheDir)
 		if errScrapers != nil {
 			slog.Error("failed to setup scrapers")
 
-			return 5
+			return 1
 		}
 
-		go startScrapers(ctx, config, pm, database, scrapers)
+		proxyMgr := newProxyManager()
+		if config.ProxiesEnabled {
+			proxyMgr.start(&config)
+
+			defer proxyMgr.stop()
+
+			for _, scraper := range scrapers {
+				if errProxies := proxyMgr.setup(scraper.Collector, &config); errProxies != nil {
+					slog.Error("Failed to setup proxies", ErrAttr(errProxies))
+
+					continue
+				}
+			}
+		}
+
+		go startScrapers(ctx, database, scrapers)
 	}
 
+	go listUpdater(ctx, database)
 	go profileUpdater(ctx, database)
 
 	return runHTTP(ctx, router, config.ListenAddr)
 }
 
 func main() {
-	os.Exit(run())
+	execute()
 }

@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/armon/go-socks5"
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
@@ -44,8 +44,8 @@ func makeSigner(keyPath string) (ssh.Signer, error) { //nolint:ireturn
 	}
 
 	var signer ssh.Signer
-
 	key, keyFound := os.LookupEnv("PASSWORD")
+
 	if keyFound {
 		newSigner, errSigner := ssh.ParsePrivateKeyWithPassphrase(privateKeyBody, []byte(key))
 		if errSigner != nil {
@@ -58,6 +58,7 @@ func makeSigner(keyPath string) (ssh.Signer, error) { //nolint:ireturn
 		if errSigner != nil {
 			return nil, errors.Wrap(errSigner, "Failed to parse private key")
 		}
+
 		signer = newSigner
 	}
 

@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"fmt"
 	"log/slog"
 	"net/http"
+	"slices"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -16,7 +18,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
 )
@@ -31,8 +33,9 @@ var (
 	//go:embed migrations
 	migrations embed.FS
 
-	errDuplicate = errors.New("Duplicate entity")
-	errNoRows    = errors.New("No rows")
+	errDuplicate = errors.New("duplicate entity")
+	errNoRows    = errors.New("no rows")
+	errPing      = errors.New("failed to ping database")
 )
 
 func newStore(ctx context.Context, dsn string) (*pgStore, error) {
@@ -51,12 +54,12 @@ func newStore(ctx context.Context, dsn string) (*pgStore, error) {
 
 	if errMigrate := database.migrate(); errMigrate != nil {
 		if errMigrate.Error() == "no change" {
-			database.log.Info("Migration at latest version")
+			database.log.Debug("Migration at latest version")
 		} else {
 			return nil, errors.Errorf("Could not migrate schema: %v", errMigrate)
 		}
 	} else {
-		database.log.Info("Migration completed successfully")
+		database.log.Debug("Migration completed successfully")
 	}
 
 	dbConn, errConnectConfig := pgxpool.NewWithConfig(ctx, cfg)
@@ -165,7 +168,7 @@ func (r *PlayerRecord) applySummary(sum steamweb.PlayerSummary) {
 
 const defaultAvatar = "fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb"
 
-func newPlayerRecord(sid64 steamid.SID64) PlayerRecord {
+func newPlayerRecord(sid64 steamid.SteamID) PlayerRecord {
 	createdOn := time.Now()
 
 	return PlayerRecord{
@@ -205,7 +208,7 @@ func playerNameSave(ctx context.Context, transaction pgx.Tx, record *PlayerRecor
 	query, args, errSQL := sb.
 		Insert("player_names").
 		Columns("steam_id", "persona_name").
-		Values(record.SteamID, record.PersonaName).
+		Values(record.SteamID.Int64(), record.PersonaName).
 		ToSql()
 	if errSQL != nil {
 		return dbErr(errSQL, "Failed to generate query")
@@ -222,7 +225,7 @@ func playerAvatarSave(ctx context.Context, transaction pgx.Tx, record *PlayerRec
 	query, args, errSQL := sb.
 		Insert("player_avatars").
 		Columns("steam_id", "avatar_hash").
-		Values(record.SteamID, record.AvatarHash).
+		Values(record.SteamID.Int64(), record.AvatarHash).
 		ToSql()
 	if errSQL != nil {
 		return dbErr(errSQL, "Failed to generate query")
@@ -243,7 +246,7 @@ func playerVanitySave(ctx context.Context, transaction pgx.Tx, record *PlayerRec
 	query, args, errSQL := sb.
 		Insert("player_vanity").
 		Columns("steam_id", "vanity").
-		Values(record.SteamID, record.Vanity).
+		Values(record.SteamID.Int64(), record.Vanity).
 		ToSql()
 	if errSQL != nil {
 		return dbErr(errSQL, "Failed to generate query")
@@ -257,11 +260,11 @@ func playerVanitySave(ctx context.Context, transaction pgx.Tx, record *PlayerRec
 }
 
 //nolint:dupl
-func (db *pgStore) playerGetNames(ctx context.Context, sid64 steamid.SID64) ([]PlayerNameRecord, error) {
+func (db *pgStore) playerGetNames(ctx context.Context, sid steamid.SteamID) ([]PlayerNameRecord, error) {
 	query, args, errSQL := sb.
 		Select("name_id", "persona_name", "created_on").
 		From("player_names").
-		Where(sq.Eq{"steam_id": sid64}).
+		Where(sq.Eq{"steam_id": sid.Int64()}).
 		ToSql()
 	if errSQL != nil {
 		return nil, dbErr(errSQL, "Failed to generate query")
@@ -277,7 +280,7 @@ func (db *pgStore) playerGetNames(ctx context.Context, sid64 steamid.SID64) ([]P
 	var records []PlayerNameRecord
 
 	for rows.Next() {
-		record := PlayerNameRecord{SteamID: sid64} //nolint:exhaustruct
+		record := PlayerNameRecord{SteamID: sid} //nolint:exhaustruct
 		if errScan := rows.Scan(&record.NameID, &record.PersonaName, &record.CreatedOn); errScan != nil {
 			return nil, dbErr(errScan, "Failed to scan name record")
 		}
@@ -289,11 +292,11 @@ func (db *pgStore) playerGetNames(ctx context.Context, sid64 steamid.SID64) ([]P
 }
 
 //nolint:dupl
-func (db *pgStore) playerGetAvatars(ctx context.Context, sid64 steamid.SID64) ([]PlayerAvatarRecord, error) {
+func (db *pgStore) playerGetAvatars(ctx context.Context, sid steamid.SteamID) ([]PlayerAvatarRecord, error) {
 	query, args, errSQL := sb.
 		Select("avatar_id", "avatar_hash", "created_on").
 		From("player_avatars").
-		Where(sq.Eq{"steam_id": sid64}).
+		Where(sq.Eq{"steam_id": sid.Int64()}).
 		ToSql()
 	if errSQL != nil {
 		return nil, dbErr(errSQL, "Failed to generate query")
@@ -309,7 +312,7 @@ func (db *pgStore) playerGetAvatars(ctx context.Context, sid64 steamid.SID64) ([
 	var records []PlayerAvatarRecord
 
 	for rows.Next() {
-		r := PlayerAvatarRecord{SteamID: sid64} //nolint:exhaustruct
+		r := PlayerAvatarRecord{SteamID: sid} //nolint:exhaustruct
 		if errScan := rows.Scan(&r.AvatarID, &r.AvatarHash, &r.CreatedOn); errScan != nil {
 			return nil, dbErr(errScan, "Failed to scan avatar")
 		}
@@ -320,11 +323,11 @@ func (db *pgStore) playerGetAvatars(ctx context.Context, sid64 steamid.SID64) ([
 	return records, nil
 }
 
-func (db *pgStore) playerGetVanityNames(ctx context.Context, sid64 steamid.SID64) ([]PlayerVanityRecord, error) {
+func (db *pgStore) playerGetVanityNames(ctx context.Context, sid steamid.SteamID) ([]PlayerVanityRecord, error) {
 	query, args, errSQL := sb.
 		Select("vanity_id", "vanity", "created_on").
 		From("player_vanity").
-		Where(sq.Eq{"steam_id": sid64}).
+		Where(sq.Eq{"steam_id": sid.Int64()}).
 		ToSql()
 	if errSQL != nil {
 		return nil, dbErr(errSQL, "Failed to generate query")
@@ -340,7 +343,7 @@ func (db *pgStore) playerGetVanityNames(ctx context.Context, sid64 steamid.SID64
 	defer rows.Close()
 
 	for rows.Next() {
-		r := PlayerVanityRecord{SteamID: sid64} //nolint:exhaustruct
+		r := PlayerVanityRecord{SteamID: sid} //nolint:exhaustruct
 		if errScan := rows.Scan(&r.VanityID, &r.Vanity, &r.CreatedOn); errScan != nil {
 			return nil, dbErr(errScan, "Failed to scan vanity name")
 		}
@@ -374,7 +377,7 @@ func (db *pgStore) playerRecordSave(ctx context.Context, record *PlayerRecord) e
 				"avatar_hash", "persona_state", "real_name", "time_created", "loc_country_code", "loc_state_code", "loc_city_id",
 				"community_banned", "vac_banned", "game_bans", "economy_banned", "logstf_count", "ugc_updated_on", "rgl_updated_on",
 				"etf2l_updated_on", "logstf_updated_on", "steam_updated_on", "created_on").
-			Values(record.SteamID, record.CommunityVisibilityState, record.ProfileState, record.PersonaName, record.Vanity,
+			Values(record.SteamID.Int64(), record.CommunityVisibilityState, record.ProfileState, record.PersonaName, record.Vanity,
 				record.AvatarHash, record.PersonaState, record.RealName, record.TimeCreated, record.LocCountryCode,
 				record.LocStateCode, record.LocCityID, record.CommunityBanned, record.VacBanned, record.GameBans,
 				record.EconomyBanned, record.LogsTFCount, record.UGCUpdatedOn, record.RGLUpdatedOn, record.ETF2LUpdatedOn,
@@ -404,7 +407,7 @@ func (db *pgStore) playerRecordSave(ctx context.Context, record *PlayerRecord) e
 	} else {
 		query, args, errSQL := sb.
 			Update("player").
-			Set("steam_id", record.SteamID).
+			Set("steam_id", record.SteamID.Int64()).
 			Set("community_visibility_state", record.CommunityVisibilityState).
 			Set("profile_state", record.ProfileState).
 			Set("persona_name", record.PersonaName).
@@ -469,7 +472,7 @@ func NewSBSite(name Site) SbSite {
 	}
 }
 
-func newRecord(site SbSite, sid64 steamid.SID64, personaName string, reason string,
+func newRecord(site SbSite, sid64 steamid.SteamID, personaName string, reason string,
 	timeStamp time.Time, duration time.Duration, perm bool,
 ) SbBanRecord {
 	return SbBanRecord{
@@ -488,15 +491,15 @@ func newRecord(site SbSite, sid64 steamid.SID64, personaName string, reason stri
 	}
 }
 
-func (db *pgStore) playerGetOrCreate(ctx context.Context, sid64 steamid.SID64, record *PlayerRecord) error {
+func (db *pgStore) playerGetOrCreate(ctx context.Context, sid steamid.SteamID, record *PlayerRecord) error {
 	query, args, errSQL := sb.
-		Select("steam_id", "community_visibility_state", "profile_state",
+		Select("community_visibility_state", "profile_state",
 			"persona_name", "vanity", "avatar_hash", "persona_state", "real_name", "time_created", "loc_country_code",
 			"loc_state_code", "loc_city_id", "community_banned", "vac_banned", "game_bans", "economy_banned",
 			"logstf_count", "ugc_updated_on", "rgl_updated_on", "etf2l_updated_on", "logstf_updated_on",
 			"steam_updated_on", "created_on").
 		From("player").
-		Where(sq.Eq{"steam_id": sid64}).
+		Where(sq.Eq{"steam_id": sid.Int64()}).
 		ToSql()
 	if errSQL != nil {
 		return dbErr(errSQL, "Failed to generate query")
@@ -504,7 +507,7 @@ func (db *pgStore) playerGetOrCreate(ctx context.Context, sid64 steamid.SID64, r
 
 	errQuery := db.pool.
 		QueryRow(ctx, query, args...).
-		Scan(&record.SteamID, &record.CommunityVisibilityState, &record.ProfileState, &record.PersonaName, &record.Vanity,
+		Scan(&record.CommunityVisibilityState, &record.ProfileState, &record.PersonaName, &record.Vanity,
 			&record.AvatarHash, &record.PersonaState, &record.RealName, &record.TimeCreated, &record.LocCountryCode,
 			&record.LocStateCode, &record.LocCityID, &record.CommunityBanned, &record.VacBanned, &record.GameBans,
 			&record.EconomyBanned, &record.LogsTFCount, &record.UGCUpdatedOn, &record.RGLUpdatedOn, &record.ETF2LUpdatedOn,
@@ -518,6 +521,7 @@ func (db *pgStore) playerGetOrCreate(ctx context.Context, sid64 steamid.SID64, r
 		return wrappedErr
 	}
 
+	record.SteamID = sid
 	record.isNewRecord = false
 
 	return nil
@@ -549,9 +553,12 @@ func (db *pgStore) playerGetExpiredProfiles(ctx context.Context, limit int) ([]P
 	var records []PlayerRecord
 
 	for rows.Next() {
-		var record PlayerRecord
+		var (
+			record PlayerRecord
+			sid    int64
+		)
 		if errQuery := rows.
-			Scan(&record.SteamID, &record.CommunityVisibilityState, &record.ProfileState, &record.PersonaName,
+			Scan(&sid, &record.CommunityVisibilityState, &record.ProfileState, &record.PersonaName,
 				&record.Vanity, &record.AvatarHash, &record.PersonaState, &record.RealName, &record.TimeCreated,
 				&record.LocCountryCode, &record.LocStateCode, &record.LocCityID, &record.CommunityBanned,
 				&record.VacBanned, &record.GameBans, &record.EconomyBanned, &record.LogsTFCount, &record.UGCUpdatedOn,
@@ -559,6 +566,8 @@ func (db *pgStore) playerGetExpiredProfiles(ctx context.Context, limit int) ([]P
 				&record.TimeStamped.CreatedOn); errQuery != nil {
 			return nil, dbErr(errQuery, "Failed to scan expired ban")
 		}
+
+		record.SteamID = steamid.New(sid)
 
 		records = append(records, record)
 	}
@@ -685,7 +694,7 @@ func (db *pgStore) sbBanSave(ctx context.Context, record *SbBanRecord) error {
 		query, args, errSQL := sb.
 			Insert("sb_ban").
 			Columns("sb_site_id", "steam_id", "persona_name", "reason", "created_on", "duration", "permanent").
-			Values(record.SiteID, record.SteamID, record.PersonaName, record.Reason, record.CreatedOn,
+			Values(record.SiteID, record.SteamID.Int64(), record.PersonaName, record.Reason, record.CreatedOn,
 				record.Duration.Seconds(), record.Permanent).
 			Suffix("RETURNING sb_ban_id").
 			ToSql()
@@ -703,7 +712,7 @@ func (db *pgStore) sbBanSave(ctx context.Context, record *SbBanRecord) error {
 	query, args, errSQL := sb.
 		Update("sb_ban").
 		Set("sb_site_id", record.SiteID).
-		Set("steam_id", record.SteamID).
+		Set("steam_id", record.SteamID.Int64()).
 		Set("persona_name", record.PersonaName).
 		Set("reason", record.Reason).
 		Set("created_on", record.CreatedOn).
@@ -724,15 +733,20 @@ func (db *pgStore) sbBanSave(ctx context.Context, record *SbBanRecord) error {
 // Turn the saved usec back into seconds.
 const storeDurationSecondMulti = int64(time.Second)
 
-type BanRecordMap map[steamid.SID64][]SbBanRecord
+type BanRecordMap map[string][]SbBanRecord
 
-func (db *pgStore) sbGetBansBySID(ctx context.Context, sid64 steamid.Collection) (BanRecordMap, error) {
+func (db *pgStore) sbGetBansBySID(ctx context.Context, sids steamid.Collection) (BanRecordMap, error) {
+	ids := make([]int64, len(sids))
+	for idx := range sids {
+		ids[idx] = sids[idx].Int64()
+	}
+
 	query, args, errSQL := sb.
 		Select("b.sb_ban_id", "b.sb_site_id", "b.steam_id", "b.persona_name", "b.reason",
 			"b.created_on", "b.duration", "b.permanent", "s.name").
 		From("sb_ban b").
 		LeftJoin("sb_site s ON b.sb_site_id = s.sb_site_id").
-		Where(sq.Eq{"steam_id": sid64}).
+		Where(sq.Eq{"steam_id": ids}).
 		ToSql()
 	if errSQL != nil {
 		return nil, dbErr(errSQL, "Failed to generate query")
@@ -747,22 +761,25 @@ func (db *pgStore) sbGetBansBySID(ctx context.Context, sid64 steamid.Collection)
 
 	records := BanRecordMap{}
 
-	for _, sid := range sid64 {
-		records[sid] = []SbBanRecord{}
+	for _, sid := range sids {
+		records[sid.String()] = []SbBanRecord{}
 	}
 
 	for rows.Next() {
-		var bRecord SbBanRecord
-
-		var duration int64
-		if errScan := rows.Scan(&bRecord.BanID, &bRecord.SiteID, &bRecord.SteamID, &bRecord.PersonaName,
+		var (
+			bRecord  SbBanRecord
+			duration int64
+			sid      int64
+		)
+		if errScan := rows.Scan(&bRecord.BanID, &bRecord.SiteID, &sid, &bRecord.PersonaName,
 			&bRecord.Reason, &bRecord.CreatedOn, &duration, &bRecord.Permanent, &bRecord.SiteName); errScan != nil {
 			return nil, dbErr(errScan, "Failed to scan sourcebans ban")
 		}
 
+		bRecord.SteamID = steamid.New(sid)
 		bRecord.Duration = time.Duration(duration * storeDurationSecondMulti)
 
-		records[bRecord.SteamID] = append(records[bRecord.SteamID], bRecord)
+		records[bRecord.SteamID.String()] = append(records[bRecord.SteamID.String()], bRecord)
 	}
 
 	if rows.Err() != nil {
@@ -770,4 +787,284 @@ func (db *pgStore) sbGetBansBySID(ctx context.Context, sid64 steamid.Collection)
 	}
 
 	return records, nil
+}
+
+func (db *pgStore) bdLists(ctx context.Context) ([]BDList, error) {
+	query, args, errSQL := sb.
+		Select("bd_list_id", "bd_list_name", "url", "game", "trust_weight", "deleted", "created_on", "updated_on").
+		From("bd_list").
+		ToSql()
+	if errSQL != nil {
+		return nil, dbErr(errSQL, "Failed to build bd list query")
+	}
+
+	rows, errQuery := db.pool.Query(ctx, query, args...)
+	if errQuery != nil {
+		return nil, dbErr(errQuery, "failed to query lists")
+	}
+
+	defer rows.Close()
+
+	var lists []BDList
+	for rows.Next() {
+		var list BDList
+		if errScan := rows.Scan(&list.BDListID, &list.BDListName, &list.URL, &list.Game, &list.TrustWeight, &list.Deleted, &list.CreatedOn, &list.UpdatedOn); errScan != nil {
+			return nil, dbErr(errScan, "failed to scan list result")
+		}
+
+		lists = append(lists, list)
+	}
+
+	return lists, nil
+}
+
+func (db *pgStore) bdListByName(ctx context.Context, name string) (BDList, error) {
+	var list BDList
+	query, args, errSQL := sb.
+		Select("bd_list_id", "bd_list_name", "url", "game", "trust_weight", "deleted", "created_on", "updated_on").
+		From("bd_list").
+		Where(sq.Eq{"bd_list_name": name}).
+		ToSql()
+	if errSQL != nil {
+		return list, dbErr(errSQL, "Failed to build bd list query")
+	}
+
+	if errQuery := db.pool.QueryRow(ctx, query, args...).
+		Scan(&list.BDListID, &list.BDListName, &list.URL, &list.Game, &list.TrustWeight, &list.Deleted, &list.CreatedOn, &list.UpdatedOn); errQuery != nil {
+		return list, dbErr(errQuery, "failed to scan list result")
+	}
+
+	return list, nil
+}
+
+func (db *pgStore) bdListCreate(ctx context.Context, list BDList) (BDList, error) {
+	query, args, errSQL := sb.
+		Insert("bd_list").
+		Columns("bd_list_name", "url", "game", "trust_weight", "deleted", "created_on", "updated_on").
+		Values(list.BDListName, list.URL, list.Game, list.TrustWeight, list.Deleted, list.CreatedOn, list.UpdatedOn).
+		Suffix("RETURNING bd_list_id").
+		ToSql()
+	if errSQL != nil {
+		return BDList{}, dbErr(errSQL, "Failed to build bd list create query")
+	}
+
+	if errRow := db.pool.QueryRow(ctx, query, args...).Scan(&list.BDListID); errRow != nil {
+		return BDList{}, dbErr(errSQL, "Failed to insert bd list create query")
+	}
+
+	return list, nil
+}
+
+func (db *pgStore) bdListSave(ctx context.Context, list BDList) error {
+	query, args, errSQL := sb.
+		Update("bd_list").
+		SetMap(map[string]interface{}{
+			"bd_list_name": list.BDListName,
+			"url":          list.URL,
+			"game":         list.Game,
+			"trust_weight": list.TrustWeight,
+			"deleted":      list.Deleted,
+			"updated_on":   list.UpdatedOn,
+		}).Where(sq.Eq{"bd_list_id": list.BDListID}).
+		ToSql()
+	if errSQL != nil {
+		return dbErr(errSQL, "Failed to build bd list save query")
+	}
+
+	if _, errExec := db.pool.Exec(ctx, query, args...); errExec != nil {
+		return dbErr(errSQL, "Failed to exec bd	list save query")
+	}
+
+	return nil
+}
+
+func (db *pgStore) bdListDelete(ctx context.Context, bdListID int) error {
+	query, args, errSQL := sb.Delete("bd_list").Where(sq.Eq{"bd_list_id": bdListID}).ToSql()
+	if errSQL != nil {
+		return dbErr(errSQL, "Failed to build bd list delete query")
+	}
+
+	if _, err := db.pool.Exec(ctx, query, args...); err != nil {
+		return dbErr(err, "failed to exec delete list query")
+	}
+
+	return nil
+}
+
+func (db *pgStore) bdListEntries(ctx context.Context, listID int) ([]BDListEntry, error) {
+	query, args, errSQL := sb.
+		Select("bd_list_entry_id", "bd_list_id", "steam_id", "attribute", "proof",
+			"last_seen", "last_name", "deleted", "created_on", "updated_on").
+		From("bd_list_entries").
+		Where(sq.Eq{"bd_list_id": listID}).
+		ToSql()
+	if errSQL != nil {
+		return nil, dbErr(errSQL, "Failed to build bd list entries query")
+	}
+
+	rows, errRows := db.pool.Query(ctx, query, args...)
+	if errRows != nil {
+		return nil, dbErr(errSQL, "Failed to execute bd list entries query")
+	}
+
+	defer rows.Close()
+
+	var results []BDListEntry
+
+	for rows.Next() {
+		var (
+			entry BDListEntry
+			sid   int64
+		)
+		if errScan := rows.Scan(&entry.BDListEntryID, &entry.BDListID, &sid, &entry.Attributes, &entry.Proof, &entry.LastName,
+			&entry.LastName, &entry.Deleted, &entry.CreatedOn, &entry.UpdatedOn); errScan != nil {
+			return nil, dbErr(errSQL, "Failed to scan bd list entry result")
+		}
+
+		entry.SteamID = steamid.New(sid)
+		results = append(results, entry)
+	}
+
+	return results, nil
+}
+
+func (db *pgStore) bdListEntryUpdate(ctx context.Context, entry BDListEntry) error {
+	if entry.Proof == nil {
+		entry.Proof = []string{}
+	}
+	query, args, errSQL := sb.
+		Update("bd_list_entries").
+		SetMap(map[string]interface{}{
+			"attribute":  entry.Attributes,
+			"proof":      entry.Proof,
+			"last_seen":  entry.LastSeen,
+			"last_name":  entry.LastName,
+			"deleted":    entry.Deleted,
+			"updated_on": entry.UpdatedOn,
+		}).
+		Where(sq.Eq{"bd_list_entry_id": entry.BDListEntryID}).
+		ToSql()
+	if errSQL != nil {
+		return dbErr(errSQL, "Failed to build bd list entry update query")
+	}
+
+	if _, errExec := db.pool.Exec(ctx, query, args...); errExec != nil {
+		return dbErr(errSQL, "Failed to execute bd list entry update query")
+	}
+
+	return nil
+}
+
+func (db *pgStore) bdListEntryCreate(ctx context.Context, entry BDListEntry) (BDListEntry, error) {
+	if entry.Proof == nil {
+		entry.Proof = []string{}
+	}
+	query, args, errSQL := sb.
+		Insert("bd_list_entries").
+		SetMap(map[string]interface{}{
+			"bd_list_id": entry.BDListID,
+			"steam_id":   entry.SteamID.Int64(),
+			"attribute":  entry.Attributes,
+			"proof":      entry.Proof,
+			"last_seen":  entry.LastSeen,
+			"last_name":  entry.LastName,
+			"deleted":    entry.Deleted,
+			"created_on": entry.CreatedOn,
+			"updated_on": entry.UpdatedOn,
+		}).
+		Suffix("RETURNING bd_list_entry_id").
+		ToSql()
+	if errSQL != nil {
+		return entry, dbErr(errSQL, "Failed to build bd list entry update query")
+	}
+
+	if errScan := db.pool.QueryRow(ctx, query, args...).Scan(&entry.BDListEntryID); errScan != nil {
+		return entry, dbErr(errScan, "failed to scan list entry id")
+	}
+
+	return entry, nil
+}
+
+func (db *pgStore) bdListEntryDelete(ctx context.Context, entryID int64) error {
+	if entryID <= 0 {
+		return errors.New("invalid id")
+	}
+
+	query, args, errSQL := sb.
+		Delete("bd_list_entries").
+		Where(sq.Eq{"bd_list_entry_id": entryID}).
+		ToSql()
+	if errSQL != nil {
+		return dbErr(errSQL, "Failed to build bd list entry delete query")
+	}
+
+	if _, err := db.pool.Exec(ctx, query, args...); err != nil {
+		return dbErr(err, "failed to execute delete list entry")
+	}
+
+	return nil
+}
+
+func steamIDCollectionToInt64Slice(collection steamid.Collection) []int64 {
+	ids := make([]int64, len(collection))
+	for idx := range collection {
+		ids[idx] = collection[idx].Int64()
+	}
+
+	return ids
+}
+
+type BDSearchResult struct {
+	ListName string      `json:"list_name"`
+	Match    TF2BDPlayer `json:"match"`
+}
+
+func (db *pgStore) bdListSearch(ctx context.Context, collection steamid.Collection, attrs []string) ([]BDSearchResult, error) {
+	if len(collection) == 0 {
+		return []BDSearchResult{}, nil
+	}
+
+	if len(attrs) == 0 {
+		attrs = []string{"cheater"}
+	}
+	attrs = normalizeAttrs(attrs)
+	conditions := sq.And{sq.Eq{"e.steam_id": steamIDCollectionToInt64Slice(collection)}}
+
+	if !slices.Contains(attrs, "all") {
+		conditions = append(conditions, sq.Expr("e.attribute && ?", attrs))
+	}
+
+	query, args, errSQL := sb.
+		Select("l.bd_list_name", "e.attribute", "e.proof", "e.last_name", "e.last_seen", "e.steam_id").
+		From("bd_list l").
+		LeftJoin("bd_list_entries e ON e.bd_list_id = l.bd_list_id").
+		Where(conditions).
+		ToSql()
+	if errSQL != nil {
+		return nil, dbErr(errSQL, "Failed to build bd list entry delete query")
+	}
+
+	rows, errRows := db.pool.Query(ctx, query, args...)
+	if errRows != nil {
+		return nil, dbErr(errRows, "failed to execute list search entry")
+	}
+	defer rows.Close()
+
+	var results []BDSearchResult
+
+	for rows.Next() {
+		var res BDSearchResult
+		var lastSeen time.Time
+		var steamID int64
+		if errScan := rows.Scan(&res.ListName, &res.Match.Attributes, &res.Match.Proof,
+			&res.Match.LastSeen.PlayerName, &lastSeen, &steamID); errScan != nil {
+			return nil, dbErr(errScan, "failed to scan list search result")
+		}
+		res.Match.LastSeen.Time = int(lastSeen.Unix())
+		res.Match.Steamid = fmt.Sprintf("%d", steamID)
+
+		results = append(results, res)
+	}
+
+	return results, nil
 }

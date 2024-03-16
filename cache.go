@@ -9,7 +9,7 @@ import (
 	"path"
 	"time"
 
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/pkg/errors"
 )
 
@@ -24,7 +24,7 @@ const (
 	KeyRGL                  = "rgl"
 )
 
-func makeKey(keyType CacheKeyType, sid64 steamid.SID64) string {
+func makeKey(keyType CacheKeyType, sid64 steamid.SteamID) string {
 	return fmt.Sprintf("steam-%s-%d", keyType, sid64.Int64())
 }
 
@@ -49,6 +49,7 @@ func createCache(enabled bool, cacheDir string) (cache, error) {
 	}
 
 	localCache, cacheErr := newFSCache(cacheDir)
+
 	if cacheErr != nil {
 		return nil, cacheErr
 	}
@@ -94,9 +95,9 @@ func (c *fsCache) get(url string) ([]byte, error) {
 	}
 
 	stat, errStat := cachedFile.Stat()
+
 	if errStat != nil {
-		slog.Error("Could not stat file",
-			ErrAttr(errStat), slog.String("file", fullPath))
+		slog.Error("Could not stat file", ErrAttr(errStat), slog.String("file", fullPath))
 
 		return nil, errCacheExpired
 	}
@@ -117,6 +118,7 @@ func (c *fsCache) get(url string) ([]byte, error) {
 
 func (c *fsCache) set(key string, reader io.Reader) error {
 	dir, fullPath := c.hashKey(key)
+
 	if errDir := os.MkdirAll(dir, os.ModePerm); errDir != nil {
 		return errors.Wrap(errDir, "Failed to make cache dir")
 	}

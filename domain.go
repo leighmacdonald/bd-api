@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 )
 
@@ -118,28 +118,28 @@ type TimeStamped struct {
 }
 
 type PlayerNameRecord struct {
-	NameID      int64         `json:"name_id"`
-	SteamID     steamid.SID64 `json:"steam_id"`
-	PersonaName string        `json:"persona_name"`
-	CreatedOn   time.Time     `json:"created_on"`
+	NameID      int64           `json:"name_id"`
+	SteamID     steamid.SteamID `json:"steam_id"`
+	PersonaName string          `json:"persona_name"`
+	CreatedOn   time.Time       `json:"created_on"`
 }
 
 type PlayerAvatarRecord struct {
-	AvatarID   int64         `json:"avatar_id"`
-	SteamID    steamid.SID64 `json:"steam_id"`
-	AvatarHash string        `json:"avatar_hash"`
-	CreatedOn  time.Time     `json:"created_on"`
+	AvatarID   int64           `json:"avatar_id"`
+	SteamID    steamid.SteamID `json:"steam_id"`
+	AvatarHash string          `json:"avatar_hash"`
+	CreatedOn  time.Time       `json:"created_on"`
 }
 
 type PlayerVanityRecord struct {
-	VanityID  int64         `json:"vanity_id"`
-	SteamID   steamid.SID64 `json:"steam_id"`
-	Vanity    string        `json:"vanity"`
-	CreatedOn time.Time     `json:"created_on"`
+	VanityID  int64           `json:"vanity_id"`
+	SteamID   steamid.SteamID `json:"steam_id"`
+	Vanity    string          `json:"vanity"`
+	CreatedOn time.Time       `json:"created_on"`
 }
 
 type Player struct {
-	SteamID                  steamid.SID64            `json:"steam_id"`
+	SteamID                  steamid.SteamID          `json:"steam_id"`
 	CommunityVisibilityState steamweb.VisibilityState `json:"community_visibility_state"`
 	ProfileState             steamweb.ProfileState    `json:"profile_state"`
 	PersonaName              string                   `json:"persona_name"`
@@ -165,14 +165,14 @@ type Player struct {
 }
 
 type SbBanRecord struct {
-	BanID       int           `json:"ban_id"`
-	SiteName    Site          `json:"site_name"`
-	SiteID      int           `json:"site_id"`
-	PersonaName string        `json:"persona_name"`
-	SteamID     steamid.SID64 `json:"steam_id"`
-	Reason      string        `json:"reason"`
-	Duration    time.Duration `json:"duration"`
-	Permanent   bool          `json:"permanent"`
+	BanID       int             `json:"ban_id"`
+	SiteName    Site            `json:"site_name"`
+	SiteID      int             `json:"site_id"`
+	PersonaName string          `json:"persona_name"`
+	SteamID     steamid.SteamID `json:"steam_id"`
+	Reason      string          `json:"reason"`
+	Duration    time.Duration   `json:"duration"`
+	Permanent   bool            `json:"permanent"`
 	TimeStamped
 }
 

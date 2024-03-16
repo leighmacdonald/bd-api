@@ -7,16 +7,20 @@ import (
 	"time"
 
 	"github.com/leighmacdonald/rgl"
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/pkg/errors"
 )
 
 // Current issues:
+
 // - Sometime api just fails on the first attempt
+
 // - Empty value.
-func getRGL(ctx context.Context, log *slog.Logger, sid64 steamid.SID64) ([]Season, error) {
+
+func getRGL(ctx context.Context, log *slog.Logger, sid64 steamid.SteamID) ([]Season, error) {
 	startTime := time.Now()
 	client := NewHTTPClient()
+
 	_, errProfile := rgl.Profile(ctx, client, sid64)
 	if errProfile != nil {
 		return nil, errors.Wrap(errProfile, "Failed tp fetch profile")
@@ -33,8 +37,8 @@ func getRGL(ctx context.Context, log *slog.Logger, sid64 steamid.SID64) ([]Seaso
 		seasonStartTime := time.Now()
 
 		var season Season
-
 		seasonInfo, errSeason := rgl.Season(ctx, client, team.SeasonID)
+
 		if errSeason != nil {
 			return nil, errors.Wrap(errSeason, "Failed to fetch seasons")
 		}
@@ -47,12 +51,16 @@ func getRGL(ctx context.Context, log *slog.Logger, sid64 steamid.SID64) ([]Seaso
 		if seasonInfo.FormatName == "" {
 			switch {
 			case strings.Contains(strings.ToLower(seasonInfo.Name), "sixes"):
+
 				seasonInfo.FormatName = "Sixes"
 			case strings.Contains(strings.ToLower(seasonInfo.Name), "prolander"):
+
 				seasonInfo.FormatName = "Prolander"
 			case strings.Contains(strings.ToLower(seasonInfo.Name), "hl season"):
+
 				seasonInfo.FormatName = "HL"
 			case strings.Contains(strings.ToLower(seasonInfo.Name), "p7 season"):
+
 				seasonInfo.FormatName = "Prolander"
 			}
 		}

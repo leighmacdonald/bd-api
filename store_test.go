@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/stretchr/testify/require"
 )
@@ -40,6 +41,7 @@ func TestStore(t *testing.T) {
 
 	t.Run("sourceBansStoreTest", sourceBansStoreTest(database))               //nolint:paralleltest
 	t.Run("sourceBansPlayerRecordTest", sourceBansPlayerRecordTest(database)) //nolint:paralleltest
+	t.Run("bot_detector", bdTest(database))
 }
 
 func sourceBansStoreTest(database *pgStore) func(t *testing.T) {
@@ -47,15 +49,12 @@ func sourceBansStoreTest(database *pgStore) func(t *testing.T) {
 		t.Parallel()
 
 		var site SbSite
-
 		require.Error(t, database.sbSiteGet(context.Background(), 99999, &site))
 
 		site2 := NewSBSite("test-site")
-
 		require.NoError(t, database.sbSiteSave(context.Background(), &site2))
 
 		var site3 SbSite
-
 		require.NoError(t, database.sbSiteGet(context.Background(), site2.SiteID, &site3))
 		require.Equal(t, site2.Name, site3.Name)
 		require.Equal(t, site2.UpdatedOn.Second(), site3.UpdatedOn.Second())
@@ -63,13 +62,11 @@ func sourceBansStoreTest(database *pgStore) func(t *testing.T) {
 		pRecord := newPlayerRecord(testIDCamper)
 		pRecord.PersonaName = "blah"
 		pRecord.Vanity = "poop3r"
-
 		require.NoError(t, database.playerRecordSave(context.Background(), &pRecord))
 
 		t0 := time.Now().AddDate(-1, 0, 0)
 		t1 := t0.AddDate(0, 1, 0)
 		recA := newRecord(site3, testIDCamper, "blah", "test", t0, t1.Sub(t0), false)
-
 		require.NoError(t, database.sbBanSave(context.Background(), &recA))
 		require.NoError(t, database.sbSiteDelete(context.Background(), site3.SiteID))
 		require.Error(t, database.sbSiteGet(context.Background(), site3.SiteID, &site))
@@ -83,15 +80,12 @@ func sourceBansPlayerRecordTest(database *pgStore) func(t *testing.T) {
 		pRecord := newPlayerRecord(steamid.New(76561197961279983))
 		pRecord.PersonaName = "blah"
 		pRecord.Vanity = "123"
-
 		require.NoError(t, database.playerRecordSave(context.Background(), &pRecord))
 
 		names, errNames := database.playerGetNames(context.Background(), pRecord.SteamID)
-
 		require.NoError(t, errNames)
 
 		nameOk := false
-
 		for _, name := range names {
 			if name.PersonaName == pRecord.PersonaName {
 				nameOk = true
@@ -99,12 +93,10 @@ func sourceBansPlayerRecordTest(database *pgStore) func(t *testing.T) {
 				break
 			}
 		}
-
 		require.True(t, nameOk, "Name not found")
 
 		vNameOk := false
 		vNames, errVNames := database.playerGetVanityNames(context.Background(), pRecord.SteamID)
-
 		require.NoError(t, errVNames)
 
 		for _, name := range vNames {
@@ -114,7 +106,6 @@ func sourceBansPlayerRecordTest(database *pgStore) func(t *testing.T) {
 				break
 			}
 		}
-
 		require.True(t, vNameOk, "Vanity not found")
 
 		avatarOk := false
@@ -130,5 +121,71 @@ func sourceBansPlayerRecordTest(database *pgStore) func(t *testing.T) {
 		}
 
 		require.True(t, avatarOk, "Avatar not found")
+	}
+}
+
+func bdTest(database *pgStore) func(t *testing.T) {
+	var (
+		aList = BDList{
+			BDListName:  "list a",
+			URL:         "http://localhost/a",
+			Game:        "tf2",
+			TrustWeight: 5,
+			Deleted:     false,
+			CreatedOn:   time.Now(),
+			UpdatedOn:   time.Now(),
+		}
+		bList = BDList{
+			BDListName:  "list b",
+			URL:         "http://localhost/b",
+			Game:        "tf2",
+			TrustWeight: 9,
+			Deleted:     false,
+			CreatedOn:   time.Now(),
+			UpdatedOn:   time.Now(),
+		}
+	)
+
+	return func(t *testing.T) {
+		t.Parallel()
+
+		ctx := context.Background()
+		listA, errA := database.bdListCreate(ctx, aList)
+		require.NoError(t, errA)
+		require.True(t, listA.BDListID > 0)
+		listB, errB := database.bdListCreate(ctx, bList)
+		require.NoError(t, errB)
+		require.True(t, listB.BDListID > 0)
+		require.NotEqual(t, listA.BDListID, listB.BDListID)
+
+		var entriesA []BDListEntry
+		for idx := 0; idx < 5; idx++ {
+			record := newPlayerRecord(steamid.RandSID64())
+			require.NoError(t, database.playerRecordSave(ctx, &record))
+			entry, errEntry := database.bdListEntryCreate(ctx, BDListEntry{
+				BDListID:   listA.BDListID,
+				SteamID:    record.SteamID,
+				Attributes: []string{"cheater"},
+				Proof:      []string{"proof", "prooof"},
+				LastSeen:   time.Now(),
+				LastName:   fmt.Sprintf("name_%d", idx),
+				Deleted:    false,
+				CreatedOn:  time.Now(),
+				UpdatedOn:  time.Now(),
+			})
+			require.Nil(t, errEntry)
+			require.True(t, entry.BDListEntryID > 0)
+			entriesA = append(entriesA, entry)
+		}
+
+		require.Equal(t, 5, len(entriesA))
+
+		newName := listA.BDListName + listA.BDListName
+		listA.BDListName = newName
+		require.NoError(t, database.bdListSave(ctx, listA))
+
+		listAEdited, errEdited := database.bdListByName(ctx, listA.BDListName)
+		require.NoError(t, errEdited)
+		require.Equal(t, newName, listAEdited.BDListName)
 	}
 }

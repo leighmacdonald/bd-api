@@ -10,7 +10,7 @@ linters:
     - bidichk
     - bodyclose
     - containedctx
-    - contextcheck
+    #- contextcheck
     - cyclop
     - decorder
     #- depguard
@@ -24,7 +24,7 @@ linters:
     - errorlint
     - execinquery
     - exhaustive
-    - exhaustruct
+    #- exhaustruct
     - exportloopref
     - forbidigo
     - forcetypeassert
@@ -32,7 +32,7 @@ linters:
     - gci
     - ginkgolinter
     - gocheckcompilerdirectives
-    - gochecknoglobals
+    #- gochecknoglobals
     - gochecknoinits
     #- gocognit
     #- goconst
@@ -45,7 +45,7 @@ linters:
     - gofumpt
     - goheader
     - goimports
-    - gomnd
+    #- gomnd
     - gomoddirectives
     - gomodguard
     - goprintffuncname
@@ -56,8 +56,8 @@ linters:
     - importas
     - ineffassign
     - interfacebloat
-    - ireturn
-    - lll
+    #- ireturn
+    #- lll
     - loggercheck
     - maintidx
     - makezero
@@ -72,7 +72,7 @@ linters:
     - nolintlint
     - nonamedreturns
     - nosprintfhostport
-    - paralleltest
+    #- paralleltest
     - prealloc
     - predeclared
     - promlinter

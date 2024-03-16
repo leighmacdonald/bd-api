@@ -53,7 +53,7 @@ func (p *proxyManager) start(config *appConfig) {
 				},
 			}
 
-			server, errServer := socks5.New(socksConf)
+			socksServer, errServer := socks5.New(socksConf)
 			if errServer != nil {
 				slog.Error("Failed to initialize socks5", ErrAttr(errServer))
 				waitGroup.Done()
@@ -64,12 +64,12 @@ func (p *proxyManager) start(config *appConfig) {
 			slog.Info("Starting socks5 service", slog.String("addr", cfg.LocalAddr))
 
 			cfg.conn = conn
-			cfg.socks = server
+			cfg.socks = socksServer
 			p.proxies[cfg.RemoteAddr] = cfg
 
 			waitGroup.Done()
 
-			if errListen := server.ListenAndServe("tcp", cfg.LocalAddr); errListen != nil {
+			if errListen := socksServer.ListenAndServe("tcp", cfg.LocalAddr); errListen != nil {
 				slog.Error("Socks5 listener returned error", ErrAttr(errListen))
 			}
 		}(serverCfg)

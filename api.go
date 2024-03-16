@@ -11,17 +11,19 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
 )
 
 const (
 	maxResults = 100
+
 	apiTimeout = time.Second * 10
 )
 
 // Profile is a high level meta profile of several services.
+
 type Profile struct {
 	Summary    steamweb.PlayerSummary  `json:"summary"`
 	BanState   steamweb.PlayerBanState `json:"ban_state"`
@@ -31,13 +33,13 @@ type Profile struct {
 	LogsCount  int64                   `json:"logs_count"`
 }
 
-func loadProfiles(ctx context.Context, db *pgStore, cache cache, steamIDs steamid.Collection) ([]Profile, error) {
+func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs steamid.Collection) ([]Profile, error) {
 	var ( //nolint:prealloc
 		waitGroup  = &sync.WaitGroup{}
 		summaries  []steamweb.PlayerSummary
 		bans       []steamweb.PlayerBanState
 		profiles   []Profile
-		friends    map[steamid.SID64][]steamweb.Friend
+		friends    friendMap
 		sourceBans BanRecordMap
 	)
 
@@ -53,7 +55,7 @@ func loadProfiles(ctx context.Context, db *pgStore, cache cache, steamIDs steami
 	go func() {
 		defer waitGroup.Done()
 
-		sbRecords, errSB := db.sbGetBansBySID(localCtx, steamIDs)
+		sbRecords, errSB := database.sbGetBansBySID(localCtx, steamIDs)
 		if errSB != nil {
 			slog.Error("Failed to load sourcebans records", ErrAttr(errSB))
 		}
@@ -120,44 +122,41 @@ func loadProfiles(ctx context.Context, db *pgStore, cache cache, steamIDs steami
 			}
 		}
 
-		if records, ok := sourceBans[sid]; ok {
+		if records, ok := sourceBans[sid.String()]; ok {
 			profile.SourceBans = records
 		} else {
 			// Dont return null json values
 			profile.SourceBans = []SbBanRecord{}
 		}
 
-		if friendsList, ok := friends[sid]; ok {
+		if friendsList, ok := friends[sid.String()]; ok {
 			profile.Friends = friendsList
 		} else {
 			profile.Friends = []steamweb.Friend{}
 		}
 
 		profile.Seasons = []Season{}
-
 		sort.Slice(profile.Seasons, func(i, j int) bool {
 			return profile.Seasons[i].DivisionInt < profile.Seasons[j].DivisionInt
 		})
-
 		profiles = append(profiles, profile)
 	}
 
 	return profiles, nil
 }
 
-func steamIDFromSlug(ctx *gin.Context) (steamid.SID64, bool) {
+func steamIDFromSlug(ctx *gin.Context) (steamid.SteamID, bool) {
 	sid64 := steamid.New(ctx.Param("steam_id"))
 	if !sid64.Valid() {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, "not found")
 
-		return "", false
+		return steamid.SteamID{}, false
 	}
 
 	return sid64, true
 }
 
-//nolint:unparam
-func renderSyntax(ctx *gin.Context, encoder *styleEncoder, value any, tmpl string, args syntaxTemplate) {
+func renderSyntax(ctx *gin.Context, encoder *styleEncoder, value any, args syntaxTemplate) {
 	if !strings.Contains(strings.ToLower(ctx.GetHeader("Accept")), "text/html") {
 		ctx.JSON(http.StatusOK, value)
 
@@ -173,7 +172,7 @@ func renderSyntax(ctx *gin.Context, encoder *styleEncoder, value any, tmpl strin
 
 	args.setCSS(css)
 	args.setBody(body)
-	ctx.HTML(http.StatusOK, tmpl, args)
+	ctx.HTML(http.StatusOK, "", args)
 }
 
 func apiErrorHandler() gin.HandlerFunc {
@@ -186,17 +185,23 @@ func apiErrorHandler() gin.HandlerFunc {
 	}
 }
 
-const defaultTemplate = "index"
+func createRouter(runMode string, database *pgStore, cacheHandler cache) (*gin.Engine, error) {
+	tmplProfiles, errTmpl := template.New("").Parse(`<!DOCTYPE html>
 
-func createRouter(runMode string, db *pgStore, c cache) (*gin.Engine, error) {
-	tmplProfiles, errTmpl := template.New(defaultTemplate).Parse(`<!DOCTYPE html>
 <html>
+
 <head> 
+
 	<title>{{ .Title }}</title>
+
 	<style> body {background-color: #272822;} {{ .CSS }} </style>
+
 </head>
+
 <body>{{ .Body }}</body>
+
 </html>`)
+
 	if errTmpl != nil {
 		return nil, errors.Wrap(errTmpl, "Failed to parse html template")
 	}
@@ -204,25 +209,28 @@ func createRouter(runMode string, db *pgStore, c cache) (*gin.Engine, error) {
 	gin.SetMode(runMode)
 
 	engine := gin.New()
+
 	engine.SetHTMLTemplate(tmplProfiles)
 	engine.Use(apiErrorHandler(), gin.Recovery())
 	engine.GET("/bans", handleGetBans())
-	engine.GET("/summary", handleGetSummary(c))
-	engine.GET("/profile", handleGetProfile(db, c))
-	engine.GET("/comp", handleGetComp(c))
-	engine.GET("/friends", handleGetFriendList(c))
-	engine.GET("/sourcebans", handleGetSourceBansMany(db))
-	engine.GET("/sourcebans/:steam_id", handleGetSourceBans(db))
+	engine.GET("/summary", handleGetSummary(cacheHandler))
+	engine.GET("/profile", handleGetProfile(database, cacheHandler))
+	engine.GET("/comp", handleGetComp(cacheHandler))
+	engine.GET("/friends", handleGetFriendList(cacheHandler))
+	engine.GET("/sourcebans", handleGetSourceBansMany(database))
+	engine.GET("/sourcebans/:steam_id", handleGetSourceBans(database))
+	engine.GET("/bd", handleGetBotDetector(database))
 
 	return engine, nil
 }
 
 const (
 	apiHandlerTimeout = 10 * time.Second
-	shutdownTimeout   = 10 * time.Second
+
+	shutdownTimeout = 10 * time.Second
 )
 
-func newHTTPServer(ctx context.Context, router *gin.Engine, addr string) *http.Server {
+func newHTTPServer(router *gin.Engine, addr string) *http.Server {
 	httpServer := &http.Server{ //nolint:exhaustruct
 		Addr:         addr,
 		Handler:      router,
@@ -234,7 +242,7 @@ func newHTTPServer(ctx context.Context, router *gin.Engine, addr string) *http.S
 }
 
 func runHTTP(ctx context.Context, router *gin.Engine, listenAddr string) int {
-	httpServer := newHTTPServer(ctx, router, listenAddr)
+	httpServer := newHTTPServer(router, listenAddr)
 
 	go func() {
 		if errServe := httpServer.ListenAndServe(); errServe != nil && !errors.Is(errServe, http.ErrServerClosed) {

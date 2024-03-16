@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 )
 
 func logCloser(closer io.Closer) {

@@ -7,7 +7,7 @@ import (
 	"io"
 	"sort"
 
-	"github.com/leighmacdonald/steamid/v3/steamid"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/pkg/errors"
 )
 
@@ -35,6 +35,7 @@ type etf2lPlayer struct {
 			ID3    string `json:"id3"`
 			ID64   string `json:"id64"`
 		} `json:"steam"`
+
 		Teams []struct {
 			Competitions map[string]comp `json:"competitions,omitempty"`
 			Country      string          `json:"country"`
@@ -42,6 +43,7 @@ type etf2lPlayer struct {
 			ID           int             `json:"id"`
 			Irc          struct {
 				Channel interface{} `json:"channel"`
+
 				Network interface{} `json:"network"`
 			} `json:"irc"`
 			Name   string `json:"name"`
@@ -80,8 +82,8 @@ func sortSeasons(seasons []Season) []Season {
 	return seasons
 }
 
-func getETF2L(ctx context.Context, sid steamid.SID64) ([]Season, error) {
-	url := fmt.Sprintf("https://api.etf2l.org/player/%s.json", sid)
+func getETF2L(ctx context.Context, sid steamid.SteamID) ([]Season, error) {
+	url := fmt.Sprintf("https://api.etf2l.org/player/%d.json", sid.Int64())
 
 	var player etf2lPlayer
 
@@ -143,8 +145,10 @@ func parseETF2L(player etf2lPlayer) []Season {
 
 			switch team.Type {
 			case "Highlander":
+
 				format = "Highlander"
 			case "6on6":
+
 				format = "6s"
 			}
 
