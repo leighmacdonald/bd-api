@@ -4,6 +4,7 @@ import (
 	"context"
 	"html/template"
 	"log/slog"
+	"net"
 	"net/http"
 	"sort"
 	"strings"
@@ -22,8 +23,9 @@ const (
 	apiTimeout = time.Second * 10
 )
 
-// Profile is a high level meta profile of several services.
+var indexTMPL *template.Template
 
+// Profile is a high level meta profile of several services.
 type Profile struct {
 	Summary    steamweb.PlayerSummary  `json:"summary"`
 	BanState   steamweb.PlayerBanState `json:"ban_state"`
@@ -145,7 +147,7 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 	return profiles, nil
 }
 
-func steamIDFromSlug(ctx *gin.Context) (steamid.SteamID, bool) {
+func steamIDFromSlug(r *http.Request) (steamid.SteamID, bool) {
 	sid64 := steamid.New(ctx.Param("steam_id"))
 	if !sid64.Valid() {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, "not found")
@@ -156,7 +158,7 @@ func steamIDFromSlug(ctx *gin.Context) (steamid.SteamID, bool) {
 	return sid64, true
 }
 
-func renderSyntax(ctx *gin.Context, encoder *styleEncoder, value any, args syntaxTemplate) {
+func renderResponse(ctx *gin.Context, encoder *styleEncoder, value any, args syntaxTemplate) {
 	if !strings.Contains(strings.ToLower(ctx.GetHeader("Accept")), "text/html") {
 		ctx.JSON(http.StatusOK, value)
 
@@ -175,18 +177,8 @@ func renderSyntax(ctx *gin.Context, encoder *styleEncoder, value any, args synta
 	ctx.HTML(http.StatusOK, "", args)
 }
 
-func apiErrorHandler() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Next()
-
-		for _, ginErr := range c.Errors {
-			slog.Error("Unhandled HTTP Error", ErrAttr(ginErr))
-		}
-	}
-}
-
-func createRouter(runMode string, database *pgStore, cacheHandler cache) (*gin.Engine, error) {
-	tmplProfiles, errTmpl := template.New("").Parse(`<!DOCTYPE html>
+func initTemplate() error {
+	tmplProfiles, errTmpl := template.New("").Funcs().Parse(`<!DOCTYPE html>
 
 <html>
 
@@ -203,25 +195,30 @@ func createRouter(runMode string, database *pgStore, cacheHandler cache) (*gin.E
 </html>`)
 
 	if errTmpl != nil {
-		return nil, errors.Wrap(errTmpl, "Failed to parse html template")
+		return errors.Wrap(errTmpl, "Failed to parse html template")
 	}
 
-	gin.SetMode(runMode)
+	indexTMPL = tmplProfiles
 
-	engine := gin.New()
+	return nil
+}
 
-	engine.SetHTMLTemplate(tmplProfiles)
-	engine.Use(apiErrorHandler(), gin.Recovery())
-	engine.GET("/bans", handleGetBans())
-	engine.GET("/summary", handleGetSummary(cacheHandler))
-	engine.GET("/profile", handleGetProfile(database, cacheHandler))
-	engine.GET("/comp", handleGetComp(cacheHandler))
-	engine.GET("/friends", handleGetFriendList(cacheHandler))
-	engine.GET("/sourcebans", handleGetSourceBansMany(database))
-	engine.GET("/sourcebans/:steam_id", handleGetSourceBans(database))
-	engine.GET("/bd", handleGetBotDetector(database))
+func createRouter(database *pgStore, cacheHandler cache) (*http.ServeMux, error) {
+	if errTmpl := initTemplate(); errTmpl != nil {
+		return nil, errTmpl
+	}
 
-	return engine, nil
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /bans", handleGetBans())
+	mux.HandleFunc("GET /summary", handleGetSummary(cacheHandler))
+	mux.HandleFunc("GET /profile", handleGetProfile(database, cacheHandler))
+	mux.HandleFunc("GET /comp", handleGetComp(cacheHandler))
+	mux.HandleFunc("GET /friends", handleGetFriendList(cacheHandler))
+	mux.HandleFunc("GET /sourcebans", handleGetSourceBansMany(database))
+	mux.HandleFunc("GET /sourcebans/:steam_id", handleGetSourceBans(database))
+	mux.HandleFunc("GET /bd", handleGetBotDetector(database))
+
+	return mux, nil
 }
 
 const (
@@ -230,19 +227,22 @@ const (
 	shutdownTimeout = 10 * time.Second
 )
 
-func newHTTPServer(router *gin.Engine, addr string) *http.Server {
+func newHTTPServer(ctx context.Context, router *http.ServeMux, addr string) *http.Server {
 	httpServer := &http.Server{ //nolint:exhaustruct
 		Addr:         addr,
 		Handler:      router,
 		ReadTimeout:  apiHandlerTimeout,
 		WriteTimeout: apiHandlerTimeout,
+		BaseContext: func(_ net.Listener) context.Context {
+			return ctx
+		},
 	}
 
 	return httpServer
 }
 
-func runHTTP(ctx context.Context, router *gin.Engine, listenAddr string) int {
-	httpServer := newHTTPServer(router, listenAddr)
+func runHTTP(ctx context.Context, router *http.ServeMux, listenAddr string) int {
+	httpServer := newHTTPServer(ctx, router, listenAddr)
 
 	go func() {
 		if errServe := httpServer.ListenAndServe(); errServe != nil && !errors.Is(errServe, http.ErrServerClosed) {

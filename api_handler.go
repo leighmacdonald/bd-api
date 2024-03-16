@@ -6,7 +6,6 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
@@ -30,7 +29,7 @@ func newAPIErr(err error) apiErr {
 	return apiErr{Error: err.Error()}
 }
 
-func getSteamIDs(ctx *gin.Context) (steamid.Collection, bool) {
+func getSteamIDs(w http.ResponseWriter, r *http.Request) (steamid.Collection, bool) {
 	steamIDQuery, ok := ctx.GetQuery("steamids")
 
 	if !ok {
@@ -73,28 +72,28 @@ func getSteamIDs(ctx *gin.Context) (steamid.Collection, bool) {
 	return validIDs, true
 }
 
-func handleGetFriendList(cache cache) gin.HandlerFunc {
+func handleGetFriendList(cache cache) http.HandlerFunc {
 	encoder := newStyleEncoder()
 
-	return func(ctx *gin.Context) {
+	return func(w http.ResponseWriter, r *http.Request) {
 		ids, ok := getSteamIDs(ctx)
 
 		if !ok {
 			return
 		}
 
-		renderSyntax(ctx, encoder, getSteamFriends(ctx, cache, ids), &baseTmplArgs{ //nolint:exhaustruct
+		renderResponse(ctx, encoder, getSteamFriends(ctx, cache, ids), &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Steam Summaries",
 		})
 	}
 }
 
-func handleGetComp(cache cache) gin.HandlerFunc {
+func handleGetComp(cache cache) http.HandlerFunc {
 	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 
 	encoder := newStyleEncoder()
 
-	return func(ctx *gin.Context) {
+	return func(w http.ResponseWriter, r *http.Request) {
 		ids, ok := getSteamIDs(ctx)
 
 		if !ok {
@@ -110,18 +109,18 @@ func handleGetComp(cache cache) gin.HandlerFunc {
 			return
 		}
 
-		renderSyntax(ctx, encoder, compHistory, &baseTmplArgs{ //nolint:exhaustruct
+		renderResponse(ctx, encoder, compHistory, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Comp History",
 		})
 	}
 }
 
-func handleGetSummary(cache cache) gin.HandlerFunc {
+func handleGetSummary(cache cache) http.HandlerFunc {
 	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 
 	encoder := newStyleEncoder()
 
-	return func(ctx *gin.Context) {
+	return func(w http.ResponseWriter, r *http.Request) {
 		ids, ok := getSteamIDs(ctx)
 
 		if !ok {
@@ -137,18 +136,18 @@ func handleGetSummary(cache cache) gin.HandlerFunc {
 			return
 		}
 
-		renderSyntax(ctx, encoder, summaries, &baseTmplArgs{ //nolint:exhaustruct
+		renderResponse(ctx, encoder, summaries, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Steam Summaries",
 		})
 	}
 }
 
-func handleGetBans() gin.HandlerFunc {
+func handleGetBans() http.HandlerFunc {
 	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 
 	encoder := newStyleEncoder()
 
-	return func(ctx *gin.Context) {
+	return func(w http.ResponseWriter, r *http.Request) {
 		ids, ok := getSteamIDs(ctx)
 
 		if !ok {
@@ -164,18 +163,18 @@ func handleGetBans() gin.HandlerFunc {
 			return
 		}
 
-		renderSyntax(ctx, encoder, bans, &baseTmplArgs{ //nolint:exhaustruct
+		renderResponse(ctx, encoder, bans, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Steam Bans",
 		})
 	}
 }
 
-func handleGetProfile(database *pgStore, cache cache) gin.HandlerFunc {
+func handleGetProfile(database *pgStore, cache cache) http.HandlerFunc {
 	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 
 	encoder := newStyleEncoder()
 
-	return func(ctx *gin.Context) {
+	return func(w http.ResponseWriter, r *http.Request) {
 		ids, ok := getSteamIDs(ctx)
 
 		if !ok {
@@ -191,18 +190,18 @@ func handleGetProfile(database *pgStore, cache cache) gin.HandlerFunc {
 			return
 		}
 
-		renderSyntax(ctx, encoder, profiles, &baseTmplArgs{ //nolint:exhaustruct
+		renderResponse(ctx, encoder, profiles, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Profiles",
 		})
 	}
 }
 
-func handleGetSourceBansMany(database *pgStore) gin.HandlerFunc {
+func handleGetSourceBansMany(database *pgStore) http.HandlerFunc {
 	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 
 	encoder := newStyleEncoder()
 
-	return func(ctx *gin.Context) {
+	return func(w http.ResponseWriter, r *http.Request) {
 		ids, ok := getSteamIDs(ctx)
 
 		if !ok {
@@ -217,17 +216,17 @@ func handleGetSourceBansMany(database *pgStore) gin.HandlerFunc {
 			return
 		}
 
-		renderSyntax(ctx, encoder, bans, &baseTmplArgs{ //nolint:exhaustruct
+		renderResponse(ctx, encoder, bans, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Source Bans",
 		})
 	}
 }
 
-func handleGetSourceBans(database *pgStore) gin.HandlerFunc {
+func handleGetSourceBans(database *pgStore) http.HandlerFunc {
 	encoder := newStyleEncoder()
 
-	return func(ctx *gin.Context) {
-		sid, ok := steamIDFromSlug(ctx)
+	return func(w http.ResponseWriter, r *http.Request) {
+		sid, ok := steamIDFromSlug(r)
 		if !ok {
 			return
 		}
@@ -247,13 +246,13 @@ func handleGetSourceBans(database *pgStore) gin.HandlerFunc {
 			out = []SbBanRecord{}
 		}
 
-		renderSyntax(ctx, encoder, out, &baseTmplArgs{ //nolint:exhaustruct
+		renderResponse(ctx, encoder, out, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Source Bans",
 		})
 	}
 }
 
-func getAttrs(ctx *gin.Context) ([]string, bool) {
+func getAttrs(w http.ResponseWriter, r *http.Request) ([]string, bool) {
 	steamIDQuery, ok := ctx.GetQuery("attrs")
 	if !ok {
 		return []string{"cheater"}, true
@@ -267,16 +266,16 @@ func getAttrs(ctx *gin.Context) ([]string, bool) {
 	return attrs, true
 }
 
-func handleGetBotDetector(database *pgStore) gin.HandlerFunc {
+func handleGetBotDetector(database *pgStore) http.HandlerFunc {
 	encoder := newStyleEncoder()
 
-	return func(ctx *gin.Context) {
-		sid, sidOk := getSteamIDs(ctx)
+	return func(w http.ResponseWriter, r *http.Request) {
+		sid, sidOk := getSteamIDs(r)
 		if !sidOk {
 			return
 		}
 
-		attrs, attrOk := getAttrs(ctx)
+		attrs, attrOk := getAttrs(r)
 		if !attrOk {
 			return
 		}
@@ -293,7 +292,7 @@ func handleGetBotDetector(database *pgStore) gin.HandlerFunc {
 			results = []BDSearchResult{}
 		}
 
-		renderSyntax(ctx, encoder, results, &baseTmplArgs{ //nolint:exhaustruct
+		renderResponse(ctx, encoder, results, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "TF2BD Search Results",
 		})
 	}
