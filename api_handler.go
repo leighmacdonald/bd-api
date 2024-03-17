@@ -25,11 +25,11 @@ type apiErr struct {
 	Error string `json:"error"`
 }
 
-func getSteamIDs(w http.ResponseWriter, r *http.Request) (steamid.Collection, bool) {
-	steamIDQuery := r.URL.Query().Get("steamids")
+func getSteamIDs(writer http.ResponseWriter, request *http.Request) (steamid.Collection, bool) {
+	steamIDQuery := request.URL.Query().Get("steamids")
 
 	if steamIDQuery == "" {
-		responseErr(w, r, http.StatusBadRequest, errInvalidQueryParams, "")
+		responseErr(writer, request, http.StatusBadRequest, errInvalidQueryParams, "")
 
 		return nil, false
 	}
@@ -40,7 +40,7 @@ func getSteamIDs(w http.ResponseWriter, r *http.Request) (steamid.Collection, bo
 		sid64 := steamid.New(steamID)
 
 		if !sid64.Valid() {
-			responseErr(w, r, http.StatusBadRequest, errInvalidSteamID, "")
+			responseErr(writer, request, http.StatusBadRequest, errInvalidSteamID, "")
 
 			return nil, false
 		}
@@ -60,7 +60,7 @@ func getSteamIDs(w http.ResponseWriter, r *http.Request) (steamid.Collection, bo
 	}
 
 	if len(validIDs) > maxResults {
-		responseErr(w, r, http.StatusBadRequest, errTooMany, "")
+		responseErr(writer, request, http.StatusBadRequest, errTooMany, "")
 
 		return nil, false
 	}
@@ -69,137 +69,125 @@ func getSteamIDs(w http.ResponseWriter, r *http.Request) (steamid.Collection, bo
 }
 
 func handleGetFriendList(cache cache) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ids, ok := getSteamIDs(w, r)
+	return func(writer http.ResponseWriter, request *http.Request) {
+		ids, ok := getSteamIDs(writer, request)
 
 		if !ok {
 			return
 		}
 
-		friends := getSteamFriends(r.Context(), cache, ids)
-		responseOk(w, r, http.StatusOK, friends, &baseTmplArgs{ //nolint:exhaustruct
-			Title: "Steam Summaries",
-		})
+		friends := getSteamFriends(request.Context(), cache, ids)
+		responseOk(writer, request, friends, "Steam Summaries")
 	}
 }
 
 func handleGetComp(cache cache) http.HandlerFunc {
 	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 
-	return func(w http.ResponseWriter, r *http.Request) {
-		ids, ok := getSteamIDs(w, r)
+	return func(writer http.ResponseWriter, request *http.Request) {
+		ids, ok := getSteamIDs(writer, request)
 
 		if !ok {
 			return
 		}
 
-		compHistory := getCompHistory(r.Context(), cache, ids)
+		compHistory := getCompHistory(request.Context(), cache, ids)
 
 		if len(ids) != len(compHistory) {
 			log.Warn("Failed to fully fetch comp history")
-			responseErr(w, r, http.StatusInternalServerError, errLoadFailed, "")
+			responseErr(writer, request, http.StatusInternalServerError, errLoadFailed, "")
 
 			return
 		}
-		responseOk(w, r, http.StatusOK, compHistory, &baseTmplArgs{ //nolint:exhaustruct
-			Title: "Comp History",
-		})
+		responseOk(writer, request, compHistory, "Comp History")
 	}
 }
 
 func handleGetSummary(cache cache) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ids, ok := getSteamIDs(w, r)
+	return func(writer http.ResponseWriter, request *http.Request) {
+		ids, ok := getSteamIDs(writer, request)
 		if !ok {
 			return
 		}
 
-		summaries, errSum := getSteamSummaries(r.Context(), cache, ids)
+		summaries, errSum := getSteamSummaries(request.Context(), cache, ids)
 		if errSum != nil || len(ids) != len(summaries) {
-			responseErr(w, r, http.StatusBadRequest, errLoadFailed, "steam api fetch failed")
+			responseErr(writer, request, http.StatusBadRequest, errLoadFailed, "steam api fetch failed")
 
 			return
 		}
 
-		responseOk(w, r, http.StatusOK, summaries, &baseTmplArgs{ //nolint:exhaustruct
-			Title: "Steam Summaries",
-		})
+		responseOk(writer, request, summaries, "Steam Summaries")
 	}
 }
 
 func handleGetBans() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ids, ok := getSteamIDs(w, r)
+	return func(writer http.ResponseWriter, request *http.Request) {
+		ids, ok := getSteamIDs(writer, request)
 
 		if !ok {
 			return
 		}
 
-		bans, errBans := steamweb.GetPlayerBans(r.Context(), ids)
+		bans, errBans := steamweb.GetPlayerBans(request.Context(), ids)
 
 		if errBans != nil || len(ids) != len(bans) {
-			responseErr(w, r, http.StatusInternalServerError, errLoadFailed, "")
+			responseErr(writer, request, http.StatusInternalServerError, errLoadFailed, "")
 
 			return
 		}
 
-		responseOk(w, r, http.StatusOK, bans, &baseTmplArgs{ //nolint:exhaustruct
-			Title: "Steam Bans",
-		})
+		responseOk(writer, request, bans, "Steam Bans")
 	}
 }
 
 func handleGetProfile(database *pgStore, cache cache) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ids, ok := getSteamIDs(w, r)
+	return func(writer http.ResponseWriter, request *http.Request) {
+		ids, ok := getSteamIDs(writer, request)
 
 		if !ok {
 			return
 		}
 
-		profiles, errProfile := loadProfiles(r.Context(), database, cache, ids)
+		profiles, errProfile := loadProfiles(request.Context(), database, cache, ids)
 
 		if errProfile != nil || len(profiles) == 0 {
-			responseErr(w, r, http.StatusInternalServerError, errLoadFailed, "")
+			responseErr(writer, request, http.StatusInternalServerError, errLoadFailed, "")
 
 			return
 		}
-		responseOk(w, r, http.StatusOK, profiles, &baseTmplArgs{ //nolint:exhaustruct
-			Title: "Profiles",
-		})
+		responseOk(writer, request, profiles, "Profiles")
 	}
 }
 
 func handleGetSourceBansMany(database *pgStore) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ids, ok := getSteamIDs(w, r)
+	return func(writer http.ResponseWriter, request *http.Request) {
+		ids, ok := getSteamIDs(writer, request)
 
 		if !ok {
 			return
 		}
 
-		bans, errBans := database.sbGetBansBySID(r.Context(), ids)
+		bans, errBans := database.sbGetBansBySID(request.Context(), ids)
 		if errBans != nil {
-			responseErr(w, r, http.StatusInternalServerError, errInternalError, "")
+			responseErr(writer, request, http.StatusInternalServerError, errInternalError, "")
 
 			return
 		}
-		responseOk(w, r, http.StatusOK, bans, &baseTmplArgs{ //nolint:exhaustruct
-			Title: "Source Bans",
-		})
+		responseOk(writer, request, bans, "Source Bans")
 	}
 }
 
 func handleGetSourceBans(database *pgStore) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		sid, ok := steamIDFromSlug(w, r)
+	return func(writer http.ResponseWriter, request *http.Request) {
+		sid, ok := steamIDFromSlug(writer, request)
 		if !ok {
 			return
 		}
 
-		bans, errBans := database.sbGetBansBySID(r.Context(), steamid.Collection{sid})
+		bans, errBans := database.sbGetBansBySID(request.Context(), steamid.Collection{sid})
 		if errBans != nil {
-			responseErr(w, r, http.StatusInternalServerError, errInternalError, "")
+			responseErr(writer, request, http.StatusInternalServerError, errInternalError, "")
 
 			return
 		}
@@ -211,9 +199,7 @@ func handleGetSourceBans(database *pgStore) http.HandlerFunc {
 			out = []SbBanRecord{}
 		}
 
-		responseOk(w, r, http.StatusOK, out, &baseTmplArgs{ //nolint:exhaustruct
-			Title: "Source Bans",
-		})
+		responseOk(writer, request, out, "Source Bans")
 	}
 }
 
@@ -232,20 +218,20 @@ func getAttrs(r *http.Request) ([]string, bool) {
 }
 
 func handleGetBotDetector(database *pgStore) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		sid, sidOk := getSteamIDs(w, r)
+	return func(writer http.ResponseWriter, request *http.Request) {
+		sid, sidOk := getSteamIDs(writer, request)
 		if !sidOk {
 			return
 		}
 
-		attrs, attrOk := getAttrs(r)
+		attrs, attrOk := getAttrs(request)
 		if !attrOk {
 			return
 		}
 
-		results, errSearch := database.bdListSearch(r.Context(), sid, attrs)
+		results, errSearch := database.bdListSearch(request.Context(), sid, attrs)
 		if errSearch != nil {
-			responseErr(w, r, http.StatusInternalServerError, errSearch, "internal error")
+			responseErr(writer, request, http.StatusInternalServerError, errSearch, "internal error")
 
 			return
 		}
@@ -254,8 +240,6 @@ func handleGetBotDetector(database *pgStore) http.HandlerFunc {
 			results = []BDSearchResult{}
 		}
 
-		responseOk(w, r, http.StatusOK, results, &baseTmplArgs{ //nolint:exhaustruct
-			Title: "TF2BD Search Results",
-		})
+		responseOk(writer, request, results, "TF2BD Search Results")
 	}
 }

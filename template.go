@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"html/template"
 
 	"github.com/alecthomas/chroma"
 	"github.com/alecthomas/chroma/formatters/html"
@@ -37,7 +36,7 @@ func (s *styleEncoder) Encode(value any) (string, string, error) {
 		return "", "", errors.Wrap(errJSON, "Failed to generate json")
 	}
 
-	iterator, errTokenize := s.lexer.Tokenise(nil, string(jsonBody))
+	iterator, errTokenize := s.lexer.Tokenise(&chroma.TokeniseOptions{State: "root", EnsureLF: true}, string(jsonBody))
 	if errTokenize != nil {
 		return "", "", errors.Wrap(errTokenize, "Failed to tokenize json")
 	}
@@ -53,23 +52,4 @@ func (s *styleEncoder) Encode(value any) (string, string, error) {
 	}
 
 	return cssBuf.String(), bodyBuf.String(), nil
-}
-
-type syntaxTemplate interface {
-	setCSS(css string)
-	setBody(css string)
-}
-
-type baseTmplArgs struct {
-	CSS   template.CSS
-	Body  template.HTML
-	Title string
-}
-
-func (t *baseTmplArgs) setCSS(css string) {
-	t.CSS = template.CSS(css)
-}
-
-func (t *baseTmplArgs) setBody(html string) {
-	t.Body = template.HTML(html) //nolint:gosec
 }

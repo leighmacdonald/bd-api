@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"log/slog"
@@ -157,55 +155,44 @@ func responseErr(w http.ResponseWriter, r *http.Request, status int, err error, 
 	if userMsg != "" {
 		msg = userMsg
 	}
-	renderResponse(w, r, status, map[string]string{
-		"error": msg,
-	}, &baseTmplArgs{ //nolint:exhaustruct
-		Title: "Error",
-	})
+	renderResponse(w, r, status, map[string]string{"error": msg}, "Error")
 	slog.Error("error executing request", ErrAttr(err))
 }
 
-func responseOk(w http.ResponseWriter, r *http.Request, status int, data any, args syntaxTemplate) {
-	renderResponse(w, r, status, data, args)
+func responseOk(w http.ResponseWriter, r *http.Request, data any, title string) {
+	renderResponse(w, r, http.StatusOK, data, title)
 }
 
-func renderResponse(w http.ResponseWriter, r *http.Request, status int, data any, args syntaxTemplate) {
+func renderResponse(writer http.ResponseWriter, request *http.Request, status int, data any, title string) {
 	if data == nil {
 		data = []string{}
 	}
 
-	jsonBuff := bytes.NewBuffer(nil)
+	if strings.Contains(strings.ToLower(request.Header.Get("Accept")), "text/html") {
+		writer.Header().Set("Content-Type", "text/html")
+		writer.WriteHeader(status)
 
-	if err := json.NewEncoder(jsonBuff).Encode(data); err != nil {
-		slog.Error("Failed to encode response", ErrAttr(err))
-		responseErr(w, r, http.StatusInternalServerError, err, "encoder failed")
-		return
-	}
-
-	if strings.Contains(strings.ToLower(r.Header.Get("Accept")), "text/html") {
-		w.Header().Set("Content-Type", "text/html")
-		w.WriteHeader(status)
-
-		css, body, errEnc := encoder.Encode(jsonBuff.String())
+		css, body, errEnc := encoder.Encode(data)
 		if errEnc != nil {
-			responseErr(w, r, http.StatusInternalServerError, errEnc, "encoder failed")
+			responseErr(writer, request, http.StatusInternalServerError, errEnc, "encoder failed")
 
 			return
 		}
 
-		args.setCSS(css)
-		args.setBody(body)
-
-		if errExec := indexTMPL.Execute(w, args); errExec != nil {
+		if errExec := indexTMPL.Execute(writer, map[string]any{
+			"title": title,
+			"css":   template.CSS(css),
+			"body":  template.HTML(body), //nolint:gosec
+		}); errExec != nil {
 			slog.Error("failed to execute template", ErrAttr(errExec))
 		}
 
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	if _, errWrite := fmt.Fprint(w, jsonBuff.String()); errWrite != nil {
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(status)
+	if _, errWrite := fmt.Fprint(writer, data); errWrite != nil {
 		slog.Error("failed to write out json response", ErrAttr(errWrite))
 	}
 }
@@ -221,34 +208,15 @@ func steamIDFromSlug(w http.ResponseWriter, r *http.Request) (steamid.SteamID, b
 	return sid64, true
 }
 
-//func renderResponse(ctx *gin.Context, encoder *styleEncoder, value any, args syntaxTemplate) {
-//	if !strings.Contains(strings.ToLower(ctx.GetHeader("Accept")), "text/html") {
-//		ctx.JSON(http.StatusOK, value)
-//
-//		return
-//	}
-//
-//	css, body, errEncode := encoder.Encode(value)
-//	if errEncode != nil {
-//		ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to load profile")
-//
-//		return
-//	}
-//
-//	args.setCSS(css)
-//	args.setBody(body)
-//	ctx.HTML(http.StatusOK, "", args)
-//}
-
 func initTemplate() error {
 	tmplProfiles, errTmpl := template.New("").Parse(`<!DOCTYPE html>
-<html>
-<head>
-	<title>{{ .Title }}</title>
-	<style> body {background-color: #272822;} {{ .CSS }} </style>
-</head>
-<body>{{ .Body }}</body>
-</html>`)
+		<html>
+		<head>
+			<title>{{ .title }}</title>
+			<style> body {background-color: #272822;} {{ .css }} </style>
+		</head>
+		<body>{{ .body }}</body>
+		</html>`)
 
 	if errTmpl != nil {
 		return errors.Wrap(errTmpl, "Failed to parse html template")

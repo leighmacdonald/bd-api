@@ -11,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
@@ -98,7 +97,7 @@ func TestApp(t *testing.T) {
 		t.Skip("BDAPI_STEAM_API_KEY not set")
 	}
 
-	router, err := createRouter("test", database, cacheHandler)
+	router, err := createRouter(database, cacheHandler)
 	require.NoError(t, err)
 
 	t.Run("apiTestBans", apiTestBans(router))                             //nolint:paralleltest
@@ -120,7 +119,7 @@ func generateIDs(count int) steamid.Collection {
 }
 
 //nolint:unparam
-func testReq(t *testing.T, router *gin.Engine, method string, path string, target any) error {
+func testReq(t *testing.T, router *http.ServeMux, method string, path string, target any) error {
 	t.Helper()
 
 	request := httptest.NewRequest(method, path, nil)
@@ -132,7 +131,7 @@ func testReq(t *testing.T, router *gin.Engine, method string, path string, targe
 	return nil
 }
 
-func apiTestBans(router *gin.Engine) func(t *testing.T) {
+func apiTestBans(router *http.ServeMux) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
 			t.Parallel()
@@ -161,7 +160,7 @@ func apiTestBans(router *gin.Engine) func(t *testing.T) {
 	}
 }
 
-func apiTestInvalidQueries(router *gin.Engine) func(t *testing.T) {
+func apiTestInvalidQueries(router *http.ServeMux) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Run("invalidParams", func(t *testing.T) {
 			t.Parallel()
@@ -200,7 +199,7 @@ func apiTestInvalidQueries(router *gin.Engine) func(t *testing.T) {
 	}
 }
 
-func apiTestSummary(router *gin.Engine) func(t *testing.T) {
+func apiTestSummary(router *http.ServeMux) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
 			t.Parallel()
@@ -217,7 +216,7 @@ func apiTestSummary(router *gin.Engine) func(t *testing.T) {
 	}
 }
 
-func apiTestGetFriends(router *gin.Engine) func(t *testing.T) {
+func apiTestGetFriends(router *http.ServeMux) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
 			t.Parallel()
@@ -244,7 +243,7 @@ func apiTestGetFriends(router *gin.Engine) func(t *testing.T) {
 	}
 }
 
-func apiTestGetProfile(router *gin.Engine) func(t *testing.T) {
+func apiTestGetProfile(router *http.ServeMux) func(t *testing.T) {
 	return func(t *testing.T) {
 		t.Parallel()
 
@@ -303,7 +302,7 @@ func createTestSourcebansRecord(t *testing.T, database *pgStore, sid64 steamid.S
 	return record
 }
 
-func apiTestGetSourcebans(router *gin.Engine, database *pgStore) func(t *testing.T) {
+func apiTestGetSourcebans(router *http.ServeMux, database *pgStore) func(t *testing.T) {
 	return func(t *testing.T) {
 		recordA := createTestSourcebansRecord(t, database, testIDb4nny)
 		recordB := createTestSourcebansRecord(t, database, testIDCamper)
