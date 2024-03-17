@@ -31,12 +31,14 @@ func newStyleEncoder() *styleEncoder {
 }
 
 func (s *styleEncoder) Encode(value any) (string, string, error) {
-	jsonBody, errJSON := json.MarshalIndent(value, "", "    ")
-	if errJSON != nil {
+	var jsonBody bytes.Buffer
+	jsonEncoder := json.NewEncoder(&jsonBody)
+	jsonEncoder.SetIndent("", "    ")
+	if errJSON := jsonEncoder.Encode(value); errJSON != nil {
 		return "", "", errors.Wrap(errJSON, "Failed to generate json")
 	}
 
-	iterator, errTokenize := s.lexer.Tokenise(&chroma.TokeniseOptions{State: "root", EnsureLF: true}, string(jsonBody))
+	iterator, errTokenize := s.lexer.Tokenise(&chroma.TokeniseOptions{State: "root", EnsureLF: true}, jsonBody.String())
 	if errTokenize != nil {
 		return "", "", errors.Wrap(errTokenize, "Failed to tokenize json")
 	}
