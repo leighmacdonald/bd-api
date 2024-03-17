@@ -14,26 +14,22 @@ import (
 const funcSize = 10
 
 var (
-	ErrTooMany            = errors.New("Too many results requested")
-	ErrInvalidQueryParams = errors.New("Invalid query parameters")
-	ErrInvalidSteamID     = errors.New("Invalid steamid")
-	ErrLoadFailed         = errors.New("Could not load remote resource")
-	ErrInternalError      = errors.New("Internal server error, please try again later")
+	errTooMany            = errors.New("Too many results requested")
+	errInvalidQueryParams = errors.New("Invalid query parameters")
+	errInvalidSteamID     = errors.New("Invalid steamid")
+	errLoadFailed         = errors.New("Could not load remote resource")
+	errInternalError      = errors.New("Internal server error, please try again later")
 )
 
 type apiErr struct {
 	Error string `json:"error"`
 }
 
-func newAPIErr(err error) apiErr {
-	return apiErr{Error: err.Error()}
-}
-
 func getSteamIDs(w http.ResponseWriter, r *http.Request) (steamid.Collection, bool) {
-	steamIDQuery, ok := ctx.GetQuery("steamids")
+	steamIDQuery := r.URL.Query().Get("steamids")
 
-	if !ok {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, newAPIErr(ErrInvalidQueryParams))
+	if steamIDQuery == "" {
+		responseErr(w, r, http.StatusBadRequest, errInvalidQueryParams, "")
 
 		return nil, false
 	}
@@ -44,7 +40,7 @@ func getSteamIDs(w http.ResponseWriter, r *http.Request) (steamid.Collection, bo
 		sid64 := steamid.New(steamID)
 
 		if !sid64.Valid() {
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, newAPIErr(ErrInvalidSteamID))
+			responseErr(w, r, http.StatusBadRequest, errInvalidSteamID, "")
 
 			return nil, false
 		}
@@ -64,7 +60,7 @@ func getSteamIDs(w http.ResponseWriter, r *http.Request) (steamid.Collection, bo
 	}
 
 	if len(validIDs) > maxResults {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, newAPIErr(ErrTooMany))
+		responseErr(w, r, http.StatusBadRequest, errTooMany, "")
 
 		return nil, false
 	}
@@ -73,16 +69,15 @@ func getSteamIDs(w http.ResponseWriter, r *http.Request) (steamid.Collection, bo
 }
 
 func handleGetFriendList(cache cache) http.HandlerFunc {
-	encoder := newStyleEncoder()
-
 	return func(w http.ResponseWriter, r *http.Request) {
-		ids, ok := getSteamIDs(ctx)
+		ids, ok := getSteamIDs(w, r)
 
 		if !ok {
 			return
 		}
 
-		renderResponse(ctx, encoder, getSteamFriends(ctx, cache, ids), &baseTmplArgs{ //nolint:exhaustruct
+		friends := getSteamFriends(r.Context(), cache, ids)
+		responseOk(w, r, http.StatusOK, friends, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Steam Summaries",
 		})
 	}
@@ -91,150 +86,120 @@ func handleGetFriendList(cache cache) http.HandlerFunc {
 func handleGetComp(cache cache) http.HandlerFunc {
 	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 
-	encoder := newStyleEncoder()
-
 	return func(w http.ResponseWriter, r *http.Request) {
-		ids, ok := getSteamIDs(ctx)
+		ids, ok := getSteamIDs(w, r)
 
 		if !ok {
 			return
 		}
 
-		compHistory := getCompHistory(ctx, cache, ids)
+		compHistory := getCompHistory(r.Context(), cache, ids)
 
 		if len(ids) != len(compHistory) {
 			log.Warn("Failed to fully fetch comp history")
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrLoadFailed)
+			responseErr(w, r, http.StatusInternalServerError, errLoadFailed, "")
 
 			return
 		}
-
-		renderResponse(ctx, encoder, compHistory, &baseTmplArgs{ //nolint:exhaustruct
+		responseOk(w, r, http.StatusOK, compHistory, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Comp History",
 		})
 	}
 }
 
 func handleGetSummary(cache cache) http.HandlerFunc {
-	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
-
-	encoder := newStyleEncoder()
-
 	return func(w http.ResponseWriter, r *http.Request) {
-		ids, ok := getSteamIDs(ctx)
-
+		ids, ok := getSteamIDs(w, r)
 		if !ok {
 			return
 		}
 
-		summaries, errSum := getSteamSummaries(ctx, cache, ids)
-
+		summaries, errSum := getSteamSummaries(r.Context(), cache, ids)
 		if errSum != nil || len(ids) != len(summaries) {
-			log.Error("Failed to fetch summary", ErrAttr(errSum))
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, ErrLoadFailed)
+			responseErr(w, r, http.StatusBadRequest, errLoadFailed, "steam api fetch failed")
 
 			return
 		}
 
-		renderResponse(ctx, encoder, summaries, &baseTmplArgs{ //nolint:exhaustruct
+		responseOk(w, r, http.StatusOK, summaries, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Steam Summaries",
 		})
 	}
 }
 
 func handleGetBans() http.HandlerFunc {
-	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
-
-	encoder := newStyleEncoder()
-
 	return func(w http.ResponseWriter, r *http.Request) {
-		ids, ok := getSteamIDs(ctx)
+		ids, ok := getSteamIDs(w, r)
 
 		if !ok {
 			return
 		}
 
-		bans, errBans := steamweb.GetPlayerBans(ctx, ids)
+		bans, errBans := steamweb.GetPlayerBans(r.Context(), ids)
 
 		if errBans != nil || len(ids) != len(bans) {
-			log.Error("Failed to fetch player bans", ErrAttr(errBans))
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrLoadFailed)
+			responseErr(w, r, http.StatusInternalServerError, errLoadFailed, "")
 
 			return
 		}
 
-		renderResponse(ctx, encoder, bans, &baseTmplArgs{ //nolint:exhaustruct
+		responseOk(w, r, http.StatusOK, bans, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Steam Bans",
 		})
 	}
 }
 
 func handleGetProfile(database *pgStore, cache cache) http.HandlerFunc {
-	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
-
-	encoder := newStyleEncoder()
-
 	return func(w http.ResponseWriter, r *http.Request) {
-		ids, ok := getSteamIDs(ctx)
+		ids, ok := getSteamIDs(w, r)
 
 		if !ok {
 			return
 		}
 
-		profiles, errProfile := loadProfiles(ctx, database, cache, ids)
+		profiles, errProfile := loadProfiles(r.Context(), database, cache, ids)
 
 		if errProfile != nil || len(profiles) == 0 {
-			log.Error("Failed to load profile", ErrAttr(errProfile))
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrLoadFailed)
+			responseErr(w, r, http.StatusInternalServerError, errLoadFailed, "")
 
 			return
 		}
-
-		renderResponse(ctx, encoder, profiles, &baseTmplArgs{ //nolint:exhaustruct
+		responseOk(w, r, http.StatusOK, profiles, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Profiles",
 		})
 	}
 }
 
 func handleGetSourceBansMany(database *pgStore) http.HandlerFunc {
-	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
-
-	encoder := newStyleEncoder()
-
 	return func(w http.ResponseWriter, r *http.Request) {
-		ids, ok := getSteamIDs(ctx)
+		ids, ok := getSteamIDs(w, r)
 
 		if !ok {
 			return
 		}
 
-		bans, errBans := database.sbGetBansBySID(ctx, ids)
+		bans, errBans := database.sbGetBansBySID(r.Context(), ids)
 		if errBans != nil {
-			log.Error("Failed to query bans from database", ErrAttr(errBans))
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
+			responseErr(w, r, http.StatusInternalServerError, errInternalError, "")
 
 			return
 		}
-
-		renderResponse(ctx, encoder, bans, &baseTmplArgs{ //nolint:exhaustruct
+		responseOk(w, r, http.StatusOK, bans, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Source Bans",
 		})
 	}
 }
 
 func handleGetSourceBans(database *pgStore) http.HandlerFunc {
-	encoder := newStyleEncoder()
-
 	return func(w http.ResponseWriter, r *http.Request) {
-		sid, ok := steamIDFromSlug(r)
+		sid, ok := steamIDFromSlug(w, r)
 		if !ok {
 			return
 		}
 
-		bans, errBans := database.sbGetBansBySID(ctx, steamid.Collection{sid})
+		bans, errBans := database.sbGetBansBySID(r.Context(), steamid.Collection{sid})
 		if errBans != nil {
-			slog.Error("Failed to query bans from database", ErrAttr(errBans))
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
+			responseErr(w, r, http.StatusInternalServerError, errInternalError, "")
 
 			return
 		}
@@ -246,15 +211,15 @@ func handleGetSourceBans(database *pgStore) http.HandlerFunc {
 			out = []SbBanRecord{}
 		}
 
-		renderResponse(ctx, encoder, out, &baseTmplArgs{ //nolint:exhaustruct
+		responseOk(w, r, http.StatusOK, out, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "Source Bans",
 		})
 	}
 }
 
-func getAttrs(w http.ResponseWriter, r *http.Request) ([]string, bool) {
-	steamIDQuery, ok := ctx.GetQuery("attrs")
-	if !ok {
+func getAttrs(r *http.Request) ([]string, bool) {
+	steamIDQuery := r.URL.Query().Get("attrs")
+	if steamIDQuery == "" {
 		return []string{"cheater"}, true
 	}
 
@@ -267,10 +232,8 @@ func getAttrs(w http.ResponseWriter, r *http.Request) ([]string, bool) {
 }
 
 func handleGetBotDetector(database *pgStore) http.HandlerFunc {
-	encoder := newStyleEncoder()
-
 	return func(w http.ResponseWriter, r *http.Request) {
-		sid, sidOk := getSteamIDs(r)
+		sid, sidOk := getSteamIDs(w, r)
 		if !sidOk {
 			return
 		}
@@ -280,10 +243,9 @@ func handleGetBotDetector(database *pgStore) http.HandlerFunc {
 			return
 		}
 
-		results, errSearch := database.bdListSearch(ctx, sid, attrs)
+		results, errSearch := database.bdListSearch(r.Context(), sid, attrs)
 		if errSearch != nil {
-			slog.Error("Failed to query bd lists from database", ErrAttr(errSearch))
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
+			responseErr(w, r, http.StatusInternalServerError, errSearch, "internal error")
 
 			return
 		}
@@ -292,7 +254,7 @@ func handleGetBotDetector(database *pgStore) http.HandlerFunc {
 			results = []BDSearchResult{}
 		}
 
-		renderResponse(ctx, encoder, results, &baseTmplArgs{ //nolint:exhaustruct
+		responseOk(w, r, http.StatusOK, results, &baseTmplArgs{ //nolint:exhaustruct
 			Title: "TF2BD Search Results",
 		})
 	}

@@ -40,7 +40,7 @@ func run(ctx context.Context) int {
 		return 1
 	}
 
-	router, errRouter := createRouter(config.RunMode, database, cacheHandler)
+	router, errRouter := createRouter(database, cacheHandler)
 	if errRouter != nil {
 		slog.Error("failed to create router", ErrAttr(errRouter))
 

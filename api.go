@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
 	"html/template"
 	"log/slog"
 	"net"
@@ -11,7 +14,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
@@ -23,7 +25,10 @@ const (
 	apiTimeout = time.Second * 10
 )
 
-var indexTMPL *template.Template
+var (
+	indexTMPL *template.Template
+	encoder   *styleEncoder
+)
 
 // Profile is a high level meta profile of several services.
 type Profile struct {
@@ -46,7 +51,7 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 	)
 
 	if len(steamIDs) > maxResults {
-		return nil, ErrTooMany
+		return nil, errTooMany
 	}
 
 	localCtx, cancel := context.WithTimeout(ctx, apiTimeout)
@@ -147,10 +152,68 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 	return profiles, nil
 }
 
-func steamIDFromSlug(r *http.Request) (steamid.SteamID, bool) {
-	sid64 := steamid.New(ctx.Param("steam_id"))
+func responseErr(w http.ResponseWriter, r *http.Request, status int, err error, userMsg string) {
+	msg := err.Error()
+	if userMsg != "" {
+		msg = userMsg
+	}
+	renderResponse(w, r, status, map[string]string{
+		"error": msg,
+	}, &baseTmplArgs{ //nolint:exhaustruct
+		Title: "Error",
+	})
+	slog.Error("error executing request", ErrAttr(err))
+}
+
+func responseOk(w http.ResponseWriter, r *http.Request, status int, data any, args syntaxTemplate) {
+	renderResponse(w, r, status, data, args)
+}
+
+func renderResponse(w http.ResponseWriter, r *http.Request, status int, data any, args syntaxTemplate) {
+	if data == nil {
+		data = []string{}
+	}
+
+	jsonBuff := bytes.NewBuffer(nil)
+
+	if err := json.NewEncoder(jsonBuff).Encode(data); err != nil {
+		slog.Error("Failed to encode response", ErrAttr(err))
+		responseErr(w, r, http.StatusInternalServerError, err, "encoder failed")
+		return
+	}
+
+	if strings.Contains(strings.ToLower(r.Header.Get("Accept")), "text/html") {
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(status)
+
+		css, body, errEnc := encoder.Encode(jsonBuff.String())
+		if errEnc != nil {
+			responseErr(w, r, http.StatusInternalServerError, errEnc, "encoder failed")
+
+			return
+		}
+
+		args.setCSS(css)
+		args.setBody(body)
+
+		if errExec := indexTMPL.Execute(w, args); errExec != nil {
+			slog.Error("failed to execute template", ErrAttr(errExec))
+		}
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	if _, errWrite := fmt.Fprint(w, jsonBuff.String()); errWrite != nil {
+		slog.Error("failed to write out json response", ErrAttr(errWrite))
+	}
+}
+
+func steamIDFromSlug(w http.ResponseWriter, r *http.Request) (steamid.SteamID, bool) {
+	sid64 := steamid.New(r.PathValue("steam_id"))
 	if !sid64.Valid() {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, "not found")
+		responseErr(w, r, http.StatusNotFound, errInvalidSteamID, "")
 
 		return steamid.SteamID{}, false
 	}
@@ -158,40 +221,33 @@ func steamIDFromSlug(r *http.Request) (steamid.SteamID, bool) {
 	return sid64, true
 }
 
-func renderResponse(ctx *gin.Context, encoder *styleEncoder, value any, args syntaxTemplate) {
-	if !strings.Contains(strings.ToLower(ctx.GetHeader("Accept")), "text/html") {
-		ctx.JSON(http.StatusOK, value)
-
-		return
-	}
-
-	css, body, errEncode := encoder.Encode(value)
-	if errEncode != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to load profile")
-
-		return
-	}
-
-	args.setCSS(css)
-	args.setBody(body)
-	ctx.HTML(http.StatusOK, "", args)
-}
+//func renderResponse(ctx *gin.Context, encoder *styleEncoder, value any, args syntaxTemplate) {
+//	if !strings.Contains(strings.ToLower(ctx.GetHeader("Accept")), "text/html") {
+//		ctx.JSON(http.StatusOK, value)
+//
+//		return
+//	}
+//
+//	css, body, errEncode := encoder.Encode(value)
+//	if errEncode != nil {
+//		ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to load profile")
+//
+//		return
+//	}
+//
+//	args.setCSS(css)
+//	args.setBody(body)
+//	ctx.HTML(http.StatusOK, "", args)
+//}
 
 func initTemplate() error {
-	tmplProfiles, errTmpl := template.New("").Funcs().Parse(`<!DOCTYPE html>
-
+	tmplProfiles, errTmpl := template.New("").Parse(`<!DOCTYPE html>
 <html>
-
-<head> 
-
+<head>
 	<title>{{ .Title }}</title>
-
 	<style> body {background-color: #272822;} {{ .CSS }} </style>
-
 </head>
-
 <body>{{ .Body }}</body>
-
 </html>`)
 
 	if errTmpl != nil {
@@ -204,6 +260,7 @@ func initTemplate() error {
 }
 
 func createRouter(database *pgStore, cacheHandler cache) (*http.ServeMux, error) {
+	encoder = newStyleEncoder()
 	if errTmpl := initTemplate(); errTmpl != nil {
 		return nil, errTmpl
 	}

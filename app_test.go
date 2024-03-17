@@ -156,7 +156,7 @@ func apiTestBans(router *gin.Engine) func(t *testing.T) {
 			)
 
 			require.NoError(t, testReq(t, router, http.MethodGet, path, &err))
-			require.Equal(t, err.Error, ErrTooMany.Error())
+			require.Equal(t, err.Error, errTooMany.Error())
 		})
 	}
 }
@@ -172,7 +172,7 @@ func apiTestInvalidQueries(router *gin.Engine) func(t *testing.T) {
 			)
 
 			require.NoError(t, testReq(t, router, http.MethodGet, path, &err))
-			require.Equal(t, err.Error, ErrInvalidQueryParams.Error())
+			require.Equal(t, err.Error, errInvalidQueryParams.Error())
 		})
 		t.Run("invalidSteamID", func(t *testing.T) {
 			t.Parallel()
@@ -183,7 +183,7 @@ func apiTestInvalidQueries(router *gin.Engine) func(t *testing.T) {
 			)
 
 			require.NoError(t, testReq(t, router, http.MethodGet, path, &err))
-			require.Equal(t, err.Error, ErrInvalidSteamID.Error())
+			require.Equal(t, err.Error, errInvalidSteamID.Error())
 		})
 		t.Run("tooManyRequested", func(t *testing.T) {
 			t.Parallel()
@@ -195,7 +195,7 @@ func apiTestInvalidQueries(router *gin.Engine) func(t *testing.T) {
 			)
 
 			require.NoError(t, testReq(t, router, http.MethodGet, path, &err))
-			require.Equal(t, err.Error, ErrTooMany.Error())
+			require.Equal(t, err.Error, errTooMany.Error())
 		})
 	}
 }
