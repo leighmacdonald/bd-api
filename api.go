@@ -2,15 +2,16 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"html/template"
 	"log/slog"
+	"net"
 	"net/http"
 	"sort"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
@@ -22,8 +23,12 @@ const (
 	apiTimeout = time.Second * 10
 )
 
-// Profile is a high level meta profile of several services.
+var (
+	indexTMPL *template.Template
+	encoder   *styleEncoder
+)
 
+// Profile is a high level meta profile of several services.
 type Profile struct {
 	Summary    steamweb.PlayerSummary  `json:"summary"`
 	BanState   steamweb.PlayerBanState `json:"ban_state"`
@@ -44,7 +49,7 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 	)
 
 	if len(steamIDs) > maxResults {
-		return nil, ErrTooMany
+		return nil, errTooMany
 	}
 
 	localCtx, cancel := context.WithTimeout(ctx, apiTimeout)
@@ -145,10 +150,57 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 	return profiles, nil
 }
 
-func steamIDFromSlug(ctx *gin.Context) (steamid.SteamID, bool) {
-	sid64 := steamid.New(ctx.Param("steam_id"))
+func responseErr(w http.ResponseWriter, r *http.Request, status int, err error, userMsg string) {
+	msg := err.Error()
+	if userMsg != "" {
+		msg = userMsg
+	}
+	renderResponse(w, r, status, map[string]string{"error": msg}, "Error")
+	slog.Error("error executing request", ErrAttr(err))
+}
+
+func responseOk(w http.ResponseWriter, r *http.Request, data any, title string) {
+	renderResponse(w, r, http.StatusOK, data, title)
+}
+
+func renderResponse(writer http.ResponseWriter, request *http.Request, status int, data any, title string) {
+	if data == nil {
+		data = []string{}
+	}
+
+	if strings.Contains(strings.ToLower(request.Header.Get("Accept")), "text/html") {
+		writer.Header().Set("Content-Type", "text/html")
+		writer.WriteHeader(status)
+
+		css, body, errEnc := encoder.Encode(data)
+		if errEnc != nil {
+			responseErr(writer, request, http.StatusInternalServerError, errEnc, "encoder failed")
+
+			return
+		}
+
+		if errExec := indexTMPL.Execute(writer, map[string]any{
+			"title": title,
+			"css":   template.CSS(css),
+			"body":  template.HTML(body), //nolint:gosec
+		}); errExec != nil {
+			slog.Error("failed to execute template", ErrAttr(errExec))
+		}
+
+		return
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(status)
+	if _, errWrite := fmt.Fprint(writer, data); errWrite != nil {
+		slog.Error("failed to write out json response", ErrAttr(errWrite))
+	}
+}
+
+func steamIDFromSlug(w http.ResponseWriter, r *http.Request) (steamid.SteamID, bool) {
+	sid64 := steamid.New(r.PathValue("steam_id"))
 	if !sid64.Valid() {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, "not found")
+		responseErr(w, r, http.StatusNotFound, errInvalidSteamID, "")
 
 		return steamid.SteamID{}, false
 	}
@@ -156,72 +208,42 @@ func steamIDFromSlug(ctx *gin.Context) (steamid.SteamID, bool) {
 	return sid64, true
 }
 
-func renderSyntax(ctx *gin.Context, encoder *styleEncoder, value any, args syntaxTemplate) {
-	if !strings.Contains(strings.ToLower(ctx.GetHeader("Accept")), "text/html") {
-		ctx.JSON(http.StatusOK, value)
-
-		return
-	}
-
-	css, body, errEncode := encoder.Encode(value)
-	if errEncode != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to load profile")
-
-		return
-	}
-
-	args.setCSS(css)
-	args.setBody(body)
-	ctx.HTML(http.StatusOK, "", args)
-}
-
-func apiErrorHandler() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Next()
-
-		for _, ginErr := range c.Errors {
-			slog.Error("Unhandled HTTP Error", ErrAttr(ginErr))
-		}
-	}
-}
-
-func createRouter(runMode string, database *pgStore, cacheHandler cache) (*gin.Engine, error) {
+func initTemplate() error {
 	tmplProfiles, errTmpl := template.New("").Parse(`<!DOCTYPE html>
-
-<html>
-
-<head> 
-
-	<title>{{ .Title }}</title>
-
-	<style> body {background-color: #272822;} {{ .CSS }} </style>
-
-</head>
-
-<body>{{ .Body }}</body>
-
-</html>`)
+		<html>
+		<head>
+			<title>{{ .title }}</title>
+			<style> body {background-color: #272822;} {{ .css }} </style>
+		</head>
+		<body>{{ .body }}</body>
+		</html>`)
 
 	if errTmpl != nil {
-		return nil, errors.Wrap(errTmpl, "Failed to parse html template")
+		return errors.Wrap(errTmpl, "Failed to parse html template")
 	}
 
-	gin.SetMode(runMode)
+	indexTMPL = tmplProfiles
 
-	engine := gin.New()
+	return nil
+}
 
-	engine.SetHTMLTemplate(tmplProfiles)
-	engine.Use(apiErrorHandler(), gin.Recovery())
-	engine.GET("/bans", handleGetBans())
-	engine.GET("/summary", handleGetSummary(cacheHandler))
-	engine.GET("/profile", handleGetProfile(database, cacheHandler))
-	engine.GET("/comp", handleGetComp(cacheHandler))
-	engine.GET("/friends", handleGetFriendList(cacheHandler))
-	engine.GET("/sourcebans", handleGetSourceBansMany(database))
-	engine.GET("/sourcebans/:steam_id", handleGetSourceBans(database))
-	engine.GET("/bd", handleGetBotDetector(database))
+func createRouter(database *pgStore, cacheHandler cache) (*http.ServeMux, error) {
+	encoder = newStyleEncoder()
+	if errTmpl := initTemplate(); errTmpl != nil {
+		return nil, errTmpl
+	}
 
-	return engine, nil
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /bans", handleGetBans())
+	mux.HandleFunc("GET /summary", handleGetSummary(cacheHandler))
+	mux.HandleFunc("GET /profile", handleGetProfile(database, cacheHandler))
+	mux.HandleFunc("GET /comp", handleGetComp(cacheHandler))
+	mux.HandleFunc("GET /friends", handleGetFriendList(cacheHandler))
+	mux.HandleFunc("GET /sourcebans", handleGetSourceBansMany(database))
+	mux.HandleFunc("GET /sourcebans/:steam_id", handleGetSourceBans(database))
+	mux.HandleFunc("GET /bd", handleGetBotDetector(database))
+
+	return mux, nil
 }
 
 const (
@@ -230,19 +252,22 @@ const (
 	shutdownTimeout = 10 * time.Second
 )
 
-func newHTTPServer(router *gin.Engine, addr string) *http.Server {
+func newHTTPServer(ctx context.Context, router *http.ServeMux, addr string) *http.Server {
 	httpServer := &http.Server{ //nolint:exhaustruct
 		Addr:         addr,
 		Handler:      router,
 		ReadTimeout:  apiHandlerTimeout,
 		WriteTimeout: apiHandlerTimeout,
+		BaseContext: func(_ net.Listener) context.Context {
+			return ctx
+		},
 	}
 
 	return httpServer
 }
 
-func runHTTP(ctx context.Context, router *gin.Engine, listenAddr string) int {
-	httpServer := newHTTPServer(router, listenAddr)
+func runHTTP(ctx context.Context, router *http.ServeMux, listenAddr string) int {
+	httpServer := newHTTPServer(ctx, router, listenAddr)
 
 	go func() {
 		if errServe := httpServer.ListenAndServe(); errServe != nil && !errors.Is(errServe, http.ErrServerClosed) {

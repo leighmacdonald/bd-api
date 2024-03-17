@@ -6,7 +6,6 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
@@ -15,26 +14,22 @@ import (
 const funcSize = 10
 
 var (
-	ErrTooMany            = errors.New("Too many results requested")
-	ErrInvalidQueryParams = errors.New("Invalid query parameters")
-	ErrInvalidSteamID     = errors.New("Invalid steamid")
-	ErrLoadFailed         = errors.New("Could not load remote resource")
-	ErrInternalError      = errors.New("Internal server error, please try again later")
+	errTooMany            = errors.New("Too many results requested")
+	errInvalidQueryParams = errors.New("Invalid query parameters")
+	errInvalidSteamID     = errors.New("Invalid steamid")
+	errLoadFailed         = errors.New("Could not load remote resource")
+	errInternalError      = errors.New("Internal server error, please try again later")
 )
 
 type apiErr struct {
 	Error string `json:"error"`
 }
 
-func newAPIErr(err error) apiErr {
-	return apiErr{Error: err.Error()}
-}
+func getSteamIDs(writer http.ResponseWriter, request *http.Request) (steamid.Collection, bool) {
+	steamIDQuery := request.URL.Query().Get("steamids")
 
-func getSteamIDs(ctx *gin.Context) (steamid.Collection, bool) {
-	steamIDQuery, ok := ctx.GetQuery("steamids")
-
-	if !ok {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, newAPIErr(ErrInvalidQueryParams))
+	if steamIDQuery == "" {
+		responseErr(writer, request, http.StatusBadRequest, errInvalidQueryParams, "")
 
 		return nil, false
 	}
@@ -45,7 +40,7 @@ func getSteamIDs(ctx *gin.Context) (steamid.Collection, bool) {
 		sid64 := steamid.New(steamID)
 
 		if !sid64.Valid() {
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, newAPIErr(ErrInvalidSteamID))
+			responseErr(writer, request, http.StatusBadRequest, errInvalidSteamID, "")
 
 			return nil, false
 		}
@@ -65,7 +60,7 @@ func getSteamIDs(ctx *gin.Context) (steamid.Collection, bool) {
 	}
 
 	if len(validIDs) > maxResults {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, newAPIErr(ErrTooMany))
+		responseErr(writer, request, http.StatusBadRequest, errTooMany, "")
 
 		return nil, false
 	}
@@ -73,169 +68,126 @@ func getSteamIDs(ctx *gin.Context) (steamid.Collection, bool) {
 	return validIDs, true
 }
 
-func handleGetFriendList(cache cache) gin.HandlerFunc {
-	encoder := newStyleEncoder()
-
-	return func(ctx *gin.Context) {
-		ids, ok := getSteamIDs(ctx)
+func handleGetFriendList(cache cache) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		ids, ok := getSteamIDs(writer, request)
 
 		if !ok {
 			return
 		}
 
-		renderSyntax(ctx, encoder, getSteamFriends(ctx, cache, ids), &baseTmplArgs{ //nolint:exhaustruct
-			Title: "Steam Summaries",
-		})
+		friends := getSteamFriends(request.Context(), cache, ids)
+		responseOk(writer, request, friends, "Steam Summaries")
 	}
 }
 
-func handleGetComp(cache cache) gin.HandlerFunc {
+func handleGetComp(cache cache) http.HandlerFunc {
 	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
 
-	encoder := newStyleEncoder()
-
-	return func(ctx *gin.Context) {
-		ids, ok := getSteamIDs(ctx)
+	return func(writer http.ResponseWriter, request *http.Request) {
+		ids, ok := getSteamIDs(writer, request)
 
 		if !ok {
 			return
 		}
 
-		compHistory := getCompHistory(ctx, cache, ids)
+		compHistory := getCompHistory(request.Context(), cache, ids)
 
 		if len(ids) != len(compHistory) {
 			log.Warn("Failed to fully fetch comp history")
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrLoadFailed)
+			responseErr(writer, request, http.StatusInternalServerError, errLoadFailed, "")
 
 			return
 		}
-
-		renderSyntax(ctx, encoder, compHistory, &baseTmplArgs{ //nolint:exhaustruct
-			Title: "Comp History",
-		})
+		responseOk(writer, request, compHistory, "Comp History")
 	}
 }
 
-func handleGetSummary(cache cache) gin.HandlerFunc {
-	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
-
-	encoder := newStyleEncoder()
-
-	return func(ctx *gin.Context) {
-		ids, ok := getSteamIDs(ctx)
-
+func handleGetSummary(cache cache) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		ids, ok := getSteamIDs(writer, request)
 		if !ok {
 			return
 		}
 
-		summaries, errSum := getSteamSummaries(ctx, cache, ids)
-
+		summaries, errSum := getSteamSummaries(request.Context(), cache, ids)
 		if errSum != nil || len(ids) != len(summaries) {
-			log.Error("Failed to fetch summary", ErrAttr(errSum))
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, ErrLoadFailed)
+			responseErr(writer, request, http.StatusBadRequest, errLoadFailed, "steam api fetch failed")
 
 			return
 		}
 
-		renderSyntax(ctx, encoder, summaries, &baseTmplArgs{ //nolint:exhaustruct
-			Title: "Steam Summaries",
-		})
+		responseOk(writer, request, summaries, "Steam Summaries")
 	}
 }
 
-func handleGetBans() gin.HandlerFunc {
-	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
-
-	encoder := newStyleEncoder()
-
-	return func(ctx *gin.Context) {
-		ids, ok := getSteamIDs(ctx)
+func handleGetBans() http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		ids, ok := getSteamIDs(writer, request)
 
 		if !ok {
 			return
 		}
 
-		bans, errBans := steamweb.GetPlayerBans(ctx, ids)
+		bans, errBans := steamweb.GetPlayerBans(request.Context(), ids)
 
 		if errBans != nil || len(ids) != len(bans) {
-			log.Error("Failed to fetch player bans", ErrAttr(errBans))
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrLoadFailed)
+			responseErr(writer, request, http.StatusInternalServerError, errLoadFailed, "")
 
 			return
 		}
 
-		renderSyntax(ctx, encoder, bans, &baseTmplArgs{ //nolint:exhaustruct
-			Title: "Steam Bans",
-		})
+		responseOk(writer, request, bans, "Steam Bans")
 	}
 }
 
-func handleGetProfile(database *pgStore, cache cache) gin.HandlerFunc {
-	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
-
-	encoder := newStyleEncoder()
-
-	return func(ctx *gin.Context) {
-		ids, ok := getSteamIDs(ctx)
+func handleGetProfile(database *pgStore, cache cache) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		ids, ok := getSteamIDs(writer, request)
 
 		if !ok {
 			return
 		}
 
-		profiles, errProfile := loadProfiles(ctx, database, cache, ids)
+		profiles, errProfile := loadProfiles(request.Context(), database, cache, ids)
 
 		if errProfile != nil || len(profiles) == 0 {
-			log.Error("Failed to load profile", ErrAttr(errProfile))
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrLoadFailed)
+			responseErr(writer, request, http.StatusInternalServerError, errLoadFailed, "")
 
 			return
 		}
-
-		renderSyntax(ctx, encoder, profiles, &baseTmplArgs{ //nolint:exhaustruct
-			Title: "Profiles",
-		})
+		responseOk(writer, request, profiles, "Profiles")
 	}
 }
 
-func handleGetSourceBansMany(database *pgStore) gin.HandlerFunc {
-	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
-
-	encoder := newStyleEncoder()
-
-	return func(ctx *gin.Context) {
-		ids, ok := getSteamIDs(ctx)
+func handleGetSourceBansMany(database *pgStore) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		ids, ok := getSteamIDs(writer, request)
 
 		if !ok {
 			return
 		}
 
-		bans, errBans := database.sbGetBansBySID(ctx, ids)
+		bans, errBans := database.sbGetBansBySID(request.Context(), ids)
 		if errBans != nil {
-			log.Error("Failed to query bans from database", ErrAttr(errBans))
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
+			responseErr(writer, request, http.StatusInternalServerError, errInternalError, "")
 
 			return
 		}
-
-		renderSyntax(ctx, encoder, bans, &baseTmplArgs{ //nolint:exhaustruct
-			Title: "Source Bans",
-		})
+		responseOk(writer, request, bans, "Source Bans")
 	}
 }
 
-func handleGetSourceBans(database *pgStore) gin.HandlerFunc {
-	encoder := newStyleEncoder()
-
-	return func(ctx *gin.Context) {
-		sid, ok := steamIDFromSlug(ctx)
+func handleGetSourceBans(database *pgStore) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		sid, ok := steamIDFromSlug(writer, request)
 		if !ok {
 			return
 		}
 
-		bans, errBans := database.sbGetBansBySID(ctx, steamid.Collection{sid})
+		bans, errBans := database.sbGetBansBySID(request.Context(), steamid.Collection{sid})
 		if errBans != nil {
-			slog.Error("Failed to query bans from database", ErrAttr(errBans))
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
+			responseErr(writer, request, http.StatusInternalServerError, errInternalError, "")
 
 			return
 		}
@@ -247,15 +199,13 @@ func handleGetSourceBans(database *pgStore) gin.HandlerFunc {
 			out = []SbBanRecord{}
 		}
 
-		renderSyntax(ctx, encoder, out, &baseTmplArgs{ //nolint:exhaustruct
-			Title: "Source Bans",
-		})
+		responseOk(writer, request, out, "Source Bans")
 	}
 }
 
-func getAttrs(ctx *gin.Context) ([]string, bool) {
-	steamIDQuery, ok := ctx.GetQuery("attrs")
-	if !ok {
+func getAttrs(r *http.Request) ([]string, bool) {
+	steamIDQuery := r.URL.Query().Get("attrs")
+	if steamIDQuery == "" {
 		return []string{"cheater"}, true
 	}
 
@@ -267,24 +217,21 @@ func getAttrs(ctx *gin.Context) ([]string, bool) {
 	return attrs, true
 }
 
-func handleGetBotDetector(database *pgStore) gin.HandlerFunc {
-	encoder := newStyleEncoder()
-
-	return func(ctx *gin.Context) {
-		sid, sidOk := getSteamIDs(ctx)
+func handleGetBotDetector(database *pgStore) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		sid, sidOk := getSteamIDs(writer, request)
 		if !sidOk {
 			return
 		}
 
-		attrs, attrOk := getAttrs(ctx)
+		attrs, attrOk := getAttrs(request)
 		if !attrOk {
 			return
 		}
 
-		results, errSearch := database.bdListSearch(ctx, sid, attrs)
+		results, errSearch := database.bdListSearch(request.Context(), sid, attrs)
 		if errSearch != nil {
-			slog.Error("Failed to query bd lists from database", ErrAttr(errSearch))
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, ErrInternalError)
+			responseErr(writer, request, http.StatusInternalServerError, errSearch, "internal error")
 
 			return
 		}
@@ -293,8 +240,6 @@ func handleGetBotDetector(database *pgStore) gin.HandlerFunc {
 			results = []BDSearchResult{}
 		}
 
-		renderSyntax(ctx, encoder, results, &baseTmplArgs{ //nolint:exhaustruct
-			Title: "TF2BD Search Results",
-		})
+		responseOk(writer, request, results, "TF2BD Search Results")
 	}
 }
