@@ -916,11 +916,10 @@ func (db *pgStore) bdListEntries(ctx context.Context, listID int) ([]BDListEntry
 			entry BDListEntry
 			sid   int64
 		)
-		if errScan := rows.Scan(&entry.BDListEntryID, &entry.BDListID, &sid, &entry.Attributes, &entry.Proof, &entry.LastName,
+		if errScan := rows.Scan(&entry.BDListEntryID, &entry.BDListID, &sid, &entry.Attributes, &entry.Proof, &entry.LastSeen,
 			&entry.LastName, &entry.Deleted, &entry.CreatedOn, &entry.UpdatedOn); errScan != nil {
 			return nil, dbErr(errSQL, "Failed to scan bd list entry result")
 		}
-
 		entry.SteamID = steamid.New(sid)
 		results = append(results, entry)
 	}

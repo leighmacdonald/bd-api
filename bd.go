@@ -243,9 +243,10 @@ func findNewAndUpdated(existingList []BDListEntry, mapping listMapping) ([]BDLis
 				found = true
 				lastSeen := time.Unix(int64(player.LastSeen.Time), 0)
 				attrs := normalizeAttrs(player.Attributes)
-				els := existing.LastSeen.Unix()
-				ls := lastSeen.Unix()
-				if existing.LastName != player.LastSeen.PlayerName || els != ls || !slices.Equal(existing.Attributes, attrs) || !slices.Equal(existing.Proof, player.Proof) {
+				if player.Proof == nil {
+					player.Proof = []string{}
+				}
+				if existing.LastName != player.LastSeen.PlayerName || !slices.Equal(existing.Attributes, attrs) || !slices.Equal(existing.Proof, player.Proof) {
 					updatedEntry := existing
 					updatedEntry.LastSeen = lastSeen
 					updatedEntry.Attributes = attrs
