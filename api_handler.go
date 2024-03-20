@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/leighmacdonald/bd-api/model"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
@@ -196,7 +197,7 @@ func handleGetSourceBans(database *pgStore) http.HandlerFunc {
 
 		if !found || out == nil {
 			// Return empty list instead of null
-			out = []SbBanRecord{}
+			out = []model.SbBanRecord{}
 		}
 
 		responseOk(writer, request, out, "Source Bans")

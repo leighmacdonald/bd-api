@@ -19,6 +19,7 @@ import (
 	"github.com/gocolly/colly/debug"
 	"github.com/gocolly/colly/extensions"
 	"github.com/gocolly/colly/queue"
+	"github.com/leighmacdonald/bd-api/model"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
@@ -38,7 +39,7 @@ func initScrapers(ctx context.Context, database *pgStore, cacheDir string) ([]*s
 
 	for _, scraper := range scrapers {
 		// Attach a site_id to the scraper, so we can keep track of the scrape source
-		var s SbSite
+		var s model.SbSite
 		if errSave := database.sbSiteGetOrCreate(ctx, scraper.name, &s); errSave != nil {
 			return nil, errors.Wrap(errSave, "Database error")
 		}
@@ -161,7 +162,7 @@ func (r *sbRecord) setSteam(value string) {
 
 type sbScraper struct {
 	*colly.Collector
-	name      Site
+	name      model.Site
 	theme     string
 	log       *slog.Logger
 	curPage   int
@@ -258,7 +259,7 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 				continue
 			}
 
-			bRecord := SbBanRecord{
+			bRecord := model.SbBanRecord{
 				BanID:       0,
 				SiteName:    "",
 				SiteID:      int(scraper.ID),
@@ -267,7 +268,7 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 				Reason:      result.Reason,
 				Duration:    result.Length,
 				Permanent:   result.Permanent,
-				TimeStamped: TimeStamped{
+				TimeStamped: model.TimeStamped{
 					UpdatedOn: time.Now(),
 					CreatedOn: result.CreatedOn,
 				},
@@ -349,7 +350,7 @@ func (log *scrapeLogger) Event(event *debug.Event) {
 
 const defaultStartPath = "index.php?p=banlist"
 
-func newScraperWithTransport(cacheDir string, name Site,
+func newScraperWithTransport(cacheDir string, name model.Site,
 	baseURL string, startPath string, parser parserFunc, nextURL nextURLFunc, parseTime parseTimeFunc,
 	transport http.RoundTripper,
 ) (*sbScraper, error) {
@@ -363,7 +364,7 @@ func newScraperWithTransport(cacheDir string, name Site,
 	return scraper, nil
 }
 
-func newScraper(cacheDir string, name Site, baseURL string,
+func newScraper(cacheDir string, name model.Site, baseURL string,
 	startPath string, parser parserFunc, nextURL nextURLFunc, parseTime parseTimeFunc,
 ) (*sbScraper, error) {
 	const (

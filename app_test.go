@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/leighmacdonald/bd-api/model"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
@@ -250,7 +251,7 @@ func apiTestGetProfile(router *http.ServeMux) func(t *testing.T) {
 		var (
 			sids     = steamid.Collection{testIDb4nny, testIDCamper}
 			path     = fmt.Sprintf("/profile?steamids=%s", SteamIDStringList(sids))
-			profiles []Profile
+			profiles []model.Profile
 			validIDs steamid.Collection
 		)
 
@@ -273,7 +274,7 @@ func apiTestGetProfile(router *http.ServeMux) func(t *testing.T) {
 	}
 }
 
-func createTestSourcebansRecord(t *testing.T, database *pgStore, sid64 steamid.SteamID) SbBanRecord {
+func createTestSourcebansRecord(t *testing.T, database *pgStore, sid64 steamid.SteamID) model.SbBanRecord {
 	t.Helper()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
@@ -286,7 +287,7 @@ func createTestSourcebansRecord(t *testing.T, database *pgStore, sid64 steamid.S
 		t.Error(errPlayer)
 	}
 
-	site := NewSBSite(Site(fmt.Sprintf("Test %s", curTime)))
+	site := NewSBSite(model.Site(fmt.Sprintf("Test %s", curTime)))
 	if errSave := database.sbSiteSave(ctx, &site); errSave != nil {
 		t.Error(errSave)
 	}
@@ -311,7 +312,7 @@ func apiTestGetSourcebans(router *http.ServeMux, database *pgStore) func(t *test
 			t.Parallel()
 
 			var (
-				banRecords []SbBanRecord
+				banRecords []model.SbBanRecord
 				path       = fmt.Sprintf("/sourcebans/%d", recordA.SteamID.Int64())
 			)
 
@@ -342,12 +343,12 @@ func apiTestGetSourcebans(router *http.ServeMux, database *pgStore) func(t *test
 
 			var (
 				steamID    = steamid.RandSID64()
-				banRecords []SbBanRecord
+				banRecords []model.SbBanRecord
 				path       = fmt.Sprintf("/sourcebans/%d", steamID.Int64())
 			)
 
 			require.NoError(t, testReq(t, router, http.MethodGet, path, &banRecords))
-			require.Equal(t, []SbBanRecord{}, banRecords)
+			require.Equal(t, []model.SbBanRecord{}, banRecords)
 		})
 	}
 }

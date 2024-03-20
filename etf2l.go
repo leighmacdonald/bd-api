@@ -7,6 +7,7 @@ import (
 	"io"
 	"sort"
 
+	"github.com/leighmacdonald/bd-api/model"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/pkg/errors"
 )
@@ -74,7 +75,7 @@ type etf2lPlayer struct {
 	} `json:"status"`
 }
 
-func sortSeasons(seasons []Season) []Season {
+func sortSeasons(seasons []model.Season) []model.Season {
 	sort.Slice(seasons, func(i, j int) bool {
 		return seasons[i].DivisionInt < seasons[j].DivisionInt
 	})
@@ -82,7 +83,7 @@ func sortSeasons(seasons []Season) []Season {
 	return seasons
 }
 
-func getETF2L(ctx context.Context, sid steamid.SteamID) ([]Season, error) {
+func getETF2L(ctx context.Context, sid steamid.SteamID) ([]model.Season, error) {
 	url := fmt.Sprintf("https://api.etf2l.org/player/%d.json", sid.Int64())
 
 	var player etf2lPlayer
@@ -106,13 +107,13 @@ func getETF2L(ctx context.Context, sid steamid.SteamID) ([]Season, error) {
 	return parseETF2L(player), nil
 }
 
-func parseETF2L(player etf2lPlayer) []Season {
-	var seasons []Season
+func parseETF2L(player etf2lPlayer) []model.Season {
+	var seasons []model.Season
 
 	for _, team := range player.Player.Teams {
 		for _, competition := range team.Competitions {
 			var (
-				div    = UnknownDivision
+				div    = model.UnknownDivision
 				divStr = competition.Competition
 				format = "N/A"
 			)
@@ -120,25 +121,25 @@ func parseETF2L(player etf2lPlayer) []Season {
 			if competition.Division.Name != "" {
 				switch competition.Division.Name {
 				case "Open":
-					div = ETF2LOpen
+					div = model.ETF2LOpen
 					divStr = "Open"
 				case "Mid":
-					div = ETF2LMid
+					div = model.ETF2LMid
 					divStr = "Mid"
 				case "Division 4":
-					div = ETF2LLow
+					div = model.ETF2LLow
 					divStr = "Low"
 				case "Division 3":
-					div = ETF2LMid
+					div = model.ETF2LMid
 					divStr = "Div 3"
 				case "Division 2":
-					div = ETF2LDiv2
+					div = model.ETF2LDiv2
 					divStr = "Div 2"
 				case "Division 1":
-					div = ETF2LDiv1
+					div = model.ETF2LDiv1
 					divStr = "Div 1"
 				case "Premiership":
-					div = ETF2LPremiership
+					div = model.ETF2LPremiership
 					divStr = "Premiership"
 				}
 			}
@@ -152,7 +153,7 @@ func parseETF2L(player etf2lPlayer) []Season {
 				format = "6s"
 			}
 
-			seasons = append(seasons, Season{
+			seasons = append(seasons, model.Season{
 				League:      "ETF2L",
 				Division:    divStr,
 				DivisionInt: div,

@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/leighmacdonald/bd-api/model"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/pkg/errors"
@@ -28,22 +29,12 @@ var (
 	encoder   *styleEncoder
 )
 
-// Profile is a high level meta profile of several services.
-type Profile struct {
-	Summary    steamweb.PlayerSummary  `json:"summary"`
-	BanState   steamweb.PlayerBanState `json:"ban_state"`
-	Seasons    []Season                `json:"seasons"`
-	Friends    []steamweb.Friend       `json:"friends"`
-	SourceBans []SbBanRecord           `json:"source_bans"`
-	LogsCount  int64                   `json:"logs_count"`
-}
-
-func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs steamid.Collection) ([]Profile, error) {
+func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs steamid.Collection) ([]model.Profile, error) {
 	var ( //nolint:prealloc
 		waitGroup  = &sync.WaitGroup{}
 		summaries  []steamweb.PlayerSummary
 		bans       []steamweb.PlayerBanState
-		profiles   []Profile
+		profiles   []model.Profile
 		friends    friendMap
 		sourceBans BanRecordMap
 	)
@@ -109,7 +100,7 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 	}
 
 	for _, sid := range steamIDs {
-		var profile Profile
+		var profile model.Profile
 
 		for _, summary := range summaries {
 			if summary.SteamID == sid {
@@ -131,7 +122,7 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 			profile.SourceBans = records
 		} else {
 			// Dont return null json values
-			profile.SourceBans = []SbBanRecord{}
+			profile.SourceBans = []model.SbBanRecord{}
 		}
 
 		if friendsList, ok := friends[sid.String()]; ok {
@@ -140,7 +131,7 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 			profile.Friends = []steamweb.Friend{}
 		}
 
-		profile.Seasons = []Season{}
+		profile.Seasons = []model.Season{}
 		sort.Slice(profile.Seasons, func(i, j int) bool {
 			return profile.Seasons[i].DivisionInt < profile.Seasons[j].DivisionInt
 		})

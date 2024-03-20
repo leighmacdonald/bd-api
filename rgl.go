@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/leighmacdonald/bd-api/model"
 	"github.com/leighmacdonald/rgl"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/pkg/errors"
@@ -17,7 +18,7 @@ import (
 
 // - Empty value.
 
-func getRGL(ctx context.Context, log *slog.Logger, sid64 steamid.SteamID) ([]Season, error) {
+func getRGL(ctx context.Context, log *slog.Logger, sid64 steamid.SteamID) ([]model.Season, error) {
 	startTime := time.Now()
 	client := NewHTTPClient()
 
@@ -31,12 +32,12 @@ func getRGL(ctx context.Context, log *slog.Logger, sid64 steamid.SteamID) ([]Sea
 		return nil, errors.Wrap(errTeams, "Failed to fetch teams")
 	}
 
-	seasons := make([]Season, len(teams))
+	seasons := make([]model.Season, len(teams))
 
 	for index, team := range teams {
 		seasonStartTime := time.Now()
 
-		var season Season
+		var season model.Season
 		seasonInfo, errSeason := rgl.Season(ctx, client, team.SeasonID)
 
 		if errSeason != nil {
@@ -76,39 +77,39 @@ func getRGL(ctx context.Context, log *slog.Logger, sid64 steamid.SteamID) ([]Sea
 	return seasons, nil
 }
 
-func parseRGLDivision(div string) Division {
+func parseRGLDivision(div string) model.Division {
 	switch div {
 	case "RGL-Invite":
 		fallthrough
 	case "Invite":
-		return RGLRankInvite
+		return model.RGLRankInvite
 	case "RGL-Div-1":
-		return RGLRankDiv1
+		return model.RGLRankDiv1
 	case "RGL-Div-2":
-		return RGLRankDiv2
+		return model.RGLRankDiv2
 	case "RGL-Main":
 		fallthrough
 	case "Main":
-		return RGLRankMain
+		return model.RGLRankMain
 	case "RGL-Advanced":
 		fallthrough
 	case "Advanced-1":
 		fallthrough
 	case "Advanced":
-		return RGLRankAdvanced
+		return model.RGLRankAdvanced
 	case "RGL-Intermediate":
 		fallthrough
 	case "Intermediate":
-		return RGLRankIntermediate
+		return model.RGLRankIntermediate
 	case "RGL-Challenger":
-		return RGLRankIntermediate
+		return model.RGLRankIntermediate
 	case "Open":
-		return RGLRankOpen
+		return model.RGLRankOpen
 	case "Amateur":
-		return RGLRankAmateur
+		return model.RGLRankAmateur
 	case "Fresh Meat":
-		return RGLRankFreshMeat
+		return model.RGLRankFreshMeat
 	default:
-		return RGLRankNone
+		return model.RGLRankNone
 	}
 }

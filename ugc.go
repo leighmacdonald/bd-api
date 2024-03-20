@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/leighmacdonald/bd-api/model"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/pkg/errors"
 )
@@ -22,7 +23,7 @@ const (
 
 var reUGCRank = regexp.MustCompile(`Season (\d+) (\D+) (\S+)`)
 
-func getUGC(ctx context.Context, steam steamid.SteamID) ([]Season, error) {
+func getUGC(ctx context.Context, steam steamid.SteamID) ([]model.Season, error) {
 	resp, err := get(ctx,
 		fmt.Sprintf("https://www.ugcleague.com/players_page.cfm?player_id=%d", steam.Int64()), nil)
 	if err != nil {
@@ -44,14 +45,14 @@ func getUGC(ctx context.Context, steam steamid.SteamID) ([]Season, error) {
 	return seasons, nil
 }
 
-func parseUGCRank(body string) ([]Season, error) {
+func parseUGCRank(body string) ([]model.Season, error) {
 	dom, errReader := goquery.NewDocumentFromReader(strings.NewReader(body))
 
 	if errReader != nil {
 		return nil, errors.Wrap(errReader, "Failed to create doc reader")
 	}
 
-	var seasons []Season
+	var seasons []model.Season
 
 	dom.Find("h5").Each(func(_ int, selection *goquery.Selection) {
 		text := selection.Text()
@@ -71,7 +72,7 @@ func parseUGCRank(body string) ([]Season, error) {
 					format = "4s"
 				}
 
-				seasons = append(seasons, Season{
+				seasons = append(seasons, model.Season{
 					League:      "UGC",
 					Division:    curRankStr,
 					DivisionInt: curRank,
@@ -85,7 +86,7 @@ func parseUGCRank(body string) ([]Season, error) {
 	return seasons, nil
 }
 
-func parseRankField(field string) (Division, string) {
+func parseRankField(field string) (model.Division, string) {
 	const expectedFieldCount = 4
 
 	info := strings.Split(strings.ReplaceAll(field, "\n\n", ""), "\n")
@@ -95,17 +96,17 @@ func parseRankField(field string) (Division, string) {
 	if len(results) == expectedFieldCount {
 		switch results[3] {
 		case "Platinum":
-			return UGCRankPlatinum, "platinum"
+			return model.UGCRankPlatinum, "platinum"
 		case "Gold":
-			return UGCRankGold, "gold"
+			return model.UGCRankGold, "gold"
 		case "Silver":
-			return UGCRankSilver, "silver"
+			return model.UGCRankSilver, "silver"
 		case "Steel":
-			return UGCRankSteel, "steel"
+			return model.UGCRankSteel, "steel"
 		case "Iron":
-			return UGCRankIron, "iron"
+			return model.UGCRankIron, "iron"
 		}
 	}
 
-	return UGCRankNone, ""
+	return model.UGCRankNone, ""
 }

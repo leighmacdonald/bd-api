@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/leighmacdonald/bd-api/model"
 	"github.com/leighmacdonald/rgl"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
@@ -122,9 +123,9 @@ func getSteamBans(ctx context.Context, cache cache, steamIDs steamid.Collection)
 	return banStates, nil
 }
 
-func getCompHistory(ctx context.Context, cache cache, steamIDs steamid.Collection) compMap {
+func getCompHistory(ctx context.Context, cache cache, steamIDs steamid.Collection) model.CompMap {
 	var (
-		results   = compMap{}
+		results   = model.CompMap{}
 		missed    steamid.Collection
 		startTime = time.Now()
 	)
