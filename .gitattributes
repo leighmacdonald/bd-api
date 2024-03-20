@@ -1,4 +1,4 @@
 * text=auto eol=lf
-*.go -text diff=golang eol=lf
+*.go -text diff=golang
 testdata/* linguist-vendored
 *.md linguist-documentation
