@@ -22,7 +22,7 @@ linters:
     - errchkjson
     - errname
     - errorlint
-    - execinquery
+    #- execinquery
     - exhaustive
     #- exhaustruct
     - exportloopref
@@ -40,7 +40,7 @@ linters:
     - gocyclo
     - godot
     - godox
-    - goerr113
+    - err113
     - gofmt
     - gofumpt
     - goheader
