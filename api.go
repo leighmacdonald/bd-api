@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 	"html/template"
 	"log/slog"
 	"net"
@@ -183,7 +183,8 @@ func renderResponse(writer http.ResponseWriter, request *http.Request, status in
 
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(status)
-	if _, errWrite := fmt.Fprint(writer, data); errWrite != nil {
+
+	if errWrite := json.NewEncoder(writer).Encode(data); errWrite != nil {
 		slog.Error("failed to write out json response", ErrAttr(errWrite))
 	}
 }
@@ -261,6 +262,7 @@ func runHTTP(ctx context.Context, router *http.ServeMux, listenAddr string) int 
 	httpServer := newHTTPServer(ctx, router, listenAddr)
 
 	go func() {
+		slog.Info("Starting HTTP service", slog.String("address", "http://"+listenAddr))
 		if errServe := httpServer.ListenAndServe(); errServe != nil && !errors.Is(errServe, http.ErrServerClosed) {
 			slog.Error("error trying to shutdown http service", ErrAttr(errServe))
 		}
