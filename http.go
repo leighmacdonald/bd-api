@@ -3,11 +3,21 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"io"
+	"errors"
 	"net/http"
 	"time"
+)
 
-	"github.com/pkg/errors"
+var (
+	errRequestCreate    = errors.New("failed to create request")
+	errRequestPerform   = errors.New("failed to perform request")
+	errResponseInvalid  = errors.New("got unexpected results")
+	errResponseRead     = errors.New("failed to read response body")
+	errResponseDecode   = errors.New("failed to decode response")
+	errResponseJSON     = errors.New("failed to generate json response")
+	errResponseTokenize = errors.New("failed to tokenize json body")
+	errResponseCSS      = errors.New("failed to write css body")
+	errResponseFormat   = errors.New("failed to format body")
 )
 
 // NewHTTPClient allocates a preconfigured *http.Client.
@@ -23,7 +33,7 @@ func NewHTTPClient() *http.Client {
 func get(ctx context.Context, url string, receiver interface{}) (*http.Response, error) {
 	req, errNewReq := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if errNewReq != nil {
-		return nil, errors.Wrapf(errNewReq, "Failed to create request: %v", errNewReq)
+		return nil, errors.Join(errNewReq, errRequestCreate)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -37,17 +47,14 @@ func get(ctx context.Context, url string, receiver interface{}) (*http.Response,
 
 	resp, errResp := client.Do(req)
 	if errResp != nil {
-		return nil, errors.Wrapf(errResp, "error during get: %v", errResp)
+		return nil, errors.Join(errResp, errRequestPerform)
 	}
 
 	if receiver != nil {
-		body, errRead := io.ReadAll(resp.Body)
-		if errRead != nil {
-			return nil, errors.Wrapf(errNewReq, "error reading stream: %v", errRead)
-		}
+		defer logCloser(resp.Body)
 
-		if errUnmarshal := json.Unmarshal(body, &receiver); errUnmarshal != nil {
-			return resp, errors.Wrapf(errUnmarshal, "Failed to decode json: %v", errUnmarshal)
+		if errUnmarshal := json.NewDecoder(resp.Body).Decode(&receiver); errUnmarshal != nil {
+			return resp, errors.Join(errUnmarshal, errResponseDecode)
 		}
 	}
 

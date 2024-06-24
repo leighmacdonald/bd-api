@@ -3,12 +3,12 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 
 	"github.com/alecthomas/chroma"
 	"github.com/alecthomas/chroma/formatters/html"
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/alecthomas/chroma/styles"
-	"github.com/pkg/errors"
 )
 
 type styleEncoder struct {
@@ -35,22 +35,22 @@ func (s *styleEncoder) Encode(value any) (string, string, error) {
 	jsonEncoder := json.NewEncoder(&jsonBody)
 	jsonEncoder.SetIndent("", "    ")
 	if errJSON := jsonEncoder.Encode(value); errJSON != nil {
-		return "", "", errors.Wrap(errJSON, "Failed to generate json")
+		return "", "", errors.Join(errJSON, errResponseJSON)
 	}
 
 	iterator, errTokenize := s.lexer.Tokenise(&chroma.TokeniseOptions{State: "root", EnsureLF: true}, jsonBody.String())
 	if errTokenize != nil {
-		return "", "", errors.Wrap(errTokenize, "Failed to tokenize json")
+		return "", "", errors.Join(errTokenize, errResponseTokenize)
 	}
 
 	cssBuf := bytes.NewBuffer(nil)
-	if errWrite := s.formatter.WriteCSS(cssBuf, s.style); errWrite != nil {
-		return "", "", errors.Wrap(errWrite, "Failed to generate HTML")
+	if err := s.formatter.WriteCSS(cssBuf, s.style); err != nil {
+		return "", "", errors.Join(err, errResponseCSS)
 	}
 
 	bodyBuf := bytes.NewBuffer(nil)
 	if errFormat := s.formatter.Format(bodyBuf, s.style, iterator); errFormat != nil {
-		return "", "", errors.Wrap(errFormat, "Failed to format json")
+		return "", "", errors.Join(errFormat, errResponseFormat)
 	}
 
 	return cssBuf.String(), bodyBuf.String(), nil

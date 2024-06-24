@@ -2,14 +2,14 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"strings"
 	"time"
 
-	"github.com/leighmacdonald/bd-api/model"
+	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/rgl"
 	"github.com/leighmacdonald/steamid/v4/steamid"
-	"github.com/pkg/errors"
 )
 
 // Current issues:
@@ -18,30 +18,30 @@ import (
 
 // - Empty value.
 
-func getRGL(ctx context.Context, log *slog.Logger, sid64 steamid.SteamID) ([]model.Season, error) {
+func getRGL(ctx context.Context, log *slog.Logger, sid64 steamid.SteamID) ([]domain.Season, error) {
 	startTime := time.Now()
 	client := NewHTTPClient()
 
 	_, errProfile := rgl.Profile(ctx, client, sid64)
 	if errProfile != nil {
-		return nil, errors.Wrap(errProfile, "Failed tp fetch profile")
+		return nil, errors.Join(errProfile, errRequestPerform)
 	}
 
 	teams, errTeams := rgl.ProfileTeams(ctx, client, sid64)
 	if errTeams != nil {
-		return nil, errors.Wrap(errTeams, "Failed to fetch teams")
+		return nil, errRequestPerform
 	}
 
-	seasons := make([]model.Season, len(teams))
+	seasons := make([]domain.Season, len(teams))
 
 	for index, team := range teams {
 		seasonStartTime := time.Now()
 
-		var season model.Season
+		var season domain.Season
 		seasonInfo, errSeason := rgl.Season(ctx, client, team.SeasonID)
 
 		if errSeason != nil {
-			return nil, errors.Wrap(errSeason, "Failed to fetch seasons")
+			return nil, errRequestPerform
 		}
 
 		season.League = "rgl"
@@ -77,39 +77,39 @@ func getRGL(ctx context.Context, log *slog.Logger, sid64 steamid.SteamID) ([]mod
 	return seasons, nil
 }
 
-func parseRGLDivision(div string) model.Division {
+func parseRGLDivision(div string) domain.Division {
 	switch div {
 	case "RGL-Invite":
 		fallthrough
 	case "Invite":
-		return model.RGLRankInvite
+		return domain.RGLRankInvite
 	case "RGL-Div-1":
-		return model.RGLRankDiv1
+		return domain.RGLRankDiv1
 	case "RGL-Div-2":
-		return model.RGLRankDiv2
+		return domain.RGLRankDiv2
 	case "RGL-Main":
 		fallthrough
 	case "Main":
-		return model.RGLRankMain
+		return domain.RGLRankMain
 	case "RGL-Advanced":
 		fallthrough
 	case "Advanced-1":
 		fallthrough
 	case "Advanced":
-		return model.RGLRankAdvanced
+		return domain.RGLRankAdvanced
 	case "RGL-Intermediate":
 		fallthrough
 	case "Intermediate":
-		return model.RGLRankIntermediate
+		return domain.RGLRankIntermediate
 	case "RGL-Challenger":
-		return model.RGLRankIntermediate
+		return domain.RGLRankIntermediate
 	case "Open":
-		return model.RGLRankOpen
+		return domain.RGLRankOpen
 	case "Amateur":
-		return model.RGLRankAmateur
+		return domain.RGLRankAmateur
 	case "Fresh Meat":
-		return model.RGLRankFreshMeat
+		return domain.RGLRankFreshMeat
 	default:
-		return model.RGLRankNone
+		return domain.RGLRankNone
 	}
 }

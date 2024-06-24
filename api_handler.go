@@ -1,25 +1,25 @@
 package main
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 	"runtime"
 	"strings"
 
-	"github.com/leighmacdonald/bd-api/model"
+	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
-	"github.com/pkg/errors"
 )
 
 const funcSize = 10
 
 var (
-	errTooMany            = errors.New("Too many results requested")
-	errInvalidQueryParams = errors.New("Invalid query parameters")
-	errInvalidSteamID     = errors.New("Invalid steamid")
-	errLoadFailed         = errors.New("Could not load remote resource")
-	errInternalError      = errors.New("Internal server error, please try again later")
+	errTooMany            = errors.New("too many results requested")
+	errInvalidQueryParams = errors.New("invalid query parameters")
+	errInvalidSteamID     = errors.New("invalid steamid")
+	errLoadFailed         = errors.New("could not load remote resource")
+	errInternalError      = errors.New("internal server error, please try again later")
 )
 
 type apiErr struct {
@@ -197,7 +197,7 @@ func handleGetSourceBans(database *pgStore) http.HandlerFunc {
 
 		if !found || out == nil {
 			// Return empty list instead of null
-			out = []model.SbBanRecord{}
+			out = []domain.SbBanRecord{}
 		}
 
 		responseOk(writer, request, out, "Source Bans")

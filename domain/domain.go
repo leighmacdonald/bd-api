@@ -1,4 +1,5 @@
-package model
+// Package domain is a separate package so that its struct definitions can be imported by other projects
+package domain
 
 import (
 	"time"
