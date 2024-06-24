@@ -25,7 +25,7 @@ check_deps:
 	go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.25.0
 	go install github.com/daixiang0/gci@v0.13.1
 	go install mvdan.cc/gofumpt@v0.6.0
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.0
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59.1
 	go install honnef.co/go/tools/cmd/staticcheck@v0.4.7
 	go install github.com/goreleaser/goreleaser@v1.24.0
 

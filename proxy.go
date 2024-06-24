@@ -101,8 +101,8 @@ func (p *proxyManager) stop() {
 
 func (p *proxyManager) setup(collector *colly.Collector, config *appConfig) error {
 	proxyAddresses := make([]string, len(config.Proxies))
-	for i, p := range config.Proxies {
-		proxyAddresses[i] = fmt.Sprintf("socks5://%s", p.LocalAddr)
+	for i, proxyConfig := range config.Proxies {
+		proxyAddresses[i] = fmt.Sprintf("socks5://%s", proxyConfig.LocalAddr)
 	}
 
 	proxiesFunc, errProxies := proxy.RoundRobinProxySwitcher(proxyAddresses...)
