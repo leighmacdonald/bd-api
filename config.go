@@ -6,12 +6,18 @@ import (
 	"os"
 
 	"github.com/armon/go-socks5"
-	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/ssh"
+)
+
+var (
+	errConfigRead            = errors.New("failed to read config file")
+	errConfigDecode          = errors.New("invalid config file format")
+	errConfigSteamKey        = errors.New("failed to set steamid key")
+	errConfigSteamKeyInvalid = errors.New("invalid steam api key [empty]")
 )
 
 type proxyContext struct {
@@ -42,7 +48,7 @@ type appConfig struct {
 func makeSigner(keyPath string) (ssh.Signer, error) { //nolint:ireturn
 	privateKeyBody, errPKBody := os.ReadFile(keyPath)
 	if errPKBody != nil {
-		return nil, errors.Join(errPKBody, domain.ErrSSHPrivateKeyRead)
+		return nil, errors.Join(errPKBody, errSSHPrivateKeyRead)
 	}
 
 	var signer ssh.Signer
@@ -51,14 +57,14 @@ func makeSigner(keyPath string) (ssh.Signer, error) { //nolint:ireturn
 	if keyFound {
 		newSigner, errSigner := ssh.ParsePrivateKeyWithPassphrase(privateKeyBody, []byte(key))
 		if errSigner != nil {
-			return nil, errors.Join(errSigner, domain.ErrSSPPrivateKeyParse)
+			return nil, errors.Join(errSigner, errSSPPrivateKeyParse)
 		}
 
 		signer = newSigner
 	} else {
 		newSigner, errSigner := ssh.ParsePrivateKey(privateKeyBody)
 		if errSigner != nil {
-			return nil, errors.Join(errSigner, domain.ErrSSPPrivateKeyParse)
+			return nil, errors.Join(errSigner, errSSPPrivateKeyParse)
 		}
 
 		signer = newSigner
@@ -79,29 +85,29 @@ func readConfig(config *appConfig) error {
 	viper.AutomaticEnv()
 
 	if errReadConfig := viper.ReadInConfig(); errReadConfig != nil {
-		return errors.Join(errReadConfig, domain.ErrConfigRead)
+		return errors.Join(errReadConfig, errConfigRead)
 	}
 
 	if errUnmarshal := viper.Unmarshal(config); errUnmarshal != nil {
-		return errors.Join(errUnmarshal, domain.ErrConfigDecode)
+		return errors.Join(errUnmarshal, errConfigDecode)
 	}
 
 	if config.SteamAPIKey == "" {
-		return domain.ErrConfigSteamKeyInvalid
+		return errConfigSteamKeyInvalid
 	}
 
 	if errSteam := steamid.SetKey(config.SteamAPIKey); errSteam != nil {
-		return fmt.Errorf("%w: %w", domain.ErrConfigSteamKey, errSteam)
+		return fmt.Errorf("%w: %w", errConfigSteamKey, errSteam)
 	}
 
 	if errSteamWeb := steamweb.SetKey(config.SteamAPIKey); errSteamWeb != nil {
-		return fmt.Errorf("%w: %w", domain.ErrConfigSteamKey, errSteamWeb)
+		return fmt.Errorf("%w: %w", errConfigSteamKey, errSteamWeb)
 	}
 
 	if config.ProxiesEnabled {
 		signer, errSigner := makeSigner(config.PrivateKeyPath)
 		if errSigner != nil {
-			return errors.Join(errSigner, domain.ErrSSHSignerCreate)
+			return errors.Join(errSigner, errSSHSignerCreate)
 		}
 
 		for _, cfg := range config.Proxies {

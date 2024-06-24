@@ -24,12 +24,12 @@ func getRGL(ctx context.Context, log *slog.Logger, sid64 steamid.SteamID) ([]dom
 
 	_, errProfile := rgl.Profile(ctx, client, sid64)
 	if errProfile != nil {
-		return nil, errors.Join(errProfile, domain.ErrRequestPerform)
+		return nil, errors.Join(errProfile, errRequestPerform)
 	}
 
 	teams, errTeams := rgl.ProfileTeams(ctx, client, sid64)
 	if errTeams != nil {
-		return nil, domain.ErrRequestPerform
+		return nil, errRequestPerform
 	}
 
 	seasons := make([]domain.Season, len(teams))
@@ -41,7 +41,7 @@ func getRGL(ctx context.Context, log *slog.Logger, sid64 steamid.SteamID) ([]dom
 		seasonInfo, errSeason := rgl.Season(ctx, client, team.SeasonID)
 
 		if errSeason != nil {
-			return nil, domain.ErrRequestPerform
+			return nil, errRequestPerform
 		}
 
 		season.League = "rgl"

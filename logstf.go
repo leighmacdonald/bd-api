@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 )
 
@@ -27,7 +26,7 @@ func getLogsTF(ctx context.Context, steamid steamid.SteamID) (int64, error) {
 
 	body, errRead := io.ReadAll(resp.Body)
 	if errRead != nil {
-		return 0, errors.Join(errRead, domain.ErrResponseRead)
+		return 0, errors.Join(errRead, errResponseRead)
 	}
 
 	bStr := string(body)
@@ -37,14 +36,14 @@ func getLogsTF(ctx context.Context, steamid steamid.SteamID) (int64, error) {
 
 	match := reLOGSResults.FindStringSubmatch(bStr)
 	if len(match) != expectedMatches {
-		return 0, domain.ErrResponseInvalid
+		return 0, errResponseInvalid
 	}
 
 	value := strings.ReplaceAll(match[1], ",", "")
 
 	count, errParse := strconv.ParseInt(value, 10, 64)
 	if errParse != nil || count <= 0 {
-		return 0, errors.Join(errParse, fmt.Errorf("%w: %s", domain.ErrResponseDecode, match[1]))
+		return 0, errors.Join(errParse, fmt.Errorf("%w: %s", errResponseDecode, match[1]))
 	}
 
 	return count, nil

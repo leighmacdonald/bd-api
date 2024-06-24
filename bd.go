@@ -63,12 +63,6 @@ type BDListEntry struct {
 	UpdatedOn     time.Time
 }
 
-var (
-	errRequestCreate  = errors.New("failed to create request")
-	errRequestPerform = errors.New("failed to perform request")
-	errRequestDecode  = errors.New("failed to decode request")
-)
-
 // fetchList downloads and parses the list defined by BDList and returns the parsed schema object.
 func fetchList(ctx context.Context, client *http.Client, list BDList) (*TF2BDSchema, error) {
 	lCtx, cancel := context.WithTimeout(ctx, time.Second*10)
@@ -91,7 +85,7 @@ func fetchList(ctx context.Context, client *http.Client, list BDList) (*TF2BDSch
 
 	var schema TF2BDSchema
 	if errDecode := json.NewDecoder(resp.Body).Decode(&schema); errDecode != nil {
-		return nil, errRequestDecode
+		return nil, errResponseDecode
 	}
 
 	return &schema, nil
@@ -167,7 +161,7 @@ func updateListEntries(ctx context.Context, database *pgStore, mapping listMappi
 			return errors.Join(err, errPlayerGetOrCreate)
 		}
 		if _, err := database.bdListEntryCreate(ctx, entry); err != nil {
-			if errors.Is(err, errDuplicate) {
+			if errors.Is(err, errDatabaseUnique) {
 				continue
 			}
 			slog.Error("Failed to create list entry", ErrAttr(err))

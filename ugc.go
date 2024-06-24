@@ -15,13 +15,14 @@ import (
 
 const (
 	ugcHLHeader = "TF2 Highlander Medals"
-
 	ugc6sHeader = "TF2 6vs6 Medals"
-
 	ugc4sHeader = "TF2 4vs4 Medals"
 )
 
-var reUGCRank = regexp.MustCompile(`Season (\d+) (\D+) (\S+)`)
+var (
+	reUGCRank          = regexp.MustCompile(`Season (\d+) (\D+) (\S+)`)
+	errGoQueryDocument = errors.New("failed to create document reader")
+)
 
 func getUGC(ctx context.Context, steam steamid.SteamID) ([]domain.Season, error) {
 	resp, err := get(ctx,
@@ -32,14 +33,14 @@ func getUGC(ctx context.Context, steam steamid.SteamID) ([]domain.Season, error)
 
 	body, errRead := io.ReadAll(resp.Body)
 	if errRead != nil {
-		return nil, errors.Join(errRead, domain.ErrResponseRead)
+		return nil, errors.Join(errRead, errResponseRead)
 	}
 
 	defer logCloser(resp.Body)
 
 	seasons, errSeasons := parseUGCRank(string(body))
 	if errSeasons != nil {
-		return seasons, errors.Join(errSeasons, domain.ErrResponseDecode)
+		return seasons, errors.Join(errSeasons, errResponseDecode)
 	}
 
 	return seasons, nil
@@ -48,7 +49,7 @@ func getUGC(ctx context.Context, steam steamid.SteamID) ([]domain.Season, error)
 func parseUGCRank(body string) ([]domain.Season, error) {
 	dom, errReader := goquery.NewDocumentFromReader(strings.NewReader(body))
 	if errReader != nil {
-		return nil, errors.Join(errReader, domain.ErrGoQueryDocument)
+		return nil, errors.Join(errReader, errGoQueryDocument)
 	}
 
 	var seasons []domain.Season

@@ -25,8 +25,9 @@ const (
 )
 
 var (
-	indexTMPL *template.Template
-	encoder   *styleEncoder
+	indexTMPL        *template.Template
+	encoder          *styleEncoder
+	errParseTemplate = errors.New("failed to parse html template")
 )
 
 func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs steamid.Collection) ([]domain.Profile, error) {
@@ -96,7 +97,7 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 	waitGroup.Wait()
 
 	if len(steamIDs) == 0 || len(summaries) == 0 {
-		return nil, domain.ErrDatabaseNoResults
+		return nil, errDatabaseNoResults
 	}
 
 	for _, sid := range steamIDs {
@@ -211,7 +212,7 @@ func initTemplate() error {
 		</html>`)
 
 	if errTmpl != nil {
-		return errors.Join(errTmpl, domain.ErrParseTemplate)
+		return errors.Join(errTmpl, errParseTemplate)
 	}
 
 	indexTMPL = tmplProfiles

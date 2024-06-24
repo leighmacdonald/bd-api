@@ -67,7 +67,7 @@ func newWonderlandTFScraper(cacheDir string) (*sbScraper, error) {
 	transport := newCFTransport()
 
 	if errOpen := transport.Open(context.Background()); errOpen != nil {
-		return nil, errors.Join(errOpen, domain.ErrScrapeCFOpen)
+		return nil, errors.Join(errOpen, errScrapeCFOpen)
 	}
 
 	scraper, errScraper := newScraperWithTransport(cacheDir,

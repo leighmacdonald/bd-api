@@ -15,6 +15,13 @@ import (
 	"github.com/leighmacdonald/steamweb/v2"
 )
 
+var (
+	errSteamBanFetch      = errors.New("failed to fetch steam ban state")
+	errSteamBanDecode     = errors.New("failed to decode steam ban state")
+	errSteamSummaryFetch  = errors.New("failed to fetch steam summary")
+	errSteamSummaryDecode = errors.New("failed to decode steam summary")
+)
+
 type friendMap map[string][]steamweb.Friend
 
 func getSteamFriends(ctx context.Context, cache cache, steamIDs steamid.Collection) friendMap {
@@ -103,13 +110,13 @@ func getSteamBans(ctx context.Context, cache cache, steamIDs steamid.Collection)
 	if len(missed) > 0 {
 		newBans, errBans := steamweb.GetPlayerBans(ctx, missed)
 		if errBans != nil {
-			return nil, errors.Join(errBans, domain.ErrSteamBanFetch)
+			return nil, errors.Join(errBans, errSteamBanFetch)
 		}
 
 		for _, ban := range newBans {
 			body, errMarshal := json.Marshal(ban)
 			if errMarshal != nil {
-				return nil, errors.Join(errMarshal, domain.ErrSteamBanDecode)
+				return nil, errors.Join(errMarshal, errSteamBanDecode)
 			}
 
 			if errSet := cache.set(makeKey(KeyBans, ban.SteamID), bytes.NewReader(body)); errSet != nil {
@@ -215,13 +222,13 @@ func getSteamSummaries(ctx context.Context, cache cache, steamIDs steamid.Collec
 	if len(missed) > 0 {
 		newSummaries, errSummaries := steamweb.PlayerSummaries(ctx, missed)
 		if errSummaries != nil {
-			return nil, errors.Join(errSummaries, domain.ErrSteamSummaryFetch)
+			return nil, errors.Join(errSummaries, errSteamSummaryFetch)
 		}
 
 		for _, summary := range newSummaries {
 			body, errMarshal := json.Marshal(summary)
 			if errMarshal != nil {
-				return nil, errors.Join(errMarshal, domain.ErrSteamSummaryDecode)
+				return nil, errors.Join(errMarshal, errSteamSummaryDecode)
 			}
 
 			if errSet := cache.set(makeKey(KeySummary, summary.SteamID), bytes.NewReader(body)); errSet != nil {

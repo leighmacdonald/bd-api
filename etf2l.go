@@ -95,7 +95,7 @@ func getETF2L(ctx context.Context, sid steamid.SteamID) ([]domain.Season, error)
 	defer logCloser(resp.Body)
 
 	if errUnmarshal := json.NewDecoder(resp.Body).Decode(&player); errUnmarshal != nil {
-		return nil, errors.Join(errUnmarshal, domain.ErrResponseDecode)
+		return nil, errors.Join(errUnmarshal, errResponseDecode)
 	}
 
 	return parseETF2L(player), nil

@@ -30,9 +30,14 @@ var (
 	//go:embed migrations
 	migrations embed.FS
 
-	errDuplicate = errors.New("duplicate entity")
-	errNoRows    = errors.New("no rows")
-	errPing      = errors.New("failed to ping database")
+	errDatabasePing      = errors.New("failed to ping database")
+	errDatabaseDSN       = errors.New("failed to parse database dsn")
+	errDatabaseMigrate   = errors.New("failed to migrate database")
+	errDatabaseConnect   = errors.New("failed to connect to database")
+	errDatabaseUnique    = errors.New("unique record violation")
+	errDatabaseNoResults = errors.New("no results")
+	errDatabaseQuery     = errors.New("query error")
+	errDatabaseInvalidID = errors.New("invalid id")
 )
 
 func newStore(ctx context.Context, dsn string) (*pgStore, error) {
@@ -40,7 +45,7 @@ func newStore(ctx context.Context, dsn string) (*pgStore, error) {
 	cfg, errConfig := pgxpool.ParseConfig(dsn)
 
 	if errConfig != nil {
-		return nil, errors.Join(errConfig, domain.ErrDatabaseDSN)
+		return nil, errors.Join(errConfig, errDatabaseDSN)
 	}
 
 	database := pgStore{
@@ -53,7 +58,7 @@ func newStore(ctx context.Context, dsn string) (*pgStore, error) {
 		if errMigrate.Error() == "no change" {
 			database.log.Debug("Migration at latest version")
 		} else {
-			return nil, errors.Join(errMigrate, domain.ErrDatabaseMigrate)
+			return nil, errors.Join(errMigrate, errDatabaseMigrate)
 		}
 	} else {
 		database.log.Debug("Migration completed successfully")
@@ -61,7 +66,7 @@ func newStore(ctx context.Context, dsn string) (*pgStore, error) {
 
 	dbConn, errConnectConfig := pgxpool.NewWithConfig(ctx, cfg)
 	if errConnectConfig != nil {
-		return nil, errors.Join(errConnectConfig, domain.ErrDatabaseConnect)
+		return nil, errors.Join(errConnectConfig, errDatabaseConnect)
 	}
 
 	database.pool = dbConn
@@ -81,11 +86,11 @@ func (db *pgStore) migrate() error {
 
 	instance, errOpen := sql.Open("pgx", db.dsn)
 	if errOpen != nil {
-		return domain.ErrDatabaseMigrate
+		return errDatabaseMigrate
 	}
 
 	if err := instance.Ping(); err != nil {
-		return errors.Join(err, domain.ErrDatabaseMigrate)
+		return errors.Join(err, errDatabaseMigrate)
 	}
 
 	driver, errMigrate := pgxMigrate.WithInstance(instance, &pgxMigrate.Config{ //nolint:exhaustruct
@@ -95,25 +100,25 @@ func (db *pgStore) migrate() error {
 		MultiStatementEnabled: true,
 	})
 	if errMigrate != nil {
-		return errors.Join(errMigrate, domain.ErrDatabaseMigrate)
+		return errors.Join(errMigrate, errDatabaseMigrate)
 	}
 
 	defer logCloser(driver)
 
 	source, errHTTPFs := httpfs.New(http.FS(migrations), "migrations")
 	if errHTTPFs != nil {
-		return errors.Join(errHTTPFs, domain.ErrDatabaseMigrate)
+		return errors.Join(errHTTPFs, errDatabaseMigrate)
 	}
 
 	migrator, errMigrateInstance := migrate.NewWithInstance("iofs", source, "pgx", driver)
 	if errMigrateInstance != nil {
-		return errors.Join(errMigrateInstance, domain.ErrDatabaseMigrate)
+		return errors.Join(errMigrateInstance, errDatabaseMigrate)
 	}
 
 	errMigration := migrator.Up()
 
 	if errMigration != nil && errMigration.Error() != "no change" {
-		return errors.Join(errMigration, domain.ErrDatabaseMigrate)
+		return errors.Join(errMigration, errDatabaseMigrate)
 	}
 
 	return nil
@@ -511,7 +516,7 @@ func (db *pgStore) playerGetOrCreate(ctx context.Context, sid steamid.SteamID, r
 			&record.LogsTFUpdatedOn, &record.TimeStamped.UpdatedOn, &record.TimeStamped.CreatedOn)
 	if errQuery != nil {
 		wrappedErr := dbErr(errQuery, "Failed to query player")
-		if errors.Is(wrappedErr, errNoRows) {
+		if errors.Is(wrappedErr, errDatabaseNoResults) {
 			return db.playerRecordSave(ctx, record)
 		}
 
@@ -586,7 +591,7 @@ func (db *pgStore) sbSiteGetOrCreate(ctx context.Context, name domain.Site, site
 		QueryRow(ctx, query, args...).
 		Scan(&site.SiteID, &site.Name, &site.UpdatedOn, &site.CreatedOn); errQuery != nil {
 		wrappedErr := dbErr(errQuery, "Failed to query sourcebans site")
-		if errors.Is(wrappedErr, errNoRows) {
+		if errors.Is(wrappedErr, errDatabaseNoResults) {
 			site.Name = name
 
 			return db.sbSiteSave(ctx, site)
@@ -675,13 +680,13 @@ func dbErr(err error, wrapMsg string) error {
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {
 		if pgErr.Code == pgerrcode.UniqueViolation {
-			return errors.Join(errDuplicate, domain.ErrDatabaseUnique)
+			return errors.Join(err, errDatabaseUnique)
 		}
 	} else if errors.Is(err, pgx.ErrNoRows) {
-		return errors.Join(errNoRows, domain.ErrDatabaseNoResults)
+		return errors.Join(err, errDatabaseNoResults)
 	}
 
-	return errors.Join(err, fmt.Errorf("%w: %s", domain.ErrDatabaseQuery, wrapMsg))
+	return errors.Join(err, fmt.Errorf("%w: %s", errDatabaseQuery, wrapMsg))
 }
 
 func (db *pgStore) sbBanSave(ctx context.Context, record *domain.SbBanRecord) error {
@@ -780,7 +785,7 @@ func (db *pgStore) sbGetBansBySID(ctx context.Context, sids steamid.Collection) 
 	}
 
 	if rows.Err() != nil {
-		return nil, errors.Join(rows.Err(), domain.ErrDatabaseQuery)
+		return nil, errors.Join(rows.Err(), errDatabaseQuery)
 	}
 
 	return records, nil
@@ -983,7 +988,7 @@ func (db *pgStore) bdListEntryCreate(ctx context.Context, entry BDListEntry) (BD
 
 func (db *pgStore) bdListEntryDelete(ctx context.Context, entryID int64) error {
 	if entryID <= 0 {
-		return domain.ErrInvalidID
+		return errDatabaseInvalidID
 	}
 
 	query, args, errSQL := sb.

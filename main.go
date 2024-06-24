@@ -26,7 +26,7 @@ func createAppDeps(ctx context.Context) (appConfig, cache, *pgStore, error) {
 		return config, nil, nil, errDB
 	}
 	if err := database.pool.Ping(ctx); err != nil {
-		return config, nil, nil, errors.Join(err, errPing)
+		return config, nil, nil, errors.Join(err, errDatabasePing)
 	}
 
 	return config, cacheHandler, database, nil

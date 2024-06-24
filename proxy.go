@@ -10,9 +10,16 @@ import (
 	"github.com/armon/go-socks5"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/proxy"
-	"github.com/leighmacdonald/bd-api/domain"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/net/context"
+)
+
+var (
+	errSSHDial            = errors.New("failed to dial ssh host")
+	errSSHPrivateKeyRead  = errors.New("cannot read private key")
+	errSSPPrivateKeyParse = errors.New("failed to parse private key")
+	errSSHSignerCreate    = errors.New("failed to setup SSH signer")
+	errSSHProxySwitcher   = errors.New("failed to create proxy round robin switcher")
 )
 
 type proxyManager struct {
@@ -47,7 +54,7 @@ func (p *proxyManager) start(config *appConfig) {
 				Dial: func(ctx context.Context, network string, addr string) (net.Conn, error) {
 					dialedConn, errDial := conn.DialContext(ctx, network, addr)
 					if errDial != nil {
-						return nil, errors.Join(errDial, domain.ErrSSHDial)
+						return nil, errors.Join(errDial, errSSHDial)
 					}
 
 					return dialedConn, nil
@@ -108,7 +115,7 @@ func (p *proxyManager) setup(collector *colly.Collector, config *appConfig) erro
 
 	proxiesFunc, errProxies := proxy.RoundRobinProxySwitcher(proxyAddresses...)
 	if errProxies != nil {
-		return errors.Join(errProxies, domain.ErrProxySwitcher)
+		return errors.Join(errProxies, errSSHProxySwitcher)
 	}
 
 	collector.SetProxyFunc(proxiesFunc)
