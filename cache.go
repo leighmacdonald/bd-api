@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -9,8 +10,8 @@ import (
 	"path"
 	"time"
 
+	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
-	"github.com/pkg/errors"
 )
 
 var errCacheExpired = errors.New("cache expired")
@@ -66,7 +67,7 @@ func newFSCache(cacheDir string) (*fsCache, error) {
 
 	if !exists(cacheDir) {
 		if errMkDir := os.MkdirAll(cacheDir, cachePerms); errMkDir != nil {
-			return nil, errors.Wrap(errMkDir, "Failed to create cache dir")
+			return nil, errors.Join(errMkDir, domain.ErrCacheInit)
 		}
 	}
 
@@ -110,7 +111,7 @@ func (c *fsCache) get(url string) ([]byte, error) {
 
 	body, errRead := io.ReadAll(cachedFile)
 	if errRead != nil {
-		return nil, errors.Wrap(errRead, "Failed to reach cached file")
+		return nil, errors.Join(errRead, domain.ErrCacheRead)
 	}
 
 	return body, nil
@@ -120,19 +121,19 @@ func (c *fsCache) set(key string, reader io.Reader) error {
 	dir, fullPath := c.hashKey(key)
 
 	if errDir := os.MkdirAll(dir, os.ModePerm); errDir != nil {
-		return errors.Wrap(errDir, "Failed to make cache dir")
+		return errors.Join(errDir, domain.ErrCacheInit)
 	}
 
 	outFile, errOF := os.Create(fullPath)
 	if errOF != nil {
-		return errors.Wrap(errOF, "Error creating cache file")
+		return errors.Join(errOF, domain.ErrCacheCreate)
 	}
 
 	defer logCloser(outFile)
 
 	_, errWrite := io.Copy(outFile, reader)
 	if errWrite != nil {
-		return errors.Wrap(errWrite, "Failed to write content to file")
+		return errors.Join(errWrite, domain.ErrCacheWrite)
 	}
 
 	return nil

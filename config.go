@@ -1,13 +1,15 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"os"
 
 	"github.com/armon/go-socks5"
+	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/mitchellh/go-homedir"
-	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/ssh"
 )
@@ -40,7 +42,7 @@ type appConfig struct {
 func makeSigner(keyPath string) (ssh.Signer, error) { //nolint:ireturn
 	privateKeyBody, errPKBody := os.ReadFile(keyPath)
 	if errPKBody != nil {
-		return nil, errors.Wrap(errPKBody, "Cannot read private key")
+		return nil, errors.Join(errPKBody, domain.ErrSSHPrivateKeyRead)
 	}
 
 	var signer ssh.Signer
@@ -49,14 +51,14 @@ func makeSigner(keyPath string) (ssh.Signer, error) { //nolint:ireturn
 	if keyFound {
 		newSigner, errSigner := ssh.ParsePrivateKeyWithPassphrase(privateKeyBody, []byte(key))
 		if errSigner != nil {
-			return nil, errors.Wrap(errSigner, "Failed to parse private key")
+			return nil, errors.Join(errSigner, domain.ErrSSPPrivateKeyParse)
 		}
 
 		signer = newSigner
 	} else {
 		newSigner, errSigner := ssh.ParsePrivateKey(privateKeyBody)
 		if errSigner != nil {
-			return nil, errors.Wrap(errSigner, "Failed to parse private key")
+			return nil, errors.Join(errSigner, domain.ErrSSPPrivateKeyParse)
 		}
 
 		signer = newSigner
@@ -77,29 +79,29 @@ func readConfig(config *appConfig) error {
 	viper.AutomaticEnv()
 
 	if errReadConfig := viper.ReadInConfig(); errReadConfig != nil {
-		return errors.Wrapf(errReadConfig, "Failed to read config file")
+		return errors.Join(errReadConfig, domain.ErrConfigRead)
 	}
 
 	if errUnmarshal := viper.Unmarshal(config); errUnmarshal != nil {
-		return errors.Wrap(errUnmarshal, "Invalid config file format")
+		return errors.Join(errUnmarshal, domain.ErrConfigDecode)
 	}
 
 	if config.SteamAPIKey == "" {
-		return errors.New("Invalid steam api key [empty]")
+		return domain.ErrConfigSteamKeyInvalid
 	}
 
 	if errSteam := steamid.SetKey(config.SteamAPIKey); errSteam != nil {
-		return errors.Errorf("Failed to set steamid key: %v", errSteam)
+		return fmt.Errorf("%w: %w", domain.ErrConfigSteamKey, errSteam)
 	}
 
 	if errSteamWeb := steamweb.SetKey(config.SteamAPIKey); errSteamWeb != nil {
-		return errors.Errorf("Failed to set steamweb key: %v", errSteamWeb)
+		return fmt.Errorf("%w: %w", domain.ErrConfigSteamKey, errSteamWeb)
 	}
 
 	if config.ProxiesEnabled {
 		signer, errSigner := makeSigner(config.PrivateKeyPath)
 		if errSigner != nil {
-			return errors.Wrap(errSigner, "Failed to setup SSH signer")
+			return errors.Join(errSigner, domain.ErrSSHSignerCreate)
 		}
 
 		for _, cfg := range config.Proxies {

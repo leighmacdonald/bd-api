@@ -2,15 +2,15 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"regexp"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/leighmacdonald/bd-api/model"
+	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -23,36 +23,35 @@ const (
 
 var reUGCRank = regexp.MustCompile(`Season (\d+) (\D+) (\S+)`)
 
-func getUGC(ctx context.Context, steam steamid.SteamID) ([]model.Season, error) {
+func getUGC(ctx context.Context, steam steamid.SteamID) ([]domain.Season, error) {
 	resp, err := get(ctx,
 		fmt.Sprintf("https://www.ugcleague.com/players_page.cfm?player_id=%d", steam.Int64()), nil)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Failed to get ugc response: %v", err)
+		return nil, err
 	}
 
 	body, errRead := io.ReadAll(resp.Body)
 	if errRead != nil {
-		return nil, errors.Wrapf(errRead, "Failed to read response body: %v", errRead)
+		return nil, errors.Join(errRead, domain.ErrResponseRead)
 	}
 
 	defer logCloser(resp.Body)
 
 	seasons, errSeasons := parseUGCRank(string(body))
 	if errSeasons != nil {
-		return seasons, errors.Wrapf(errSeasons, "Failed to parse ugc response: %v", errSeasons)
+		return seasons, errors.Join(errSeasons, domain.ErrResponseDecode)
 	}
 
 	return seasons, nil
 }
 
-func parseUGCRank(body string) ([]model.Season, error) {
+func parseUGCRank(body string) ([]domain.Season, error) {
 	dom, errReader := goquery.NewDocumentFromReader(strings.NewReader(body))
-
 	if errReader != nil {
-		return nil, errors.Wrap(errReader, "Failed to create doc reader")
+		return nil, errors.Join(errReader, domain.ErrGoQueryDocument)
 	}
 
-	var seasons []model.Season
+	var seasons []domain.Season
 
 	dom.Find("h5").Each(func(_ int, selection *goquery.Selection) {
 		text := selection.Text()
@@ -72,7 +71,7 @@ func parseUGCRank(body string) ([]model.Season, error) {
 					format = "4s"
 				}
 
-				seasons = append(seasons, model.Season{
+				seasons = append(seasons, domain.Season{
 					League:      "UGC",
 					Division:    curRankStr,
 					DivisionInt: curRank,
@@ -86,7 +85,7 @@ func parseUGCRank(body string) ([]model.Season, error) {
 	return seasons, nil
 }
 
-func parseRankField(field string) (model.Division, string) {
+func parseRankField(field string) (domain.Division, string) {
 	const expectedFieldCount = 4
 
 	info := strings.Split(strings.ReplaceAll(field, "\n\n", ""), "\n")
@@ -96,17 +95,17 @@ func parseRankField(field string) (model.Division, string) {
 	if len(results) == expectedFieldCount {
 		switch results[3] {
 		case "Platinum":
-			return model.UGCRankPlatinum, "platinum"
+			return domain.UGCRankPlatinum, "platinum"
 		case "Gold":
-			return model.UGCRankGold, "gold"
+			return domain.UGCRankGold, "gold"
 		case "Silver":
-			return model.UGCRankSilver, "silver"
+			return domain.UGCRankSilver, "silver"
 		case "Steel":
-			return model.UGCRankSteel, "steel"
+			return domain.UGCRankSteel, "steel"
 		case "Iron":
-			return model.UGCRankIron, "iron"
+			return domain.UGCRankIron, "iron"
 		}
 	}
 
-	return model.UGCRankNone, ""
+	return domain.UGCRankNone, ""
 }

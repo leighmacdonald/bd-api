@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"html/template"
 	"log/slog"
 	"net"
@@ -12,10 +13,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/leighmacdonald/bd-api/model"
+	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -29,12 +29,12 @@ var (
 	encoder   *styleEncoder
 )
 
-func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs steamid.Collection) ([]model.Profile, error) {
+func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs steamid.Collection) ([]domain.Profile, error) {
 	var ( //nolint:prealloc
 		waitGroup  = &sync.WaitGroup{}
 		summaries  []steamweb.PlayerSummary
 		bans       []steamweb.PlayerBanState
-		profiles   []model.Profile
+		profiles   []domain.Profile
 		friends    friendMap
 		sourceBans BanRecordMap
 	)
@@ -96,11 +96,11 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 	waitGroup.Wait()
 
 	if len(steamIDs) == 0 || len(summaries) == 0 {
-		return nil, errors.New("No results fetched")
+		return nil, domain.ErrDatabaseNoResults
 	}
 
 	for _, sid := range steamIDs {
-		var profile model.Profile
+		var profile domain.Profile
 
 		for _, summary := range summaries {
 			if summary.SteamID == sid {
@@ -122,7 +122,7 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 			profile.SourceBans = records
 		} else {
 			// Dont return null json values
-			profile.SourceBans = []model.SbBanRecord{}
+			profile.SourceBans = []domain.SbBanRecord{}
 		}
 
 		if friendsList, ok := friends[sid.String()]; ok {
@@ -131,7 +131,7 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 			profile.Friends = []steamweb.Friend{}
 		}
 
-		profile.Seasons = []model.Season{}
+		profile.Seasons = []domain.Season{}
 		sort.Slice(profile.Seasons, func(i, j int) bool {
 			return profile.Seasons[i].DivisionInt < profile.Seasons[j].DivisionInt
 		})
@@ -211,7 +211,7 @@ func initTemplate() error {
 		</html>`)
 
 	if errTmpl != nil {
-		return errors.Wrap(errTmpl, "Failed to parse html template")
+		return errors.Join(errTmpl, domain.ErrParseTemplate)
 	}
 
 	indexTMPL = tmplProfiles
@@ -262,6 +262,7 @@ func runHTTP(ctx context.Context, router *http.ServeMux, listenAddr string) int 
 	httpServer := newHTTPServer(ctx, router, listenAddr)
 
 	go func() {
+		//goland:noinspection ALL
 		slog.Info("Starting HTTP service", slog.String("address", "http://"+listenAddr))
 		if errServe := httpServer.ListenAndServe(); errServe != nil && !errors.Is(errServe, http.ErrServerClosed) {
 			slog.Error("error trying to shutdown http service", ErrAttr(errServe))

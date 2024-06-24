@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -18,17 +19,12 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/leighmacdonald/bd-api/model"
+	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
-	"github.com/pkg/errors"
 )
 
 var (
-	// ErrNoResult is returned on successful queries which return no rows.
-
-	// ErrDuplicate is returned when a duplicate row result is attempted to be inserted
-	// errDuplicate = errors.New("Duplicate entity")
 	// Use $ for pg based queries.
 	sb = sq.StatementBuilder.PlaceholderFormat(sq.Dollar) //nolint:gochecknoglobals,varnamelen
 	//go:embed migrations
@@ -44,7 +40,7 @@ func newStore(ctx context.Context, dsn string) (*pgStore, error) {
 	cfg, errConfig := pgxpool.ParseConfig(dsn)
 
 	if errConfig != nil {
-		return nil, errors.Errorf("Unable to parse config: %v", errConfig)
+		return nil, errors.Join(errConfig, domain.ErrDatabaseDSN)
 	}
 
 	database := pgStore{
@@ -57,7 +53,7 @@ func newStore(ctx context.Context, dsn string) (*pgStore, error) {
 		if errMigrate.Error() == "no change" {
 			database.log.Debug("Migration at latest version")
 		} else {
-			return nil, errors.Errorf("Could not migrate schema: %v", errMigrate)
+			return nil, errors.Join(errMigrate, domain.ErrDatabaseMigrate)
 		}
 	} else {
 		database.log.Debug("Migration completed successfully")
@@ -65,7 +61,7 @@ func newStore(ctx context.Context, dsn string) (*pgStore, error) {
 
 	dbConn, errConnectConfig := pgxpool.NewWithConfig(ctx, cfg)
 	if errConnectConfig != nil {
-		return nil, errors.Wrap(errConnectConfig, "Failed to connect to database")
+		return nil, errors.Join(errConnectConfig, domain.ErrDatabaseConnect)
 	}
 
 	database.pool = dbConn
@@ -85,11 +81,11 @@ func (db *pgStore) migrate() error {
 
 	instance, errOpen := sql.Open("pgx", db.dsn)
 	if errOpen != nil {
-		return errors.Wrapf(errOpen, "Failed to open database for migration")
+		return domain.ErrDatabaseMigrate
 	}
 
-	if errPing := instance.Ping(); errPing != nil {
-		return errors.Wrapf(errPing, "Cannot migrate, failed to connect to target server")
+	if err := instance.Ping(); err != nil {
+		return errors.Join(err, domain.ErrDatabaseMigrate)
 	}
 
 	driver, errMigrate := pgxMigrate.WithInstance(instance, &pgxMigrate.Config{ //nolint:exhaustruct
@@ -99,32 +95,32 @@ func (db *pgStore) migrate() error {
 		MultiStatementEnabled: true,
 	})
 	if errMigrate != nil {
-		return errors.Wrapf(errMigrate, "failed to create migration driver")
+		return errors.Join(errMigrate, domain.ErrDatabaseMigrate)
 	}
 
 	defer logCloser(driver)
 
 	source, errHTTPFs := httpfs.New(http.FS(migrations), "migrations")
 	if errHTTPFs != nil {
-		return errors.Wrap(errHTTPFs, "Failed to create httpfs for migrations")
+		return errors.Join(errHTTPFs, domain.ErrDatabaseMigrate)
 	}
 
 	migrator, errMigrateInstance := migrate.NewWithInstance("iofs", source, "pgx", driver)
 	if errMigrateInstance != nil {
-		return errors.Wrapf(errMigrateInstance, "Failed to create migrator")
+		return errors.Join(errMigrateInstance, domain.ErrDatabaseMigrate)
 	}
 
 	errMigration := migrator.Up()
 
 	if errMigration != nil && errMigration.Error() != "no change" {
-		return errors.Wrapf(errMigration, "Failed to perform migration")
+		return errors.Join(errMigration, domain.ErrDatabaseMigrate)
 	}
 
 	return nil
 }
 
 type PlayerRecord struct {
-	model.Player
+	domain.Player
 	isNewRecord bool
 }
 
@@ -139,11 +135,11 @@ func (r *PlayerRecord) applyBans(ban steamweb.PlayerBanState) {
 
 	switch ban.EconomyBan {
 	case steamweb.EconBanNone:
-		r.EconomyBanned = model.EconBanNone
+		r.EconomyBanned = domain.EconBanNone
 	case steamweb.EconBanProbation:
-		r.EconomyBanned = model.EconBanProbation
+		r.EconomyBanned = domain.EconBanProbation
 	case steamweb.EconBanBanned:
-		r.EconomyBanned = model.EconBanBanned
+		r.EconomyBanned = domain.EconBanBanned
 	}
 
 	r.UpdatedOn = time.Now()
@@ -173,7 +169,7 @@ func newPlayerRecord(sid64 steamid.SteamID) PlayerRecord {
 	createdOn := time.Now()
 
 	return PlayerRecord{
-		Player: model.Player{
+		Player: domain.Player{
 			SteamID:                  sid64,
 			CommunityVisibilityState: steamweb.VisibilityPrivate,
 			ProfileState:             steamweb.ProfileStateNew,
@@ -196,7 +192,7 @@ func newPlayerRecord(sid64 steamid.SteamID) PlayerRecord {
 			RGLUpdatedOn:             time.Time{},
 			ETF2LUpdatedOn:           time.Time{},
 			LogsTFUpdatedOn:          time.Time{},
-			TimeStamped: model.TimeStamped{
+			TimeStamped: domain.TimeStamped{
 				UpdatedOn: createdOn,
 				CreatedOn: createdOn,
 			},
@@ -261,7 +257,7 @@ func playerVanitySave(ctx context.Context, transaction pgx.Tx, record *PlayerRec
 }
 
 //nolint:dupl
-func (db *pgStore) playerGetNames(ctx context.Context, sid steamid.SteamID) ([]model.PlayerNameRecord, error) {
+func (db *pgStore) playerGetNames(ctx context.Context, sid steamid.SteamID) ([]domain.PlayerNameRecord, error) {
 	query, args, errSQL := sb.
 		Select("name_id", "persona_name", "created_on").
 		From("player_names").
@@ -278,10 +274,10 @@ func (db *pgStore) playerGetNames(ctx context.Context, sid steamid.SteamID) ([]m
 
 	defer rows.Close()
 
-	var records []model.PlayerNameRecord
+	var records []domain.PlayerNameRecord
 
 	for rows.Next() {
-		record := model.PlayerNameRecord{SteamID: sid} //nolint:exhaustruct
+		record := domain.PlayerNameRecord{SteamID: sid} //nolint:exhaustruct
 		if errScan := rows.Scan(&record.NameID, &record.PersonaName, &record.CreatedOn); errScan != nil {
 			return nil, dbErr(errScan, "Failed to scan name record")
 		}
@@ -293,7 +289,7 @@ func (db *pgStore) playerGetNames(ctx context.Context, sid steamid.SteamID) ([]m
 }
 
 //nolint:dupl
-func (db *pgStore) playerGetAvatars(ctx context.Context, sid steamid.SteamID) ([]model.PlayerAvatarRecord, error) {
+func (db *pgStore) playerGetAvatars(ctx context.Context, sid steamid.SteamID) ([]domain.PlayerAvatarRecord, error) {
 	query, args, errSQL := sb.
 		Select("avatar_id", "avatar_hash", "created_on").
 		From("player_avatars").
@@ -310,10 +306,10 @@ func (db *pgStore) playerGetAvatars(ctx context.Context, sid steamid.SteamID) ([
 
 	defer rows.Close()
 
-	var records []model.PlayerAvatarRecord
+	var records []domain.PlayerAvatarRecord
 
 	for rows.Next() {
-		r := model.PlayerAvatarRecord{SteamID: sid} //nolint:exhaustruct
+		r := domain.PlayerAvatarRecord{SteamID: sid} //nolint:exhaustruct
 		if errScan := rows.Scan(&r.AvatarID, &r.AvatarHash, &r.CreatedOn); errScan != nil {
 			return nil, dbErr(errScan, "Failed to scan avatar")
 		}
@@ -324,7 +320,7 @@ func (db *pgStore) playerGetAvatars(ctx context.Context, sid steamid.SteamID) ([
 	return records, nil
 }
 
-func (db *pgStore) playerGetVanityNames(ctx context.Context, sid steamid.SteamID) ([]model.PlayerVanityRecord, error) {
+func (db *pgStore) playerGetVanityNames(ctx context.Context, sid steamid.SteamID) ([]domain.PlayerVanityRecord, error) {
 	query, args, errSQL := sb.
 		Select("vanity_id", "vanity", "created_on").
 		From("player_vanity").
@@ -334,7 +330,7 @@ func (db *pgStore) playerGetVanityNames(ctx context.Context, sid steamid.SteamID
 		return nil, dbErr(errSQL, "Failed to generate query")
 	}
 
-	var records []model.PlayerVanityRecord
+	var records []domain.PlayerVanityRecord
 
 	rows, errQuery := db.pool.Query(ctx, query, args...)
 	if errQuery != nil {
@@ -344,7 +340,7 @@ func (db *pgStore) playerGetVanityNames(ctx context.Context, sid steamid.SteamID
 	defer rows.Close()
 
 	for rows.Next() {
-		r := model.PlayerVanityRecord{SteamID: sid} //nolint:exhaustruct
+		r := domain.PlayerVanityRecord{SteamID: sid} //nolint:exhaustruct
 		if errScan := rows.Scan(&r.VanityID, &r.Vanity, &r.CreatedOn); errScan != nil {
 			return nil, dbErr(errScan, "Failed to scan vanity name")
 		}
@@ -460,23 +456,23 @@ func (db *pgStore) playerRecordSave(ctx context.Context, record *PlayerRecord) e
 // type teamRecord struct {
 //}
 
-func NewSBSite(name model.Site) model.SbSite {
+func NewSBSite(name domain.Site) domain.SbSite {
 	createdOn := time.Now()
 
-	return model.SbSite{
+	return domain.SbSite{
 		SiteID: 0,
 		Name:   name,
-		TimeStamped: model.TimeStamped{
+		TimeStamped: domain.TimeStamped{
 			UpdatedOn: createdOn,
 			CreatedOn: createdOn,
 		},
 	}
 }
 
-func newRecord(site model.SbSite, sid64 steamid.SteamID, personaName string, reason string,
+func newRecord(site domain.SbSite, sid64 steamid.SteamID, personaName string, reason string,
 	timeStamp time.Time, duration time.Duration, perm bool,
-) model.SbBanRecord {
-	return model.SbBanRecord{
+) domain.SbBanRecord {
+	return domain.SbBanRecord{
 		BanID:       0,
 		SiteName:    site.Name,
 		SiteID:      site.SiteID,
@@ -485,7 +481,7 @@ func newRecord(site model.SbSite, sid64 steamid.SteamID, personaName string, rea
 		Reason:      reason,
 		Duration:    duration,
 		Permanent:   perm,
-		TimeStamped: model.TimeStamped{
+		TimeStamped: domain.TimeStamped{
 			UpdatedOn: timeStamp,
 			CreatedOn: timeStamp,
 		},
@@ -576,7 +572,7 @@ func (db *pgStore) playerGetExpiredProfiles(ctx context.Context, limit int) ([]P
 	return records, nil
 }
 
-func (db *pgStore) sbSiteGetOrCreate(ctx context.Context, name model.Site, site *model.SbSite) error {
+func (db *pgStore) sbSiteGetOrCreate(ctx context.Context, name domain.Site, site *domain.SbSite) error {
 	query, args, errSQL := sb.
 		Select("sb_site_id", "name", "updated_on", "created_on").
 		From("sb_site").
@@ -602,7 +598,7 @@ func (db *pgStore) sbSiteGetOrCreate(ctx context.Context, name model.Site, site 
 	return nil
 }
 
-func (db *pgStore) sbSiteSave(ctx context.Context, site *model.SbSite) error {
+func (db *pgStore) sbSiteSave(ctx context.Context, site *domain.SbSite) error {
 	site.UpdatedOn = time.Now()
 
 	if site.SiteID <= 0 {
@@ -641,7 +637,7 @@ func (db *pgStore) sbSiteSave(ctx context.Context, site *model.SbSite) error {
 	return nil
 }
 
-func (db *pgStore) sbSiteGet(ctx context.Context, siteID int, site *model.SbSite) error {
+func (db *pgStore) sbSiteGet(ctx context.Context, siteID int, site *domain.SbSite) error {
 	query, args, errSQL := sb.
 		Select("sb_site_id", "name", "updated_on", "created_on").
 		From("sb_site").
@@ -679,16 +675,16 @@ func dbErr(err error, wrapMsg string) error {
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {
 		if pgErr.Code == pgerrcode.UniqueViolation {
-			return errors.Wrap(errDuplicate, wrapMsg)
+			return errors.Join(errDuplicate, domain.ErrDatabaseUnique)
 		}
 	} else if errors.Is(err, pgx.ErrNoRows) {
-		return errors.Wrap(errNoRows, "")
+		return errors.Join(errNoRows, domain.ErrDatabaseNoResults)
 	}
 
-	return errors.Wrap(err, wrapMsg)
+	return errors.Join(err, fmt.Errorf("%w: %s", domain.ErrDatabaseQuery, wrapMsg))
 }
 
-func (db *pgStore) sbBanSave(ctx context.Context, record *model.SbBanRecord) error {
+func (db *pgStore) sbBanSave(ctx context.Context, record *domain.SbBanRecord) error {
 	record.UpdatedOn = time.Now()
 
 	if record.BanID <= 0 {
@@ -734,7 +730,7 @@ func (db *pgStore) sbBanSave(ctx context.Context, record *model.SbBanRecord) err
 // Turn the saved usec back into seconds.
 const storeDurationSecondMulti = int64(time.Second)
 
-type BanRecordMap map[string][]model.SbBanRecord
+type BanRecordMap map[string][]domain.SbBanRecord
 
 func (db *pgStore) sbGetBansBySID(ctx context.Context, sids steamid.Collection) (BanRecordMap, error) {
 	ids := make([]int64, len(sids))
@@ -763,12 +759,12 @@ func (db *pgStore) sbGetBansBySID(ctx context.Context, sids steamid.Collection) 
 	records := BanRecordMap{}
 
 	for _, sid := range sids {
-		records[sid.String()] = []model.SbBanRecord{}
+		records[sid.String()] = []domain.SbBanRecord{}
 	}
 
 	for rows.Next() {
 		var (
-			bRecord  model.SbBanRecord
+			bRecord  domain.SbBanRecord
 			duration int64
 			sid      int64
 		)
@@ -784,7 +780,7 @@ func (db *pgStore) sbGetBansBySID(ctx context.Context, sids steamid.Collection) 
 	}
 
 	if rows.Err() != nil {
-		return nil, errors.Wrap(rows.Err(), "Rows returned error")
+		return nil, errors.Join(rows.Err(), domain.ErrDatabaseQuery)
 	}
 
 	return records, nil
@@ -987,7 +983,7 @@ func (db *pgStore) bdListEntryCreate(ctx context.Context, entry BDListEntry) (BD
 
 func (db *pgStore) bdListEntryDelete(ctx context.Context, entryID int64) error {
 	if entryID <= 0 {
-		return errors.New("invalid id")
+		return domain.ErrInvalidID
 	}
 
 	query, args, errSQL := sb.

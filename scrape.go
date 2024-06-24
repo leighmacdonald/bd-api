@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -19,9 +20,8 @@ import (
 	"github.com/gocolly/colly/debug"
 	"github.com/gocolly/colly/extensions"
 	"github.com/gocolly/colly/queue"
-	"github.com/leighmacdonald/bd-api/model"
+	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
-	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -39,9 +39,9 @@ func initScrapers(ctx context.Context, database *pgStore, cacheDir string) ([]*s
 
 	for _, scraper := range scrapers {
 		// Attach a site_id to the scraper, so we can keep track of the scrape source
-		var s model.SbSite
+		var s domain.SbSite
 		if errSave := database.sbSiteGetOrCreate(ctx, scraper.name, &s); errSave != nil {
-			return nil, errors.Wrap(errSave, "Database error")
+			return nil, errSave
 		}
 
 		scraper.ID = uint32(s.SiteID)
@@ -162,7 +162,7 @@ func (r *sbRecord) setSteam(value string) {
 
 type sbScraper struct {
 	*colly.Collector
-	name      model.Site
+	name      domain.Site
 	theme     string
 	log       *slog.Logger
 	curPage   int
@@ -225,7 +225,7 @@ func createScrapers(cacheDir string) ([]*sbScraper, error) {
 	}
 
 	if errWait := errGroup.Wait(); errWait != nil {
-		return nil, errors.Wrap(errWait, "Could not initialize all scrapers")
+		return nil, errors.Join(errWait, domain.ErrScrapInit)
 	}
 
 	return scrapers, nil
@@ -259,7 +259,7 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 				continue
 			}
 
-			bRecord := model.SbBanRecord{
+			bRecord := domain.SbBanRecord{
 				BanID:       0,
 				SiteName:    "",
 				SiteID:      int(scraper.ID),
@@ -268,7 +268,7 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 				Reason:      result.Reason,
 				Duration:    result.Length,
 				Permanent:   result.Permanent,
-				TimeStamped: model.TimeStamped{
+				TimeStamped: domain.TimeStamped{
 					UpdatedOn: time.Now(),
 					CreatedOn: result.CreatedOn,
 				},
@@ -350,7 +350,7 @@ func (log *scrapeLogger) Event(event *debug.Event) {
 
 const defaultStartPath = "index.php?p=banlist"
 
-func newScraperWithTransport(cacheDir string, name model.Site,
+func newScraperWithTransport(cacheDir string, name domain.Site,
 	baseURL string, startPath string, parser parserFunc, nextURL nextURLFunc, parseTime parseTimeFunc,
 	transport http.RoundTripper,
 ) (*sbScraper, error) {
@@ -364,7 +364,7 @@ func newScraperWithTransport(cacheDir string, name model.Site,
 	return scraper, nil
 }
 
-func newScraper(cacheDir string, name model.Site, baseURL string,
+func newScraper(cacheDir string, name domain.Site, baseURL string,
 	startPath string, parser parserFunc, nextURL nextURLFunc, parseTime parseTimeFunc,
 ) (*sbScraper, error) {
 	const (
@@ -375,7 +375,7 @@ func newScraper(cacheDir string, name model.Site, baseURL string,
 
 	parsedURL, errURL := url.Parse(baseURL)
 	if errURL != nil {
-		return nil, errors.Wrap(errURL, "Failed to parse base url")
+		return nil, errors.Join(errURL, domain.ErrScrapeURL)
 	}
 
 	logger := slog.With("name", string(name))
@@ -383,7 +383,7 @@ func newScraper(cacheDir string, name model.Site, baseURL string,
 
 	reqQueue, errQueue := queue.New(1, &queue.InMemoryQueueStorage{MaxSize: maxQueueSize})
 	if errQueue != nil {
-		return nil, errors.Wrap(errQueue, "Filed to create queue")
+		return nil, errors.Join(errQueue, domain.ErrScrapeQueueInit)
 	}
 
 	if startPath == "" {
@@ -421,7 +421,7 @@ func newScraper(cacheDir string, name model.Site, baseURL string,
 		DomainGlob:  "*" + parsedURL.Hostname(),
 		RandomDelay: randomDelay,
 	}); errLimit != nil {
-		return nil, errors.Wrap(errLimit, "Failed to set limit")
+		return nil, errors.Join(errLimit, domain.ErrScrapeLimit)
 	}
 
 	scraper.OnError(func(r *colly.Response, err error) {
@@ -438,7 +438,7 @@ func (scraper *sbScraper) url(path string) string {
 func doTimeParse(layout string, timeStr string) (time.Time, error) {
 	parsedTime, errParse := time.Parse(layout, timeStr)
 	if errParse != nil {
-		return time.Time{}, errors.Wrap(errParse, "Failed to parse time value")
+		return time.Time{}, errors.Join(errParse, domain.ErrScrapeParseTime)
 	}
 
 	return parsedTime, nil
@@ -1125,7 +1125,7 @@ func (t *cfTransport) Open(ctx context.Context) error {
 		Set("no-first-run").
 		Launch()
 	if errLauncher != nil {
-		return errors.Wrap(errLauncher, "Failed to setup launcher")
+		return errors.Join(errLauncher, domain.ErrScrapeLauncherInit)
 	}
 
 	t.launchURL = launchURL
@@ -1179,12 +1179,12 @@ func (t *cfTransport) fetch(url string) (*cfResult, error) {
 	}
 
 	if errWait := t.page.WaitStable(t.waitStableTime); errWait != nil {
-		return nil, errors.Wrap(errWait, "Failed to wait for content to load")
+		return nil, errors.Join(errWait, domain.ErrScrapeWait)
 	}
 
 	body, errBody := t.page.HTML()
 	if errBody != nil {
-		return nil, errors.Wrap(errBody, "Failed to read HTML body")
+		return nil, errors.Join(errBody, domain.ErrResponseRead)
 	}
 
 	return &cfResult{page: url, body: body}, nil

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,15 +12,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/leighmacdonald/bd-api/model"
+	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
+
+var errTestContainer = errors.New("failed to bring up test container")
 
 func newTestDB(ctx context.Context) (string, *postgres.PostgresContainer, error) {
 	const testInfo = "bdapi-test"
@@ -36,7 +38,7 @@ func newTestDB(ctx context.Context) (string, *postgres.PostgresContainer, error)
 	)
 
 	if errContainer != nil {
-		return "", nil, errors.Wrap(errContainer, "Failed to bring up test container")
+		return "", nil, errors.Join(errContainer, errTestContainer)
 	}
 
 	port, _ := cont.MappedPort(ctx, "5432")
@@ -251,7 +253,7 @@ func apiTestGetProfile(router *http.ServeMux) func(t *testing.T) {
 		var (
 			sids     = steamid.Collection{testIDb4nny, testIDCamper}
 			path     = fmt.Sprintf("/profile?steamids=%s", SteamIDStringList(sids))
-			profiles []model.Profile
+			profiles []domain.Profile
 			validIDs steamid.Collection
 		)
 
@@ -274,7 +276,7 @@ func apiTestGetProfile(router *http.ServeMux) func(t *testing.T) {
 	}
 }
 
-func createTestSourcebansRecord(t *testing.T, database *pgStore, sid64 steamid.SteamID) model.SbBanRecord {
+func createTestSourcebansRecord(t *testing.T, database *pgStore, sid64 steamid.SteamID) domain.SbBanRecord {
 	t.Helper()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
@@ -287,7 +289,7 @@ func createTestSourcebansRecord(t *testing.T, database *pgStore, sid64 steamid.S
 		t.Error(errPlayer)
 	}
 
-	site := NewSBSite(model.Site(fmt.Sprintf("Test %s", curTime)))
+	site := NewSBSite(domain.Site(fmt.Sprintf("Test %s", curTime)))
 	if errSave := database.sbSiteSave(ctx, &site); errSave != nil {
 		t.Error(errSave)
 	}
@@ -312,7 +314,7 @@ func apiTestGetSourcebans(router *http.ServeMux, database *pgStore) func(t *test
 			t.Parallel()
 
 			var (
-				banRecords []model.SbBanRecord
+				banRecords []domain.SbBanRecord
 				path       = fmt.Sprintf("/sourcebans/%d", recordA.SteamID.Int64())
 			)
 
@@ -343,12 +345,12 @@ func apiTestGetSourcebans(router *http.ServeMux, database *pgStore) func(t *test
 
 			var (
 				steamID    = steamid.RandSID64()
-				banRecords []model.SbBanRecord
+				banRecords []domain.SbBanRecord
 				path       = fmt.Sprintf("/sourcebans/%d", steamID.Int64())
 			)
 
 			require.NoError(t, testReq(t, router, http.MethodGet, path, &banRecords))
-			require.Equal(t, []model.SbBanRecord{}, banRecords)
+			require.Equal(t, []domain.SbBanRecord{}, banRecords)
 		})
 	}
 }

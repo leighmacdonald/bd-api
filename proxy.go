@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"net"
@@ -9,7 +10,7 @@ import (
 	"github.com/armon/go-socks5"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/proxy"
-	"github.com/pkg/errors"
+	"github.com/leighmacdonald/bd-api/domain"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/net/context"
 )
@@ -46,7 +47,7 @@ func (p *proxyManager) start(config *appConfig) {
 				Dial: func(ctx context.Context, network string, addr string) (net.Conn, error) {
 					dialedConn, errDial := conn.DialContext(ctx, network, addr)
 					if errDial != nil {
-						return nil, errors.Wrap(errDial, "Failed to dial network")
+						return nil, errors.Join(errDial, domain.ErrSSHDial)
 					}
 
 					return dialedConn, nil
@@ -107,7 +108,7 @@ func (p *proxyManager) setup(collector *colly.Collector, config *appConfig) erro
 
 	proxiesFunc, errProxies := proxy.RoundRobinProxySwitcher(proxyAddresses...)
 	if errProxies != nil {
-		return errors.Wrap(errProxies, "Failed to create proxy round robin proxy switcher")
+		return errors.Join(errProxies, domain.ErrProxySwitcher)
 	}
 
 	collector.SetProxyFunc(proxiesFunc)

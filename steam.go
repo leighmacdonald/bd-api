@@ -4,15 +4,15 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"sync"
 	"time"
 
-	"github.com/leighmacdonald/bd-api/model"
+	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/rgl"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
-	"github.com/pkg/errors"
 )
 
 type friendMap map[string][]steamweb.Friend
@@ -103,13 +103,13 @@ func getSteamBans(ctx context.Context, cache cache, steamIDs steamid.Collection)
 	if len(missed) > 0 {
 		newBans, errBans := steamweb.GetPlayerBans(ctx, missed)
 		if errBans != nil {
-			return nil, errors.Wrap(errBans, "Failed to fetch ban state")
+			return nil, errors.Join(errBans, domain.ErrSteamBanFetch)
 		}
 
 		for _, ban := range newBans {
 			body, errMarshal := json.Marshal(ban)
 			if errMarshal != nil {
-				return nil, errors.Wrap(errMarshal, "Failed to marshal ban state")
+				return nil, errors.Join(errMarshal, domain.ErrSteamBanDecode)
 			}
 
 			if errSet := cache.set(makeKey(KeyBans, ban.SteamID), bytes.NewReader(body)); errSet != nil {
@@ -123,9 +123,9 @@ func getSteamBans(ctx context.Context, cache cache, steamIDs steamid.Collection)
 	return banStates, nil
 }
 
-func getCompHistory(ctx context.Context, cache cache, steamIDs steamid.Collection) model.CompMap {
+func getCompHistory(ctx context.Context, cache cache, steamIDs steamid.Collection) domain.CompMap {
 	var (
-		results   = model.CompMap{}
+		results   = domain.CompMap{}
 		missed    steamid.Collection
 		startTime = time.Now()
 	)
@@ -215,13 +215,13 @@ func getSteamSummaries(ctx context.Context, cache cache, steamIDs steamid.Collec
 	if len(missed) > 0 {
 		newSummaries, errSummaries := steamweb.PlayerSummaries(ctx, missed)
 		if errSummaries != nil {
-			return nil, errors.Wrap(errSummaries, "Failed to fetch summaries")
+			return nil, errors.Join(errSummaries, domain.ErrSteamSummaryFetch)
 		}
 
 		for _, summary := range newSummaries {
 			body, errMarshal := json.Marshal(summary)
 			if errMarshal != nil {
-				return nil, errors.Wrap(errMarshal, "Failed to marshal friends")
+				return nil, errors.Join(errMarshal, domain.ErrSteamSummaryDecode)
 			}
 
 			if errSet := cache.set(makeKey(KeySummary, summary.SteamID), bytes.NewReader(body)); errSet != nil {
