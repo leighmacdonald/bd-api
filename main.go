@@ -47,6 +47,32 @@ func run(ctx context.Context) int {
 		return 1
 	}
 
+	proxyMgr := newProxyManager()
+	if config.ProxiesEnabled {
+		proxyMgr.start(&config)
+
+		defer proxyMgr.stop()
+	}
+
+	if config.LogstfScraperEnabled {
+		logsScraper, errLogsTF := newLogsTFScraper(config.CacheDir)
+		if errLogsTF != nil {
+			slog.Error("failed to init logstf scraper", ErrAttr(errLogsTF))
+
+			return 1
+		}
+
+		if config.ProxiesEnabled {
+			if errProxies := attachCollectorProxies(logsScraper.Collector, &config); errProxies != nil {
+				slog.Error("Failed to setup proxies", ErrAttr(errProxies))
+
+				return 1
+			}
+		}
+
+		go logsScraper.start(ctx)
+	}
+
 	if config.SourcebansScraperEnabled {
 		scrapers, errScrapers := initScrapers(ctx, database, config.CacheDir)
 		if errScrapers != nil {
@@ -55,17 +81,12 @@ func run(ctx context.Context) int {
 			return 1
 		}
 
-		proxyMgr := newProxyManager()
 		if config.ProxiesEnabled {
-			proxyMgr.start(&config)
-
-			defer proxyMgr.stop()
-
 			for _, scraper := range scrapers {
-				if errProxies := proxyMgr.setup(scraper.Collector, &config); errProxies != nil {
+				if errProxies := attachCollectorProxies(scraper.Collector, &config); errProxies != nil {
 					slog.Error("Failed to setup proxies", ErrAttr(errProxies))
 
-					continue
+					return 1
 				}
 			}
 		}

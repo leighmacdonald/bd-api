@@ -375,15 +375,15 @@ func newScraperWithTransport(cacheDir string, name domain.Site,
 	return scraper, nil
 }
 
+const (
+	randomDelay    = 5 * time.Second
+	maxQueueSize   = 10000
+	requestTimeout = time.Second * 30
+)
+
 func newScraper(cacheDir string, name domain.Site, baseURL string,
 	startPath string, parser parserFunc, nextURL nextURLFunc, parseTime parseTimeFunc,
 ) (*sbScraper, error) {
-	const (
-		randomDelay    = 5 * time.Second
-		maxQueueSize   = 10000
-		requestTimeout = time.Second * 30
-	)
-
 	parsedURL, errURL := url.Parse(baseURL)
 	if errURL != nil {
 		return nil, errors.Join(errURL, errScrapeURL)
@@ -402,7 +402,7 @@ func newScraper(cacheDir string, name domain.Site, baseURL string,
 	}
 
 	collector := colly.NewCollector(
-		colly.UserAgent("bd"),
+		colly.UserAgent("bd-api"),
 		colly.CacheDir(filepath.Join(cacheDir, "scrapers")),
 		colly.Debugger(&debugLogger),
 		colly.AllowedDomains(parsedURL.Hostname()),

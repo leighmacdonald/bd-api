@@ -107,7 +107,7 @@ func (p *proxyManager) stop() {
 	waitGroup.Wait()
 }
 
-func (p *proxyManager) setup(collector *colly.Collector, config *appConfig) error {
+func attachCollectorProxies(collector *colly.Collector, config *appConfig) error {
 	proxyAddresses := make([]string, len(config.Proxies))
 	for i, proxyConfig := range config.Proxies {
 		proxyAddresses[i] = fmt.Sprintf("socks5://%s", proxyConfig.LocalAddr)

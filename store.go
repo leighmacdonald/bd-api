@@ -676,19 +676,6 @@ func (db *pgStore) sbSiteDelete(ctx context.Context, siteID int) error {
 	return nil
 }
 
-func dbErr(err error, wrapMsg string) error {
-	var pgErr *pgconn.PgError
-	if errors.As(err, &pgErr) {
-		if pgErr.Code == pgerrcode.UniqueViolation {
-			return errors.Join(err, errDatabaseUnique)
-		}
-	} else if errors.Is(err, pgx.ErrNoRows) {
-		return errors.Join(err, errDatabaseNoResults)
-	}
-
-	return errors.Join(err, fmt.Errorf("%w: %s", errDatabaseQuery, wrapMsg))
-}
-
 func (db *pgStore) sbBanSave(ctx context.Context, record *domain.SbBanRecord) error {
 	record.UpdatedOn = time.Now()
 
@@ -1006,15 +993,6 @@ func (db *pgStore) bdListEntryDelete(ctx context.Context, entryID int64) error {
 	return nil
 }
 
-func steamIDCollectionToInt64Slice(collection steamid.Collection) []int64 {
-	ids := make([]int64, len(collection))
-	for idx := range collection {
-		ids[idx] = collection[idx].Int64()
-	}
-
-	return ids
-}
-
 type BDSearchResult struct {
 	ListName string      `json:"list_name"`
 	Match    TF2BDPlayer `json:"match"`
@@ -1068,4 +1046,26 @@ func (db *pgStore) bdListSearch(ctx context.Context, collection steamid.Collecti
 	}
 
 	return results, nil
+}
+
+func steamIDCollectionToInt64Slice(collection steamid.Collection) []int64 {
+	ids := make([]int64, len(collection))
+	for idx := range collection {
+		ids[idx] = collection[idx].Int64()
+	}
+
+	return ids
+}
+
+func dbErr(err error, wrapMsg string) error {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		if pgErr.Code == pgerrcode.UniqueViolation {
+			return errors.Join(err, errDatabaseUnique)
+		}
+	} else if errors.Is(err, pgx.ErrNoRows) {
+		return errors.Join(err, errDatabaseNoResults)
+	}
+
+	return errors.Join(err, fmt.Errorf("%w: %s", errDatabaseQuery, wrapMsg))
 }
