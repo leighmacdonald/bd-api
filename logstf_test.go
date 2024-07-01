@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/PuerkitoBio/goquery"
-	"github.com/stretchr/testify/require"
 	"os"
 	"testing"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseLogsTFDuration(t *testing.T) {
@@ -25,7 +26,7 @@ func TestLogsTFDetails(t *testing.T) {
 	doc, err := goquery.NewDocumentFromReader(body)
 	require.NoError(t, err)
 
-	match, errDetails := newDetailsFromDoc(doc)
+	match, errDetails := parseMatchFromDoc(doc.Find("html"))
 	require.NoError(t, errDetails)
 
 	require.Equal(t, "Qixalite Booking: RED vs BLU", match.Title)
@@ -34,7 +35,6 @@ func TestLogsTFDetails(t *testing.T) {
 	require.Equal(t, "2022-02-05 06:39:42 +0000 UTC", match.CreatedOn.String())
 	require.Equal(t, 0, match.ScoreBLU)
 	require.Equal(t, 3, match.ScoreRED)
-
 }
 
 func TestLogsTFDetailsOld(t *testing.T) {

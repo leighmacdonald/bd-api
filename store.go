@@ -1048,6 +1048,218 @@ func (db *pgStore) bdListSearch(ctx context.Context, collection steamid.Collecti
 	return results, nil
 }
 
+func (db *pgStore) insertLogsTF(ctx context.Context, match domain.LogsTFMatch) error {
+	transaction, errBegin := db.pool.Begin(ctx)
+	if errBegin != nil {
+		return dbErr(errBegin, "Failed to start tx")
+	}
+
+	defer func() {
+		if err := transaction.Rollback(ctx); err != nil {
+			slog.Error("failed to rollback logs tx")
+		}
+	}()
+
+	if err := db.insertLogsTFMatch(ctx, transaction, match); err != nil {
+		return err
+	}
+
+	if err := db.insertLogsTFMatchPlayers(ctx, transaction, match.Players); err != nil {
+		return err
+	}
+
+	if err := db.insertLogsTFMatchRounds(ctx, transaction, match.Rounds); err != nil {
+		return err
+	}
+
+	if err := db.insertLogsTFMatchMedics(ctx, transaction, match.Medics); err != nil {
+		return dbErr(err, "Failed to insert logstf player class weapon")
+	}
+
+	if err := transaction.Commit(ctx); err != nil {
+		return dbErr(err, "Failed to commit")
+	}
+
+	return nil
+}
+
+func (db *pgStore) insertLogsTFMatch(ctx context.Context, transaction pgx.Tx, match domain.LogsTFMatch) error {
+	matchQuery, matchArgs, errQuery := sb.Insert("logstf").
+		SetMap(map[string]interface{}{
+			"log_id":     match.LogID,
+			"title":      match.Title,
+			"map":        match.Map,
+			"format":     match.Format,
+			"views":      match.Views,
+			"duration":   match.Duration,
+			"score_red":  match.ScoreRED,
+			"score_blu":  match.ScoreBLU,
+			"created_on": match.CreatedOn,
+		}).ToSql()
+	if errQuery != nil {
+		return dbErr(errQuery, "Failed to build query")
+	}
+
+	if _, err := transaction.Exec(ctx, matchQuery, matchArgs...); err != nil {
+		return dbErr(err, "Failed to insert logstf table")
+	}
+
+	return nil
+}
+
+func (db *pgStore) insertLogsTFMatchPlayers(ctx context.Context, transaction pgx.Tx, players []domain.LogsTFPlayer) error {
+	for _, player := range players {
+		query, args, errQuery := sb.Insert("logstf_player").
+			SetMap(map[string]interface{}{
+				"log_id":        player.LogID,
+				"steam_id":      player.SteamID,
+				"team":          player.Team,
+				"name":          player.Name,
+				"kills":         player.Kills,
+				"assists":       player.Assists,
+				"deaths":        player.Deaths,
+				"damage":        player.Damage,
+				"dpm":           player.DPM,
+				"kad":           player.KAD,
+				"kd":            player.KD,
+				"dt":            player.DamageTaken,
+				"dtm":           player.DTM,
+				"hp":            player.HealthPacks,
+				"bs":            player.Backstabs,
+				"hs":            player.Headshots,
+				"caps":          player.Caps,
+				"healing_taken": player.HealingTaken,
+			}).ToSql()
+		if errQuery != nil {
+			return dbErr(errQuery, "Failed to build query")
+		}
+
+		if _, err := transaction.Exec(ctx, query, args...); err != nil {
+			return dbErr(err, "Failed to insert logstf table")
+		}
+
+		if err := db.insertLogsTFMatchPlayerClasses(ctx, transaction, player); err != nil {
+			return dbErr(err, "Failed to insert logstf player class")
+		}
+
+		if err := db.insertLogsTFMatchPlayerClassWeapon(ctx, transaction, player); err != nil {
+			return dbErr(err, "Failed to insert logstf player class weapon")
+		}
+	}
+
+	return nil
+}
+
+func (db *pgStore) insertLogsTFMatchMedics(ctx context.Context, transaction pgx.Tx, medics []domain.LogsTFMedic) error {
+	for _, medic := range medics {
+		query, args, errQuery := sb.Insert("logstf_player_class").
+			SetMap(map[string]interface{}{
+				"log_id":             medic.LogID,
+				"steam_id":           medic.SteamID,
+				"healing":            medic.Healing,
+				"charges_kritz":      medic.ChargesKritz,
+				"charges_quickfix":   medic.ChargesQuickfix,
+				"charges_medigun":    medic.ChargesMedigun,
+				"charges_vacc":       medic.ChargesVacc,
+				"avg_time_build":     medic.AvgTimeBuild,
+				"avg_time_use":       medic.AvgTimeUse,
+				"near_full_death":    medic.NearFullDeath,
+				"avg_uber_len":       medic.AvgUberLen,
+				"death_after_charge": medic.DeathAfterCharge,
+				"major_adv_lost":     medic.MajorAdvLost,
+				"biggest_adv_lost":   medic.BiggestAdvLost,
+			}).ToSql()
+		if errQuery != nil {
+			return dbErr(errQuery, "Failed to build query")
+		}
+
+		if _, err := transaction.Exec(ctx, query, args...); err != nil {
+			return dbErr(err, "Failed to insert logstf table")
+		}
+	}
+
+	return nil
+}
+
+func (db *pgStore) insertLogsTFMatchPlayerClasses(ctx context.Context, transaction pgx.Tx, player domain.LogsTFPlayer) error {
+	for _, class := range player.Classes {
+		query, args, errQuery := sb.Insert("logstf_player_class").
+			SetMap(map[string]interface{}{
+				"log_id":       player.LogID,
+				"steam_id":     player.SteamID,
+				"player_class": class.Class,
+				"played":       class.Played,
+				"kills":        class.Kills,
+				"assists":      class.Assists,
+				"deaths":       class.Deaths,
+				"damage":       class.Damage,
+			}).ToSql()
+		if errQuery != nil {
+			return dbErr(errQuery, "Failed to build query")
+		}
+
+		if _, err := transaction.Exec(ctx, query, args...); err != nil {
+			return dbErr(err, "Failed to insert logstf table")
+		}
+	}
+
+	return nil
+}
+
+func (db *pgStore) insertLogsTFMatchPlayerClassWeapon(ctx context.Context, transaction pgx.Tx, player domain.LogsTFPlayer) error {
+	for _, class := range player.Classes {
+		for _, classWeapon := range class.Weapons {
+			query, args, errQuery := sb.Insert("logstf_player_class_weapon").
+				SetMap(map[string]interface{}{
+					"log_id":   player.LogID,
+					"steam_id": player.SteamID,
+					"weapon":   classWeapon.Weapon,
+					"kills":    classWeapon.Kills,
+					"damage":   classWeapon.Damage,
+					"accuracy": classWeapon.Accuracy,
+				}).ToSql()
+			if errQuery != nil {
+				return dbErr(errQuery, "Failed to build query")
+			}
+
+			if _, err := transaction.Exec(ctx, query, args...); err != nil {
+				return dbErr(err, "Failed to insert logstf table")
+			}
+		}
+	}
+
+	return nil
+}
+
+func (db *pgStore) insertLogsTFMatchRounds(ctx context.Context, transaction pgx.Tx, rounds []domain.LogsTFRound) error {
+	for _, player := range rounds {
+		query, args, errQuery := sb.Insert("logstf_round").
+			SetMap(map[string]interface{}{
+				"log_id":     player.LogID,
+				"round":      player.Round,
+				"length":     player.Length,
+				"score_blu":  player.ScoreBLU,
+				"score_red":  player.ScoreRED,
+				"kills_blu":  player.KillsBLU,
+				"kills_red":  player.KillsRED,
+				"ubers_blu":  player.UbersBLU,
+				"ubers_red":  player.UbersRED,
+				"damage_blu": player.DamageBLU,
+				"damage_red": player.DamageRED,
+				"midfight":   player.MidFight,
+			}).ToSql()
+		if errQuery != nil {
+			return dbErr(errQuery, "Failed to build query")
+		}
+
+		if _, err := transaction.Exec(ctx, query, args...); err != nil {
+			return dbErr(err, "Failed to insert logstf table")
+		}
+	}
+
+	return nil
+}
+
 func steamIDCollectionToInt64Slice(collection steamid.Collection) []int64 {
 	ids := make([]int64, len(collection))
 	for idx := range collection {

@@ -377,7 +377,7 @@ func newScraperWithTransport(cacheDir string, name domain.Site,
 
 const (
 	randomDelay    = 5 * time.Second
-	maxQueueSize   = 10000
+	maxQueueSize   = 10000000
 	requestTimeout = time.Second * 30
 )
 

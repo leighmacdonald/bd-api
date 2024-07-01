@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/leighmacdonald/bd-api/domain"
 	"io"
 	"log/slog"
 	"path/filepath"
@@ -17,13 +16,17 @@ import (
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/extensions"
 	"github.com/gocolly/colly/queue"
+	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 )
 
 var (
-	reLOGSResults   = regexp.MustCompile(`<p>(\d+|\d+,\d+)\sresults</p>`)
-	errParseLogsRow = errors.New("failed to parse title")
-	errParseAttrs   = errors.New("failed to parse valid attrs")
+	reLOGSResults     = regexp.MustCompile(`<p>(\d+|\d+,\d+)\sresults</p>`)
+	errFindStartID    = errors.New("failed to find start id")
+	errParseStartID   = errors.New("failed to parse start id")
+	errParseDuration  = errors.New("failed to parse duration")
+	errCreateDocument = errors.New("failed to create goquery document")
+	errParseDate      = errors.New("failed to parse logs creation date")
 )
 
 func getLogsTF(ctx context.Context, steamid steamid.SteamID) (int64, error) {
@@ -61,20 +64,10 @@ func getLogsTF(ctx context.Context, steamid steamid.SteamID) (int64, error) {
 	return count, nil
 }
 
-type logTableRow struct {
-	logID   int64
-	title   string
-	mapName string
-	format  string
-	views   int64
-	date    time.Time
-}
-
 type logsTFScraper struct {
 	*colly.Collector
-	log     *slog.Logger
-	curPage int
-	queue   *queue.Queue
+	log   *slog.Logger
+	queue *queue.Queue
 }
 
 func newLogsTFScraper(cacheDir string) (*logsTFScraper, error) {
@@ -95,7 +88,6 @@ func newLogsTFScraper(cacheDir string) (*logsTFScraper, error) {
 
 	scraper := logsTFScraper{
 		Collector: collector,
-		curPage:   1,
 		log:       logger,
 		queue:     reqQueue,
 	}
@@ -108,7 +100,7 @@ func newLogsTFScraper(cacheDir string) (*logsTFScraper, error) {
 
 	if errLimit := scraper.Limit(&colly.LimitRule{ //nolint:exhaustruct
 		DomainGlob:  "*logs.tf",
-		RandomDelay: randomDelay,
+		Parallelism: 1,
 	}); errLimit != nil {
 		return nil, errors.Join(errLimit, errScrapeLimit)
 	}
@@ -140,29 +132,66 @@ func (s logsTFScraper) start(ctx context.Context) {
 func (s logsTFScraper) scrape() {
 	startTime := time.Now()
 
+	stopAt := 3600000
+	start := true
 	s.log.Info("Starting scrape job")
-	s.OnHTML("body", func(element *colly.HTMLElement) {
-		results := s.parse(element.DOM)
-		if results == nil {
-			s.log.Warn("No results parsed")
+	totalCount := 0
+	curCount := 0
+	successCount := 0
+	errorCount := 0
+	skipCount := 0
+	lastCount := time.Now()
+	s.OnHTML("html", func(element *colly.HTMLElement) {
+		if start {
+			start = false
+			// Setup the queue
+			startID, err := getLogsTFStartID(element.DOM)
+			if err != nil {
+				s.log.Error("No log id parsed")
+
+				return
+			}
+
+			for startID > stopAt {
+				if errNext := s.queue.AddURL(fmt.Sprintf("https://logs.tf/%d", startID)); errNext != nil {
+					s.log.Error("failed to add url to queue", ErrAttr(errNext))
+				}
+
+				startID--
+			}
+
+			return
+		}
+		totalCount++
+		curCount++
+		match, errMatch := parseMatchFromDoc(element.DOM)
+		if errMatch != nil {
+			if errors.Is(errMatch, errLogID) || errors.Is(errMatch, errMissingExtended) {
+				skipCount++
+
+				return
+			}
+			errorCount++
+			slog.Error("failed to parse document", slog.Int("log_id", match.LogID), ErrAttr(errMatch))
 
 			return
 		}
 
-		for _, res := range results {
-			s.log.Info(res.date.String())
+		successCount++
+
+		if time.Since(lastCount) > time.Minute {
+			slog.Info("Scrape stats",
+				slog.Int("total", totalCount), slog.Int("per_min", curCount),
+				slog.Int("success", successCount), slog.Int("error", errorCount), slog.Int("skip", skipCount),
+				slog.Int("current_id", match.LogID))
+			curCount = 0
+			lastCount = time.Now()
 		}
 
-		nextPage := s.nextURL(element.DOM)
-		s.log.Info(nextPage)
-		if nextPage != "" {
-			if errNext := s.queue.AddURL(nextPage); errNext != nil {
-				s.log.Error("failed to add url to queue", ErrAttr(errNext))
-			}
-		}
+		slog.Debug("Parsed page", slog.Int("log_id", match.LogID))
 	})
 
-	if errAdd := s.queue.AddURL("https://logs.tf/?p=1"); errAdd != nil {
+	if errAdd := s.queue.AddURL("https://logs.tf"); errAdd != nil {
 		s.log.Error("Failed to add queue error", ErrAttr(errAdd))
 
 		return
@@ -178,115 +207,79 @@ func (s logsTFScraper) scrape() {
 		slog.Duration("duration", time.Since(startTime)))
 }
 
-func (s logsTFScraper) nextURL(doc *goquery.Selection) string {
-	node := doc.Find(".pagination ul li span strong").First()
-	nextPage, err := strconv.ParseInt(node.Text(), 10, 64)
+func getLogsTFStartID(doc *goquery.Selection) (int, error) {
+	idStr, found := doc.Find("table.loglist tbody tr").First().Attr("id")
+	if !found {
+		return 0, errFindStartID
+	}
+
+	id, err := strconv.Atoi(strings.TrimPrefix(idStr, "log_"))
 	if err != nil {
-		return ""
+		return 0, errors.Join(err, errParseStartID)
 	}
 
-	return fmt.Sprintf("https://logs.tf/?p=%d", nextPage+1)
+	return id, nil
 }
 
-func (s logsTFScraper) parse(doc *goquery.Selection) []logTableRow {
-	var results []logTableRow
-
-	doc.Find(".loglist tbody tr").Each(func(_ int, selection *goquery.Selection) {
-		row, errRow := logsTFSelectionToRow(selection)
-		if errRow != nil {
-			s.log.Error("Failed to parse log row", ErrAttr(errRow))
-
-			return
-		}
-		results = append(results, row)
-	})
-
-	return results
-}
-
-func logsTFSelectionToRow(doc *goquery.Selection) (logTableRow, error) {
-	children := doc.Children()
-	title := children.Get(0).FirstChild.Data
-	titleAttrs := children.Get(0).FirstChild.Attr
-
-	if len(titleAttrs) != 1 {
-		return logTableRow{}, errParseAttrs
-	}
-
-	logID, errID := strconv.ParseInt(strings.Replace(titleAttrs[0].Val, "/", "", 1), 10, 64)
-	if errID != nil {
-		return logTableRow{}, errors.Join(errID, errParseLogsRow)
-	}
-
-	var mapName string
-	mapNameChild := children.Get(1)
-	if mapNameChild.FirstChild != nil {
-		mapName = mapNameChild.FirstChild.Data
-	} else {
-		slog.Warn("map name missing")
-	}
-	format := children.Get(2).FirstChild.Data
-
-	views, errViews := strconv.ParseInt(children.Get(3).FirstChild.Data, 10, 64)
-	if errViews != nil {
-		return logTableRow{}, errors.Join(errViews, errParseLogsRow)
-	}
-
-	date := children.Get(4).FirstChild.Data
-
-	// 24-Jun-2024 23:11:13
-	created, errCreated := parseLogsTFDate(date)
-	if errCreated != nil {
-		return logTableRow{}, errors.Join(errCreated, errScrapeParseTime)
-	}
-
-	return logTableRow{
-		logID:   logID,
-		title:   title,
-		mapName: mapName,
-		format:  format,
-		views:   views,
-		date:    created,
-	}, nil
-}
-
-// newDetailsFromDoc will parse the logstf match details page HTML into a domain.LogsTFMatch.
+// parseMatchFromDoc will parse the logstf match details page HTML into a domain.LogsTFMatch.
 //
 // Does not currently parse, and probably won't ever parse these because they are not valuable for our use case:
 // - Individual player class stats weapon details
 // - Notable round events
-// - Player kills vs class table
-func newDetailsFromDoc(doc *goquery.Document) (*domain.LogsTFMatch, error) {
+// - Player kills vs class table.
+func parseMatchFromDoc(doc *goquery.Selection) (*domain.LogsTFMatch, error) {
 	var match domain.LogsTFMatch
 
+	if err := parseLogID(doc, &match); err != nil {
+		return &match, err
+	}
+
 	if err := parseHeader(doc, &match); err != nil {
-		return nil, err
+		return &match, err
 	}
 
 	if err := parseScores(doc, &match); err != nil {
-		return nil, err
+		return &match, err
 	}
 
-	if err := parsePlayers(doc, &match); err != nil {
-		return nil, err
-	}
-
-	if err := parseRounds(doc, &match); err != nil {
-		return nil, err
-	}
-
-	if err := parseMedics(doc, &match); err != nil {
-		return nil, err
-	}
+	parsePlayers(doc, &match)
+	parseRounds(doc, &match)
+	parseMedics(doc, &match)
 
 	return &match, nil
 }
 
-func parseHeader(doc *goquery.Document, match *domain.LogsTFMatch) error {
+var errLogID = errors.New("failed to parse log id")
+
+func parseLogID(doc *goquery.Selection, match *domain.LogsTFMatch) error {
+	attr, ok := doc.Find("meta[property='og:url']").Attr("content")
+	if !ok {
+		return errLogID
+	}
+
+	parts := strings.SplitAfter(attr, "logs.tf/")
+
+	logID, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return errors.Join(err, errLogID)
+	}
+
+	match.LogID = logID
+
+	return nil
+}
+
+var errMissingExtended = errors.New("missing extended stats")
+
+func parseHeader(doc *goquery.Selection, match *domain.LogsTFMatch) error {
 	var err error
 
-	doc.Find("#log-header h3").EachWithBreak(func(i int, selection *goquery.Selection) bool {
-		slog.Info(selection.Text())
+	found := doc.Find(".log-notification")
+	if found.Nodes != nil {
+		return errMissingExtended
+	}
+
+	doc.Find("#log-header h3").EachWithBreak(func(_ int, selection *goquery.Selection) bool {
 		attrID, found := selection.Attr("id")
 		if !found {
 			return false
@@ -300,18 +293,19 @@ func parseHeader(doc *goquery.Document, match *domain.LogsTFMatch) error {
 			dur, errDur := parseLogsTFDuration(selection.Text())
 			if errDur != nil {
 				err = errDur
+
 				return false
 			}
 
 			match.Duration = dur
 		case "log-date":
-			co, errDate := parseLogsTFDate(selection.Text())
+			created, errDate := parseLogsTFDate(selection.Text())
 			if errDate != nil {
 				err = errDate
 
 				return false
 			}
-			match.CreatedOn = co
+			match.CreatedOn = created
 		}
 
 		return true
@@ -320,10 +314,10 @@ func parseHeader(doc *goquery.Document, match *domain.LogsTFMatch) error {
 	return err
 }
 
-func parseScores(doc *goquery.Document, match *domain.LogsTFMatch) error {
+func parseScores(doc *goquery.Selection, match *domain.LogsTFMatch) error {
 	var err error
-	doc.Find("#log-score h1").EachWithBreak(func(i int, selection *goquery.Selection) bool {
-		if i == 1 {
+	doc.Find("#log-score h1").EachWithBreak(func(idx int, selection *goquery.Selection) bool {
+		if idx == 1 {
 			score, errScore := strconv.Atoi(selection.Text())
 			if errScore != nil {
 				err = errScore
@@ -332,7 +326,7 @@ func parseScores(doc *goquery.Document, match *domain.LogsTFMatch) error {
 			}
 
 			match.ScoreBLU = score
-		} else if i == 2 {
+		} else if idx == 2 {
 			score, errScore := strconv.Atoi(selection.Text())
 			if errScore != nil {
 				err = errScore
@@ -348,10 +342,8 @@ func parseScores(doc *goquery.Document, match *domain.LogsTFMatch) error {
 	return err
 }
 
-func parsePlayers(doc *goquery.Document, match *domain.LogsTFMatch) error {
-	var err error
-
-	doc.Find("#players tbody tr").EachWithBreak(func(i int, selection *goquery.Selection) bool {
+func parsePlayers(doc *goquery.Selection, match *domain.LogsTFMatch) {
+	doc.Find("#players tbody tr").EachWithBreak(func(_ int, selection *goquery.Selection) bool {
 		var player domain.LogsTFPlayer
 		playerID, found := selection.Attr("id")
 		if !found {
@@ -425,8 +417,6 @@ func parsePlayers(doc *goquery.Document, match *domain.LogsTFMatch) error {
 
 		return true
 	})
-
-	return err
 }
 
 func stringToClass(name string) domain.PlayerClass {
@@ -456,7 +446,7 @@ func stringToClass(name string) domain.PlayerClass {
 }
 
 func parseClassStats(sel *goquery.Selection, player *domain.LogsTFPlayer) {
-	sel.Find("i").EachWithBreak(func(i int, selection *goquery.Selection) bool {
+	sel.Find("i").EachWithBreak(func(_ int, selection *goquery.Selection) bool {
 		content, found := selection.Attr("data-content")
 		if !found {
 			return false
@@ -479,55 +469,59 @@ func parseClassStats(sel *goquery.Selection, player *domain.LogsTFPlayer) {
 }
 
 func stringToIntWithDefault(value string) int {
-	v, err := strconv.Atoi(value)
+	intVal, err := strconv.Atoi(value)
 	if err != nil {
 		slog.Warn("Failed to parse int string", ErrAttr(err))
+
 		return 0
 	}
 
-	return v
+	return intVal
 }
 
 func stringToInt64WithDefault(value string) int64 {
-	v, err := strconv.ParseInt(value, 10, 64)
+	intVal, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
-		slog.Warn("Failed to parse int string", ErrAttr(err))
+		slog.Warn("Failed to parse int64 string", ErrAttr(err))
+
 		return 0
 	}
 
-	return v
+	return intVal
 }
 
 func stringToFloatWithDefault(value string) float32 {
-	v, err := strconv.ParseFloat(value, 32)
+	floatVal, err := strconv.ParseFloat(value, 32)
 	if err != nil {
-		slog.Warn("Failed to parse int string", ErrAttr(err))
+		slog.Warn("Failed to parse float string", ErrAttr(err))
+
 		return 0
 	}
 
-	return float32(v)
+	return float32(floatVal)
 }
 
 func parseClass(body string, class *domain.LogsTFPlayerClass) error {
 	selection, err := goquery.NewDocumentFromReader(strings.NewReader(body))
 	if err != nil {
-		return err
+		return errors.Join(err, errCreateDocument)
 	}
 
 	selection.Find("table tbody").EachWithBreak(func(tableIdx int, selection *goquery.Selection) bool {
-		selection.Find("tr").Each(func(i int, selection *goquery.Selection) {
+		selection.Find("tr").Each(func(_ int, selection *goquery.Selection) {
 			selection.Find("td").EachWithBreak(func(i int, selection *goquery.Selection) bool {
 				value := selection.Text()
 				// Parse the first overall table
 				if tableIdx == 0 {
 					switch i {
 					case 0:
-						d, errDur := parseLogsTFDuration(value)
+						duration, errDur := parseLogsTFDuration(value)
 						if errDur != nil {
 							err = errDur
+
 							return false
 						}
-						class.Played = d
+						class.Played = duration
 					case 1:
 						class.Kills = stringToIntWithDefault(value)
 					case 2:
@@ -537,9 +531,10 @@ func parseClass(body string, class *domain.LogsTFPlayerClass) error {
 					case 4:
 						class.Damage = stringToIntWithDefault(value)
 					}
-				} else {
-					// Parse the weapons
 				}
+				// else {
+				//	// Parse the weapons
+				// }
 
 				return true
 			})
@@ -551,9 +546,8 @@ func parseClass(body string, class *domain.LogsTFPlayerClass) error {
 	return err
 }
 
-func parseRounds(selection *goquery.Document, match *domain.LogsTFMatch) error {
-
-	selection.Find("#log-section-rounds .round_row").EachWithBreak(func(i int, selection *goquery.Selection) bool {
+func parseRounds(doc *goquery.Selection, match *domain.LogsTFMatch) {
+	doc.Find("#log-section-rounds .round_row").EachWithBreak(func(_ int, selection *goquery.Selection) bool {
 		var round domain.LogsTFRound
 
 		selection.Find("td").EachWithBreak(func(i int, selection *goquery.Selection) bool {
@@ -564,6 +558,7 @@ func parseRounds(selection *goquery.Document, match *domain.LogsTFMatch) error {
 				dur, errDur := parseLogsTFDuration(selection.Text())
 				if errDur != nil {
 					slog.Error("Failed to parse round time", ErrAttr(errDur))
+
 					return false
 				}
 				round.Length = dur
@@ -571,6 +566,7 @@ func parseRounds(selection *goquery.Document, match *domain.LogsTFMatch) error {
 				parts := strings.SplitN(selection.Text(), " - ", 2)
 				if len(parts) != 2 {
 					slog.Error("Failed to parse round scores")
+
 					return false
 				}
 
@@ -591,23 +587,22 @@ func parseRounds(selection *goquery.Document, match *domain.LogsTFMatch) error {
 				match.Rounds = append(match.Rounds, round)
 				round = domain.LogsTFRound{}
 			}
+
 			return true
 		})
+
 		return true
 	})
-	return nil
 }
 
 var (
-	healingRx = regexp.MustCompile("(\\d+)\\s\\((\\d+)/m\\)")
-	medigunRx = regexp.MustCompile("(.+?):\\s(\\d+)\\s")
+	healingRx = regexp.MustCompile(`(\d+)\s\((\d+)/m\)`)
+	medigunRx = regexp.MustCompile(`(.+?):\s(\d+)\s`)
 )
 
-func parseMedics(doc *goquery.Document, match *domain.LogsTFMatch) error {
-	var err error
-
+func parseMedics(doc *goquery.Selection, match *domain.LogsTFMatch) {
 	parent := doc.Find("#log-section-healspread")
-	parent.Find(".healtable").Each(func(i int, selection *goquery.Selection) {
+	parent.Find(".healtable").Each(func(_ int, selection *goquery.Selection) {
 		medic := domain.LogsTFMedic{LogID: match.LogID}
 
 		playerName := selection.Find("h6").Text()
@@ -619,8 +614,8 @@ func parseMedics(doc *goquery.Document, match *domain.LogsTFMatch) error {
 
 		var curField string
 
-		selection.Find(".medstats td").EachWithBreak(func(i int, selection *goquery.Selection) bool {
-			if i%2 == 0 {
+		selection.Find(".medstats td").EachWithBreak(func(idx int, selection *goquery.Selection) bool {
+			if idx%2 == 0 {
 				curField = strings.ToLower(selection.Text())
 			} else {
 				switch curField {
@@ -634,7 +629,7 @@ func parseMedics(doc *goquery.Document, match *domain.LogsTFMatch) error {
 					medic.Healing = stringToInt64WithDefault(parts[1])
 					medic.HealingPerMin = stringToIntWithDefault(parts[2])
 				case "charges":
-					selection.Find("li").EachWithBreak(func(i int, selection *goquery.Selection) bool {
+					selection.Find("li").EachWithBreak(func(_ int, selection *goquery.Selection) bool {
 						parts := medigunRx.FindStringSubmatch(selection.Text())
 						if len(parts) != 3 {
 							return false
@@ -649,6 +644,9 @@ func parseMedics(doc *goquery.Document, match *domain.LogsTFMatch) error {
 						case "vaccinator":
 							medic.ChargesKritz = stringToIntWithDefault(parts[2])
 						default:
+							if parts[1] == "Unknown" {
+								return false
+							}
 							panic(parts)
 						}
 
@@ -676,29 +674,40 @@ func parseMedics(doc *goquery.Document, match *domain.LogsTFMatch) error {
 			return true
 		})
 
-		selection.Find(".healsort").EachWithBreak(func(i int, selection *goquery.Selection) bool {
-			return true
-		})
+		//
+		// selection.Find(".healsort").EachWithBreak(func(i int, selection *goquery.Selection) bool {
+		//	// TODO... maybe?
+		//	return true
+		// })
 
 		match.Medics = append(match.Medics, medic)
 	})
-
-	return err
 }
 
 // 16:56
 func parseLogsTFDuration(d string) (time.Duration, error) {
 	durString := strings.Replace(d, ":", "m", 1) + "s"
-	return time.ParseDuration(durString)
+
+	dur, err := time.ParseDuration(durString)
+	if err != nil {
+		return 0, errors.Join(err, errParseDuration)
+	}
+
+	return dur, nil
 }
 
-// 05-Feb-2022 06:39:42
+// 05-Feb-2022 06:39:42.
 func parseLogsTFDate(d string) (time.Time, error) {
-	return time.Parse("02-Jan-2006 15:04:05", d)
+	date, err := time.Parse("02-Jan-2006 15:04:05", d)
+	if err != nil {
+		return time.Time{}, errors.Join(err, errParseDate)
+	}
+
+	return date, nil
 }
 
 func parseLogsTFDurationMedicInt(value string) time.Duration {
-	seconds, err := strconv.Atoi(strings.Replace(value, " s", "", -1))
+	seconds, err := strconv.Atoi(strings.ReplaceAll(value, " s", ""))
 	if err != nil {
 		slog.Error("Failed to parse medic duration", slog.String("value", value))
 
@@ -709,7 +718,7 @@ func parseLogsTFDurationMedicInt(value string) time.Duration {
 }
 
 func parseLogsTFDurationMedicFloat(value string) time.Duration {
-	seconds, err := strconv.ParseFloat(strings.Replace(value, " s", "", -1), 10)
+	seconds, err := strconv.ParseFloat(strings.ReplaceAll(value, " s", ""), 32)
 	if err != nil {
 		slog.Error("Failed to parse medic duration", slog.String("value", value))
 

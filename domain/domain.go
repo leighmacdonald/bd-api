@@ -307,6 +307,7 @@ type LogsTFPlayer struct {
 }
 
 type LogsTFRound struct {
+	LogID     int
 	Round     int
 	Length    time.Duration
 	ScoreBLU  int
@@ -321,6 +322,8 @@ type LogsTFRound struct {
 }
 
 type LogsTFPlayerClass struct {
+	LogID   int
+	SteamID steamid.SteamID
 	Class   PlayerClass
 	Played  time.Duration
 	Kills   int
@@ -331,6 +334,8 @@ type LogsTFPlayerClass struct {
 }
 
 type LogsTFPlayerClassWeapon struct {
+	LogID    int
+	SteamID  steamid.SteamID
 	Weapon   string
 	Kills    int
 	Damage   int
