@@ -375,15 +375,14 @@ func newScraperWithTransport(cacheDir string, name domain.Site,
 	return scraper, nil
 }
 
+const (
+	randomDelay    = 5 * time.Second
+	requestTimeout = time.Second * 30
+)
+
 func newScraper(cacheDir string, name domain.Site, baseURL string,
 	startPath string, parser parserFunc, nextURL nextURLFunc, parseTime parseTimeFunc,
 ) (*sbScraper, error) {
-	const (
-		randomDelay    = 5 * time.Second
-		maxQueueSize   = 10000
-		requestTimeout = time.Second * 30
-	)
-
 	parsedURL, errURL := url.Parse(baseURL)
 	if errURL != nil {
 		return nil, errors.Join(errURL, errScrapeURL)
@@ -392,7 +391,7 @@ func newScraper(cacheDir string, name domain.Site, baseURL string,
 	logger := slog.With("name", string(name))
 	debugLogger := scrapeLogger{logger: logger} //nolint:exhaustruct
 
-	reqQueue, errQueue := queue.New(1, &queue.InMemoryQueueStorage{MaxSize: maxQueueSize})
+	reqQueue, errQueue := queue.New(1, &queue.InMemoryQueueStorage{})
 	if errQueue != nil {
 		return nil, errors.Join(errQueue, errScrapeQueueInit)
 	}
@@ -402,7 +401,7 @@ func newScraper(cacheDir string, name domain.Site, baseURL string,
 	}
 
 	collector := colly.NewCollector(
-		colly.UserAgent("bd"),
+		colly.UserAgent("bd-api"),
 		colly.CacheDir(filepath.Join(cacheDir, "scrapers")),
 		colly.Debugger(&debugLogger),
 		colly.AllowedDomains(parsedURL.Hostname()),
@@ -431,6 +430,7 @@ func newScraper(cacheDir string, name domain.Site, baseURL string,
 	if errLimit := scraper.Limit(&colly.LimitRule{ //nolint:exhaustruct
 		DomainGlob:  "*" + parsedURL.Hostname(),
 		RandomDelay: randomDelay,
+		Delay:       time.Second,
 	}); errLimit != nil {
 		return nil, errors.Join(errLimit, errScrapeLimit)
 	}

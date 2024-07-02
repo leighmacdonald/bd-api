@@ -244,3 +244,120 @@ type Season struct {
 }
 
 type CompMap map[steamid.SteamID][]Season
+
+type LogsTFMatch struct {
+	LogID        int           `json:"log_id"`
+	Title        string        `json:"title"`
+	Map          string        `json:"map"`
+	Format       string        `json:"format"`
+	Views        int           `json:"views"`
+	Duration     time.Duration `json:"duration"`
+	ScoreRED     int           `json:"score_red"`
+	ScoreBLU     int           `json:"score_blu"`
+	CreatedOn    time.Time     `json:"created_on"`
+	LogFormatOld bool
+
+	Rounds  []LogsTFRound
+	Players []LogsTFPlayer
+	Medics  []LogsTFMedic
+}
+
+type PlayerClass int
+
+const (
+	Spectator PlayerClass = iota
+	Scout
+	Soldier
+	Pyro
+	Demo
+	Heavy
+	Engineer
+	Medic
+	Sniper
+	Spy
+)
+
+type Team int
+
+const (
+	RED Team = 3
+	BLU Team = 4
+)
+
+type LogsTFPlayer struct {
+	LogID        int                 `json:"log_id"`
+	SteamID      steamid.SteamID     `json:"steam_id"`
+	Team         Team                `json:"team"`
+	Name         string              `json:"name"`
+	Classes      []LogsTFPlayerClass `json:"classes"`
+	Kills        int                 `json:"kills"`
+	Assists      int                 `json:"assists"`
+	Deaths       int                 `json:"deaths"`
+	Damage       int64               `json:"damage"`
+	DPM          int                 `json:"dpm"`
+	KAD          float32             `json:"kad"`
+	KD           float32             `json:"kd"`
+	DamageTaken  int                 `json:"damage_taken"`
+	DTM          int                 `json:"dtm"`
+	HealthPacks  int                 `json:"health_packs"`
+	Backstabs    int                 `json:"backstabs"`
+	Headshots    int                 `json:"headshots"`
+	Airshots     int                 `json:"airshots"`
+	Caps         int                 `json:"caps"`
+	HealingTaken int                 `json:"healing_taken"`
+}
+
+type LogsTFRound struct {
+	LogID     int
+	Round     int
+	Length    time.Duration
+	ScoreBLU  int
+	ScoreRED  int
+	KillsBLU  int
+	KillsRED  int
+	UbersBLU  int
+	UbersRED  int
+	DamageBLU int
+	DamageRED int
+	MidFight  Team
+}
+
+type LogsTFPlayerClass struct {
+	LogID   int
+	SteamID steamid.SteamID
+	Class   PlayerClass
+	Played  time.Duration
+	Kills   int
+	Assists int
+	Deaths  int
+	Damage  int
+	Weapons []LogsTFPlayerClassWeapon
+}
+
+type LogsTFPlayerClassWeapon struct {
+	LogID    int
+	SteamID  steamid.SteamID
+	Weapon   string
+	Kills    int
+	Damage   int
+	Accuracy int
+}
+
+type LogsTFMedic struct {
+	LogID            int             `json:"log_id"`
+	SteamID          steamid.SteamID `json:"steam_id"`
+	Healing          int64           `json:"healing"`
+	HealingPerMin    int             `json:"healing_per_min"`
+	ChargesKritz     int             `json:"charges_kritz"`
+	ChargesQuickfix  int             `json:"charges_quickfix"`
+	ChargesMedigun   int             `json:"charges_medigun"`
+	ChargesVacc      int             `json:"charges_vacc"`
+	Drops            int             `json:"drops"`
+	AvgTimeBuild     time.Duration   `json:"avg_time_build"`
+	AvgTimeUse       time.Duration   `json:"avg_time_use"`
+	NearFullDeath    int             `json:"near_full_death"`
+	AvgUberLen       time.Duration   `json:"avg_uber_len"`
+	DeathAfterCharge int             `json:"death_after_charge"`
+	MajorAdvLost     int             `json:"major_adv_lost"`
+	BiggestAdvLost   time.Duration   `json:"biggest_adv_lost"`
+}
