@@ -377,7 +377,6 @@ func newScraperWithTransport(cacheDir string, name domain.Site,
 
 const (
 	randomDelay    = 5 * time.Second
-	maxQueueSize   = 10000000
 	requestTimeout = time.Second * 30
 )
 
@@ -392,7 +391,7 @@ func newScraper(cacheDir string, name domain.Site, baseURL string,
 	logger := slog.With("name", string(name))
 	debugLogger := scrapeLogger{logger: logger} //nolint:exhaustruct
 
-	reqQueue, errQueue := queue.New(1, &queue.InMemoryQueueStorage{MaxSize: maxQueueSize})
+	reqQueue, errQueue := queue.New(1, &queue.InMemoryQueueStorage{})
 	if errQueue != nil {
 		return nil, errors.Join(errQueue, errScrapeQueueInit)
 	}
@@ -431,6 +430,7 @@ func newScraper(cacheDir string, name domain.Site, baseURL string,
 	if errLimit := scraper.Limit(&colly.LimitRule{ //nolint:exhaustruct
 		DomainGlob:  "*" + parsedURL.Hostname(),
 		RandomDelay: randomDelay,
+		Delay:       time.Second,
 	}); errLimit != nil {
 		return nil, errors.Join(errLimit, errScrapeLimit)
 	}

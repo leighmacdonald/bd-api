@@ -359,7 +359,7 @@ func (db *pgStore) playerGetVanityNames(ctx context.Context, sid steamid.SteamID
 func (db *pgStore) playerRecordSave(ctx context.Context, record *PlayerRecord) error {
 	success := false
 
-	transaction, errTx := db.pool.BeginTx(ctx, pgx.TxOptions{}) //nolint:exhaustruct
+	transaction, errTx := db.pool.Begin(ctx) //nolint:exhaustruct
 	if errTx != nil {
 		return dbErr(errTx, "Failed to start transaction")
 	}
@@ -1048,7 +1048,21 @@ func (db *pgStore) bdListSearch(ctx context.Context, collection steamid.Collecti
 	return results, nil
 }
 
-func (db *pgStore) insertLogsTF(ctx context.Context, match domain.LogsTFMatch) error {
+func (db *pgStore) insertLogsTF(ctx context.Context, match *domain.LogsTFMatch) error {
+	// Ensure  player FK's exist
+	for _, player := range match.Players {
+		playerRecord := PlayerRecord{
+			Player: domain.Player{
+				SteamID:     player.SteamID,
+				PersonaName: player.Name,
+			},
+			isNewRecord: true,
+		}
+		if err := db.playerGetOrCreate(ctx, player.SteamID, &playerRecord); err != nil {
+			return err
+		}
+	}
+
 	transaction, errBegin := db.pool.Begin(ctx)
 	if errBegin != nil {
 		return dbErr(errBegin, "Failed to start tx")
@@ -1056,7 +1070,9 @@ func (db *pgStore) insertLogsTF(ctx context.Context, match domain.LogsTFMatch) e
 
 	defer func() {
 		if err := transaction.Rollback(ctx); err != nil {
-			slog.Error("failed to rollback logs tx")
+			if !errors.Is(err, pgx.ErrTxClosed) {
+				slog.Error("failed to rollback logs tx", ErrAttr(err))
+			}
 		}
 	}()
 
@@ -1083,7 +1099,7 @@ func (db *pgStore) insertLogsTF(ctx context.Context, match domain.LogsTFMatch) e
 	return nil
 }
 
-func (db *pgStore) insertLogsTFMatch(ctx context.Context, transaction pgx.Tx, match domain.LogsTFMatch) error {
+func (db *pgStore) insertLogsTFMatch(ctx context.Context, transaction pgx.Tx, match *domain.LogsTFMatch) error {
 	matchQuery, matchArgs, errQuery := sb.Insert("logstf").
 		SetMap(map[string]interface{}{
 			"log_id":     match.LogID,
@@ -1152,7 +1168,7 @@ func (db *pgStore) insertLogsTFMatchPlayers(ctx context.Context, transaction pgx
 
 func (db *pgStore) insertLogsTFMatchMedics(ctx context.Context, transaction pgx.Tx, medics []domain.LogsTFMedic) error {
 	for _, medic := range medics {
-		query, args, errQuery := sb.Insert("logstf_player_class").
+		query, args, errQuery := sb.Insert("logstf_medic").
 			SetMap(map[string]interface{}{
 				"log_id":             medic.LogID,
 				"steam_id":           medic.SteamID,

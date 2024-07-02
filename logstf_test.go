@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/leighmacdonald/bd-api/domain"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -35,6 +37,76 @@ func TestLogsTFDetails(t *testing.T) {
 	require.Equal(t, "2022-02-05 06:39:42 +0000 UTC", match.CreatedOn.String())
 	require.Equal(t, 0, match.ScoreBLU)
 	require.Equal(t, 3, match.ScoreRED)
+	require.Len(t, match.Players, 19)
+	require.EqualValues(t, domain.LogsTFPlayer{
+		LogID:   3124689,
+		SteamID: steamid.New(76561198164892406),
+		Team:    domain.BLU,
+		Name:    "var",
+		Classes: []domain.LogsTFPlayerClass{
+			{
+				LogID:   3124689,
+				SteamID: steamid.New(76561198164892406),
+				Class:   domain.Scout,
+				Played:  1016000000000,
+				Kills:   12,
+				Assists: 10,
+				Deaths:  14,
+				Damage:  5078,
+				Weapons: nil,
+			},
+		},
+		Kills:        12,
+		Assists:      10,
+		Deaths:       14,
+		Damage:       5078,
+		DPM:          299,
+		KAD:          1.6,
+		KD:           0.9,
+		DamageTaken:  5399,
+		DTM:          318,
+		HealthPacks:  16,
+		Backstabs:    0,
+		Headshots:    0,
+		Airshots:     0,
+		Caps:         3,
+		HealingTaken: 0,
+	}, match.Players[0])
+	require.Len(t, match.Medics, 2)
+	require.EqualValues(t, domain.LogsTFMedic{
+		LogID:            3124689,
+		SteamID:          steamid.New(76561198113244106),
+		Healing:          17368,
+		HealingPerMin:    1025,
+		ChargesKritz:     0,
+		ChargesQuickfix:  0,
+		ChargesMedigun:   4,
+		ChargesVacc:      0,
+		Drops:            2,
+		AvgTimeBuild:     42000000000,
+		AvgTimeUse:       28000000000,
+		NearFullDeath:    1,
+		AvgUberLen:       7000000000,
+		DeathAfterCharge: 0,
+		MajorAdvLost:     1,
+		BiggestAdvLost:   39000000000,
+	}, match.Medics[0])
+
+	require.Len(t, match.Rounds, 3)
+	require.EqualValues(t, domain.LogsTFRound{
+		LogID:     3124689,
+		Round:     3,
+		Length:    325000000000,
+		ScoreBLU:  0,
+		ScoreRED:  3,
+		KillsBLU:  34,
+		KillsRED:  46,
+		UbersBLU:  1,
+		UbersRED:  1,
+		DamageBLU: 15258,
+		DamageRED: 12677,
+		MidFight:  domain.RED,
+	}, match.Rounds[2])
 }
 
 func TestLogsTFDetailsOld(t *testing.T) {

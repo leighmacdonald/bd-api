@@ -55,7 +55,7 @@ func run(ctx context.Context) int {
 	}
 
 	if config.LogstfScraperEnabled {
-		logsScraper, errLogsTF := newLogsTFScraper(config.CacheDir)
+		logsScraper, errLogsTF := newLogsTFScraper(database, config.CacheDir)
 		if errLogsTF != nil {
 			slog.Error("failed to init logstf scraper", ErrAttr(errLogsTF))
 

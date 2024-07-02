@@ -11,7 +11,6 @@ import (
 var (
 	errRequestCreate    = errors.New("failed to create request")
 	errRequestPerform   = errors.New("failed to perform request")
-	errResponseInvalid  = errors.New("got unexpected results")
 	errResponseRead     = errors.New("failed to read response body")
 	errResponseDecode   = errors.New("failed to decode response")
 	errResponseJSON     = errors.New("failed to generate json response")

@@ -246,15 +246,16 @@ type Season struct {
 type CompMap map[steamid.SteamID][]Season
 
 type LogsTFMatch struct {
-	LogID     int           `json:"log_id"`
-	Title     string        `json:"title"`
-	Map       string        `json:"map"`
-	Format    string        `json:"format"`
-	Views     int           `json:"views"`
-	Duration  time.Duration `json:"duration"`
-	ScoreRED  int           `json:"score_red"`
-	ScoreBLU  int           `json:"score_blu"`
-	CreatedOn time.Time     `json:"created_on"`
+	LogID        int           `json:"log_id"`
+	Title        string        `json:"title"`
+	Map          string        `json:"map"`
+	Format       string        `json:"format"`
+	Views        int           `json:"views"`
+	Duration     time.Duration `json:"duration"`
+	ScoreRED     int           `json:"score_red"`
+	ScoreBLU     int           `json:"score_blu"`
+	CreatedOn    time.Time     `json:"created_on"`
+	LogFormatOld bool
 
 	Rounds  []LogsTFRound
 	Players []LogsTFPlayer
