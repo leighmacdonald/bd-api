@@ -1276,6 +1276,15 @@ func (db *pgStore) insertLogsTFMatchRounds(ctx context.Context, transaction pgx.
 	return nil
 }
 
+func (db *pgStore) getNewestLogID(ctx context.Context) (int, error) {
+	var id int
+	if err := db.pool.QueryRow(ctx, "SELECT max(log_id) FROM logstf").Scan(&id); err != nil {
+		return 0, dbErr(err, "failed to get max_id")
+	}
+
+	return id, nil
+}
+
 func steamIDCollectionToInt64Slice(collection steamid.Collection) []int64 {
 	ids := make([]int64, len(collection))
 	for idx := range collection {

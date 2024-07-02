@@ -83,15 +83,16 @@ func newLogsTFScraper(database *pgStore, cacheDir string) (*logsTFScraper, error
 	scraper.OnError(func(response *colly.Response, err error) {
 		if response.StatusCode != http.StatusTooManyRequests {
 			logger.Error("Request error", slog.String("url", response.Request.URL.String()), ErrAttr(err))
+
+			return
 		}
 
 		initialDelay += time.Millisecond * 100
 		slog.Info("Increasing delay", slog.String("delay", initialDelay.String()))
 
 		if errLimit := scraper.Limit(&colly.LimitRule{ //nolint:exhaustruct
-			DomainGlob:  "*logs.tf",
-			Parallelism: 1,
-			Delay:       initialDelay,
+			DomainGlob: "*logs.tf",
+			Delay:      initialDelay,
 		}); errLimit != nil {
 			panic(errScrapeLimit)
 		}
@@ -138,7 +139,6 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 
 	var (
 		startTime    = time.Now()
-		curID        = 1
 		start        = true
 		totalCount   = 0
 		curCount     = 0
@@ -147,6 +147,13 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 		skipCount    = 0
 		lastCount    = time.Now()
 	)
+
+	minID, errID := s.db.getNewestLogID(ctx)
+	if errID != nil {
+		slog.Error("Failed to get int id")
+
+		return
+	}
 
 	s.OnHTML("html", func(element *colly.HTMLElement) {
 		if start {
@@ -159,12 +166,13 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 				return
 			}
 
-			for curID < maxID {
-				if errNext := s.queue.AddURL(fmt.Sprintf("https://logs.tf/%d", curID)); errNext != nil {
+			for i := range maxID {
+				if i <= minID {
+					continue
+				}
+				if errNext := s.queue.AddURL(fmt.Sprintf("https://logs.tf/%d", i)); errNext != nil {
 					s.log.Error("failed to add url to queue", ErrAttr(errNext))
 				}
-
-				curID++
 			}
 
 			return

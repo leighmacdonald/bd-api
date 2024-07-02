@@ -110,7 +110,59 @@ func TestLogsTFDetails(t *testing.T) {
 }
 
 func TestLogsTFDetailsOld(t *testing.T) {
-	body, errRead := os.Open("testdata/logstf_detail_old.html")
+	body, errRead := os.Open("testdata/logstf_details_old.html")
 	require.NoError(t, errRead)
 	defer body.Close()
+
+	doc, err := goquery.NewDocumentFromReader(body)
+	require.NoError(t, err)
+
+	match, errDetails := parseMatchFromDoc(doc.Find("html"))
+	require.NoError(t, errDetails)
+
+	require.Equal(t, 100, match.LogID)
+	require.Equal(t, "Log 100", match.Title)
+	require.Equal(t, "", match.Map)
+	require.Equal(t, "39m3s", match.Duration.String())
+	require.Equal(t, "2012-11-26 07:39:59 +0000 UTC", match.CreatedOn.String())
+	require.Equal(t, 4, match.ScoreBLU)
+	require.Equal(t, 2, match.ScoreRED)
+
+	require.Nil(t, match.Rounds)
+	require.Len(t, match.Players, 19)
+	require.Len(t, match.Medics, 2)
+	require.EqualValues(t, domain.LogsTFPlayer{
+		LogID:   100,
+		SteamID: steamid.New(76561198006069420),
+		Team:    domain.BLU,
+		Name:    "paradox",
+		Classes: []domain.LogsTFPlayerClass{
+			{
+				LogID:   100,
+				SteamID: steamid.New(76561198006069420),
+				Class:   domain.Sniper,
+				Played:  2343000000000,
+				Kills:   57,
+				Assists: 21,
+				Deaths:  30,
+				Damage:  18981,
+				Weapons: nil,
+			},
+		},
+		Kills:        57,
+		Assists:      21,
+		Deaths:       30,
+		Damage:       18981,
+		DPM:          486,
+		KAD:          2.6,
+		KD:           1.9,
+		DamageTaken:  0,
+		DTM:          0,
+		HealthPacks:  15,
+		Backstabs:    41,
+		Headshots:    5,
+		Airshots:     0,
+		Caps:         0,
+		HealingTaken: 0,
+	}, match.Players[0])
 }
