@@ -1089,7 +1089,7 @@ func (db *pgStore) insertLogsTF(ctx context.Context, match *domain.LogsTFMatch) 
 	}
 
 	if err := db.insertLogsTFMatchMedics(ctx, transaction, match.Medics); err != nil {
-		return dbErr(err, "Failed to insert logstf player class weapon")
+		return dbErr(err, "Failed to insert logstf medic")
 	}
 
 	if err := transaction.Commit(ctx); err != nil {
@@ -1097,6 +1097,208 @@ func (db *pgStore) insertLogsTF(ctx context.Context, match *domain.LogsTFMatch) 
 	}
 
 	return nil
+}
+
+func (db *pgStore) getLogsTFMatch(ctx context.Context, logID int) (*domain.LogsTFMatch, error) {
+	const query = `
+		SELECT log_id, title, map, format, views, duration, score_red, score_blu, created_on 
+		FROM logstf
+		WHERE log_id = $1`
+
+	var match domain.LogsTFMatch
+	if err := db.pool.QueryRow(ctx, query, logID).
+		Scan(&match.LogID, &match.Title, &match.Map, &match.Format, &match.Views,
+			&match.Duration.Duration, &match.ScoreRED, &match.ScoreBLU, &match.CreatedOn); err != nil {
+		return nil, dbErr(err, "Failed to query match by id")
+	}
+
+	players, errPlayers := db.getLogsTFMatchPlayers(ctx, logID)
+	if errPlayers != nil {
+		return nil, errPlayers
+	}
+
+	match.Players = players
+
+	medics, errMedics := db.getLogsTFMatchMedics(ctx, logID)
+	if errMedics != nil {
+		return nil, errMedics
+	}
+
+	match.Medics = medics
+
+	// Old format does not include rounds
+	rounds, errRounds := db.getLogsTFMatchRounds(ctx, logID)
+	if errRounds != nil && !errors.Is(errRounds, errDatabaseNoResults) {
+		return nil, errRounds
+	}
+
+	if rounds == nil {
+		rounds = []domain.LogsTFRound{}
+	}
+
+	match.Rounds = rounds
+
+	return &match, nil
+}
+
+func (db *pgStore) getLogsTFMatchPlayers(ctx context.Context, logID int) ([]domain.LogsTFPlayer, error) {
+	const query = `
+		SELECT log_id, steam_id, team, name, kills, assists, deaths, damage, dpm, kad, kd, dt, dtm, hp, bs, hs, caps, healing_taken 
+		FROM logstf_player
+		WHERE log_id = $1`
+
+	rows, err := db.pool.Query(ctx, query, logID)
+	if err != nil {
+		return nil, dbErr(err, "Failed to query players")
+	}
+
+	defer rows.Close()
+
+	var players []domain.LogsTFPlayer
+
+	for rows.Next() {
+		var player domain.LogsTFPlayer
+		if errScan := rows.Scan(&player.LogID, &player.SteamID, &player.Team, &player.Name, &player.Kills, &player.Assists, &player.Deaths, &player.Damage, &player.DPM,
+			&player.KAD, &player.KD, &player.DamageTaken, &player.DTM, &player.HealthPacks, &player.Backstabs, &player.Headshots, &player.Caps, &player.HealingTaken); errScan != nil {
+			return nil, dbErr(errScan, "Failed to scan player")
+		}
+
+		players = append(players, player)
+	}
+
+	classes, errClasses := db.getLogsTFMatchPlayersClass(ctx, logID)
+	if errClasses != nil {
+		return nil, errClasses
+	}
+
+	for _, class := range classes {
+		for _, player := range players {
+			if class.SteamID == player.SteamID {
+				player.Classes = append(player.Classes, class)
+			}
+		}
+	}
+
+	return players, nil
+}
+
+func (db *pgStore) getLogsTFPlayerSummary(ctx context.Context, steamID steamid.SteamID) (*domain.LogsTFPlayerSummary, error) {
+	const query = `
+		SELECT
+			count(p.log_id),
+			sum(case when p.team = 3 AND l.score_red > l.score_blu then 1 else 0 end),
+			sum(case when p.team = 4 AND l.score_blu > l.score_red then 1 else 0 end),
+			
+			round(avg(p.kills)::numeric, 2), round(avg(p.assists)::numeric, 2),round(avg(p.deaths)::numeric, 2), round(avg(p.damage)::numeric, 2),
+			round(avg(p.dpm)::numeric, 2), round(avg(p.kad)::numeric, 2), round(avg(p.kd)::numeric, 2), round(avg(p.dt)::numeric, 2), round(avg(p.dtm)::numeric, 2),
+			round(avg(p.hp)::numeric, 2), round(avg(p.bs)::numeric, 2), round(avg(p.hs)::numeric, 2), round(avg(p.caps)::numeric, 2), round(avg(p.healing_taken)::numeric, 2),
+			
+			sum(p.kills), sum(p.assists),sum(p.deaths), sum(p.damage),
+			sum(p.dt), 
+			sum(p.hp), sum(p.bs), sum(p.hs), sum(p.caps), sum(p.healing_taken)
+		FROM logstf_player p
+		LEFT JOIN public.logstf l on l.log_id = p.log_id
+		WHERE steam_id = $1`
+
+	var sum domain.LogsTFPlayerSummary
+	sid := steamID.Int64()
+	if errScan := db.pool.QueryRow(ctx, query, sid).
+		Scan(&sum.Logs, &sum.Wins, &sum.Losses,
+			&sum.KillsAvg, &sum.AssistsAvg, &sum.DeathsAvg, &sum.DamageAvg,
+			&sum.DPMAvg, &sum.KADAvg, &sum.KDAvg, &sum.DamageTakenAvg, &sum.DTMAvg,
+			&sum.HealthPacksAvg, &sum.BackstabsAvg, &sum.HeadshotsAvg, &sum.CapsAvg, &sum.HealingTakenAvg,
+			&sum.KillsSum, &sum.AssistsSum, &sum.DeathsSum, &sum.DamageSum,
+			&sum.DamageTakenSum,
+			&sum.HealthPacksSum, &sum.BackstabsSum, &sum.HeadshotsSum, &sum.CapsSum, &sum.HealingTakenSum,
+		); errScan != nil {
+		return nil, dbErr(errScan, "Failed to scan player")
+	}
+
+	return &sum, nil
+}
+
+func (db *pgStore) getLogsTFMatchRounds(ctx context.Context, logID int) ([]domain.LogsTFRound, error) {
+	const query = `
+		SELECT log_id, round, length, score_blu, score_red, kills_blu, kills_red, ubers_blu, ubers_red, damage_blu, damage_red, midfight 
+		FROM logstf_round
+		WHERE log_id = $1`
+
+	rows, err := db.pool.Query(ctx, query, logID)
+	if err != nil {
+		return nil, dbErr(err, "Failed to query rounds")
+	}
+
+	defer rows.Close()
+
+	var rounds []domain.LogsTFRound
+
+	for rows.Next() {
+		var round domain.LogsTFRound
+		if errScan := rows.Scan(&round.LogID, &round.Round, &round.Length.Duration, &round.ScoreBLU, &round.ScoreRED, &round.KillsBLU, &round.KillsRED,
+			&round.UbersBLU, &round.UbersRED, &round.DamageBLU, &round.DamageRED, &round.MidFight); errScan != nil {
+			return nil, dbErr(errScan, "Failed to scan round")
+		}
+
+		rounds = append(rounds, round)
+	}
+
+	return rounds, nil
+}
+
+func (db *pgStore) getLogsTFMatchPlayersClass(ctx context.Context, logID int) ([]domain.LogsTFPlayerClass, error) {
+	const query = `
+		SELECT log_id, steam_id, player_class, played, kills, assists, deaths, damage 
+		FROM logstf_player_class
+		WHERE log_id = $1`
+
+	rows, err := db.pool.Query(ctx, query, logID)
+	if err != nil {
+		return nil, dbErr(err, "Failed to query classes")
+	}
+
+	defer rows.Close()
+
+	var classes []domain.LogsTFPlayerClass
+
+	for rows.Next() {
+		var p domain.LogsTFPlayerClass
+		if errScan := rows.Scan(&p.LogID, &p.SteamID, &p.Class, &p.Played.Duration, &p.Kills, &p.Assists, &p.Deaths, &p.Damage); errScan != nil {
+			return nil, dbErr(errScan, "Failed to scan player class")
+		}
+
+		classes = append(classes, p)
+	}
+
+	return classes, nil
+}
+
+func (db *pgStore) getLogsTFMatchMedics(ctx context.Context, logID int) ([]domain.LogsTFMedic, error) {
+	const query = `
+		SELECT log_id, steam_id, healing, charges_kritz, charges_quickfix, charges_medigun, charges_vacc, avg_time_build, 
+		       avg_time_use, near_full_death, avg_uber_len, death_after_charge, major_adv_lost, biggest_adv_lost 
+		FROM logstf_medic
+		WHERE log_id = $1`
+
+	rows, err := db.pool.Query(ctx, query, logID)
+	if err != nil {
+		return nil, dbErr(err, "Failed to query medics")
+	}
+
+	defer rows.Close()
+
+	var medics []domain.LogsTFMedic
+
+	for rows.Next() {
+		var medic domain.LogsTFMedic
+		if errScan := rows.Scan(&medic.LogID, &medic.SteamID, &medic.Healing, &medic.ChargesKritz, &medic.ChargesQuickfix, &medic.ChargesMedigun, &medic.ChargesVacc,
+			&medic.AvgTimeBuild.Duration, &medic.AvgTimeUse.Duration, &medic.NearFullDeath, &medic.AvgUberLen.Duration, &medic.DeathAfterCharge, &medic.MajorAdvLost, &medic.BiggestAdvLost.Duration); errScan != nil {
+			return nil, dbErr(errScan, "Failed to scan medic")
+		}
+
+		medics = append(medics, medic)
+	}
+
+	return medics, nil
 }
 
 func (db *pgStore) insertLogsTFMatch(ctx context.Context, transaction pgx.Tx, match *domain.LogsTFMatch) error {
@@ -1107,7 +1309,7 @@ func (db *pgStore) insertLogsTFMatch(ctx context.Context, transaction pgx.Tx, ma
 			"map":        match.Map,
 			"format":     match.Format,
 			"views":      match.Views,
-			"duration":   match.Duration,
+			"duration":   match.Duration.Duration,
 			"score_red":  match.ScoreRED,
 			"score_blu":  match.ScoreBLU,
 			"created_on": match.CreatedOn,
@@ -1177,13 +1379,13 @@ func (db *pgStore) insertLogsTFMatchMedics(ctx context.Context, transaction pgx.
 				"charges_quickfix":   medic.ChargesQuickfix,
 				"charges_medigun":    medic.ChargesMedigun,
 				"charges_vacc":       medic.ChargesVacc,
-				"avg_time_build":     medic.AvgTimeBuild,
-				"avg_time_use":       medic.AvgTimeUse,
+				"avg_time_build":     medic.AvgTimeBuild.Duration,
+				"avg_time_use":       medic.AvgTimeUse.Duration,
 				"near_full_death":    medic.NearFullDeath,
-				"avg_uber_len":       medic.AvgUberLen,
+				"avg_uber_len":       medic.AvgUberLen.Duration,
 				"death_after_charge": medic.DeathAfterCharge,
 				"major_adv_lost":     medic.MajorAdvLost,
-				"biggest_adv_lost":   medic.BiggestAdvLost,
+				"biggest_adv_lost":   medic.BiggestAdvLost.Duration,
 			}).ToSql()
 		if errQuery != nil {
 			return dbErr(errQuery, "Failed to build query")
@@ -1204,7 +1406,7 @@ func (db *pgStore) insertLogsTFMatchPlayerClasses(ctx context.Context, transacti
 				"log_id":       player.LogID,
 				"steam_id":     player.SteamID,
 				"player_class": class.Class,
-				"played":       class.Played,
+				"played":       class.Played.Duration,
 				"kills":        class.Kills,
 				"assists":      class.Assists,
 				"deaths":       class.Deaths,
@@ -1253,7 +1455,7 @@ func (db *pgStore) insertLogsTFMatchRounds(ctx context.Context, transaction pgx.
 			SetMap(map[string]interface{}{
 				"log_id":     player.LogID,
 				"round":      player.Round,
-				"length":     player.Length,
+				"length":     player.Length.Duration,
 				"score_blu":  player.ScoreBLU,
 				"score_red":  player.ScoreRED,
 				"kills_blu":  player.KillsBLU,

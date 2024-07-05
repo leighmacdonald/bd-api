@@ -227,14 +227,16 @@ func createRouter(database *pgStore, cacheHandler cache) (*http.ServeMux, error)
 	}
 
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /log/{log_id}", handleGetLogByID(database))
 	mux.HandleFunc("GET /bans", handleGetBans())
 	mux.HandleFunc("GET /summary", handleGetSummary(cacheHandler))
 	mux.HandleFunc("GET /profile", handleGetProfile(database, cacheHandler))
 	mux.HandleFunc("GET /comp", handleGetComp(cacheHandler))
 	mux.HandleFunc("GET /friends", handleGetFriendList(cacheHandler))
 	mux.HandleFunc("GET /sourcebans", handleGetSourceBansMany(database))
-	mux.HandleFunc("GET /sourcebans/:steam_id", handleGetSourceBans(database))
+	mux.HandleFunc("GET /sourcebans/{steam_id}", handleGetSourceBans(database))
 	mux.HandleFunc("GET /bd", handleGetBotDetector(database))
+	mux.HandleFunc("GET /log/player/{steam_id}", handleGetLogsSummary(database))
 
 	return mux, nil
 }

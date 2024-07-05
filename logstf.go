@@ -144,6 +144,7 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 		curCount     = 0
 		successCount = 0
 		errorCount   = 0
+		maxID        = 0
 		skipCount    = 0
 		lastCount    = time.Now()
 	)
@@ -159,12 +160,14 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 		if start {
 			start = false
 			// Setup the queue
-			maxID, err := getLogsTFStartID(element.DOM)
-			if err != nil {
+			maxIDValue, errMaxID := getLogsTFStartID(element.DOM)
+			if errMaxID != nil {
 				s.log.Error("No log id parsed")
 
 				return
 			}
+
+			maxID = maxIDValue
 
 			for i := range maxID {
 				if i <= minID {
@@ -177,8 +180,10 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 
 			return
 		}
+
 		totalCount++
 		curCount++
+
 		match, errMatch := parseMatchFromDoc(element.DOM)
 		if errMatch != nil {
 			if errors.Is(errMatch, errLogID) || errors.Is(errMatch, errMissingExtended) {
@@ -186,6 +191,7 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 
 				return
 			}
+
 			errorCount++
 			slog.Error("failed to parse document", slog.String("log", fmt.Sprintf("https://logs.tf/%d", match.LogID)), ErrAttr(errMatch))
 
@@ -202,7 +208,7 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 			slog.Info("Scrape stats",
 				slog.Int("total", totalCount), slog.Int("per_min", curCount),
 				slog.Int("success", successCount), slog.Int("error", errorCount), slog.Int("skip", skipCount),
-				slog.Int("current_id", match.LogID))
+				slog.String("current", fmt.Sprintf("%d/%d", match.LogID, maxID)))
 			curCount = 0
 			lastCount = time.Now()
 		}
@@ -210,6 +216,7 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 		slog.Debug("Parsed page", slog.Int("log_id", match.LogID))
 	})
 
+	// The index is checked first so that we can get the max ID
 	if errAdd := s.queue.AddURL("https://logs.tf"); errAdd != nil {
 		s.log.Error("Failed to add queue error", ErrAttr(errAdd))
 
@@ -320,7 +327,7 @@ func parseHeader(doc *goquery.Selection, match *domain.LogsTFMatch) error {
 				return false
 			}
 
-			match.Duration = dur
+			match.Duration = domain.JSONDuration{Duration: dur}
 		case "log-date":
 			created, errDate := parseLogsTFDate(selection.Text())
 			if errDate != nil {
@@ -594,7 +601,7 @@ func parseClass(body string, class *domain.LogsTFPlayerClass) error {
 
 							return false
 						}
-						class.Played = duration
+						class.Played.Duration = duration
 					case 1:
 						class.Kills = stringToIntWithDefault(value)
 					case 2:
@@ -637,7 +644,7 @@ func parseRounds(doc *goquery.Selection, match *domain.LogsTFMatch) error {
 
 					return false
 				}
-				round.Length = dur
+				round.Length.Duration = dur
 			case 2:
 				parts := strings.SplitN(selection.Text(), " - ", 2)
 				if len(parts) != 2 {
@@ -748,19 +755,19 @@ func parseMedics(doc *goquery.Selection, logger *slog.Logger, match *domain.Logs
 			case "drops":
 				medic.Drops = stringToIntWithDefault(selection.Text())
 			case "avg time to build":
-				medic.AvgTimeBuild = parseLogsTFDurationMedicInt(selection.Text())
+				medic.AvgTimeBuild.Duration = parseLogsTFDurationMedicInt(selection.Text())
 			case "avg time before using":
-				medic.AvgTimeUse = parseLogsTFDurationMedicInt(selection.Text())
+				medic.AvgTimeUse.Duration = parseLogsTFDurationMedicInt(selection.Text())
 			case "near full charge deaths":
 				medic.NearFullDeath = stringToIntWithDefault(selection.Text())
 			case "avg uber length":
-				medic.AvgUberLen = parseLogsTFDurationMedicFloat(selection.Text())
+				medic.AvgUberLen.Duration = parseLogsTFDurationMedicFloat(selection.Text())
 			case "deaths after charge":
 				medic.DeathAfterCharge = stringToIntWithDefault(selection.Text())
 			case "major advantages lost":
 				medic.MajorAdvLost = stringToIntWithDefault(selection.Text())
 			case "biggest advantage lost":
-				medic.BiggestAdvLost = parseLogsTFDurationMedicInt(selection.Text())
+				medic.BiggestAdvLost.Duration = parseLogsTFDurationMedicInt(selection.Text())
 			}
 
 			return true

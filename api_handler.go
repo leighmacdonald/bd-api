@@ -2,9 +2,11 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/leighmacdonald/bd-api/domain"
@@ -242,5 +244,69 @@ func handleGetBotDetector(database *pgStore) http.HandlerFunc {
 		}
 
 		responseOk(writer, request, results, "TF2BD Search Results")
+	}
+}
+
+func intParam(w http.ResponseWriter, r *http.Request, param string) (int, bool) {
+	intStr := r.PathValue(param)
+	if intStr == "" {
+		responseErr(w, r, http.StatusBadRequest, errInvalidSteamID, "Invalid parameter")
+
+		return 0, false
+	}
+
+	intVal, err := strconv.Atoi(intStr)
+	if err != nil {
+		return 0, false
+	}
+
+	return intVal, true
+}
+
+func handleGetLogByID(database *pgStore) http.HandlerFunc {
+	return func(writer http.ResponseWriter, reader *http.Request) {
+		logID, ok := intParam(writer, reader, "log_id")
+		if !ok {
+			return
+		}
+
+		match, errMatch := database.getLogsTFMatch(reader.Context(), logID)
+		if errMatch != nil {
+			if errors.Is(errMatch, errDatabaseNoResults) {
+				responseErr(writer, reader, http.StatusNotFound, errDatabaseNoResults, "Unknown match id")
+
+				return
+			}
+
+			responseErr(writer, reader, http.StatusInternalServerError, errInternalError, "Unhandled error")
+
+			return
+		}
+
+		responseOk(writer, reader, match, fmt.Sprintf("Match Log #%d - %s", match.LogID, match.Title))
+	}
+}
+
+func handleGetLogsSummary(database *pgStore) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		steamID, found := steamIDFromSlug(writer, request)
+		if !found {
+			return
+		}
+
+		avgs, err := database.getLogsTFPlayerSummary(request.Context(), steamID)
+		if err != nil {
+			if errors.Is(err, errDatabaseNoResults) {
+				responseErr(writer, request, http.StatusNotFound, errDatabaseNoResults, "Unknown match id")
+
+				return
+			}
+
+			responseErr(writer, request, http.StatusInternalServerError, errInternalError, "Unhandled error")
+
+			return
+		}
+
+		responseOk(writer, request, avgs, fmt.Sprintf("Logs.tf Summary %s", steamID.String()))
 	}
 }
