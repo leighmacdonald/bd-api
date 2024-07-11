@@ -4,17 +4,16 @@ import (
 	"context"
 	"encoding/csv"
 	"errors"
-	"github.com/leighmacdonald/bd-api/domain"
-	"github.com/leighmacdonald/steamid/v4/steamid"
 	"io"
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/leighmacdonald/bd-api/domain"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 )
 
-var (
-	errReadCSVRows = errors.New("failed to read csv rows")
-)
+var errReadCSVRows = errors.New("failed to read csv rows")
 
 func startServeMeUpdater(ctx context.Context, database *pgStore) {
 	updateServeMe(ctx, database)
