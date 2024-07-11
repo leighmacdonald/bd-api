@@ -2,7 +2,7 @@
 
 All endpoints that support multiple steam ids are limited to a maximum of 100 steam ids per query.
 
-## /bans
+## GET /bans
 
 Returns the current vac ban states for the requested IDs. 
 
@@ -33,7 +33,7 @@ Example: http://localhost:8888/bans?steamids=76561197970669109,76561197992870439
 ]
 ```
 
-## /friends
+## GET /friends
 
 Fetch friends lists for the requested steam ids. Depending on the profile visibility states, this will return a empty
 list when users set their profiles to private.
@@ -65,7 +65,7 @@ Example: http://localhost:8888/friends?steamids=76561197970669109,76561197992870
 }
 ```
 
-## /summary
+## GET /summary
 
 Fetch player summaries for all requested steam ids. 
 
@@ -119,7 +119,7 @@ Example: http://localhost:8888/summary?steamids=76561197970669109,76561197992870
   }
 ]
 ```
-## /profile
+## GET /profile
 
 Profile is a higher level "meta" object that combines the following different data sources into a single object.
 
@@ -218,7 +218,7 @@ Example: http://localhost:8888/profile?steamids=76561197970669109,76561197992870
 ]
 ```
 
-## /sourcebans
+## GET /sourcebans
 
 The sourcebans endpoint will return all related data that has been scraped from 3rd party sourcebans sites. There is 
 currently close to 100 different sites being scraped.
@@ -253,7 +253,7 @@ Return a list for a single steam id: http://localhost:8888/sourcebans/7656119897
 }
 ```
 
-## /bd
+## GET /bd
 
 Search tracked bot detector lists.
 
@@ -292,7 +292,7 @@ Example: http://localhost:8888/bd?steamids=76561199176781392
 ]
 ```
 
-## /log/{log_id}
+## GET /log/{log_id}
 
 Get a logs.tf match
 
@@ -393,7 +393,7 @@ Examples (truncated): http://localhost:8888/log/3000
 
 ```
 
-## /log/player/{steam_id}
+## GET /log/player/{steam_id}
 
 Get a summary of a users logs.tf data.
 
@@ -432,7 +432,7 @@ Example: http://localhost:8888/log/player/76561197960831093
 
 ```
 
-## /log/player/{steam_id}/list
+## GET /log/player/{steam_id}/list
 
 Get a high level list of a users logs.tf matches.
 
@@ -473,7 +473,7 @@ Example: http://localhost:8888/log/player/76561197960831093/list
 ]
 ```
 
-## /serveme
+## GET /serveme
 
 Get a list of current serveme.tf bans.
 
