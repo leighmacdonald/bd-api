@@ -42,18 +42,28 @@ type appConfig struct {
 	ProxiesEnabled           bool            `mapstructure:"proxies_enabled"`
 	Proxies                  []*proxyContext `mapstructure:"proxies"`
 	PrivateKeyPath           string          `mapstructure:"private_key_path"`
+	PrivateKeyPassword       string          `mapstructure:"private_key_password"`
 	EnableCache              bool            `mapstructure:"enable_cache"`
 	CacheDir                 string          `mapstructure:"cache_dir"`
 }
 
-func makeSigner(keyPath string) (ssh.Signer, error) { //nolint:ireturn
+func makeSigner(keyPath string, password string) (ssh.Signer, error) { //nolint:ireturn
 	privateKeyBody, errPKBody := os.ReadFile(keyPath)
 	if errPKBody != nil {
 		return nil, errors.Join(errPKBody, errSSHPrivateKeyRead)
 	}
 
-	var signer ssh.Signer
-	key, keyFound := os.LookupEnv("PASSWORD")
+	var (
+		signer   ssh.Signer
+		key      string
+		keyFound bool
+	)
+	if password == "" {
+		key, keyFound = os.LookupEnv("PASSWORD")
+	} else {
+		keyFound = true
+		key = password
+	}
 
 	if keyFound {
 		newSigner, errSigner := ssh.ParsePrivateKeyWithPassphrase(privateKeyBody, []byte(key))
@@ -106,7 +116,7 @@ func readConfig(config *appConfig) error {
 	}
 
 	if config.ProxiesEnabled {
-		signer, errSigner := makeSigner(config.PrivateKeyPath)
+		signer, errSigner := makeSigner(config.PrivateKeyPath, config.PrivateKeyPassword)
 		if errSigner != nil {
 			return errors.Join(errSigner, errSSHSignerCreate)
 		}
