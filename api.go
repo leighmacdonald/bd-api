@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -18,19 +19,25 @@ import (
 )
 
 const (
-	maxResults = 100
-
-	apiTimeout = time.Second * 10
+	maxResults      = 100
+	shutdownTimeout = 10 * time.Second
+	apiTimeout      = time.Second * 10
 )
 
 var (
-	indexTMPL        *template.Template
-	encoder          *styleEncoder
-	errParseTemplate = errors.New("failed to parse html template")
+	indexTMPL             *template.Template
+	encoder               *styleEncoder
+	errParseTemplate      = errors.New("failed to parse html template")
+	errInvalidSteamID     = errors.New("invalid steamid")
+	errInvalidQueryParams = errors.New("invalid query parameters")
+	errTooMany            = errors.New("too many results requested")
+	errLoadFailed         = errors.New("could not load remote resource")
+	errInternalError      = errors.New("internal server error, please try again later")
 )
 
-//nolint:funlen
-func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs steamid.Collection) ([]domain.Profile, error) {
+// loadProfiles concurrently loads data from all of the tracked data source tables and assembles them into
+// a slice of domain.Profile.
+func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs steamid.Collection) ([]domain.Profile, error) { //nolint:funlen
 	var ( //nolint:prealloc
 		waitGroup   = &sync.WaitGroup{}
 		summaries   []steamweb.PlayerSummary
@@ -238,6 +245,79 @@ func renderResponse(writer http.ResponseWriter, request *http.Request, status in
 	}
 }
 
+func getAttrs(r *http.Request) ([]string, bool) {
+	steamIDQuery := r.URL.Query().Get("attrs")
+	if steamIDQuery == "" {
+		return []string{"cheater"}, true
+	}
+
+	attrs := normalizeAttrs(strings.Split(steamIDQuery, ","))
+	if len(attrs) == 0 {
+		return nil, false
+	}
+
+	return attrs, true
+}
+
+func getSteamIDs(writer http.ResponseWriter, request *http.Request) (steamid.Collection, bool) {
+	steamIDQuery := request.URL.Query().Get("steamids")
+
+	if steamIDQuery == "" {
+		responseErr(writer, request, http.StatusBadRequest, errInvalidQueryParams, "")
+
+		return nil, false
+	}
+
+	var validIDs steamid.Collection
+
+	for _, steamID := range strings.Split(steamIDQuery, ",") {
+		sid64 := steamid.New(steamID)
+
+		if !sid64.Valid() {
+			responseErr(writer, request, http.StatusBadRequest, errInvalidSteamID, "")
+
+			return nil, false
+		}
+
+		unique := true
+		for _, knownID := range validIDs {
+			if knownID == sid64 {
+				unique = false
+
+				break
+			}
+		}
+
+		if unique {
+			validIDs = append(validIDs, sid64)
+		}
+	}
+
+	if len(validIDs) > maxResults {
+		responseErr(writer, request, http.StatusBadRequest, errTooMany, "")
+
+		return nil, false
+	}
+
+	return validIDs, true
+}
+
+func intParam(w http.ResponseWriter, r *http.Request, param string) (int, bool) {
+	intStr := r.PathValue(param)
+	if intStr == "" {
+		responseErr(w, r, http.StatusBadRequest, errInvalidSteamID, "Invalid parameter")
+
+		return 0, false
+	}
+
+	intVal, err := strconv.Atoi(intStr)
+	if err != nil {
+		return 0, false
+	}
+
+	return intVal, true
+}
+
 func steamIDFromSlug(w http.ResponseWriter, r *http.Request) (steamid.SteamID, bool) {
 	sid64 := steamid.New(r.PathValue("steam_id"))
 	if !sid64.Valid() {
@@ -291,18 +371,12 @@ func createRouter(database *pgStore, cacheHandler cache) (*http.ServeMux, error)
 	return mux, nil
 }
 
-const (
-	apiHandlerTimeout = 10 * time.Second
-
-	shutdownTimeout = 10 * time.Second
-)
-
 func newHTTPServer(ctx context.Context, router *http.ServeMux, addr string) *http.Server {
 	httpServer := &http.Server{ //nolint:exhaustruct
 		Addr:         addr,
 		Handler:      router,
-		ReadTimeout:  apiHandlerTimeout,
-		WriteTimeout: apiHandlerTimeout,
+		ReadTimeout:  apiTimeout,
+		WriteTimeout: apiTimeout,
 		BaseContext: func(_ net.Listener) context.Context {
 			return ctx
 		},

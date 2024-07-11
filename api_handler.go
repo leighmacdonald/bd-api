@@ -5,72 +5,18 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"runtime"
-	"strconv"
-	"strings"
 
 	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 )
 
-const funcSize = 10
-
-var (
-	errTooMany            = errors.New("too many results requested")
-	errInvalidQueryParams = errors.New("invalid query parameters")
-	errInvalidSteamID     = errors.New("invalid steamid")
-	errLoadFailed         = errors.New("could not load remote resource")
-	errInternalError      = errors.New("internal server error, please try again later")
-)
-
 type apiErr struct {
 	Error string `json:"error"`
 }
 
-func getSteamIDs(writer http.ResponseWriter, request *http.Request) (steamid.Collection, bool) {
-	steamIDQuery := request.URL.Query().Get("steamids")
-
-	if steamIDQuery == "" {
-		responseErr(writer, request, http.StatusBadRequest, errInvalidQueryParams, "")
-
-		return nil, false
-	}
-
-	var validIDs steamid.Collection
-
-	for _, steamID := range strings.Split(steamIDQuery, ",") {
-		sid64 := steamid.New(steamID)
-
-		if !sid64.Valid() {
-			responseErr(writer, request, http.StatusBadRequest, errInvalidSteamID, "")
-
-			return nil, false
-		}
-
-		unique := true
-		for _, knownID := range validIDs {
-			if knownID == sid64 {
-				unique = false
-
-				break
-			}
-		}
-
-		if unique {
-			validIDs = append(validIDs, sid64)
-		}
-	}
-
-	if len(validIDs) > maxResults {
-		responseErr(writer, request, http.StatusBadRequest, errTooMany, "")
-
-		return nil, false
-	}
-
-	return validIDs, true
-}
-
+// handleGetFriendList returns a list of the users friends. If the users friends are private,
+// no results are returned.
 func handleGetFriendList(cache cache) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		ids, ok := getSteamIDs(writer, request)
@@ -84,9 +30,9 @@ func handleGetFriendList(cache cache) http.HandlerFunc {
 	}
 }
 
+// handleGetComp returns a list of a users competitive history.
+// This is very incomplete currently.
 func handleGetComp(cache cache) http.HandlerFunc {
-	log := slog.With(slog.String("fn", runtime.FuncForPC(make([]uintptr, funcSize)[0]).Name()))
-
 	return func(writer http.ResponseWriter, request *http.Request) {
 		ids, ok := getSteamIDs(writer, request)
 
@@ -97,7 +43,7 @@ func handleGetComp(cache cache) http.HandlerFunc {
 		compHistory := getCompHistory(request.Context(), cache, ids)
 
 		if len(ids) != len(compHistory) {
-			log.Warn("Failed to fully fetch comp history")
+			slog.Warn("Failed to fully fetch comp history")
 			responseErr(writer, request, http.StatusInternalServerError, errLoadFailed, "")
 
 			return
@@ -106,6 +52,7 @@ func handleGetComp(cache cache) http.HandlerFunc {
 	}
 }
 
+// handleGetSummary returns a players steam profile summary. This mirrors the data shape in the steam summary api.
 func handleGetSummary(cache cache) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		ids, ok := getSteamIDs(writer, request)
@@ -124,6 +71,7 @@ func handleGetSummary(cache cache) http.HandlerFunc {
 	}
 }
 
+// handleGetBans returns the ban state of the player from the steam api.
 func handleGetBans() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		ids, ok := getSteamIDs(writer, request)
@@ -144,6 +92,7 @@ func handleGetBans() http.HandlerFunc {
 	}
 }
 
+// handleGetProfile returns a composite of all known data on the players.
 func handleGetProfile(database *pgStore, cache cache) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		ids, ok := getSteamIDs(writer, request)
@@ -164,6 +113,7 @@ func handleGetProfile(database *pgStore, cache cache) http.HandlerFunc {
 	}
 }
 
+// handleGetSourceBansMany fetches the indexed sourcebans data for multiple users.
 func handleGetSourceBansMany(database *pgStore) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		ids, ok := getSteamIDs(writer, request)
@@ -182,6 +132,7 @@ func handleGetSourceBansMany(database *pgStore) http.HandlerFunc {
 	}
 }
 
+// handleGetSourceBans fetches a single users sourcebans data.
 func handleGetSourceBans(database *pgStore) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		sid, ok := steamIDFromSlug(writer, request)
@@ -207,20 +158,7 @@ func handleGetSourceBans(database *pgStore) http.HandlerFunc {
 	}
 }
 
-func getAttrs(r *http.Request) ([]string, bool) {
-	steamIDQuery := r.URL.Query().Get("attrs")
-	if steamIDQuery == "" {
-		return []string{"cheater"}, true
-	}
-
-	attrs := normalizeAttrs(strings.Split(steamIDQuery, ","))
-	if len(attrs) == 0 {
-		return nil, false
-	}
-
-	return attrs, true
-}
-
+// handleGetBotDetector searches the tracked bot detector lists for matches. Supports multiple steamids.
 func handleGetBotDetector(database *pgStore) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		sid, sidOk := getSteamIDs(writer, request)
@@ -248,22 +186,8 @@ func handleGetBotDetector(database *pgStore) http.HandlerFunc {
 	}
 }
 
-func intParam(w http.ResponseWriter, r *http.Request, param string) (int, bool) {
-	intStr := r.PathValue(param)
-	if intStr == "" {
-		responseErr(w, r, http.StatusBadRequest, errInvalidSteamID, "Invalid parameter")
-
-		return 0, false
-	}
-
-	intVal, err := strconv.Atoi(intStr)
-	if err != nil {
-		return 0, false
-	}
-
-	return intVal, true
-}
-
+// handleGetLogByID returns a overview for a single logstf match similar to the main logs.tf site. Some info
+// is currently omitted such as specific player weapon stats, chatlogs and kill streaks.
 func handleGetLogByID(database *pgStore) http.HandlerFunc {
 	return func(writer http.ResponseWriter, reader *http.Request) {
 		logID, ok := intParam(writer, reader, "log_id")
@@ -288,6 +212,7 @@ func handleGetLogByID(database *pgStore) http.HandlerFunc {
 	}
 }
 
+// handleGetLogsSummary returns a summary of a players logstf match statistics.
 func handleGetLogsSummary(database *pgStore) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		steamID, found := steamIDFromSlug(writer, request)
@@ -312,6 +237,7 @@ func handleGetLogsSummary(database *pgStore) http.HandlerFunc {
 	}
 }
 
+// handleGetLogsList returns a list of a users logstf matches.
 func handleGetLogsList(database *pgStore) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		steamID, found := steamIDFromSlug(writer, request)
@@ -340,6 +266,7 @@ func handleGetLogsList(database *pgStore) http.HandlerFunc {
 	}
 }
 
+// handleGetServemeList returns a list of all known serveme bans.
 func handleGetServemeList(database *pgStore) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		list, err := database.getServeMeList(request.Context())

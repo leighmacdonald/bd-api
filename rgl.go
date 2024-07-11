@@ -49,18 +49,20 @@ func getRGL(ctx context.Context, log *slog.Logger, sid64 steamid.SteamID) ([]dom
 		season.DivisionInt = parseRGLDivision(team.DivisionName)
 		season.TeamName = team.TeamName
 
+		lowerName := strings.ToLower(seasonInfo.Name)
+
 		if seasonInfo.FormatName == "" {
 			switch {
-			case strings.Contains(strings.ToLower(seasonInfo.Name), "sixes"):
+			case strings.Contains(lowerName, "sixes"):
 
 				seasonInfo.FormatName = "Sixes"
-			case strings.Contains(strings.ToLower(seasonInfo.Name), "prolander"):
+			case strings.Contains(lowerName, "prolander"):
 
 				seasonInfo.FormatName = "Prolander"
-			case strings.Contains(strings.ToLower(seasonInfo.Name), "hl season"):
+			case strings.Contains(lowerName, "hl season"):
 
 				seasonInfo.FormatName = "HL"
-			case strings.Contains(strings.ToLower(seasonInfo.Name), "p7 season"):
+			case strings.Contains(lowerName, "p7 season"):
 
 				seasonInfo.FormatName = "Prolander"
 			}
