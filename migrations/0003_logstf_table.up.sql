@@ -89,13 +89,13 @@ create table if not exists logstf_medic
     charges_quickfix   int    not null default 0,
     charges_medigun    int    not null default 0,
     charges_vacc       int    not null default 0,
-    avg_time_build     int    not null default 0,
-    avg_time_use       int    not null default 0,
+    avg_time_build     bigint    not null default 0,
+    avg_time_use       bigint    not null default 0,
     near_full_death    int    not null default 0,
     avg_uber_len       float  not null default 0,
     death_after_charge int    not null default 0,
     major_adv_lost     int    not null default 0,
-    biggest_adv_lost   int    not null default 0
+    biggest_adv_lost   bigint    not null default 0
 );
 
 create unique index if not exists logstf_medic_uidx ON logstf_medic (log_id, steam_id);

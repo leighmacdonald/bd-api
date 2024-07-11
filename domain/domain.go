@@ -2,6 +2,7 @@
 package domain
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/leighmacdonald/steamid/v4/steamid"
@@ -190,7 +191,7 @@ type Profile struct {
 	Seasons    []Season                `json:"seasons"`
 	Friends    []steamweb.Friend       `json:"friends"`
 	SourceBans []SbBanRecord           `json:"source_bans"`
-	LogsCount  int64                   `json:"logs_count"`
+	LogsCount  int                     `json:"logs_count"`
 }
 
 // Division tries to define a generalized ranked division order.
@@ -245,21 +246,34 @@ type Season struct {
 
 type CompMap map[steamid.SteamID][]Season
 
-type LogsTFMatch struct {
-	LogID        int           `json:"log_id"`
-	Title        string        `json:"title"`
-	Map          string        `json:"map"`
-	Format       string        `json:"format"`
-	Views        int           `json:"views"`
-	Duration     time.Duration `json:"duration"`
-	ScoreRED     int           `json:"score_red"`
-	ScoreBLU     int           `json:"score_blu"`
-	CreatedOn    time.Time     `json:"created_on"`
-	LogFormatOld bool
+// JSONDuration handles encoding time.Duration values into seconds.
+type JSONDuration struct {
+	time.Duration
+}
 
-	Rounds  []LogsTFRound
-	Players []LogsTFPlayer
-	Medics  []LogsTFMedic
+func (d JSONDuration) MarshalJSON() ([]byte, error) {
+	return json.Marshal(d.Seconds()) //nolint:wrapcheck
+}
+
+type LogsTFMatchInfo struct {
+	LogID        int          `json:"log_id"`
+	Title        string       `json:"title"`
+	Map          string       `json:"map"`
+	Format       string       `json:"format"`
+	Views        int          `json:"-"`
+	Duration     JSONDuration `json:"duration"`
+	ScoreRED     int          `json:"score_red"`
+	ScoreBLU     int          `json:"score_blu"`
+	CreatedOn    time.Time    `json:"created_on"`
+	LogFormatOld bool         `json:"-"`
+}
+
+type LogsTFMatch struct {
+	LogsTFMatchInfo
+
+	Rounds  []LogsTFRound  `json:"rounds"`
+	Players []LogsTFPlayer `json:"players"`
+	Medics  []LogsTFMedic  `json:"medics"`
 }
 
 type PlayerClass int
@@ -285,7 +299,7 @@ const (
 )
 
 type LogsTFPlayer struct {
-	LogID        int                 `json:"log_id"`
+	LogID        int                 `json:"-"`
 	SteamID      steamid.SteamID     `json:"steam_id"`
 	Team         Team                `json:"team"`
 	Name         string              `json:"name"`
@@ -308,43 +322,43 @@ type LogsTFPlayer struct {
 }
 
 type LogsTFRound struct {
-	LogID     int
-	Round     int
-	Length    time.Duration
-	ScoreBLU  int
-	ScoreRED  int
-	KillsBLU  int
-	KillsRED  int
-	UbersBLU  int
-	UbersRED  int
-	DamageBLU int
-	DamageRED int
-	MidFight  Team
+	LogID     int          `json:"-"`
+	Round     int          `json:"round"`
+	Length    JSONDuration `json:"length"`
+	ScoreBLU  int          `json:"score_blu"`
+	ScoreRED  int          `json:"score_red"`
+	KillsBLU  int          `json:"kills_blu"`
+	KillsRED  int          `json:"kills_red"`
+	UbersBLU  int          `json:"ubers_blu"`
+	UbersRED  int          `json:"ubers_red"`
+	DamageBLU int          `json:"damage_blu"`
+	DamageRED int          `json:"damage_red"`
+	MidFight  Team         `json:"mid_fight,omitempty"`
 }
 
 type LogsTFPlayerClass struct {
-	LogID   int
-	SteamID steamid.SteamID
-	Class   PlayerClass
-	Played  time.Duration
-	Kills   int
-	Assists int
-	Deaths  int
-	Damage  int
-	Weapons []LogsTFPlayerClassWeapon
+	LogID   int                       `json:"-"`
+	SteamID steamid.SteamID           `json:"steam_id"`
+	Class   PlayerClass               `json:"class"`
+	Played  JSONDuration              `json:"played"`
+	Kills   int                       `json:"kills"`
+	Assists int                       `json:"assists"`
+	Deaths  int                       `json:"deaths"`
+	Damage  int                       `json:"damage"`
+	Weapons []LogsTFPlayerClassWeapon `json:"weapons"`
 }
 
 type LogsTFPlayerClassWeapon struct {
-	LogID    int
-	SteamID  steamid.SteamID
-	Weapon   string
-	Kills    int
-	Damage   int
-	Accuracy int
+	LogID    int             `json:"-"`
+	SteamID  steamid.SteamID `json:"steam_id"`
+	Weapon   string          `json:"weapon,omitempty"`
+	Kills    int             `json:"kills,omitempty"`
+	Damage   int             `json:"damage,omitempty"`
+	Accuracy int             `json:"accuracy,omitempty"`
 }
 
 type LogsTFMedic struct {
-	LogID            int             `json:"log_id"`
+	LogID            int             `json:"-"`
 	SteamID          steamid.SteamID `json:"steam_id"`
 	Healing          int64           `json:"healing"`
 	HealingPerMin    int             `json:"healing_per_min"`
@@ -353,11 +367,48 @@ type LogsTFMedic struct {
 	ChargesMedigun   int             `json:"charges_medigun"`
 	ChargesVacc      int             `json:"charges_vacc"`
 	Drops            int             `json:"drops"`
-	AvgTimeBuild     time.Duration   `json:"avg_time_build"`
-	AvgTimeUse       time.Duration   `json:"avg_time_use"`
+	AvgTimeBuild     JSONDuration    `json:"avg_time_build"`
+	AvgTimeUse       JSONDuration    `json:"avg_time_use"`
 	NearFullDeath    int             `json:"near_full_death"`
-	AvgUberLen       time.Duration   `json:"avg_uber_len"`
+	AvgUberLen       JSONDuration    `json:"avg_uber_len"`
 	DeathAfterCharge int             `json:"death_after_charge"`
 	MajorAdvLost     int             `json:"major_adv_lost"`
-	BiggestAdvLost   time.Duration   `json:"biggest_adv_lost"`
+	BiggestAdvLost   JSONDuration    `json:"biggest_adv_lost"`
+}
+
+type LogsTFPlayerSums struct {
+	KillsSum        int   `json:"kills_sum"`
+	AssistsSum      int   `json:"assists_sum"`
+	DeathsSum       int   `json:"deaths_sum"`
+	DamageSum       int64 `json:"damage_sum"`
+	DamageTakenSum  int   `json:"damage_taken_sum"`
+	HealthPacksSum  int   `json:"health_packs_sum"`
+	BackstabsSum    int   `json:"backstabs_sum"`
+	HeadshotsSum    int   `json:"headshots_sum"`
+	AirshotsSum     int   `json:"airshots_sum"`
+	CapsSum         int   `json:"caps_sum"`
+	HealingTakenSum int   `json:"healing_taken_sum"`
+}
+
+type LogsTFPlayerAverages struct {
+	KillsAvg        float32 `json:"kills_avg"`
+	AssistsAvg      float32 `json:"assists_avg"`
+	DeathsAvg       float32 `json:"deaths_avg"`
+	DamageAvg       float32 `json:"damage_avg"`
+	DPMAvg          float32 `json:"dpm_avg"`
+	KADAvg          float32 `json:"kad_avg"`
+	KDAvg           float32 `json:"kd_avg"`
+	DamageTakenAvg  float32 `json:"damage_taken_avg"`
+	DTMAvg          float32 `json:"dtm_avg"`
+	HealthPacksAvg  float32 `json:"health_packs_avg"`
+	BackstabsAvg    float32 `json:"backstabs_avg"`
+	HeadshotsAvg    float32 `json:"headshots_avg"`
+	AirshotsAvg     float32 `json:"airshots_avg"`
+	CapsAvg         float32 `json:"caps_avg"`
+	HealingTakenAvg float32 `json:"healing_taken_avg"`
+}
+type LogsTFPlayerSummary struct {
+	Logs int `json:"logs"`
+	LogsTFPlayerAverages
+	LogsTFPlayerSums
 }

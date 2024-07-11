@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log/slog"
+	"strings"
 	"sync"
 	"time"
 
@@ -58,9 +59,16 @@ func getSteamFriends(ctx context.Context, cache cache, steamIDs steamid.Collecti
 
 			newFriends, errFriends := steamweb.GetFriendList(ctx, steamID)
 			if errFriends != nil {
-				slog.Warn("Failed to fetch friends", ErrAttr(errFriends))
+				// 401 = Friends list is not public
+				if !strings.Contains(errFriends.Error(), "401") {
+					slog.Warn("Failed to fetch friends", ErrAttr(errFriends))
+				}
 
 				return
+			}
+
+			if newFriends == nil {
+				newFriends = []steamweb.Friend{}
 			}
 
 			body, errMarshal := json.Marshal(newFriends)
