@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"html/template"
 	"log/slog"
@@ -210,10 +209,7 @@ func renderResponse(writer http.ResponseWriter, request *http.Request, status in
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(status)
 
-	enc := json.NewEncoder(writer)
-	enc.SetIndent("", "    ")
-
-	if errWrite := enc.Encode(data); errWrite != nil {
+	if errWrite := encodeJSONIndent(writer, data); errWrite != nil {
 		slog.Error("failed to write out json response", ErrAttr(errWrite))
 	}
 }
