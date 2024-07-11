@@ -30,12 +30,14 @@ var (
 	errParseTemplate = errors.New("failed to parse html template")
 )
 
+//nolint:funlen
 func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs steamid.Collection) ([]domain.Profile, error) {
 	var ( //nolint:prealloc
 		waitGroup  = &sync.WaitGroup{}
 		summaries  []steamweb.PlayerSummary
 		bans       []steamweb.PlayerBanState
 		profiles   []domain.Profile
+		logs       map[steamid.SteamID]int
 		friends    friendMap
 		sourceBans BanRecordMap
 	)
@@ -94,6 +96,21 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 		friends = getSteamFriends(localCtx, cache, steamIDs)
 	}()
 
+	waitGroup.Add(1)
+
+	go func() {
+		defer waitGroup.Done()
+
+		logsVal, err := database.getLogsTFCount(localCtx, steamIDs)
+		if err != nil {
+			slog.Error("failed to query log counts", ErrAttr(err))
+
+			return
+		}
+
+		logs = logsVal
+	}()
+
 	waitGroup.Wait()
 
 	if len(steamIDs) == 0 || len(summaries) == 0 {
@@ -114,6 +131,14 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 		for _, ban := range bans {
 			if ban.SteamID == sid {
 				profile.BanState = ban
+
+				break
+			}
+		}
+
+		for logSID, count := range logs {
+			if logSID == sid {
+				profile.LogsCount = count
 
 				break
 			}
@@ -185,7 +210,10 @@ func renderResponse(writer http.ResponseWriter, request *http.Request, status in
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(status)
 
-	if errWrite := json.NewEncoder(writer).Encode(data); errWrite != nil {
+	enc := json.NewEncoder(writer)
+	enc.SetIndent("", "    ")
+
+	if errWrite := enc.Encode(data); errWrite != nil {
 		slog.Error("failed to write out json response", ErrAttr(errWrite))
 	}
 }
@@ -237,6 +265,7 @@ func createRouter(database *pgStore, cacheHandler cache) (*http.ServeMux, error)
 	mux.HandleFunc("GET /sourcebans/{steam_id}", handleGetSourceBans(database))
 	mux.HandleFunc("GET /bd", handleGetBotDetector(database))
 	mux.HandleFunc("GET /log/player/{steam_id}", handleGetLogsSummary(database))
+	mux.HandleFunc("GET /log/player/{steam_id}/list", handleGetLogsList(database))
 
 	return mux, nil
 }

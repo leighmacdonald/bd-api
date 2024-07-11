@@ -1186,8 +1186,6 @@ func (db *pgStore) getLogsTFPlayerSummary(ctx context.Context, steamID steamid.S
 	const query = `
 		SELECT
 			count(p.log_id),
-			sum(case when p.team = 3 AND l.score_red > l.score_blu then 1 else 0 end),
-			sum(case when p.team = 4 AND l.score_blu > l.score_red then 1 else 0 end),
 			
 			round(avg(p.kills)::numeric, 2), round(avg(p.assists)::numeric, 2),round(avg(p.deaths)::numeric, 2), round(avg(p.damage)::numeric, 2),
 			round(avg(p.dpm)::numeric, 2), round(avg(p.kad)::numeric, 2), round(avg(p.kd)::numeric, 2), round(avg(p.dt)::numeric, 2), round(avg(p.dtm)::numeric, 2),
@@ -1203,7 +1201,7 @@ func (db *pgStore) getLogsTFPlayerSummary(ctx context.Context, steamID steamid.S
 	var sum domain.LogsTFPlayerSummary
 	sid := steamID.Int64()
 	if errScan := db.pool.QueryRow(ctx, query, sid).
-		Scan(&sum.Logs, &sum.Wins, &sum.Losses,
+		Scan(&sum.Logs,
 			&sum.KillsAvg, &sum.AssistsAvg, &sum.DeathsAvg, &sum.DamageAvg,
 			&sum.DPMAvg, &sum.KADAvg, &sum.KDAvg, &sum.DamageTakenAvg, &sum.DTMAvg,
 			&sum.HealthPacksAvg, &sum.BackstabsAvg, &sum.HeadshotsAvg, &sum.CapsAvg, &sum.HealingTakenAvg,
@@ -1476,6 +1474,67 @@ func (db *pgStore) insertLogsTFMatchRounds(ctx context.Context, transaction pgx.
 	}
 
 	return nil
+}
+
+func (db *pgStore) getLogsTFList(ctx context.Context, steamID steamid.SteamID) ([]domain.LogsTFMatchInfo, error) {
+	const query = `
+		SELECT l.log_id, l.title, l.map, l.format, l.views, l.duration, l.score_red, l.score_blu, l.created_on 
+		FROM logstf l
+		LEFT JOIN logstf_player lp on l.log_id = lp.log_id
+		WHERE lp.steam_id = $1`
+
+	rows, err := db.pool.Query(ctx, query, steamID.Int64())
+	if err != nil {
+		return nil, dbErr(err, "Failed to get results")
+	}
+
+	var matches []domain.LogsTFMatchInfo
+
+	for rows.Next() {
+		var match domain.LogsTFMatchInfo
+		if errScan := rows.Scan(&match.LogID, &match.Title, &match.Map, &match.Format, &match.Views,
+			&match.Duration.Duration, &match.ScoreRED, &match.ScoreBLU, &match.CreatedOn); errScan != nil {
+			return nil, dbErr(errScan, "Failed to query match by id")
+		}
+
+		matches = append(matches, match)
+	}
+
+	return matches, nil
+}
+
+func (db *pgStore) getLogsTFCount(ctx context.Context, steamID steamid.Collection) (map[steamid.SteamID]int, error) {
+	query, args, errQuery := sb.
+		Select("count(l.log_id)", "lp.steam_id").
+		From("logstf l").
+		LeftJoin("logstf_player lp on l.log_id = lp.log_id").
+		Where(sq.Eq{"lp.steam_id": steamID}).
+		GroupBy("lp.steam_id").
+		ToSql()
+	if errQuery != nil {
+		return nil, dbErr(errQuery, "Failed to build query")
+	}
+
+	counts := map[steamid.SteamID]int{}
+
+	rows, errRows := db.pool.Query(ctx, query, args...)
+	if errRows != nil {
+		return nil, dbErr(errRows, "Failed to query logs")
+	}
+
+	for rows.Next() {
+		var (
+			count int
+			sid   int64
+		)
+		if err := rows.Scan(&count, &sid); err != nil {
+			return nil, dbErr(err, "Failed to get results")
+		}
+
+		counts[steamid.New(sid)] = count
+	}
+
+	return counts, nil
 }
 
 func (db *pgStore) getNewestLogID(ctx context.Context) (int, error) {

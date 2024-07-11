@@ -159,6 +159,7 @@ func handleGetProfile(database *pgStore, cache cache) http.HandlerFunc {
 
 			return
 		}
+
 		responseOk(writer, request, profiles, "Profiles")
 	}
 }
@@ -294,7 +295,7 @@ func handleGetLogsSummary(database *pgStore) http.HandlerFunc {
 			return
 		}
 
-		avgs, err := database.getLogsTFPlayerSummary(request.Context(), steamID)
+		averages, err := database.getLogsTFPlayerSummary(request.Context(), steamID)
 		if err != nil {
 			if errors.Is(err, errDatabaseNoResults) {
 				responseErr(writer, request, http.StatusNotFound, errDatabaseNoResults, "Unknown match id")
@@ -307,6 +308,34 @@ func handleGetLogsSummary(database *pgStore) http.HandlerFunc {
 			return
 		}
 
-		responseOk(writer, request, avgs, fmt.Sprintf("Logs.tf Summary %s", steamID.String()))
+		responseOk(writer, request, averages, fmt.Sprintf("Logs.tf Summary %s", steamID.String()))
+	}
+}
+
+func handleGetLogsList(database *pgStore) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		steamID, found := steamIDFromSlug(writer, request)
+		if !found {
+			return
+		}
+
+		logs, err := database.getLogsTFList(request.Context(), steamID)
+		if err != nil {
+			if errors.Is(err, errDatabaseNoResults) {
+				responseErr(writer, request, http.StatusNotFound, errDatabaseNoResults, "Unknown match id")
+
+				return
+			}
+
+			responseErr(writer, request, http.StatusInternalServerError, errInternalError, "Unhandled error")
+
+			return
+		}
+
+		if logs == nil {
+			logs = []domain.LogsTFMatchInfo{}
+		}
+
+		responseOk(writer, request, logs, fmt.Sprintf("Logs.tf List %s", steamID.String()))
 	}
 }

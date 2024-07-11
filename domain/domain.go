@@ -191,7 +191,7 @@ type Profile struct {
 	Seasons    []Season                `json:"seasons"`
 	Friends    []steamweb.Friend       `json:"friends"`
 	SourceBans []SbBanRecord           `json:"source_bans"`
-	LogsCount  int64                   `json:"logs_count"`
+	LogsCount  int                     `json:"logs_count"`
 }
 
 // Division tries to define a generalized ranked division order.
@@ -255,17 +255,21 @@ func (d JSONDuration) MarshalJSON() ([]byte, error) {
 	return json.Marshal(d.Seconds()) //nolint:wrapcheck
 }
 
-type LogsTFMatch struct {
-	LogID        int    `json:"log_id"`
-	Title        string `json:"title"`
-	Map          string `json:"map"`
-	Format       string
-	Views        int
+type LogsTFMatchInfo struct {
+	LogID        int          `json:"log_id"`
+	Title        string       `json:"title"`
+	Map          string       `json:"map"`
+	Format       string       `json:"format"`
+	Views        int          `json:"-"`
 	Duration     JSONDuration `json:"duration"`
 	ScoreRED     int          `json:"score_red"`
 	ScoreBLU     int          `json:"score_blu"`
 	CreatedOn    time.Time    `json:"created_on"`
-	LogFormatOld bool
+	LogFormatOld bool         `json:"-"`
+}
+
+type LogsTFMatch struct {
+	LogsTFMatchInfo
 
 	Rounds  []LogsTFRound  `json:"rounds"`
 	Players []LogsTFPlayer `json:"players"`
@@ -404,9 +408,7 @@ type LogsTFPlayerAverages struct {
 	HealingTakenAvg float32 `json:"healing_taken_avg"`
 }
 type LogsTFPlayerSummary struct {
-	Logs   int `json:"logs"`
-	Wins   int `json:"wins"`
-	Losses int `json:"losses"`
+	Logs int `json:"logs"`
 	LogsTFPlayerAverages
 	LogsTFPlayerSums
 }
