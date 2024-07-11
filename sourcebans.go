@@ -191,22 +191,22 @@ type sbScraper struct {
 func createScrapers(cacheDir string) ([]*sbScraper, error) {
 	// scraperConstructors:= []func(cacheDir string) (*sbScraper, error){newProGamesZetScraper}.
 	scraperConstructors := []func(cacheDir string) (*sbScraper, error){
-		new7MauScraper, newAceKillScraper, newAMSGamingScraper, newApeModeScraper, newAstraManiaScraper,
+		/*new7MauScraper,*/ newAceKillScraper, newAMSGamingScraper, newApeModeScraper, newAstraManiaScraper,
 		newBachuruServasScraper, newBaitedCommunityScraper, newBierwieseScraper, newBigBangGamersScraper,
 		newBioCraftingScraper, newBouncyBallScraper, newCasualFunScraper, newCedaPugScraper, newCSIServersScraper,
 		newCuteProjectScraper, newCutiePieScraper, newDarkPyroScraper, newDefuseRoScraper, newDiscFFScraper,
 		newDreamFireScraper, newECJScraper, newElectricScraper, newEOTLGamingScraper, newEpicZoneScraper,
 		newFirePoweredScraper, newFluxTFScraper, newFurryPoundScraper, newG44Scraper, newGameSitesScraper,
-		newGamesTownScraper, newGetSomeScraper, newGFLScraper, newGhostCapScraper, newGlobalParadiseScraper,
-		newGunServerScraper, newHarpoonScraper, newHellClanScraper, newJumpAcademyScraper, newLBGamingScraper,
+		newGamesTownScraper, newGetSomeScraper, newGFLScraper /*newGhostCapScraper,*/, newGlobalParadiseScraper,
+		newGunServerScraper, newHarpoonScraper /*newHellClanScraper,*/, newJumpAcademyScraper, newLBGamingScraper,
 		newLOOSScraper, newLazyNeerScraper, newLazyPurpleScraper, newLunarioScraper, newMagyarhnsScraper,
 		newMaxDBScraper, newMoevsMachineScraper, newNeonHeightsScraper, newNideScraper, newOpstOnlineScraper,
 		newOreonScraper, newOwlTFScraper, newPancakesScraper, newPandaScraper, newPetrolTFScraper,
 		newPhoenixSourceScraper, newPlayesROScraper, newPowerFPSScraper, newProGamesZetScraper, newPRWHScraper,
 		newPubsTFScraper, newRandomTF2Scraper, newRushyScraper, newRetroServersScraper, newSGGamingScraper,
-		newSameTeemScraper, newSavageServidoresScraper, newScrapTFScraper, newServiliveClScraper, newSettiScraper,
+		newSameTeemScraper, newSavageServidoresScraper, newScrapTFScraper /*newServiliveClScraper,*/, newSettiScraper,
 		newSirPleaseScraper, newSkialScraper, newSlavonServerScraper, newSneaksScraper, newSpaceShipScraper,
-		newSpectreScraper, newSvdosBrothersScraper, newSwapShopScraper, newTF2MapsScraper, newTF2ROScraper,
+		newSpectreScraper, newSvdosBrothersScraper, newSwapShopScraper, newTF2MapsScraper, /*newTF2ROScraper,*/
 		/*newTawernaScraper,*/ newTheVilleScraper, newTitanScraper, newTriggerHappyScraper, newUGCScraper,
 		newVaticanCityScraper, newVidyaGaemsScraper, newVortexScraper, /*newWonderlandTFScraper*/
 		newZMBrasilScraper, newZubatScraper,
@@ -401,7 +401,6 @@ func newScraper(cacheDir string, name domain.Site, baseURL string,
 	}
 
 	collector := colly.NewCollector(
-		colly.UserAgent("bd-api"),
 		colly.CacheDir(filepath.Join(cacheDir, "scrapers")),
 		colly.Debugger(&debugLogger),
 		colly.AllowedDomains(parsedURL.Hostname()),

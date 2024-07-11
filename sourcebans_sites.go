@@ -134,6 +134,7 @@ func newPubsTFScraper(cacheDir string) (*sbScraper, error) {
 		parseDefault, nextURLLast, parseSkialTime)
 }
 
+// Dead.
 func newServiliveClScraper(cacheDir string) (*sbScraper, error) {
 	return newScraper(cacheDir, domain.ServiLiveCl, "https://sourcebans.servilive.cl/", "",
 		parseFluent, nextURLFluent, parseDefaultTimeMonthFirst)
@@ -234,6 +235,7 @@ func newJumpAcademyScraper(cacheDir string) (*sbScraper, error) {
 		parseDefault, nextURLLast, parseDefaultTime)
 }
 
+// Dead.
 func newTF2ROScraper(cacheDir string) (*sbScraper, error) {
 	// Not enough values to page yet...
 	return newScraper(cacheDir, domain.TF2Ro, "https://bans.tf2ro.com/", "",
@@ -250,11 +252,13 @@ func newPowerFPSScraper(cacheDir string) (*sbScraper, error) {
 		parseDefault, nextURLLast, parseSkialTime)
 }
 
+// Migrated to https://github.com/counterstrikesharp-panel/css-bans
 func new7MauScraper(cacheDir string) (*sbScraper, error) {
 	return newScraper(cacheDir, domain.SevenMau, "https://7-mau.com/server/", "",
 		parseFluent, nextURLFluent, parseDefaultTime)
 }
 
+// Dead.
 func newGhostCapScraper(cacheDir string) (*sbScraper, error) {
 	return newScraper(cacheDir, domain.GhostCap, "https://sourcebans.ghostcap.com/", "",
 		parseDefault, nextURLLast, parseDefaultTime)
@@ -280,6 +284,7 @@ func newGunServerScraper(cacheDir string) (*sbScraper, error) {
 		parseDefault, nextURLFirst, parseGunServer)
 }
 
+// Down.
 func newHellClanScraper(cacheDir string) (*sbScraper, error) {
 	return newScraper(cacheDir, domain.HellClan, "https://hellclan.co.uk/sourcebans/", "",
 		parseDefault, nextURLLast, parseHellClanTime)
