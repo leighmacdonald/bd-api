@@ -191,6 +191,7 @@ type Profile struct {
 	Seasons    []Season                `json:"seasons"`
 	Friends    []steamweb.Friend       `json:"friends"`
 	SourceBans []SbBanRecord           `json:"source_bans"`
+	ServeMe    *ServeMeRecord          `json:"serve_me"`
 	LogsCount  int                     `json:"logs_count"`
 }
 
@@ -411,4 +412,12 @@ type LogsTFPlayerSummary struct {
 	Logs int `json:"logs"`
 	LogsTFPlayerAverages
 	LogsTFPlayerSums
+}
+
+type ServeMeRecord struct {
+	SteamID steamid.SteamID `json:"steam_id"`
+	Name    string          `json:"name"`
+	Reason  string          `json:"reason"`
+	Deleted bool            `json:"deleted"`
+	TimeStamped
 }

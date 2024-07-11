@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io"
 
 	"github.com/alecthomas/chroma"
 	"github.com/alecthomas/chroma/formatters/html"
@@ -32,10 +33,9 @@ func newStyleEncoder() *styleEncoder {
 
 func (s *styleEncoder) Encode(value any) (string, string, error) {
 	var jsonBody bytes.Buffer
-	jsonEncoder := json.NewEncoder(&jsonBody)
-	jsonEncoder.SetIndent("", "    ")
-	if errJSON := jsonEncoder.Encode(value); errJSON != nil {
-		return "", "", errors.Join(errJSON, errResponseJSON)
+
+	if err := encodeJSONIndent(&jsonBody, value); err != nil {
+		return "", "", err
 	}
 
 	iterator, errTokenize := s.lexer.Tokenise(&chroma.TokeniseOptions{State: "root", EnsureLF: true}, jsonBody.String())
@@ -54,4 +54,14 @@ func (s *styleEncoder) Encode(value any) (string, string, error) {
 	}
 
 	return cssBuf.String(), bodyBuf.String(), nil
+}
+
+func encodeJSONIndent(w io.Writer, value any) error {
+	jsonEncoder := json.NewEncoder(w)
+	jsonEncoder.SetIndent("", "    ")
+	if errJSON := jsonEncoder.Encode(value); errJSON != nil {
+		return errors.Join(errJSON, errResponseJSON)
+	}
+
+	return nil
 }

@@ -253,6 +253,258 @@ Return a list for a single steam id: http://localhost:8888/sourcebans/7656119897
 }
 ```
 
+## /bd
+
+Search tracked bot detector lists.
+
+Example: http://localhost:8888/bd?steamids=76561199176781392
+
+```json
+[
+    {
+        "list_name": "joekiller",
+        "match": {
+            "attributes": [
+                "cheater"
+            ],
+            "last_seen": {
+                "player_name": "Whiâ€te Madnesâ€s",
+                "time": 1708860576
+            },
+            "steamid": "76561199176781392",
+            "proof": []
+        }
+    },
+    {
+        "list_name": "@trusted",
+        "match": {
+            "attributes": [
+                "cheater"
+            ],
+            "last_seen": {
+                "player_name": "DISCO MOUâ€SEâ€â€â€",
+                "time": 1623984811
+            },
+            "steamid": "76561199176781392",
+            "proof": []
+        }
+    }
+]
+```
+
+## /log/{log_id}
+
+Get a logs.tf match
+
+Examples (truncated): http://localhost:8888/log/3000
+
+```json
+{
+    "log_id": 3000,
+    "title": "evening-l0108007.log",
+    "map": "freight",
+    "format": "",
+    "duration": 1784,
+    "score_red": 3,
+    "score_blu": 0,
+    "created_on": "2013-01-08T19:46:03-07:00",
+    "rounds": [],
+    "players": [
+        {
+            "steam_id": "76561197960460584",
+            "team": 3,
+            "name": "diaz",
+            "classes": null,
+            "kills": 21,
+            "assists": 12,
+            "deaths": 15,
+            "damage": 6464,
+            "dpm": 217,
+            "kad": 2.2,
+            "kd": 1.4,
+            "damage_taken": 0,
+            "dtm": 0,
+            "health_packs": 14,
+            "backstabs": 13,
+            "headshots": 4,
+            "airshots": 0,
+            "caps": 0,
+            "healing_taken": 0
+        },
+        {
+            "steam_id": "76561197989627594",
+            "team": 4,
+            "name": "Max!",
+            "classes": null,
+            "kills": 22,
+            "assists": 3,
+            "deaths": 23,
+            "damage": 7319,
+            "dpm": 246,
+            "kad": 1.1,
+            "kd": 1,
+            "damage_taken": 0,
+            "dtm": 0,
+            "health_packs": 41,
+            "backstabs": 5,
+            "headshots": 2,
+            "airshots": 0,
+            "caps": 0,
+            "healing_taken": 0
+        }
+    ],
+    "medics": [
+        {
+            "steam_id": "76561197993564443",
+            "healing": 6281,
+            "healing_per_min": 0,
+            "charges_kritz": 0,
+            "charges_quickfix": 0,
+            "charges_medigun": 18,
+            "charges_vacc": 0,
+            "drops": 0,
+            "avg_time_build": 0,
+            "avg_time_use": 0,
+            "near_full_death": 0,
+            "avg_uber_len": 0,
+            "death_after_charge": 0,
+            "major_adv_lost": 0,
+            "biggest_adv_lost": 0
+        },
+        {
+            "steam_id": "76561198000024718",
+            "healing": 6737,
+            "healing_per_min": 0,
+            "charges_kritz": 0,
+            "charges_quickfix": 0,
+            "charges_medigun": 8,
+            "charges_vacc": 0,
+            "drops": 0,
+            "avg_time_build": 0,
+            "avg_time_use": 0,
+            "near_full_death": 0,
+            "avg_uber_len": 0,
+            "death_after_charge": 0,
+            "major_adv_lost": 0,
+            "biggest_adv_lost": 0
+        }
+    ]
+}
+
+```
+
+## /log/player/{steam_id}
+
+Get a summary of a users logs.tf data.
+
+Example: http://localhost:8888/log/player/76561197960831093
+
+```json
+{
+    "logs": 480,
+    "kills_avg": 23.02,
+    "assists_avg": 9.78,
+    "deaths_avg": 16.09,
+    "damage_avg": 6338.83,
+    "dpm_avg": 262.76,
+    "kad_avg": 2.67,
+    "kd_avg": 1.89,
+    "damage_taken_avg": 782.94,
+    "dtm_avg": 37.31,
+    "health_packs_avg": 20.41,
+    "backstabs_avg": 3.02,
+    "headshots_avg": 1.69,
+    "airshots_avg": 0,
+    "caps_avg": 0.4,
+    "healing_taken_avg": 0,
+    "kills_sum": 11051,
+    "assists_sum": 4696,
+    "deaths_sum": 7724,
+    "damage_sum": 3042640,
+    "damage_taken_sum": 375813,
+    "health_packs_sum": 9796,
+    "backstabs_sum": 1450,
+    "headshots_sum": 813,
+    "airshots_sum": 0,
+    "caps_sum": 194,
+    "healing_taken_sum": 0
+}
+
+```
+
+## /log/player/{steam_id}/list
+
+Get a high level list of a users logs.tf matches.
+
+Example: http://localhost:8888/log/player/76561197960831093/list
+
+```json
+[
+  {
+    "log_id": 3,
+    "title": "Log 3",
+    "map": "",
+    "format": "",
+    "duration": 1769,
+    "score_red": 1,
+    "score_blu": 1,
+    "created_on": "2012-11-18T14:46:05-07:00"
+  },
+  {
+    "log_id": 13,
+    "title": "Log 13",
+    "map": "",
+    "format": "",
+    "duration": 1984,
+    "score_red": 5,
+    "score_blu": 4,
+    "created_on": "2012-11-20T16:15:45-07:00"
+  },
+  {
+    "log_id": 12,
+    "title": "Log 12",
+    "map": "",
+    "format": "",
+    "duration": 1769,
+    "score_red": 1,
+    "score_blu": 1,
+    "created_on": "2012-11-20T16:15:22-07:00"
+  }
+]
+```
+
+## /serveme
+
+Get a list of current serveme.tf bans.
+
+Example: http://localhost:8888/serveme
+
+```json
+[
+    {
+        "steam_id": "76561199176100193",
+        "name": "bot/cheat dev",
+        "reason": "bot/cheat dev",
+        "deleted": false,
+        "created_on": "2024-07-11T04:27:45.81104-06:00"
+    },
+    {
+        "steam_id": "76561199176117137",
+        "name": "bot/cheat dev",
+        "reason": "bot/cheat dev",
+        "deleted": false,
+        "created_on": "2024-07-11T04:27:45.81104-06:00"
+    },
+    {
+        "steam_id": "76561199176183082",
+        "name": "bot/cheat dev",
+        "reason": "bot/cheat dev",
+        "deleted": false,
+        "created_on": "2024-07-11T04:27:45.81104-06:00"
+    }
+]
+```
+
 
 ## Content Types
 
