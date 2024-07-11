@@ -1,44 +1,70 @@
-name: Publish Workflow
+name: release
 
 on:
-  workflow_run:
-    workflows: "Build Workflow"
-    branches: master
-    types: completed
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'New version'
+        required: true
 
 jobs:
-  deploy:
-    name: Publish
-    environment: master
+  release:
+    name: release
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    # `if` required because a workflow run is triggered regardless of
-    # the result of the previous workflow (see the documentation page)
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
 
-      - name: Log in to the Container registry
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-        with:
-          images: |
-            ghcr.io/${{ github.repository }}
+      #      - name: Import GPG key
+      #        id: import_gpg
+      #        uses: crazy-max/ghaction-import-gpg@v6
+      #        with:
+      #          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+      #          passphrase: ${{ secrets.PASSPHRASE }}
 
-      - name: Build and push Docker images
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      - uses: goreleaser/goreleaser-action@v5
         with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          distribution: goreleaser
+          version: "~> v1"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          #          DISCORD_WEBHOOK_ID: ${{ secrets.DISCORD_WEBHOOK_ID }}
+          #          DISCORD_WEBHOOK_TOKEN: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
+          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+
+      - name: Upload snapshot
+        uses: actions/upload-artifact@v3
+        with:
+          name: snapshot
+          path: build/*
+          retention-days: 1
+
+      - name: Build & publish image
+        run: |
+          docker build . --tag ghcr.io/leighmacdonald/gbans:v${{ inputs.version }}
+          docker push ghcr.io/leighmacdonald/gbans:v${{ inputs.version }}
+          docker build . --tag ghcr.io/leighmacdonald/gbans:latest
+          docker push ghcr.io/leighmacdonald/gbans:latest
+
+      - name: Update contributor list
+        uses: akhilmhdh/contributors-readme-action@v2.3.10
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
