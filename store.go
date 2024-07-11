@@ -1488,6 +1488,8 @@ func (db *pgStore) getLogsTFList(ctx context.Context, steamID steamid.SteamID) (
 		return nil, dbErr(err, "Failed to get results")
 	}
 
+	defer rows.Close()
+
 	var matches []domain.LogsTFMatchInfo
 
 	for rows.Next() {
@@ -1522,6 +1524,8 @@ func (db *pgStore) getLogsTFCount(ctx context.Context, steamID steamid.Collectio
 		return nil, dbErr(errRows, "Failed to query logs")
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		var (
 			count int
@@ -1544,6 +1548,103 @@ func (db *pgStore) getNewestLogID(ctx context.Context) (int, error) {
 	}
 
 	return id, nil
+}
+
+func (db *pgStore) getServeMeList(ctx context.Context) ([]domain.ServeMeRecord, error) {
+	const query = `SELECT steam_id, name, reason, created_on, updated_on FROM serveme`
+
+	rows, errRows := db.pool.Query(ctx, query)
+	if errRows != nil {
+		return nil, dbErr(errRows, "Failed to query serveme records")
+	}
+
+	defer rows.Close()
+
+	var records []domain.ServeMeRecord
+
+	for rows.Next() {
+		var (
+			sid    int64
+			record domain.ServeMeRecord
+		)
+		if err := rows.Scan(&sid, &record.Name, &record.Reason, &record.CreatedOn, &record.UpdatedOn); err != nil {
+			return nil, dbErr(err, "Failed to get results")
+		}
+
+		record.SteamID = steamid.New(sid)
+
+		records = append(records, record)
+	}
+
+	return records, nil
+}
+
+func (db *pgStore) updateServeMeList(ctx context.Context, entries []domain.ServeMeRecord) error {
+	transaction, errTx := db.pool.Begin(ctx)
+	if errTx != nil {
+		return dbErr(errTx, "Failed to create tx")
+	}
+
+	defer func() {
+		if err := transaction.Rollback(ctx); err != nil {
+			if !errors.Is(err, pgx.ErrTxClosed) {
+				slog.Error("Failed to close tx", ErrAttr(err))
+			}
+		}
+	}()
+
+	if _, err := db.pool.Exec(ctx, "DELETE FROM serveme"); err != nil {
+		return dbErr(err, "Failed to delete existing entries")
+	}
+	const query = "INSERT INTO serveme (steam_id, name, reason, created_on, updated_on) VALUES ($1, $2, $3, $4, $5)"
+	for _, entry := range entries {
+		if _, err := db.pool.Exec(ctx, query, entry.SteamID.Int64(), entry.Name, entry.Reason, entry.CreatedOn, entry.UpdatedOn); err != nil {
+			return dbErr(err, "Failed to insert serveme record")
+		}
+	}
+
+	if err := transaction.Commit(ctx); err != nil {
+		return dbErr(err, "Failed to commit serveme tx")
+	}
+
+	return nil
+}
+
+func (db *pgStore) getServeMeRecords(ctx context.Context, collection steamid.Collection) ([]*domain.ServeMeRecord, error) {
+	query, args, errQuery := sb.
+		Select("steam_id", "name", "reason", "created_on", "updated_on").
+		From("serveme").
+		Where(sq.Eq{"steam_id": collection}).
+		ToSql()
+	if errQuery != nil {
+		return nil, dbErr(errQuery, "Failed to create serveme query")
+	}
+
+	rows, errRows := db.pool.Query(ctx, query, args...)
+	if errRows != nil {
+		return nil, dbErr(errRows, "Failed to query serveme rows")
+	}
+
+	defer rows.Close()
+
+	var records []*domain.ServeMeRecord
+
+	for rows.Next() {
+		var (
+			sid    int64
+			record domain.ServeMeRecord
+		)
+
+		if errScan := rows.Scan(&sid, &record.Name, &record.Reason, &record.CreatedOn, &record.UpdatedOn); errScan != nil {
+			return nil, dbErr(errScan, "Failed to scan serveme record")
+		}
+
+		record.SteamID = steamid.New(sid)
+
+		records = append(records, &record)
+	}
+
+	return records, nil
 }
 
 func steamIDCollectionToInt64Slice(collection steamid.Collection) []int64 {

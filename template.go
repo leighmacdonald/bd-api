@@ -38,12 +38,6 @@ func (s *styleEncoder) Encode(value any) (string, string, error) {
 		return "", "", err
 	}
 
-	jsonEncoder := json.NewEncoder(&jsonBody)
-	jsonEncoder.SetIndent("", "    ")
-	if errJSON := jsonEncoder.Encode(value); errJSON != nil {
-		return "", "", errors.Join(errJSON, errResponseJSON)
-	}
-
 	iterator, errTokenize := s.lexer.Tokenise(&chroma.TokeniseOptions{State: "root", EnsureLF: true}, jsonBody.String())
 	if errTokenize != nil {
 		return "", "", errors.Join(errTokenize, errResponseTokenize)

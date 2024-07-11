@@ -96,6 +96,7 @@ func run(ctx context.Context) int {
 
 	go listUpdater(ctx, database)
 	go profileUpdater(ctx, database)
+	go startServeMeUpdater(ctx, database)
 
 	return runHTTP(ctx, router, config.ListenAddr)
 }

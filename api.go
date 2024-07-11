@@ -32,13 +32,14 @@ var (
 //nolint:funlen
 func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs steamid.Collection) ([]domain.Profile, error) {
 	var ( //nolint:prealloc
-		waitGroup  = &sync.WaitGroup{}
-		summaries  []steamweb.PlayerSummary
-		bans       []steamweb.PlayerBanState
-		profiles   []domain.Profile
-		logs       map[steamid.SteamID]int
-		friends    friendMap
-		sourceBans BanRecordMap
+		waitGroup   = &sync.WaitGroup{}
+		summaries   []steamweb.PlayerSummary
+		bans        []steamweb.PlayerBanState
+		profiles    []domain.Profile
+		logs        map[steamid.SteamID]int
+		friends     friendMap
+		servemeBans []*domain.ServeMeRecord
+		sourceBans  BanRecordMap
 	)
 
 	if len(steamIDs) > maxResults {
@@ -100,6 +101,21 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 	go func() {
 		defer waitGroup.Done()
 
+		serveme, errs := database.getServeMeRecords(localCtx, steamIDs)
+		if errs != nil && !errors.Is(errs, errDatabaseNoResults) {
+			slog.Error("Failed to get serveme records")
+
+			return
+		}
+
+		servemeBans = serveme
+	}()
+
+	waitGroup.Add(1)
+
+	go func() {
+		defer waitGroup.Done()
+
 		logsVal, err := database.getLogsTFCount(localCtx, steamIDs)
 		if err != nil {
 			slog.Error("failed to query log counts", ErrAttr(err))
@@ -130,6 +146,14 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 		for _, ban := range bans {
 			if ban.SteamID == sid {
 				profile.BanState = ban
+
+				break
+			}
+		}
+
+		for _, serveme := range servemeBans {
+			if serveme.SteamID == sid {
+				profile.ServeMe = serveme
 
 				break
 			}
@@ -262,6 +286,7 @@ func createRouter(database *pgStore, cacheHandler cache) (*http.ServeMux, error)
 	mux.HandleFunc("GET /bd", handleGetBotDetector(database))
 	mux.HandleFunc("GET /log/player/{steam_id}", handleGetLogsSummary(database))
 	mux.HandleFunc("GET /log/player/{steam_id}/list", handleGetLogsList(database))
+	mux.HandleFunc("GET /serveme", handleGetServemeList(database))
 
 	return mux, nil
 }

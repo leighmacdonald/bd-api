@@ -339,3 +339,20 @@ func handleGetLogsList(database *pgStore) http.HandlerFunc {
 		responseOk(writer, request, logs, fmt.Sprintf("Logs.tf List %s", steamID.String()))
 	}
 }
+
+func handleGetServemeList(database *pgStore) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		list, err := database.getServeMeList(request.Context())
+		if err != nil && !errors.Is(err, errDatabaseNoResults) {
+			responseErr(writer, request, http.StatusInternalServerError, errInternalError, "Unhandled error")
+
+			return
+		}
+
+		if list == nil {
+			list = []domain.ServeMeRecord{}
+		}
+
+		responseOk(writer, request, list, fmt.Sprintf("Serveme Ban Records (%d)", len(list)))
+	}
+}
