@@ -41,6 +41,7 @@ type appConfig struct {
 	SourcebansScraperEnabled bool            `mapstructure:"sourcebans_scraper_enabled"`
 	ProxiesEnabled           bool            `mapstructure:"proxies_enabled"`
 	Proxies                  []*proxyContext `mapstructure:"proxies"`
+	ScrapeDelay              int             `mapstructure:"scrape_delay"`
 	PrivateKeyPath           string          `mapstructure:"private_key_path"`
 	PrivateKeyPassword       string          `mapstructure:"private_key_password"`
 	EnableCache              bool            `mapstructure:"enable_cache"`
