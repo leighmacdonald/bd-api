@@ -1543,7 +1543,7 @@ func (db *pgStore) getLogsTFCount(ctx context.Context, steamID steamid.Collectio
 
 func (db *pgStore) getNewestLogID(ctx context.Context) (int, error) {
 	var id int
-	if err := db.pool.QueryRow(ctx, "SELECT max(log_id) FROM logstf").Scan(&id); err != nil {
+	if err := db.pool.QueryRow(ctx, "SELECT coalesce(max(log_id), 1) FROM logstf").Scan(&id); err != nil {
 		return 0, dbErr(err, "failed to get max_id")
 	}
 
