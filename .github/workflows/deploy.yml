@@ -2,6 +2,7 @@ name: release
 
 on:
   workflow_dispatch:
+    permissions: write-all
     inputs:
       version:
         description: 'New version'
@@ -11,9 +12,7 @@ jobs:
   release:
     name: release
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+    permissions: write-all
     steps:
       - uses: actions/checkout@v4
         with:
