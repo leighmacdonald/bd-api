@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"path/filepath"
 	"regexp"
 	"slices"
 	"strconv"
@@ -48,7 +49,7 @@ func newLogsTFScraper(database *pgStore, config appConfig) (*logsTFScraper, erro
 
 	collector := colly.NewCollector(
 		colly.UserAgent("bd-api"),
-		// colly.CacheDir(filepath.Join(cacheDir, "logstf")),
+		colly.CacheDir(filepath.Join(config.CacheDir, "logstf")),
 		colly.Debugger(&debugLogger),
 		colly.AllowedDomains("logs.tf"),
 	)
