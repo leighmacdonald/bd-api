@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"path/filepath"
 	"regexp"
 	"slices"
 	"strconv"
@@ -38,7 +37,7 @@ type logsTFScraper struct {
 	db    *pgStore
 }
 
-func newLogsTFScraper(database *pgStore, cacheDir string) (*logsTFScraper, error) {
+func newLogsTFScraper(database *pgStore, config appConfig) (*logsTFScraper, error) {
 	logger := slog.With("name", "logstf")
 	debugLogger := scrapeLogger{logger: logger} //nolint:exhaustruct
 
@@ -49,7 +48,7 @@ func newLogsTFScraper(database *pgStore, cacheDir string) (*logsTFScraper, error
 
 	collector := colly.NewCollector(
 		colly.UserAgent("bd-api"),
-		colly.CacheDir(filepath.Join(cacheDir, "logstf")),
+		// colly.CacheDir(filepath.Join(cacheDir, "logstf")),
 		colly.Debugger(&debugLogger),
 		colly.AllowedDomains("logs.tf"),
 	)
@@ -68,11 +67,17 @@ func newLogsTFScraper(database *pgStore, cacheDir string) (*logsTFScraper, error
 		slog.Debug("Visiting", slog.String("url", r.URL.String()))
 	})
 
-	initialDelay := time.Millisecond * 500
+	initialDelay := time.Millisecond * 750
+
+	parallelism := 1
+	if config.ProxiesEnabled {
+		parallelism = len(config.Proxies)
+	}
 
 	if errLimit := scraper.Limit(&colly.LimitRule{ //nolint:exhaustruct
-		DomainGlob: "*logs.tf",
-		Delay:      initialDelay,
+		DomainGlob:  "*logs.tf",
+		Delay:       initialDelay,
+		Parallelism: parallelism,
 	}); errLimit != nil {
 		return nil, errors.Join(errLimit, errScrapeLimit)
 	}
@@ -87,8 +92,10 @@ func newLogsTFScraper(database *pgStore, cacheDir string) (*logsTFScraper, error
 			return
 		}
 
-		initialDelay += time.Millisecond * 100
-		slog.Info("Increasing delay", slog.String("delay", initialDelay.String()))
+		// initialDelay += time.Millisecond * 100
+		slog.Info("Too many requests...", slog.String("delay", initialDelay.String()))
+
+		time.Sleep(time.Second * 2)
 
 		if errLimit := scraper.Limit(&colly.LimitRule{ //nolint:exhaustruct
 			DomainGlob: "*logs.tf",
@@ -144,7 +151,7 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 		curCount     = 0
 		successCount = 0
 		errorCount   = 0
-		maxID        = 0
+		maxID        = 3680000
 		skipCount    = 0
 		lastCount    = time.Now()
 	)
@@ -162,7 +169,7 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 			// Setup the queue
 			maxIDValue, errMaxID := getLogsTFStartID(element.DOM)
 			if errMaxID != nil {
-				s.log.Error("No log id parsed")
+				s.log.Error("No log id parsed, using default", ErrAttr(errMaxID))
 
 				return
 			}
