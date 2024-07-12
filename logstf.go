@@ -69,15 +69,15 @@ func newLogsTFScraper(database *pgStore, config appConfig) (*logsTFScraper, erro
 
 	initialDelay := time.Millisecond * 750
 
-	paralellism := 1
+	parallelism := 1
 	if config.ProxiesEnabled {
-		paralellism = len(config.Proxies)
+		parallelism = len(config.Proxies)
 	}
 
 	if errLimit := scraper.Limit(&colly.LimitRule{ //nolint:exhaustruct
 		DomainGlob:  "*logs.tf",
 		Delay:       initialDelay,
-		Parallelism: paralellism,
+		Parallelism: parallelism,
 	}); errLimit != nil {
 		return nil, errors.Join(errLimit, errScrapeLimit)
 	}
