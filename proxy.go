@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"net/http"
 	"sync"
 
 	"github.com/armon/go-socks5"
@@ -119,6 +120,11 @@ func attachCollectorProxies(collector *colly.Collector, config *appConfig) error
 	}
 
 	collector.SetProxyFunc(proxiesFunc)
+
+	// Keep-alives will prevent proxy switching
+	collector.WithTransport(&http.Transport{
+		DisableKeepAlives: true,
+	})
 
 	return nil
 }
