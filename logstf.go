@@ -159,7 +159,11 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 
 	minID, errID := s.db.getNewestLogID(ctx)
 	if errID != nil {
-		slog.Error("Failed to get int id")
+		if errors.Is(errID, errDatabaseNoResults) {
+			minID = 1
+		} else {
+			slog.Error("Failed to get int id", ErrAttr(errID))
+		}
 
 		return
 	}
@@ -168,7 +172,7 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 		if start {
 			start = false
 			// Setup the queue
-			maxIDValue, errMaxID := getLogsTFStartID(element.DOM)
+			maxIDValue, errMaxID := getLogsTFMaxID(element.DOM)
 			if errMaxID != nil {
 				s.log.Error("No log id parsed, using default", ErrAttr(errMaxID))
 
@@ -241,7 +245,7 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 		slog.Duration("duration", time.Since(startTime)))
 }
 
-func getLogsTFStartID(doc *goquery.Selection) (int, error) {
+func getLogsTFMaxID(doc *goquery.Selection) (int, error) {
 	idStr, found := doc.Find("table.loglist tbody tr").First().Attr("id")
 	if !found {
 		return 0, errFindStartID
