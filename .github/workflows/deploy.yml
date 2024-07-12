@@ -49,7 +49,7 @@ jobs:
 
       - name: Build & publish image
         run: |
-          docker build . --tag ghcr.io/leighmacdonald/gbans:v${{ inputs.version }}
-          docker push ghcr.io/leighmacdonald/gbans:v${{ inputs.version }}
-          docker build . --tag ghcr.io/leighmacdonald/gbans:latest
-          docker push ghcr.io/leighmacdonald/gbans:latest
+          docker build . --tag ghcr.io/leighmacdonald/bd-api:${{ inputs.version }}
+          docker push ghcr.io/leighmacdonald/bd-api:${{ inputs.version }}
+          docker build . --tag ghcr.io/leighmacdonald/bd-api:latest
+          docker push ghcr.io/leighmacdonald/bd-api:latest
