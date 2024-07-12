@@ -67,7 +67,7 @@ func newLogsTFScraper(database *pgStore, config appConfig) (*logsTFScraper, erro
 		slog.Debug("Visiting", slog.String("url", r.URL.String()))
 	})
 
-	initialDelay := time.Millisecond * 500
+	initialDelay := time.Millisecond * 750
 
 	paralellism := 1
 	if config.ProxiesEnabled {
