@@ -505,6 +505,19 @@ Example: http://localhost:8888/serveme
 ]
 ```
 
+## GET /steamid/{id}
+
+Perform steam id conversions/lookups. Accept any format, including bare vanity name and full profile URLs.
+
+```json
+{
+    "steam64": "76561197961279983",
+    "steam32": 1014255,
+    "steam3": "[U:1:1014255]",
+    "steam": "STEAM_1:1:507127",
+    "profile": "https://steamcommunity.com/profiles/76561197961279983"
+}
+```
 
 ## Content Types
 
