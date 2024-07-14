@@ -186,13 +186,23 @@ type SbSite struct {
 
 // Profile is a high level meta profile of several services.
 type Profile struct {
-	Summary    steamweb.PlayerSummary  `json:"summary"`
-	BanState   steamweb.PlayerBanState `json:"ban_state"`
-	Seasons    []Season                `json:"seasons"`
-	Friends    []steamweb.Friend       `json:"friends"`
-	SourceBans []SbBanRecord           `json:"source_bans"`
-	ServeMe    *ServeMeRecord          `json:"serve_me"`
-	LogsCount  int                     `json:"logs_count"`
+	Summary    steamweb.PlayerSummary `json:"summary"`
+	BanState   PlayerBanState         `json:"ban_state"`
+	Seasons    []Season               `json:"seasons"`
+	Friends    []steamweb.Friend      `json:"friends"`
+	SourceBans []SbBanRecord          `json:"source_bans"`
+	ServeMe    *ServeMeRecord         `json:"serve_me"`
+	LogsCount  int                    `json:"logs_count"`
+}
+
+type PlayerBanState struct {
+	SteamID          steamid.SteamID       `json:"steam_id"`
+	CommunityBanned  bool                  `json:"community_banned"`
+	VACBanned        bool                  `json:"vac_banned"`
+	NumberOfVACBans  int                   `json:"number_of_vac_bans"`
+	DaysSinceLastBan int                   `json:"days_since_last_ban"`
+	NumberOfGameBans int                   `json:"number_of_game_bans"`
+	EconomyBan       steamweb.EconBanState `json:"economy_ban"`
 }
 
 // Division tries to define a generalized ranked division order.

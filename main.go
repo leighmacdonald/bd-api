@@ -6,6 +6,8 @@ import (
 	"log/slog"
 )
 
+var version = "1.0.2"
+
 func createAppDeps(ctx context.Context) (appConfig, cache, *pgStore, error) {
 	var config appConfig
 
