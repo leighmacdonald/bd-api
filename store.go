@@ -1202,9 +1202,9 @@ func (db *pgStore) getLogsTFPlayerSummary(ctx context.Context, steamID steamid.S
 	sid := steamID.Int64()
 	if errScan := db.pool.QueryRow(ctx, query, sid).
 		Scan(&sum.Logs,
-			&sum.KillsAvg, &sum.AssistsAvg, &sum.DeathsAvg, &sum.DamageAvg,
-			&sum.DPMAvg, &sum.KADAvg, &sum.KDAvg, &sum.DamageTakenAvg, &sum.DTMAvg,
-			&sum.HealthPacksAvg, &sum.BackstabsAvg, &sum.HeadshotsAvg, &sum.CapsAvg, &sum.HealingTakenAvg,
+			&sum.KillsAvg.Value, &sum.AssistsAvg.Value, &sum.DeathsAvg.Value, &sum.DamageAvg.Value,
+			&sum.DPMAvg.Value, &sum.KADAvg.Value, &sum.KDAvg.Value, &sum.DamageTakenAvg.Value, &sum.DTMAvg.Value,
+			&sum.HealthPacksAvg.Value, &sum.BackstabsAvg.Value, &sum.HeadshotsAvg.Value, &sum.CapsAvg.Value, &sum.HealingTakenAvg.Value,
 			&sum.KillsSum, &sum.AssistsSum, &sum.DeathsSum, &sum.DamageSum,
 			&sum.DamageTakenSum,
 			&sum.HealthPacksSum, &sum.BackstabsSum, &sum.HeadshotsSum, &sum.CapsSum, &sum.HealingTakenSum,

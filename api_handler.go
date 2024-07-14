@@ -1,8 +1,10 @@
 package main
 
 import (
+	_ "embed"
 	"errors"
 	"fmt"
+	"html/template"
 	"log/slog"
 	"net/http"
 
@@ -10,10 +12,6 @@ import (
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 )
-
-type apiErr struct {
-	Error string `json:"error"`
-}
 
 // handleGetFriendList returns a list of the users friends. If the users friends are private,
 // no results are returned.
@@ -281,5 +279,27 @@ func handleGetServemeList(database *pgStore) http.HandlerFunc {
 		}
 
 		responseOk(writer, request, list, fmt.Sprintf("Serveme Ban Records (%d)", len(list)))
+	}
+}
+
+type tmplVars struct {
+	Version string
+}
+
+//go:embed index.tmpl.html
+var tmplLoginPage string
+
+func handleGetIndex() http.HandlerFunc {
+	index, err := template.New("index").Parse(tmplLoginPage)
+	if err != nil {
+		panic(err)
+	}
+
+	return func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Content-Type", "text/html")
+		writer.WriteHeader(http.StatusOK)
+		if errTmpl := index.Execute(writer, tmplVars{Version: version}); errTmpl != nil {
+			slog.Error("Failed to execute index template", ErrAttr(errTmpl))
+		}
 	}
 }

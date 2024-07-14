@@ -152,7 +152,15 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 
 		for _, ban := range bans {
 			if ban.SteamID == sid {
-				profile.BanState = ban
+				profile.BanState = domain.PlayerBanState{
+					SteamID:          ban.SteamID,
+					CommunityBanned:  ban.CommunityBanned,
+					VACBanned:        ban.VACBanned,
+					NumberOfVACBans:  ban.NumberOfVACBans,
+					DaysSinceLastBan: ban.DaysSinceLastBan,
+					NumberOfGameBans: ban.NumberOfGameBans,
+					EconomyBan:       ban.EconomyBan,
+				}
 
 				break
 			}
@@ -195,6 +203,10 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 	}
 
 	return profiles, nil
+}
+
+type apiErr struct {
+	Error string `json:"error"`
 }
 
 func responseErr(w http.ResponseWriter, r *http.Request, status int, err error, userMsg string) {
@@ -367,6 +379,7 @@ func createRouter(database *pgStore, cacheHandler cache) (*http.ServeMux, error)
 	mux.HandleFunc("GET /log/player/{steam_id}", handleGetLogsSummary(database))
 	mux.HandleFunc("GET /log/player/{steam_id}/list", handleGetLogsList(database))
 	mux.HandleFunc("GET /serveme", handleGetServemeList(database))
+	mux.HandleFunc("GET /", handleGetIndex())
 
 	return mux, nil
 }
@@ -390,6 +403,9 @@ func runHTTP(ctx context.Context, router *http.ServeMux, listenAddr string) int 
 
 	go func() {
 		//goland:noinspection ALL
+		if strings.HasPrefix(listenAddr, ":") {
+			listenAddr = "localhost" + listenAddr
+		}
 		slog.Info("Starting HTTP service", slog.String("address", "http://"+listenAddr))
 		if errServe := httpServer.ListenAndServe(); errServe != nil && !errors.Is(errServe, http.ErrServerClosed) {
 			slog.Error("error trying to shutdown http service", ErrAttr(errServe))
