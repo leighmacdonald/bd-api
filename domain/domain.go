@@ -3,6 +3,7 @@ package domain
 
 import (
 	"encoding/json"
+	"math"
 	"time"
 
 	"github.com/leighmacdonald/steamid/v4/steamid"
@@ -266,6 +267,20 @@ func (d JSONDuration) MarshalJSON() ([]byte, error) {
 	return json.Marshal(d.Seconds()) //nolint:wrapcheck
 }
 
+// JSONFloat32 handles encoding float32, returning -1 for Inf values.
+type JSONFloat32 struct {
+	Value float32
+}
+
+func (d JSONFloat32) MarshalJSON() ([]byte, error) {
+	// json package does not encode inf floats and will error out.
+	if math.IsInf(float64(d.Value), 0) {
+		return json.Marshal(-1) //nolint:wrapcheck
+	}
+
+	return json.Marshal(d.Value) //nolint:wrapcheck
+}
+
 type LogsTFMatchInfo struct {
 	LogID        int          `json:"log_id"`
 	Title        string       `json:"title"`
@@ -402,22 +417,23 @@ type LogsTFPlayerSums struct {
 }
 
 type LogsTFPlayerAverages struct {
-	KillsAvg        float32 `json:"kills_avg"`
-	AssistsAvg      float32 `json:"assists_avg"`
-	DeathsAvg       float32 `json:"deaths_avg"`
-	DamageAvg       float32 `json:"damage_avg"`
-	DPMAvg          float32 `json:"dpm_avg"`
-	KADAvg          float32 `json:"kad_avg"`
-	KDAvg           float32 `json:"kd_avg"`
-	DamageTakenAvg  float32 `json:"damage_taken_avg"`
-	DTMAvg          float32 `json:"dtm_avg"`
-	HealthPacksAvg  float32 `json:"health_packs_avg"`
-	BackstabsAvg    float32 `json:"backstabs_avg"`
-	HeadshotsAvg    float32 `json:"headshots_avg"`
-	AirshotsAvg     float32 `json:"airshots_avg"`
-	CapsAvg         float32 `json:"caps_avg"`
-	HealingTakenAvg float32 `json:"healing_taken_avg"`
+	KillsAvg        JSONFloat32 `json:"kills_avg"`
+	AssistsAvg      JSONFloat32 `json:"assists_avg"`
+	DeathsAvg       JSONFloat32 `json:"deaths_avg"`
+	DamageAvg       JSONFloat32 `json:"damage_avg"`
+	DPMAvg          JSONFloat32 `json:"dpm_avg"`
+	KADAvg          JSONFloat32 `json:"kad_avg"`
+	KDAvg           JSONFloat32 `json:"kd_avg"`
+	DamageTakenAvg  JSONFloat32 `json:"damage_taken_avg"`
+	DTMAvg          JSONFloat32 `json:"dtm_avg"`
+	HealthPacksAvg  JSONFloat32 `json:"health_packs_avg"`
+	BackstabsAvg    JSONFloat32 `json:"backstabs_avg"`
+	HeadshotsAvg    JSONFloat32 `json:"headshots_avg"`
+	AirshotsAvg     JSONFloat32 `json:"airshots_avg"`
+	CapsAvg         JSONFloat32 `json:"caps_avg"`
+	HealingTakenAvg JSONFloat32 `json:"healing_taken_avg"`
 }
+
 type LogsTFPlayerSummary struct {
 	Logs int `json:"logs"`
 	LogsTFPlayerAverages
