@@ -303,3 +303,37 @@ func handleGetIndex() http.HandlerFunc {
 		}
 	}
 }
+
+func handleGetSteamID() http.HandlerFunc {
+	type sid struct {
+		Steam64 string `json:"steam64"`
+		Steam32 uint32 `json:"steam32"`
+		Steam3  string `json:"steam3"`
+		Steam   string `json:"steam"`
+		Profile string `json:"profile"`
+	}
+
+	return func(writer http.ResponseWriter, request *http.Request) {
+		value := request.PathValue("steam_id")
+		if value == "" {
+			responseErr(writer, request, http.StatusBadRequest, errInvalidSteamID, "Invalid parameter")
+
+			return
+		}
+
+		resolved, err := steamid.Resolve(request.Context(), value)
+		if err != nil {
+			responseErr(writer, request, http.StatusBadRequest, errInvalidSteamID, "Invalid steamid / profile")
+
+			return
+		}
+
+		responseOk(writer, request, sid{
+			Steam64: resolved.String(),
+			Steam32: uint32(resolved.AccountID),
+			Steam3:  string(resolved.Steam3()),
+			Steam:   string(resolved.Steam(true)),
+			Profile: "https://steamcommunity.com/profiles/" + resolved.String(),
+		}, fmt.Sprintf("SteamID Conversion (%s)", value))
+	}
+}

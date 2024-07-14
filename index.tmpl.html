@@ -791,6 +791,11 @@
     <button type="submit">Player Log List</button>
 </form>
 
+<form method="get" id="steam_id">
+    <input type="text" name="steamids" placeholder="steamid|vanity name|profile url">
+    <button type="submit">Get SteamIDs</button>
+</form>
+
 <form action="/serveme" method="get">
     <button type="submit" style="width: 99%">serveme.tf Bans</button>
 </form>
@@ -817,6 +822,13 @@
         e.preventDefault();
         if (this.elements[0].value !== "") {
             location.href = '/log/player/' + this.elements[0].value + '/list';
+        }
+    }, false);
+
+    document.querySelector('#steam_id').addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (this.elements[0].value !== "") {
+            location.href = '/steamid/' + encodeURIComponent(this.elements[0].value);
         }
     }, false);
 </script>
