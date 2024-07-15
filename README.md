@@ -3,10 +3,40 @@
 Simple api that provides a caching proxy for fetching various TF2 related data points from 3rd party apis and scraped
 site data.
 
-## SourceBans scraper
+There is also a very basic index page that allows for manual searching using the APIs.
 
-The scraper functionality is currently designed to work via establishing a socks5 proxy over ssh (`ssh -D`). The scraper 
+## Scraper Proxies
+
+The scraper functionality is currently designed, but not required, to work via establishing a socks5 proxy over ssh (`ssh -D`). The scraper 
 cycles through all the configured ssh endpoints when making requests.
+
+## Data Sources
+
+If you know of a good data source that should be index in addition to these, please dont hesitate to open
+a issue. If it seems worthwhile it can be added.
+
+### Source Bans 
+
+Close to 100 sites are currently indexed. Support is included for scraping the most commonly used 3rd party themes.
+
+### Logs.tf
+
+Most logs.tf match data is indexed. Some info such as chat logs and player class specific weapon stats are currently omitted, 
+however, they may be included in the future.
+
+### Serveme.tf 
+
+The serveme data is taken directly from their [CSV](https://github.com/Arie/serveme/blob/master/doc/banned_steam_ids.csv) and 
+returned in a JSON format.
+
+### Bot Detector
+
+There is support for adding bot detector compatible lists to index and enable searching. These
+lists need to be inserted into the database manually, this tool does not come with any predefined.
+
+### Competitive Leagues (RGL, ETF2L, UGC, More?)
+
+There is some preliminary support for scraping this data, however its not functional yet.
 
 ## API
 
