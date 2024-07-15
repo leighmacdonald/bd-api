@@ -447,3 +447,52 @@ type ServeMeRecord struct {
 	Deleted bool            `json:"deleted"`
 	TimeStamped
 }
+
+type FileInfo struct {
+	Authors     []string `json:"authors"`
+	Description string   `json:"description"`
+	Title       string   `json:"title"`
+	UpdateURL   string   `json:"update_url"`
+}
+
+type LastSeen struct {
+	PlayerName string `json:"player_name,omitempty"`
+	Time       int    `json:"time,omitempty"`
+}
+
+type TF2BDPlayer struct {
+	Attributes []string `json:"attributes"`
+	LastSeen   LastSeen `json:"last_seen,omitempty"`
+	Steamid    any      `json:"steamid"`
+	Proof      []string `json:"proof"`
+}
+
+type TF2BDSchema struct {
+	Schema   string        `json:"$schema"` //nolint:tagliatelle
+	FileInfo FileInfo      `json:"file_info"`
+	Players  []TF2BDPlayer `json:"players"`
+}
+
+type BDList struct {
+	BDListID    int
+	BDListName  string
+	URL         string
+	Game        string
+	TrustWeight int
+	Deleted     bool
+	CreatedOn   time.Time
+	UpdatedOn   time.Time
+}
+
+type BDListEntry struct {
+	BDListEntryID int64
+	BDListID      int
+	SteamID       steamid.SteamID
+	Attributes    []string
+	Proof         []string
+	LastSeen      time.Time
+	LastName      string
+	Deleted       bool
+	CreatedOn     time.Time
+	UpdatedOn     time.Time
+}

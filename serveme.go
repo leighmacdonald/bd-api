@@ -58,7 +58,7 @@ func updateServeMe(ctx context.Context, database *pgStore) {
 		}
 	}
 
-	if err := database.updateServeMeList(ctx, entries); err != nil {
+	if err := database.servemeUpdate(ctx, entries); err != nil {
 		slog.Error("Failed to save serveme list", ErrAttr(err))
 
 		return

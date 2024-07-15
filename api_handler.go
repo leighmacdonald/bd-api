@@ -83,7 +83,7 @@ func handleGetBans() http.HandlerFunc {
 		var bans []domain.PlayerBanState
 
 		swBans, errBans := steamweb.GetPlayerBans(request.Context(), ids)
-		if errBans != nil || len(ids) != len(bans) {
+		if errBans != nil || len(ids) != len(swBans) {
 			responseErr(writer, request, http.StatusInternalServerError, errLoadFailed, "")
 
 			return
@@ -135,7 +135,7 @@ func handleGetSourceBansMany(database *pgStore) http.HandlerFunc {
 			return
 		}
 
-		bans, errBans := database.sbGetBansBySID(request.Context(), ids)
+		bans, errBans := database.sourcebansRecordBySID(request.Context(), ids)
 		if errBans != nil {
 			responseErr(writer, request, http.StatusInternalServerError, errInternalError, "")
 
@@ -153,7 +153,7 @@ func handleGetSourceBans(database *pgStore) http.HandlerFunc {
 			return
 		}
 
-		bans, errBans := database.sbGetBansBySID(request.Context(), steamid.Collection{sid})
+		bans, errBans := database.sourcebansRecordBySID(request.Context(), steamid.Collection{sid})
 		if errBans != nil {
 			responseErr(writer, request, http.StatusInternalServerError, errInternalError, "")
 
@@ -184,7 +184,7 @@ func handleGetBotDetector(database *pgStore) http.HandlerFunc {
 			return
 		}
 
-		results, errSearch := database.bdListSearch(request.Context(), sid, attrs)
+		results, errSearch := database.botDetectorListSearch(request.Context(), sid, attrs)
 		if errSearch != nil {
 			responseErr(writer, request, http.StatusInternalServerError, errSearch, "internal error")
 
@@ -208,7 +208,7 @@ func handleGetLogByID(database *pgStore) http.HandlerFunc {
 			return
 		}
 
-		match, errMatch := database.getLogsTFMatch(reader.Context(), logID)
+		match, errMatch := database.logsTFMatchGet(reader.Context(), logID)
 		if errMatch != nil {
 			if errors.Is(errMatch, errDatabaseNoResults) {
 				responseErr(writer, reader, http.StatusNotFound, errDatabaseNoResults, "Unknown match id")
@@ -233,7 +233,7 @@ func handleGetLogsSummary(database *pgStore) http.HandlerFunc {
 			return
 		}
 
-		averages, err := database.getLogsTFPlayerSummary(request.Context(), steamID)
+		averages, err := database.logsTFPlayerSummary(request.Context(), steamID)
 		if err != nil {
 			if errors.Is(err, errDatabaseNoResults) {
 				responseErr(writer, request, http.StatusNotFound, errDatabaseNoResults, "Unknown match id")
@@ -258,7 +258,7 @@ func handleGetLogsList(database *pgStore) http.HandlerFunc {
 			return
 		}
 
-		logs, err := database.getLogsTFList(request.Context(), steamID)
+		logs, err := database.logsTFMatchList(request.Context(), steamID)
 		if err != nil {
 			if errors.Is(err, errDatabaseNoResults) {
 				responseErr(writer, request, http.StatusNotFound, errDatabaseNoResults, "Unknown match id")
@@ -282,7 +282,7 @@ func handleGetLogsList(database *pgStore) http.HandlerFunc {
 // handleGetServemeList returns a list of all known serveme bans.
 func handleGetServemeList(database *pgStore) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
-		list, err := database.getServeMeList(request.Context())
+		list, err := database.servemeRecords(request.Context())
 		if err != nil && !errors.Is(err, errDatabaseNoResults) {
 			responseErr(writer, request, http.StatusInternalServerError, errInternalError, "Unhandled error")
 
@@ -366,7 +366,7 @@ func handleGetStats(database *pgStore) func(http.ResponseWriter, *http.Request) 
 		statsMu.RUnlock()
 
 		if timeDiff > time.Minute*15 {
-			newStats, err := database.getStats(request.Context())
+			newStats, err := database.stats(request.Context())
 			if err != nil {
 				responseErr(writer, request, http.StatusInternalServerError, err, "Failed to generate stats")
 

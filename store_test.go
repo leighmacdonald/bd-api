@@ -50,13 +50,13 @@ func sourceBansStoreTest(database *pgStore) func(t *testing.T) {
 		t.Parallel()
 
 		var site domain.SbSite
-		require.Error(t, database.sbSiteGet(context.Background(), 99999, &site))
+		require.Error(t, database.sourcebansSiteGet(context.Background(), 99999, &site))
 
-		site2 := NewSBSite("test-site")
-		require.NoError(t, database.sbSiteSave(context.Background(), &site2))
+		site2 := newSourcebansSite("test-site")
+		require.NoError(t, database.sourcebansSiteSave(context.Background(), &site2))
 
 		var site3 domain.SbSite
-		require.NoError(t, database.sbSiteGet(context.Background(), site2.SiteID, &site3))
+		require.NoError(t, database.sourcebansSiteGet(context.Background(), site2.SiteID, &site3))
 		require.Equal(t, site2.Name, site3.Name)
 		require.Equal(t, site2.UpdatedOn.Second(), site3.UpdatedOn.Second())
 
@@ -67,10 +67,10 @@ func sourceBansStoreTest(database *pgStore) func(t *testing.T) {
 
 		t0 := time.Now().AddDate(-1, 0, 0)
 		t1 := t0.AddDate(0, 1, 0)
-		recA := newRecord(site3, testIDCamper, "blah", "test", t0, t1.Sub(t0), false)
-		require.NoError(t, database.sbBanSave(context.Background(), &recA))
-		require.NoError(t, database.sbSiteDelete(context.Background(), site3.SiteID))
-		require.Error(t, database.sbSiteGet(context.Background(), site3.SiteID, &site))
+		recA := newSourcebansRecord(site3, testIDCamper, "blah", "test", t0, t1.Sub(t0), false)
+		require.NoError(t, database.sourcebansBanRecordSave(context.Background(), &recA))
+		require.NoError(t, database.sourcebansSiteDelete(context.Background(), site3.SiteID))
+		require.Error(t, database.sourcebansSiteGet(context.Background(), site3.SiteID, &site))
 	}
 }
 
@@ -83,7 +83,7 @@ func sourceBansPlayerRecordTest(database *pgStore) func(t *testing.T) {
 		pRecord.Vanity = "123"
 		require.NoError(t, database.playerRecordSave(context.Background(), &pRecord))
 
-		names, errNames := database.playerGetNames(context.Background(), pRecord.SteamID)
+		names, errNames := database.playerNames(context.Background(), pRecord.SteamID)
 		require.NoError(t, errNames)
 
 		nameOk := false
@@ -97,7 +97,7 @@ func sourceBansPlayerRecordTest(database *pgStore) func(t *testing.T) {
 		require.True(t, nameOk, "Name not found")
 
 		vNameOk := false
-		vNames, errVNames := database.playerGetVanityNames(context.Background(), pRecord.SteamID)
+		vNames, errVNames := database.playerVanityNames(context.Background(), pRecord.SteamID)
 		require.NoError(t, errVNames)
 
 		for _, name := range vNames {
@@ -110,7 +110,7 @@ func sourceBansPlayerRecordTest(database *pgStore) func(t *testing.T) {
 		require.True(t, vNameOk, "Vanity not found")
 
 		avatarOk := false
-		avatars, errAvatars := database.playerGetAvatars(context.Background(), pRecord.SteamID)
+		avatars, errAvatars := database.playerAvatars(context.Background(), pRecord.SteamID)
 		require.NoError(t, errAvatars)
 
 		for _, name := range avatars {
@@ -127,7 +127,7 @@ func sourceBansPlayerRecordTest(database *pgStore) func(t *testing.T) {
 
 func bdTest(database *pgStore) func(t *testing.T) {
 	var (
-		aList = BDList{
+		aList = domain.BDList{
 			BDListName:  "list a",
 			URL:         "http://localhost/a",
 			Game:        "tf2",
@@ -136,7 +136,7 @@ func bdTest(database *pgStore) func(t *testing.T) {
 			CreatedOn:   time.Now(),
 			UpdatedOn:   time.Now(),
 		}
-		bList = BDList{
+		bList = domain.BDList{
 			BDListName:  "list b",
 			URL:         "http://localhost/b",
 			Game:        "tf2",
@@ -151,19 +151,19 @@ func bdTest(database *pgStore) func(t *testing.T) {
 		t.Parallel()
 
 		ctx := context.Background()
-		listA, errA := database.bdListCreate(ctx, aList)
+		listA, errA := database.botDetectorListCreate(ctx, aList)
 		require.NoError(t, errA)
 		require.True(t, listA.BDListID > 0)
-		listB, errB := database.bdListCreate(ctx, bList)
+		listB, errB := database.botDetectorListCreate(ctx, bList)
 		require.NoError(t, errB)
 		require.True(t, listB.BDListID > 0)
 		require.NotEqual(t, listA.BDListID, listB.BDListID)
 
-		var entriesA []BDListEntry
+		var entriesA []domain.BDListEntry
 		for idx := 0; idx < 5; idx++ {
 			record := newPlayerRecord(steamid.RandSID64())
 			require.NoError(t, database.playerRecordSave(ctx, &record))
-			entry, errEntry := database.bdListEntryCreate(ctx, BDListEntry{
+			entry, errEntry := database.botDetectorListEntryCreate(ctx, domain.BDListEntry{
 				BDListID:   listA.BDListID,
 				SteamID:    record.SteamID,
 				Attributes: []string{"cheater"},
@@ -183,9 +183,9 @@ func bdTest(database *pgStore) func(t *testing.T) {
 
 		newName := listA.BDListName + listA.BDListName
 		listA.BDListName = newName
-		require.NoError(t, database.bdListSave(ctx, listA))
+		require.NoError(t, database.botDetectorListSave(ctx, listA))
 
-		listAEdited, errEdited := database.bdListByName(ctx, listA.BDListName)
+		listAEdited, errEdited := database.botDetectorListByName(ctx, listA.BDListName)
 		require.NoError(t, errEdited)
 		require.Equal(t, newName, listAEdited.BDListName)
 	}

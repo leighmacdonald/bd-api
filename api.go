@@ -61,7 +61,7 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 	go func() {
 		defer waitGroup.Done()
 
-		sbRecords, errSB := database.sbGetBansBySID(localCtx, steamIDs)
+		sbRecords, errSB := database.sourcebansRecordBySID(localCtx, steamIDs)
 		if errSB != nil {
 			slog.Error("Failed to load sourcebans records", ErrAttr(errSB))
 		}
@@ -108,7 +108,7 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 	go func() {
 		defer waitGroup.Done()
 
-		serveme, errs := database.getServeMeRecords(localCtx, steamIDs)
+		serveme, errs := database.servemeRecordsSearch(localCtx, steamIDs)
 		if errs != nil && !errors.Is(errs, errDatabaseNoResults) {
 			slog.Error("Failed to get serveme records")
 
@@ -123,7 +123,7 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 	go func() {
 		defer waitGroup.Done()
 
-		logsVal, err := database.getLogsTFCount(localCtx, steamIDs)
+		logsVal, err := database.logsTFLogCount(localCtx, steamIDs)
 		if err != nil {
 			slog.Error("failed to query log counts", ErrAttr(err))
 

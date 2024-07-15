@@ -5,12 +5,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/stretchr/testify/require"
 )
 
 func TestBDUpdates(t *testing.T) {
-	list1 := BDList{
+	list1 := domain.BDList{
 		BDListID:    1,
 		BDListName:  "list1",
 		URL:         "",
@@ -21,7 +22,7 @@ func TestBDUpdates(t *testing.T) {
 		UpdatedOn:   time.Now(),
 	}
 
-	entries1 := []BDListEntry{
+	entries1 := []domain.BDListEntry{
 		{
 			BDListEntryID: 1,
 			BDListID:      1,
@@ -50,13 +51,13 @@ func TestBDUpdates(t *testing.T) {
 
 	schema1 := listMapping{
 		list: list1,
-		result: &TF2BDSchema{
+		result: &domain.TF2BDSchema{
 			Schema:   "",
-			FileInfo: FileInfo{},
-			Players: []TF2BDPlayer{
+			FileInfo: domain.FileInfo{},
+			Players: []domain.TF2BDPlayer{
 				{
 					Attributes: []string{"cheater"},
-					LastSeen: LastSeen{
+					LastSeen: domain.LastSeen{
 						PlayerName: "player1",
 						Time:       int(entries1[0].LastSeen.Unix()),
 					},
@@ -64,7 +65,7 @@ func TestBDUpdates(t *testing.T) {
 				},
 				{
 					Attributes: []string{"cheater"},
-					LastSeen: LastSeen{
+					LastSeen: domain.LastSeen{
 						PlayerName: "player2-edit",
 						Time:       int(entries1[1].LastSeen.Unix()),
 					},
@@ -72,7 +73,7 @@ func TestBDUpdates(t *testing.T) {
 				},
 				{
 					Attributes: []string{"cheater"},
-					LastSeen: LastSeen{
+					LastSeen: domain.LastSeen{
 						PlayerName: "player3",
 						Time:       1709935391,
 					},

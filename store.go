@@ -74,6 +74,19 @@ func newStore(ctx context.Context, dsn string) (*pgStore, error) {
 	return &database, nil
 }
 
+func dbErr(err error, wrapMsg string) error {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		if pgErr.Code == pgerrcode.UniqueViolation {
+			return errors.Join(err, errDatabaseUnique)
+		}
+	} else if errors.Is(err, pgx.ErrNoRows) {
+		return errors.Join(err, errDatabaseNoResults)
+	}
+
+	return errors.Join(err, fmt.Errorf("%w: %s", errDatabaseQuery, wrapMsg))
+}
+
 type pgStore struct {
 	dsn  string
 	log  *slog.Logger
@@ -262,7 +275,7 @@ func playerVanitySave(ctx context.Context, transaction pgx.Tx, record *PlayerRec
 }
 
 //nolint:dupl
-func (db *pgStore) playerGetNames(ctx context.Context, sid steamid.SteamID) ([]domain.PlayerNameRecord, error) {
+func (db *pgStore) playerNames(ctx context.Context, sid steamid.SteamID) ([]domain.PlayerNameRecord, error) {
 	query, args, errSQL := sb.
 		Select("name_id", "persona_name", "created_on").
 		From("player_names").
@@ -294,7 +307,7 @@ func (db *pgStore) playerGetNames(ctx context.Context, sid steamid.SteamID) ([]d
 }
 
 //nolint:dupl
-func (db *pgStore) playerGetAvatars(ctx context.Context, sid steamid.SteamID) ([]domain.PlayerAvatarRecord, error) {
+func (db *pgStore) playerAvatars(ctx context.Context, sid steamid.SteamID) ([]domain.PlayerAvatarRecord, error) {
 	query, args, errSQL := sb.
 		Select("avatar_id", "avatar_hash", "created_on").
 		From("player_avatars").
@@ -325,7 +338,7 @@ func (db *pgStore) playerGetAvatars(ctx context.Context, sid steamid.SteamID) ([
 	return records, nil
 }
 
-func (db *pgStore) playerGetVanityNames(ctx context.Context, sid steamid.SteamID) ([]domain.PlayerVanityRecord, error) {
+func (db *pgStore) playerVanityNames(ctx context.Context, sid steamid.SteamID) ([]domain.PlayerVanityRecord, error) {
 	query, args, errSQL := sb.
 		Select("vanity_id", "vanity", "created_on").
 		From("player_vanity").
@@ -451,48 +464,6 @@ func (db *pgStore) playerRecordSave(ctx context.Context, record *PlayerRecord) e
 	return nil
 }
 
-// type leagueRecord struct {
-//	LeagueID   int       `json:"league_id"`
-//	LeagueName string    `json:"league_name"`
-//	UpdatedOn  time.Time `json:"Updated_on"`
-//	CreatedOn  time.Time `json:"created_on"`
-//}
-//
-// type teamRecord struct {
-//}
-
-func NewSBSite(name domain.Site) domain.SbSite {
-	createdOn := time.Now()
-
-	return domain.SbSite{
-		SiteID: 0,
-		Name:   name,
-		TimeStamped: domain.TimeStamped{
-			UpdatedOn: createdOn,
-			CreatedOn: createdOn,
-		},
-	}
-}
-
-func newRecord(site domain.SbSite, sid64 steamid.SteamID, personaName string, reason string,
-	timeStamp time.Time, duration time.Duration, perm bool,
-) domain.SbBanRecord {
-	return domain.SbBanRecord{
-		BanID:       0,
-		SiteName:    site.Name,
-		SiteID:      site.SiteID,
-		PersonaName: personaName,
-		SteamID:     sid64,
-		Reason:      reason,
-		Duration:    duration,
-		Permanent:   perm,
-		TimeStamped: domain.TimeStamped{
-			UpdatedOn: timeStamp,
-			CreatedOn: timeStamp,
-		},
-	}
-}
-
 func (db *pgStore) playerGetOrCreate(ctx context.Context, sid steamid.SteamID, record *PlayerRecord) error {
 	query, args, errSQL := sb.
 		Select("community_visibility_state", "profile_state",
@@ -577,7 +548,7 @@ func (db *pgStore) playerGetExpiredProfiles(ctx context.Context, limit int) ([]P
 	return records, nil
 }
 
-func (db *pgStore) sbSiteGetOrCreate(ctx context.Context, name domain.Site, site *domain.SbSite) error {
+func (db *pgStore) sourcebansSiteGetOrCreate(ctx context.Context, name domain.Site, site *domain.SbSite) error {
 	query, args, errSQL := sb.
 		Select("sb_site_id", "name", "updated_on", "created_on").
 		From("sb_site").
@@ -594,7 +565,7 @@ func (db *pgStore) sbSiteGetOrCreate(ctx context.Context, name domain.Site, site
 		if errors.Is(wrappedErr, errDatabaseNoResults) {
 			site.Name = name
 
-			return db.sbSiteSave(ctx, site)
+			return db.sourcebansSiteSave(ctx, site)
 		}
 
 		return wrappedErr
@@ -603,7 +574,7 @@ func (db *pgStore) sbSiteGetOrCreate(ctx context.Context, name domain.Site, site
 	return nil
 }
 
-func (db *pgStore) sbSiteSave(ctx context.Context, site *domain.SbSite) error {
+func (db *pgStore) sourcebansSiteSave(ctx context.Context, site *domain.SbSite) error {
 	site.UpdatedOn = time.Now()
 
 	if site.SiteID <= 0 {
@@ -642,7 +613,7 @@ func (db *pgStore) sbSiteSave(ctx context.Context, site *domain.SbSite) error {
 	return nil
 }
 
-func (db *pgStore) sbSiteGet(ctx context.Context, siteID int, site *domain.SbSite) error {
+func (db *pgStore) sourcebansSiteGet(ctx context.Context, siteID int, site *domain.SbSite) error {
 	query, args, errSQL := sb.
 		Select("sb_site_id", "name", "updated_on", "created_on").
 		From("sb_site").
@@ -660,7 +631,7 @@ func (db *pgStore) sbSiteGet(ctx context.Context, siteID int, site *domain.SbSit
 	return nil
 }
 
-func (db *pgStore) sbSiteDelete(ctx context.Context, siteID int) error {
+func (db *pgStore) sourcebansSiteDelete(ctx context.Context, siteID int) error {
 	query, args, errSQL := sb.
 		Delete("sb_site").
 		Where(sq.Eq{"sb_site_id": siteID}).
@@ -676,7 +647,7 @@ func (db *pgStore) sbSiteDelete(ctx context.Context, siteID int) error {
 	return nil
 }
 
-func (db *pgStore) sbBanSave(ctx context.Context, record *domain.SbBanRecord) error {
+func (db *pgStore) sourcebansBanRecordSave(ctx context.Context, record *domain.SbBanRecord) error {
 	record.UpdatedOn = time.Now()
 
 	if record.BanID <= 0 {
@@ -724,7 +695,7 @@ const storeDurationSecondMulti = int64(time.Second)
 
 type BanRecordMap map[string][]domain.SbBanRecord
 
-func (db *pgStore) sbGetBansBySID(ctx context.Context, sids steamid.Collection) (BanRecordMap, error) {
+func (db *pgStore) sourcebansRecordBySID(ctx context.Context, sids steamid.Collection) (BanRecordMap, error) {
 	ids := make([]int64, len(sids))
 	for idx := range sids {
 		ids[idx] = sids[idx].Int64()
@@ -778,7 +749,7 @@ func (db *pgStore) sbGetBansBySID(ctx context.Context, sids steamid.Collection) 
 	return records, nil
 }
 
-func (db *pgStore) bdLists(ctx context.Context) ([]BDList, error) {
+func (db *pgStore) botDetectorLists(ctx context.Context) ([]domain.BDList, error) {
 	query, args, errSQL := sb.
 		Select("bd_list_id", "bd_list_name", "url", "game", "trust_weight", "deleted", "created_on", "updated_on").
 		From("bd_list").
@@ -794,9 +765,9 @@ func (db *pgStore) bdLists(ctx context.Context) ([]BDList, error) {
 
 	defer rows.Close()
 
-	var lists []BDList
+	var lists []domain.BDList
 	for rows.Next() {
-		var list BDList
+		var list domain.BDList
 		if errScan := rows.Scan(&list.BDListID, &list.BDListName, &list.URL, &list.Game, &list.TrustWeight, &list.Deleted, &list.CreatedOn, &list.UpdatedOn); errScan != nil {
 			return nil, dbErr(errScan, "failed to scan list result")
 		}
@@ -807,8 +778,8 @@ func (db *pgStore) bdLists(ctx context.Context) ([]BDList, error) {
 	return lists, nil
 }
 
-func (db *pgStore) bdListByName(ctx context.Context, name string) (BDList, error) {
-	var list BDList
+func (db *pgStore) botDetectorListByName(ctx context.Context, name string) (domain.BDList, error) {
+	var list domain.BDList
 	query, args, errSQL := sb.
 		Select("bd_list_id", "bd_list_name", "url", "game", "trust_weight", "deleted", "created_on", "updated_on").
 		From("bd_list").
@@ -826,7 +797,7 @@ func (db *pgStore) bdListByName(ctx context.Context, name string) (BDList, error
 	return list, nil
 }
 
-func (db *pgStore) bdListCreate(ctx context.Context, list BDList) (BDList, error) {
+func (db *pgStore) botDetectorListCreate(ctx context.Context, list domain.BDList) (domain.BDList, error) {
 	query, args, errSQL := sb.
 		Insert("bd_list").
 		Columns("bd_list_name", "url", "game", "trust_weight", "deleted", "created_on", "updated_on").
@@ -834,17 +805,17 @@ func (db *pgStore) bdListCreate(ctx context.Context, list BDList) (BDList, error
 		Suffix("RETURNING bd_list_id").
 		ToSql()
 	if errSQL != nil {
-		return BDList{}, dbErr(errSQL, "Failed to build bd list create query")
+		return domain.BDList{}, dbErr(errSQL, "Failed to build bd list create query")
 	}
 
 	if errRow := db.pool.QueryRow(ctx, query, args...).Scan(&list.BDListID); errRow != nil {
-		return BDList{}, dbErr(errSQL, "Failed to insert bd list create query")
+		return domain.BDList{}, dbErr(errSQL, "Failed to insert bd list create query")
 	}
 
 	return list, nil
 }
 
-func (db *pgStore) bdListSave(ctx context.Context, list BDList) error {
+func (db *pgStore) botDetectorListSave(ctx context.Context, list domain.BDList) error {
 	query, args, errSQL := sb.
 		Update("bd_list").
 		SetMap(map[string]interface{}{
@@ -867,7 +838,7 @@ func (db *pgStore) bdListSave(ctx context.Context, list BDList) error {
 	return nil
 }
 
-func (db *pgStore) bdListDelete(ctx context.Context, bdListID int) error {
+func (db *pgStore) botDetectorListDelete(ctx context.Context, bdListID int) error {
 	query, args, errSQL := sb.Delete("bd_list").Where(sq.Eq{"bd_list_id": bdListID}).ToSql()
 	if errSQL != nil {
 		return dbErr(errSQL, "Failed to build bd list delete query")
@@ -880,7 +851,7 @@ func (db *pgStore) bdListDelete(ctx context.Context, bdListID int) error {
 	return nil
 }
 
-func (db *pgStore) bdListEntries(ctx context.Context, listID int) ([]BDListEntry, error) {
+func (db *pgStore) botDetectorListEntries(ctx context.Context, listID int) ([]domain.BDListEntry, error) {
 	query, args, errSQL := sb.
 		Select("bd_list_entry_id", "bd_list_id", "steam_id", "attribute", "proof",
 			"last_seen", "last_name", "deleted", "created_on", "updated_on").
@@ -898,11 +869,11 @@ func (db *pgStore) bdListEntries(ctx context.Context, listID int) ([]BDListEntry
 
 	defer rows.Close()
 
-	var results []BDListEntry
+	var results []domain.BDListEntry
 
 	for rows.Next() {
 		var (
-			entry BDListEntry
+			entry domain.BDListEntry
 			sid   int64
 		)
 		if errScan := rows.Scan(&entry.BDListEntryID, &entry.BDListID, &sid, &entry.Attributes, &entry.Proof, &entry.LastSeen,
@@ -916,7 +887,7 @@ func (db *pgStore) bdListEntries(ctx context.Context, listID int) ([]BDListEntry
 	return results, nil
 }
 
-func (db *pgStore) bdListEntryUpdate(ctx context.Context, entry BDListEntry) error {
+func (db *pgStore) botDetectorListEntryUpdate(ctx context.Context, entry domain.BDListEntry) error {
 	if entry.Proof == nil {
 		entry.Proof = []string{}
 	}
@@ -943,7 +914,7 @@ func (db *pgStore) bdListEntryUpdate(ctx context.Context, entry BDListEntry) err
 	return nil
 }
 
-func (db *pgStore) bdListEntryCreate(ctx context.Context, entry BDListEntry) (BDListEntry, error) {
+func (db *pgStore) botDetectorListEntryCreate(ctx context.Context, entry domain.BDListEntry) (domain.BDListEntry, error) {
 	if entry.Proof == nil {
 		entry.Proof = []string{}
 	}
@@ -994,11 +965,11 @@ func (db *pgStore) bdListEntryDelete(ctx context.Context, entryID int64) error {
 }
 
 type BDSearchResult struct {
-	ListName string      `json:"list_name"`
-	Match    TF2BDPlayer `json:"match"`
+	ListName string             `json:"list_name"`
+	Match    domain.TF2BDPlayer `json:"match"`
 }
 
-func (db *pgStore) bdListSearch(ctx context.Context, collection steamid.Collection, attrs []string) ([]BDSearchResult, error) {
+func (db *pgStore) botDetectorListSearch(ctx context.Context, collection steamid.Collection, attrs []string) ([]BDSearchResult, error) {
 	if len(collection) == 0 {
 		return []BDSearchResult{}, nil
 	}
@@ -1048,7 +1019,7 @@ func (db *pgStore) bdListSearch(ctx context.Context, collection steamid.Collecti
 	return results, nil
 }
 
-func (db *pgStore) insertLogsTF(ctx context.Context, match *domain.LogsTFMatch) error {
+func (db *pgStore) logsTFMatchCreate(ctx context.Context, match *domain.LogsTFMatch) error {
 	// Ensure  player FK's exist
 	for _, player := range match.Players {
 		playerRecord := PlayerRecord{
@@ -1076,19 +1047,19 @@ func (db *pgStore) insertLogsTF(ctx context.Context, match *domain.LogsTFMatch) 
 		}
 	}()
 
-	if err := db.insertLogsTFMatch(ctx, transaction, match); err != nil {
+	if err := db.logsTFMatchInsert(ctx, transaction, match); err != nil {
 		return err
 	}
 
-	if err := db.insertLogsTFMatchPlayers(ctx, transaction, match.Players); err != nil {
+	if err := db.logsTFMatchPlayersInsert(ctx, transaction, match.Players); err != nil {
 		return err
 	}
 
-	if err := db.insertLogsTFMatchRounds(ctx, transaction, match.Rounds); err != nil {
+	if err := db.logsTFMatchRoundsInsert(ctx, transaction, match.Rounds); err != nil {
 		return err
 	}
 
-	if err := db.insertLogsTFMatchMedics(ctx, transaction, match.Medics); err != nil {
+	if err := db.logsTFMatchMedicsInsert(ctx, transaction, match.Medics); err != nil {
 		return dbErr(err, "Failed to insert logstf medic")
 	}
 
@@ -1099,7 +1070,7 @@ func (db *pgStore) insertLogsTF(ctx context.Context, match *domain.LogsTFMatch) 
 	return nil
 }
 
-func (db *pgStore) getLogsTFMatch(ctx context.Context, logID int) (*domain.LogsTFMatch, error) {
+func (db *pgStore) logsTFMatchGet(ctx context.Context, logID int) (*domain.LogsTFMatch, error) {
 	const query = `
 		SELECT log_id, title, map, format, views, duration, score_red, score_blu, created_on 
 		FROM logstf
@@ -1112,14 +1083,14 @@ func (db *pgStore) getLogsTFMatch(ctx context.Context, logID int) (*domain.LogsT
 		return nil, dbErr(err, "Failed to query match by id")
 	}
 
-	players, errPlayers := db.getLogsTFMatchPlayers(ctx, logID)
+	players, errPlayers := db.logsTFMatchPlayers(ctx, logID)
 	if errPlayers != nil {
 		return nil, errPlayers
 	}
 
 	match.Players = players
 
-	medics, errMedics := db.getLogsTFMatchMedics(ctx, logID)
+	medics, errMedics := db.logsTFMatchMedics(ctx, logID)
 	if errMedics != nil {
 		return nil, errMedics
 	}
@@ -1127,7 +1098,7 @@ func (db *pgStore) getLogsTFMatch(ctx context.Context, logID int) (*domain.LogsT
 	match.Medics = medics
 
 	// Old format does not include rounds
-	rounds, errRounds := db.getLogsTFMatchRounds(ctx, logID)
+	rounds, errRounds := db.logsTFMatchRounds(ctx, logID)
 	if errRounds != nil && !errors.Is(errRounds, errDatabaseNoResults) {
 		return nil, errRounds
 	}
@@ -1141,7 +1112,7 @@ func (db *pgStore) getLogsTFMatch(ctx context.Context, logID int) (*domain.LogsT
 	return &match, nil
 }
 
-func (db *pgStore) getLogsTFMatchPlayers(ctx context.Context, logID int) ([]domain.LogsTFPlayer, error) {
+func (db *pgStore) logsTFMatchPlayers(ctx context.Context, logID int) ([]domain.LogsTFPlayer, error) {
 	const query = `
 		SELECT log_id, steam_id, team, name, kills, assists, deaths, damage, dpm, kad, kd, dt, dtm, hp, bs, hs, caps, healing_taken 
 		FROM logstf_player
@@ -1166,7 +1137,7 @@ func (db *pgStore) getLogsTFMatchPlayers(ctx context.Context, logID int) ([]doma
 		players = append(players, player)
 	}
 
-	classes, errClasses := db.getLogsTFMatchPlayersClass(ctx, logID)
+	classes, errClasses := db.logsTFMatchPlayerClasses(ctx, logID)
 	if errClasses != nil {
 		return nil, errClasses
 	}
@@ -1182,7 +1153,7 @@ func (db *pgStore) getLogsTFMatchPlayers(ctx context.Context, logID int) ([]doma
 	return players, nil
 }
 
-func (db *pgStore) getLogsTFPlayerSummary(ctx context.Context, steamID steamid.SteamID) (*domain.LogsTFPlayerSummary, error) {
+func (db *pgStore) logsTFPlayerSummary(ctx context.Context, steamID steamid.SteamID) (*domain.LogsTFPlayerSummary, error) {
 	const query = `
 		SELECT
 			count(p.log_id),
@@ -1215,7 +1186,7 @@ func (db *pgStore) getLogsTFPlayerSummary(ctx context.Context, steamID steamid.S
 	return &sum, nil
 }
 
-func (db *pgStore) getLogsTFMatchRounds(ctx context.Context, logID int) ([]domain.LogsTFRound, error) {
+func (db *pgStore) logsTFMatchRounds(ctx context.Context, logID int) ([]domain.LogsTFRound, error) {
 	const query = `
 		SELECT log_id, round, length, score_blu, score_red, kills_blu, kills_red, ubers_blu, ubers_red, damage_blu, damage_red, midfight 
 		FROM logstf_round
@@ -1243,7 +1214,7 @@ func (db *pgStore) getLogsTFMatchRounds(ctx context.Context, logID int) ([]domai
 	return rounds, nil
 }
 
-func (db *pgStore) getLogsTFMatchPlayersClass(ctx context.Context, logID int) ([]domain.LogsTFPlayerClass, error) {
+func (db *pgStore) logsTFMatchPlayerClasses(ctx context.Context, logID int) ([]domain.LogsTFPlayerClass, error) {
 	const query = `
 		SELECT log_id, steam_id, player_class, played, kills, assists, deaths, damage 
 		FROM logstf_player_class
@@ -1270,7 +1241,7 @@ func (db *pgStore) getLogsTFMatchPlayersClass(ctx context.Context, logID int) ([
 	return classes, nil
 }
 
-func (db *pgStore) getLogsTFMatchMedics(ctx context.Context, logID int) ([]domain.LogsTFMedic, error) {
+func (db *pgStore) logsTFMatchMedics(ctx context.Context, logID int) ([]domain.LogsTFMedic, error) {
 	const query = `
 		SELECT log_id, steam_id, healing, charges_kritz, charges_quickfix, charges_medigun, charges_vacc, avg_time_build, 
 		       avg_time_use, near_full_death, avg_uber_len, death_after_charge, major_adv_lost, biggest_adv_lost 
@@ -1299,7 +1270,7 @@ func (db *pgStore) getLogsTFMatchMedics(ctx context.Context, logID int) ([]domai
 	return medics, nil
 }
 
-func (db *pgStore) insertLogsTFMatch(ctx context.Context, transaction pgx.Tx, match *domain.LogsTFMatch) error {
+func (db *pgStore) logsTFMatchInsert(ctx context.Context, transaction pgx.Tx, match *domain.LogsTFMatch) error {
 	matchQuery, matchArgs, errQuery := sb.Insert("logstf").
 		SetMap(map[string]interface{}{
 			"log_id":     match.LogID,
@@ -1323,7 +1294,7 @@ func (db *pgStore) insertLogsTFMatch(ctx context.Context, transaction pgx.Tx, ma
 	return nil
 }
 
-func (db *pgStore) insertLogsTFMatchPlayers(ctx context.Context, transaction pgx.Tx, players []domain.LogsTFPlayer) error {
+func (db *pgStore) logsTFMatchPlayersInsert(ctx context.Context, transaction pgx.Tx, players []domain.LogsTFPlayer) error {
 	for _, player := range players {
 		query, args, errQuery := sb.Insert("logstf_player").
 			SetMap(map[string]interface{}{
@@ -1354,11 +1325,11 @@ func (db *pgStore) insertLogsTFMatchPlayers(ctx context.Context, transaction pgx
 			return dbErr(err, "Failed to insert logstf table")
 		}
 
-		if err := db.insertLogsTFMatchPlayerClasses(ctx, transaction, player); err != nil {
+		if err := db.logsTFMatchPlayerClassesInsert(ctx, transaction, player); err != nil {
 			return dbErr(err, "Failed to insert logstf player class")
 		}
 
-		if err := db.insertLogsTFMatchPlayerClassWeapon(ctx, transaction, player); err != nil {
+		if err := db.logsTFMatchPlayerClassWeaponInsert(ctx, transaction, player); err != nil {
 			return dbErr(err, "Failed to insert logstf player class weapon")
 		}
 	}
@@ -1366,7 +1337,7 @@ func (db *pgStore) insertLogsTFMatchPlayers(ctx context.Context, transaction pgx
 	return nil
 }
 
-func (db *pgStore) insertLogsTFMatchMedics(ctx context.Context, transaction pgx.Tx, medics []domain.LogsTFMedic) error {
+func (db *pgStore) logsTFMatchMedicsInsert(ctx context.Context, transaction pgx.Tx, medics []domain.LogsTFMedic) error {
 	for _, medic := range medics {
 		query, args, errQuery := sb.Insert("logstf_medic").
 			SetMap(map[string]interface{}{
@@ -1397,7 +1368,7 @@ func (db *pgStore) insertLogsTFMatchMedics(ctx context.Context, transaction pgx.
 	return nil
 }
 
-func (db *pgStore) insertLogsTFMatchPlayerClasses(ctx context.Context, transaction pgx.Tx, player domain.LogsTFPlayer) error {
+func (db *pgStore) logsTFMatchPlayerClassesInsert(ctx context.Context, transaction pgx.Tx, player domain.LogsTFPlayer) error {
 	for _, class := range player.Classes {
 		query, args, errQuery := sb.Insert("logstf_player_class").
 			SetMap(map[string]interface{}{
@@ -1422,7 +1393,7 @@ func (db *pgStore) insertLogsTFMatchPlayerClasses(ctx context.Context, transacti
 	return nil
 }
 
-func (db *pgStore) insertLogsTFMatchPlayerClassWeapon(ctx context.Context, transaction pgx.Tx, player domain.LogsTFPlayer) error {
+func (db *pgStore) logsTFMatchPlayerClassWeaponInsert(ctx context.Context, transaction pgx.Tx, player domain.LogsTFPlayer) error {
 	for _, class := range player.Classes {
 		for _, classWeapon := range class.Weapons {
 			query, args, errQuery := sb.Insert("logstf_player_class_weapon").
@@ -1447,7 +1418,7 @@ func (db *pgStore) insertLogsTFMatchPlayerClassWeapon(ctx context.Context, trans
 	return nil
 }
 
-func (db *pgStore) insertLogsTFMatchRounds(ctx context.Context, transaction pgx.Tx, rounds []domain.LogsTFRound) error {
+func (db *pgStore) logsTFMatchRoundsInsert(ctx context.Context, transaction pgx.Tx, rounds []domain.LogsTFRound) error {
 	for _, player := range rounds {
 		query, args, errQuery := sb.Insert("logstf_round").
 			SetMap(map[string]interface{}{
@@ -1476,7 +1447,7 @@ func (db *pgStore) insertLogsTFMatchRounds(ctx context.Context, transaction pgx.
 	return nil
 }
 
-func (db *pgStore) getLogsTFList(ctx context.Context, steamID steamid.SteamID) ([]domain.LogsTFMatchInfo, error) {
+func (db *pgStore) logsTFMatchList(ctx context.Context, steamID steamid.SteamID) ([]domain.LogsTFMatchInfo, error) {
 	const query = `
 		SELECT l.log_id, l.title, l.map, l.format, l.views, l.duration, l.score_red, l.score_blu, l.created_on 
 		FROM logstf l
@@ -1505,7 +1476,7 @@ func (db *pgStore) getLogsTFList(ctx context.Context, steamID steamid.SteamID) (
 	return matches, nil
 }
 
-func (db *pgStore) getLogsTFCount(ctx context.Context, steamID steamid.Collection) (map[steamid.SteamID]int, error) {
+func (db *pgStore) logsTFLogCount(ctx context.Context, steamID steamid.Collection) (map[steamid.SteamID]int, error) {
 	query, args, errQuery := sb.
 		Select("count(l.log_id)", "lp.steam_id").
 		From("logstf l").
@@ -1541,7 +1512,7 @@ func (db *pgStore) getLogsTFCount(ctx context.Context, steamID steamid.Collectio
 	return counts, nil
 }
 
-func (db *pgStore) getNewestLogID(ctx context.Context) (int, error) {
+func (db *pgStore) logsTFNewestID(ctx context.Context) (int, error) {
 	var id int
 	if err := db.pool.QueryRow(ctx, "SELECT coalesce(max(log_id), 1) FROM logstf").Scan(&id); err != nil {
 		return 0, dbErr(err, "failed to get max_id")
@@ -1550,7 +1521,7 @@ func (db *pgStore) getNewestLogID(ctx context.Context) (int, error) {
 	return id, nil
 }
 
-func (db *pgStore) getServeMeList(ctx context.Context) ([]domain.ServeMeRecord, error) {
+func (db *pgStore) servemeRecords(ctx context.Context) ([]domain.ServeMeRecord, error) {
 	const query = `SELECT steam_id, name, reason, created_on, updated_on FROM serveme`
 
 	rows, errRows := db.pool.Query(ctx, query)
@@ -1579,7 +1550,7 @@ func (db *pgStore) getServeMeList(ctx context.Context) ([]domain.ServeMeRecord, 
 	return records, nil
 }
 
-func (db *pgStore) updateServeMeList(ctx context.Context, entries []domain.ServeMeRecord) error {
+func (db *pgStore) servemeUpdate(ctx context.Context, entries []domain.ServeMeRecord) error {
 	transaction, errTx := db.pool.Begin(ctx)
 	if errTx != nil {
 		return dbErr(errTx, "Failed to create tx")
@@ -1610,7 +1581,7 @@ func (db *pgStore) updateServeMeList(ctx context.Context, entries []domain.Serve
 	return nil
 }
 
-func (db *pgStore) getServeMeRecords(ctx context.Context, collection steamid.Collection) ([]*domain.ServeMeRecord, error) {
+func (db *pgStore) servemeRecordsSearch(ctx context.Context, collection steamid.Collection) ([]*domain.ServeMeRecord, error) {
 	query, args, errQuery := sb.
 		Select("steam_id", "name", "reason", "created_on", "updated_on").
 		From("serveme").
@@ -1648,30 +1619,31 @@ func (db *pgStore) getServeMeRecords(ctx context.Context, collection steamid.Col
 }
 
 type siteStats struct {
-	BDListEntriesCount   int `json:"bd_list_entries_count"`
-	BDListCount          int `json:"bd_list_count"`
-	LogsTFCount          int `json:"logs_tf_count"`
-	LogsTFPlayerCount    int `json:"logs_tf_player_count"`
-	PlayersCount         int `json:"players_count"`
-	SourcebansSitesCount int `json:"sourcebans_sites_count"`
-	SourcebansBanCount   int `json:"sourcebans_ban_count"`
-	ServemeBanCount      int `json:"serveme_ban_count"`
-	AvatarCount          int `json:"avatar_count"`
-	NameCount            int `json:"name_count"`
+	BDListEntriesCount   int             `json:"bd_list_entries_count"`
+	BDListCount          int             `json:"bd_list_count"`
+	LogsTFCount          int             `json:"logs_tf_count"`
+	LogsTFPlayerCount    int             `json:"logs_tf_player_count"`
+	PlayersCount         int             `json:"players_count"`
+	SourcebansSitesCount int             `json:"sourcebans_sites_count"`
+	SourcebansBanCount   int             `json:"sourcebans_ban_count"`
+	ServemeBanCount      int             `json:"serveme_ban_count"`
+	AvatarCount          int             `json:"avatar_count"`
+	NameCount            int             `json:"name_count"`
+	BotDetectorLists     []domain.BDList `json:"bot_detector_lists"`
 }
 
-func (db *pgStore) getStats(ctx context.Context) (siteStats, error) {
+func (db *pgStore) stats(ctx context.Context) (siteStats, error) {
 	const query = `SELECT
 		(SELECT count(bd_list_entry_id) FROM bd_list_entries) as bd_list_entries_count,
 		(SELECT count(bd_list_id) FROM bd_list) as bd_list_count,
 		(SELECT count(log_id) FROM logstf) as logstf_count,
-		(SELECT count(steam_id) FROM logstf_player) as logstf_players_count,
+		(SELECT count(distinct steam_id) FROM logstf_player) as logstf_players_count,
 		(SELECT count(steam_id) FROM player) as players_count,
 		(SELECT count(sb_site_id) FROM sb_site) as sb_site_count,
 		(SELECT count(sb_ban_id) FROM sb_ban) as sb_ban_count,
 		(SELECT count(steam_id) FROM serveme) as serveme_count,
-		(SELECT count(avatar_id) FROM player_avatars) as avatar_count,
-		(SELECT count(name_id) FROM player_names) as name_count`
+		(SELECT count(distinct avatar_hash) FROM player_avatars) as avatar_count,
+		(SELECT count(distinct persona_name) FROM player_names) as name_count`
 
 	var stats siteStats
 	if err := db.pool.QueryRow(ctx, query).
@@ -1682,26 +1654,4 @@ func (db *pgStore) getStats(ctx context.Context) (siteStats, error) {
 	}
 
 	return stats, nil
-}
-
-func steamIDCollectionToInt64Slice(collection steamid.Collection) []int64 {
-	ids := make([]int64, len(collection))
-	for idx := range collection {
-		ids[idx] = collection[idx].Int64()
-	}
-
-	return ids
-}
-
-func dbErr(err error, wrapMsg string) error {
-	var pgErr *pgconn.PgError
-	if errors.As(err, &pgErr) {
-		if pgErr.Code == pgerrcode.UniqueViolation {
-			return errors.Join(err, errDatabaseUnique)
-		}
-	} else if errors.Is(err, pgx.ErrNoRows) {
-		return errors.Join(err, errDatabaseNoResults)
-	}
-
-	return errors.Join(err, fmt.Errorf("%w: %s", errDatabaseQuery, wrapMsg))
 }

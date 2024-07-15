@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/spf13/cobra"
 )
 
@@ -46,7 +47,7 @@ func bdListCmd() *cobra.Command {
 
 				return
 			}
-			lists, errLists := database.bdLists(cmd.Context())
+			lists, errLists := database.botDetectorLists(cmd.Context())
 			if errLists != nil {
 				slog.Error("Failed to load lists", ErrAttr(errLists))
 
@@ -95,7 +96,7 @@ func bdListCmd() *cobra.Command {
 
 			now := time.Now()
 
-			list, errCreate := database.bdListCreate(cmd.Context(), BDList{ //nolint:exhaustruct
+			list, errCreate := database.botDetectorListCreate(cmd.Context(), domain.BDList{ //nolint:exhaustruct
 				BDListName:  name,
 				URL:         listURL,
 				Game:        game,
@@ -125,14 +126,14 @@ func bdListCmd() *cobra.Command {
 				return
 			}
 
-			list, errGet := database.bdListByName(cmd.Context(), name)
+			list, errGet := database.botDetectorListByName(cmd.Context(), name)
 			if errGet != nil {
 				slog.Error("Failed to find list by name", slog.String("name", name))
 
 				return
 			}
 
-			if errDelete := database.bdListDelete(cmd.Context(), list.BDListID); errDelete != nil {
+			if errDelete := database.botDetectorListDelete(cmd.Context(), list.BDListID); errDelete != nil {
 				slog.Error("failed to delete list", ErrAttr(errDelete))
 
 				return

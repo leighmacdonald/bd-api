@@ -157,7 +157,7 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 		lastCount    = time.Now()
 	)
 
-	minID, errID := s.db.getNewestLogID(ctx)
+	minID, errID := s.db.logsTFNewestID(ctx)
 	if errID != nil {
 		if errors.Is(errID, errDatabaseNoResults) {
 			minID = 1
@@ -210,7 +210,7 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 			return
 		}
 
-		if err := s.db.insertLogsTF(ctx, match); err != nil {
+		if err := s.db.logsTFMatchCreate(ctx, match); err != nil {
 			slog.Error("Failed to insert match", ErrAttr(err))
 		}
 

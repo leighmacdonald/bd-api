@@ -51,7 +51,7 @@ func initScrapers(ctx context.Context, database *pgStore, cacheDir string) ([]*s
 	for _, scraper := range scrapers {
 		// Attach a site_id to the scraper, so we can keep track of the scrape source
 		var s domain.SbSite
-		if errSave := database.sbSiteGetOrCreate(ctx, scraper.name, &s); errSave != nil {
+		if errSave := database.sourcebansSiteGetOrCreate(ctx, scraper.name, &s); errSave != nil {
 			return nil, errSave
 		}
 
@@ -285,7 +285,7 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 				},
 			}
 
-			if errBanSave := database.sbBanSave(ctx, &bRecord); errBanSave != nil {
+			if errBanSave := database.sourcebansBanRecordSave(ctx, &bRecord); errBanSave != nil {
 				if errors.Is(errBanSave, errDatabaseUnique) {
 					// slog.Debug("Failed to save ban record (duplicate)",
 					//	slog.String("sid64", pRecord.SteamID.String()), ErrAttr(errBanSave))
@@ -379,6 +379,38 @@ const (
 	randomDelay    = 5 * time.Second
 	requestTimeout = time.Second * 30
 )
+
+func newSourcebansSite(name domain.Site) domain.SbSite {
+	createdOn := time.Now()
+
+	return domain.SbSite{
+		SiteID: 0,
+		Name:   name,
+		TimeStamped: domain.TimeStamped{
+			UpdatedOn: createdOn,
+			CreatedOn: createdOn,
+		},
+	}
+}
+
+func newSourcebansRecord(site domain.SbSite, sid64 steamid.SteamID, personaName string, reason string,
+	timeStamp time.Time, duration time.Duration, perm bool,
+) domain.SbBanRecord {
+	return domain.SbBanRecord{
+		BanID:       0,
+		SiteName:    site.Name,
+		SiteID:      site.SiteID,
+		PersonaName: personaName,
+		SteamID:     sid64,
+		Reason:      reason,
+		Duration:    duration,
+		Permanent:   perm,
+		TimeStamped: domain.TimeStamped{
+			UpdatedOn: timeStamp,
+			CreatedOn: timeStamp,
+		},
+	}
+}
 
 func newScraper(cacheDir string, name domain.Site, baseURL string,
 	startPath string, parser parserFunc, nextURL nextURLFunc, parseTime parseTimeFunc,

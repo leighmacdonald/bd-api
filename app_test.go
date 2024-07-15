@@ -289,16 +289,16 @@ func createTestSourcebansRecord(t *testing.T, database *pgStore, sid64 steamid.S
 		t.Error(errPlayer)
 	}
 
-	site := NewSBSite(domain.Site(fmt.Sprintf("Test %s", curTime)))
-	if errSave := database.sbSiteSave(ctx, &site); errSave != nil {
+	site := newSourcebansSite(domain.Site(fmt.Sprintf("Test %s", curTime)))
+	if errSave := database.sourcebansSiteSave(ctx, &site); errSave != nil {
 		t.Error(errSave)
 	}
 
-	record := newRecord(site, sid64, "Name Goes Here", "Smelly",
+	record := newSourcebansRecord(site, sid64, "Name Goes Here", "Smelly",
 		curTime.AddDate(-1, 0, 0), time.Hour*24, false)
 	record.CreatedOn = curTime
 
-	if errSave := database.sbBanSave(ctx, &record); errSave != nil {
+	if errSave := database.sourcebansBanRecordSave(ctx, &record); errSave != nil {
 		t.Error(errSave)
 	}
 

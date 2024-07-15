@@ -11,60 +11,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 )
 
-type FileInfo struct {
-	Authors     []string `json:"authors"`
-	Description string   `json:"description"`
-	Title       string   `json:"title"`
-	UpdateURL   string   `json:"update_url"`
-}
-
-type LastSeen struct {
-	PlayerName string `json:"player_name,omitempty"`
-	Time       int    `json:"time,omitempty"`
-}
-
-type TF2BDPlayer struct {
-	Attributes []string `json:"attributes"`
-	LastSeen   LastSeen `json:"last_seen,omitempty"`
-	Steamid    any      `json:"steamid"`
-	Proof      []string `json:"proof"`
-}
-
-type TF2BDSchema struct {
-	Schema   string        `json:"$schema"` //nolint:tagliatelle
-	FileInfo FileInfo      `json:"file_info"`
-	Players  []TF2BDPlayer `json:"players"`
-}
-
-type BDList struct {
-	BDListID    int
-	BDListName  string
-	URL         string
-	Game        string
-	TrustWeight int
-	Deleted     bool
-	CreatedOn   time.Time
-	UpdatedOn   time.Time
-}
-
-type BDListEntry struct {
-	BDListEntryID int64
-	BDListID      int
-	SteamID       steamid.SteamID
-	Attributes    []string
-	Proof         []string
-	LastSeen      time.Time
-	LastName      string
-	Deleted       bool
-	CreatedOn     time.Time
-	UpdatedOn     time.Time
-}
-
 // fetchList downloads and parses the list defined by BDList and returns the parsed schema object.
-func fetchList(ctx context.Context, client *http.Client, list BDList) (*TF2BDSchema, error) {
+func fetchList(ctx context.Context, client *http.Client, list domain.BDList) (*domain.TF2BDSchema, error) {
 	lCtx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
@@ -83,7 +35,7 @@ func fetchList(ctx context.Context, client *http.Client, list BDList) (*TF2BDSch
 		}
 	}()
 
-	var schema TF2BDSchema
+	var schema domain.TF2BDSchema
 	if errDecode := json.NewDecoder(resp.Body).Decode(&schema); errDecode != nil {
 		return nil, errResponseDecode
 	}
@@ -92,8 +44,8 @@ func fetchList(ctx context.Context, client *http.Client, list BDList) (*TF2BDSch
 }
 
 type listMapping struct {
-	list   BDList
-	result *TF2BDSchema
+	list   domain.BDList
+	result *domain.TF2BDSchema
 }
 
 // updateLists will fetch all provided lists and update the local database.
@@ -101,7 +53,7 @@ type listMapping struct {
 // - If the entry is not known locally, it is created
 // - If a known entry is no longer in the downloaded list, it is marked as deleted.
 // - If an entry contains differing data, it will be updated.
-func updateLists(ctx context.Context, lists []BDList, database *pgStore) {
+func updateLists(ctx context.Context, lists []domain.BDList, database *pgStore) {
 	client := NewHTTPClient()
 	waitGroup := sync.WaitGroup{}
 	errs := make(chan error, len(lists))
@@ -112,7 +64,7 @@ func updateLists(ctx context.Context, lists []BDList, database *pgStore) {
 			continue
 		}
 		waitGroup.Add(1)
-		go func(lCtx context.Context, localList BDList) {
+		go func(lCtx context.Context, localList domain.BDList) {
 			defer waitGroup.Done()
 			bdList, errFetch := fetchList(lCtx, client, localList)
 			if errFetch != nil {
@@ -147,7 +99,7 @@ var (
 )
 
 func updateListEntries(ctx context.Context, database *pgStore, mapping listMapping) error {
-	existingList, errExisting := database.bdListEntries(ctx, mapping.list.BDListID)
+	existingList, errExisting := database.botDetectorListEntries(ctx, mapping.list.BDListID)
 	if errExisting != nil {
 		return errExisting
 	}
@@ -160,7 +112,7 @@ func updateListEntries(ctx context.Context, database *pgStore, mapping listMappi
 		if err := database.playerGetOrCreate(ctx, entry.SteamID, &pr); err != nil {
 			return errors.Join(err, errPlayerGetOrCreate)
 		}
-		if _, err := database.bdListEntryCreate(ctx, entry); err != nil {
+		if _, err := database.botDetectorListEntryCreate(ctx, entry); err != nil {
 			if errors.Is(err, errDatabaseUnique) {
 				continue
 			}
@@ -175,7 +127,7 @@ func updateListEntries(ctx context.Context, database *pgStore, mapping listMappi
 	}
 
 	for _, updated := range updatedEntries {
-		if err := database.bdListEntryUpdate(ctx, updated); err != nil {
+		if err := database.botDetectorListEntryUpdate(ctx, updated); err != nil {
 			return errors.Join(err, errUpdateEntryFailed)
 		}
 	}
@@ -218,10 +170,10 @@ func normalizeAttrs(inputAttrs []string) []string {
 }
 
 // Search results for existing entries with new attrs.
-func findNewAndUpdated(existingList []BDListEntry, mapping listMapping) ([]BDListEntry, []BDListEntry) {
+func findNewAndUpdated(existingList []domain.BDListEntry, mapping listMapping) ([]domain.BDListEntry, []domain.BDListEntry) {
 	var (
-		newEntries []BDListEntry
-		updated    []BDListEntry
+		newEntries []domain.BDListEntry
+		updated    []domain.BDListEntry
 	)
 
 	for _, player := range mapping.result.Players {
@@ -255,7 +207,7 @@ func findNewAndUpdated(existingList []BDListEntry, mapping listMapping) ([]BDLis
 		}
 		if !found {
 			now := time.Now()
-			newEntry := BDListEntry{
+			newEntry := domain.BDListEntry{
 				BDListEntryID: 0,
 				BDListID:      mapping.list.BDListID,
 				SteamID:       sid,
@@ -275,8 +227,8 @@ func findNewAndUpdated(existingList []BDListEntry, mapping listMapping) ([]BDLis
 }
 
 // Search results for deleted entries.
-func findDeleted(existingList []BDListEntry, mapping listMapping) []BDListEntry {
-	var deleted []BDListEntry
+func findDeleted(existingList []domain.BDListEntry, mapping listMapping) []domain.BDListEntry {
+	var deleted []domain.BDListEntry
 	for _, player := range existingList {
 		found := false
 		for _, entry := range mapping.result.Players {
@@ -297,7 +249,7 @@ func findDeleted(existingList []BDListEntry, mapping listMapping) []BDListEntry 
 }
 
 func doListUpdate(ctx context.Context, database *pgStore) {
-	lists, errLists := database.bdLists(ctx)
+	lists, errLists := database.botDetectorLists(ctx)
 	if errLists != nil {
 		slog.Error("failed to load lists", ErrAttr(errLists))
 

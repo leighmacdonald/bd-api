@@ -23,6 +23,15 @@ var (
 	errSteamSummaryDecode = errors.New("failed to decode steam summary")
 )
 
+func steamIDCollectionToInt64Slice(collection steamid.Collection) []int64 {
+	ids := make([]int64, len(collection))
+	for idx := range collection {
+		ids[idx] = collection[idx].Int64()
+	}
+
+	return ids
+}
+
 type friendMap map[string][]steamweb.Friend
 
 func getSteamFriends(ctx context.Context, cache cache, steamIDs steamid.Collection) friendMap {
