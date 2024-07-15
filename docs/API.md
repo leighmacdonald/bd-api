@@ -8,7 +8,7 @@ Returns the current vac ban states for the requested IDs.
 
 This returns children with the identical data shape of the [steam web api](https://steamapi.xpaw.me/#ISteamUser/GetPlayerBans).
 
-Example: http://localhost:8888/bans?steamids=76561197970669109,76561197992870439
+Example: https://bd-api.roto.lol/bans?steamids=76561197970669109,76561197992870439
 
 ```json
 [
@@ -40,7 +40,7 @@ list when users set their profiles to private.
 
 This returns a map with children using the identical data shape of the [steam web api](https://steamapi.xpaw.me/#IFriendsListService).
 
-Example: http://localhost:8888/friends?steamids=76561197970669109,76561197992870439
+Example: https://bd-api.roto.lol/friends?steamids=76561197970669109,76561197992870439
 
 ```json
 {
@@ -71,7 +71,7 @@ Fetch player summaries for all requested steam ids.
 
 Returns a list of player summaries as children. Mirrors data shape of [steam web api](https://steamapi.xpaw.me/#ISteamUser/GetPlayerSummaries).. 
 
-Example: http://localhost:8888/summary?steamids=76561197970669109,76561197992870439
+Example: https://bd-api.roto.lol/summary?steamids=76561197970669109,76561197992870439
 
 ```json
 [
@@ -130,7 +130,7 @@ Profile is a higher level "meta" object that combines the following different da
 - Sourcebans History (soon)
 - LogsTF counts (soon)
 
-Example: http://localhost:8888/profile?steamids=76561197970669109,76561197992870439
+Example: https://bd-api.roto.lol/profile?steamids=76561197970669109,76561197992870439
 
 ```json
 [
@@ -232,8 +232,8 @@ There is no consideration taken into the game being played when the user gets ba
 several games in the data such as: TF2, CSGO, GMod, etc. 
 
 
-Return a map of multiple steam ids: http://localhost:8888/sourcebans?steamids=76561198976058084
-Return a list for a single steam id: http://localhost:8888/sourcebans/76561198976058084
+Return a map of multiple steam ids: https://bd-api.roto.lol/sourcebans?steamids=76561198976058084
+Return a list for a single steam id: https://bd-api.roto.lol/sourcebans/76561198976058084
 
 ```json
 {
@@ -257,7 +257,7 @@ Return a list for a single steam id: http://localhost:8888/sourcebans/7656119897
 
 Search tracked bot detector lists.
 
-Example: http://localhost:8888/bd?steamids=76561199176781392
+Example: https://bd-api.roto.lol/bd?steamids=76561199176781392
 
 ```json
 [
@@ -296,7 +296,7 @@ Example: http://localhost:8888/bd?steamids=76561199176781392
 
 Get a logs.tf match
 
-Examples (truncated): http://localhost:8888/log/3000
+Examples (truncated): https://bd-api.roto.lol/log/3000
 
 ```json
 {
@@ -397,7 +397,7 @@ Examples (truncated): http://localhost:8888/log/3000
 
 Get a summary of a users logs.tf data.
 
-Example: http://localhost:8888/log/player/76561197960831093
+Example: https://bd-api.roto.lol/log/player/76561197960831093
 
 ```json
 {
@@ -436,7 +436,7 @@ Example: http://localhost:8888/log/player/76561197960831093
 
 Get a high level list of a users logs.tf matches.
 
-Example: http://localhost:8888/log/player/76561197960831093/list
+Example: https://bd-api.roto.lol/log/player/76561197960831093/list
 
 ```json
 [
@@ -477,7 +477,7 @@ Example: http://localhost:8888/log/player/76561197960831093/list
 
 Get a list of current serveme.tf bans.
 
-Example: http://localhost:8888/serveme
+Example: https://bd-api.roto.lol/serveme
 
 ```json
 [
@@ -509,6 +509,8 @@ Example: http://localhost:8888/serveme
 
 Perform steam id conversions/lookups. Accept any format, including bare vanity name and full profile URLs.
 
+Example: https://bd-api.roto.lol/steamid/76561197961279983
+
 ```json
 {
     "steam64": "76561197961279983",
@@ -516,6 +518,27 @@ Perform steam id conversions/lookups. Accept any format, including bare vanity n
     "steam3": "[U:1:1014255]",
     "steam": "STEAM_1:1:507127",
     "profile": "https://steamcommunity.com/profiles/76561197961279983"
+}
+```
+
+## GET /stats
+
+Get the current global stats for the site.
+
+Example: https://bd-api.roto.lol/stats
+
+```json
+{
+    "bd_list_entries_count": 0,
+    "bd_list_count": 0,
+    "logs_tf_count": 6392,
+    "logs_tf_player_count": 91009,
+    "players_count": 383224,
+    "sourcebans_sites_count": 88,
+    "sourcebans_ban_count": 480527,
+    "serveme_ban_count": 697,
+    "avatar_count": 383224,
+    "name_count": 383224
 }
 ```
 

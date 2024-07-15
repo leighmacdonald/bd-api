@@ -3,6 +3,7 @@
 <head>
     <title>BD-API - {{ .Version }}</title>
     <style>
+        /* Simple.css base styles */
         /* Global variables. */
         :root,
         ::backdrop {
@@ -716,6 +717,7 @@
         }
     </style>
     <style>
+        /* override & extend some of the simple.css stuff */
 
         :root {
             --accent: #e6db74;
@@ -777,7 +779,7 @@
 </form>
 
 <form method="get" id="log">
-    <input type="text" name="steamids" placeholder="steamid">
+    <input type="text" name="steamids" placeholder="12345">
     <button type="submit">Log By ID</button>
 </form>
 
@@ -800,7 +802,12 @@
     <button type="submit" style="width: 99%">serveme.tf Bans</button>
 </form>
 
-<h6><a href="https://github.com/leighmacdonald/bd-api/blob/master/docs/API.md">Docs</a><br />{{ .Version }}</h6>
+<h6>
+    <a href="https://github.com/leighmacdonald/bd-api/blob/master/docs/API.md">API</a>
+
+    <a href="/stats">Stats</a>
+    <br />
+    {{ .Version }}</h6>
 
 </body>
 <script>

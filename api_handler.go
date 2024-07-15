@@ -7,6 +7,8 @@ import (
 	"html/template"
 	"log/slog"
 	"net/http"
+	"sync"
+	"time"
 
 	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
@@ -78,12 +80,25 @@ func handleGetBans() http.HandlerFunc {
 			return
 		}
 
-		bans, errBans := steamweb.GetPlayerBans(request.Context(), ids)
+		var bans []domain.PlayerBanState
 
+		swBans, errBans := steamweb.GetPlayerBans(request.Context(), ids)
 		if errBans != nil || len(ids) != len(bans) {
 			responseErr(writer, request, http.StatusInternalServerError, errLoadFailed, "")
 
 			return
+		}
+
+		for _, ban := range swBans {
+			bans = append(bans, domain.PlayerBanState{
+				SteamID:          ban.SteamID,
+				CommunityBanned:  ban.CommunityBanned,
+				VACBanned:        ban.VACBanned,
+				NumberOfVACBans:  ban.NumberOfVACBans,
+				DaysSinceLastBan: ban.DaysSinceLastBan,
+				NumberOfGameBans: ban.NumberOfGameBans,
+				EconomyBan:       ban.EconomyBan,
+			})
 		}
 
 		responseOk(writer, request, bans, "Steam Bans")
@@ -335,5 +350,38 @@ func handleGetSteamID() http.HandlerFunc {
 			Steam:   string(resolved.Steam(true)),
 			Profile: "https://steamcommunity.com/profiles/" + resolved.String(),
 		}, fmt.Sprintf("SteamID Conversion (%s)", value))
+	}
+}
+
+func handleGetStats(database *pgStore) func(http.ResponseWriter, *http.Request) {
+	var (
+		stats   siteStats
+		updated time.Time
+		statsMu sync.RWMutex
+	)
+
+	return func(writer http.ResponseWriter, request *http.Request) {
+		statsMu.RLock()
+		timeDiff := time.Since(updated)
+		statsMu.RUnlock()
+
+		if timeDiff > time.Minute*15 {
+			newStats, err := database.getStats(request.Context())
+			if err != nil {
+				responseErr(writer, request, http.StatusInternalServerError, err, "Failed to generate stats")
+
+				return
+			}
+
+			statsMu.Lock()
+			updated = time.Now()
+			stats = newStats
+			statsMu.Unlock()
+		}
+
+		statsMu.RLock()
+		defer statsMu.RUnlock()
+
+		responseOk(writer, request, stats, "Global Site Stats")
 	}
 }

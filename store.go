@@ -1647,6 +1647,43 @@ func (db *pgStore) getServeMeRecords(ctx context.Context, collection steamid.Col
 	return records, nil
 }
 
+type siteStats struct {
+	BDListEntriesCount   int `json:"bd_list_entries_count"`
+	BDListCount          int `json:"bd_list_count"`
+	LogsTFCount          int `json:"logs_tf_count"`
+	LogsTFPlayerCount    int `json:"logs_tf_player_count"`
+	PlayersCount         int `json:"players_count"`
+	SourcebansSitesCount int `json:"sourcebans_sites_count"`
+	SourcebansBanCount   int `json:"sourcebans_ban_count"`
+	ServemeBanCount      int `json:"serveme_ban_count"`
+	AvatarCount          int `json:"avatar_count"`
+	NameCount            int `json:"name_count"`
+}
+
+func (db *pgStore) getStats(ctx context.Context) (siteStats, error) {
+	const query = `SELECT
+		(SELECT count(bd_list_entry_id) FROM bd_list_entries) as bd_list_entries_count,
+		(SELECT count(bd_list_id) FROM bd_list) as bd_list_count,
+		(SELECT count(log_id) FROM logstf) as logstf_count,
+		(SELECT count(steam_id) FROM logstf_player) as logstf_players_count,
+		(SELECT count(steam_id) FROM player) as players_count,
+		(SELECT count(sb_site_id) FROM sb_site) as sb_site_count,
+		(SELECT count(sb_ban_id) FROM sb_ban) as sb_ban_count,
+		(SELECT count(steam_id) FROM serveme) as serveme_count,
+		(SELECT count(avatar_id) FROM player_avatars) as avatar_count,
+		(SELECT count(name_id) FROM player_names) as name_count`
+
+	var stats siteStats
+	if err := db.pool.QueryRow(ctx, query).
+		Scan(&stats.BDListEntriesCount, &stats.BDListCount, &stats.LogsTFCount, &stats.LogsTFPlayerCount,
+			&stats.PlayersCount, &stats.SourcebansSitesCount, &stats.SourcebansBanCount, &stats.ServemeBanCount,
+			&stats.AvatarCount, &stats.NameCount); err != nil {
+		return stats, dbErr(err, "Failed to get stats")
+	}
+
+	return stats, nil
+}
+
 func steamIDCollectionToInt64Slice(collection steamid.Collection) []int64 {
 	ids := make([]int64, len(collection))
 	for idx := range collection {

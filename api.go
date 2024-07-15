@@ -381,6 +381,7 @@ func createRouter(database *pgStore, cacheHandler cache) (*http.ServeMux, error)
 	mux.HandleFunc("GET /serveme", handleGetServemeList(database))
 	mux.HandleFunc("GET /steamid/{steam_id}", handleGetSteamID())
 	mux.HandleFunc("GET /", handleGetIndex())
+	mux.HandleFunc("GET /stats", handleGetStats(database))
 
 	return mux, nil
 }
