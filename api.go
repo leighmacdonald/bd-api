@@ -271,6 +271,11 @@ func getAttrs(r *http.Request) ([]string, bool) {
 	return attrs, true
 }
 
+// getSteamIDs parses the steamids url query value for valid steamids and returns them as a steamid.Collection.
+//
+// If there is only one entry provided, then it will also attempt resolve the vanity name and/or parse the profile url.
+// This is to prevent over use of the API since many api endpoints are able to accept up to 100 steamids at a time while
+// the vanity resolving endpoint only supports a single entry at a time.
 func getSteamIDs(writer http.ResponseWriter, request *http.Request) (steamid.Collection, bool) {
 	steamIDQuery := request.URL.Query().Get("steamids")
 
@@ -280,13 +285,25 @@ func getSteamIDs(writer http.ResponseWriter, request *http.Request) (steamid.Col
 		return nil, false
 	}
 
+	entries := strings.Split(steamIDQuery, ",")
+
+	if len(entries) == 1 {
+		sid64, errResolve := steamid.Resolve(request.Context(), entries[0])
+		if errResolve != nil {
+			responseErr(writer, request, http.StatusBadRequest, errInvalidSteamID, "")
+
+			return nil, false
+		}
+
+		return steamid.Collection{sid64}, true
+	}
+
 	var validIDs steamid.Collection
 
-	for _, steamID := range strings.Split(steamIDQuery, ",") {
+	for _, steamID := range entries {
 		sid64 := steamid.New(steamID)
-
 		if !sid64.Valid() {
-			responseErr(writer, request, http.StatusBadRequest, errInvalidSteamID, "")
+			responseErr(writer, request, http.StatusBadRequest, errInvalidSteamID, "Invalid steamid/profile")
 
 			return nil, false
 		}
@@ -306,7 +323,7 @@ func getSteamIDs(writer http.ResponseWriter, request *http.Request) (steamid.Col
 	}
 
 	if len(validIDs) > maxResults {
-		responseErr(writer, request, http.StatusBadRequest, errTooMany, "")
+		responseErr(writer, request, http.StatusBadRequest, errTooMany, "Max 100 steamids allowed")
 
 		return nil, false
 	}
@@ -331,9 +348,9 @@ func intParam(w http.ResponseWriter, r *http.Request, param string) (int, bool) 
 }
 
 func steamIDFromSlug(w http.ResponseWriter, r *http.Request) (steamid.SteamID, bool) {
-	sid64 := steamid.New(r.PathValue("steam_id"))
-	if !sid64.Valid() {
-		responseErr(w, r, http.StatusNotFound, errInvalidSteamID, "")
+	sid64, errResolve := steamid.Resolve(r.Context(), r.PathValue("steam_id"))
+	if errResolve != nil {
+		responseErr(w, r, http.StatusNotFound, errInvalidSteamID, "Could not resolve steamid")
 
 		return steamid.SteamID{}, false
 	}

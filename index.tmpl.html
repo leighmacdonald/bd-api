@@ -45,6 +45,7 @@
                 --preformatted: #ccc;
                 --disabled: #111;
             }
+
             /* Add a bit of transparency so light media isn't so glaring in dark mode */
             img,
             video {
@@ -83,6 +84,7 @@
             grid-template-columns: 1fr min(45rem, 90%) 1fr;
             margin: 0;
         }
+
         body > * {
             grid-column: 2;
         }
@@ -326,6 +328,7 @@
             margin-inline-start: 15px;
             float: right;
         }
+
         *[dir="rtl"] aside {
             float: left;
         }
@@ -448,6 +451,7 @@
             max-width: 100%;
             display: inline-block;
         }
+
         textarea,
         select,
         input {
@@ -455,9 +459,11 @@
             background-color: var(--bg);
             border: 1px solid var(--border);
         }
+
         label {
             display: block;
         }
+
         textarea:not([cols]) {
             width: 100%;
         }
@@ -471,6 +477,7 @@
             background-repeat: no-repeat;
             padding-inline-end: 25px;
         }
+
         *[dir="rtl"] select:not([multiple]) {
             background-position: 10px, 15px;
         }
@@ -512,6 +519,7 @@
             font-size: 1.8em;
             transform: rotate(45deg);
         }
+
         input[type="radio"]:checked::after {
             /* creates a colored circle for the checked radio button  */
             content: " ";
@@ -537,7 +545,7 @@
         /* Set a height for color input */
         input[type="color"] {
             height: 2.5rem;
-            padding:  0.2rem;
+            padding: 0.2rem;
         }
 
         /* do not show border around file selector button */
@@ -721,7 +729,7 @@
 
         :root {
             --accent: #e6db74;
-            --bg:  #272822;
+            --bg: #272822;
 
         }
 
@@ -729,7 +737,7 @@
             padding-top: 50px;
         }
 
-        h1,h6 {
+        h1, h6 {
             text-align: center;
         }
 
@@ -746,35 +754,52 @@
         }
 
     </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            [
+                ['#log', value => '/log/' + encodeURIComponent(value)],
+                ['#log_player', value => '/log/player/' + encodeURIComponent(value)],
+                ['#logs', value => '/log/player/' + encodeURIComponent(value) + '/list'],
+                ['#steam_id', value => '/steamid/' + encodeURIComponent(value)],
+            ].map(funcMap => {
+                document.querySelector(funcMap[0]).addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    if (this.elements[0].value !== "") {
+                        location.href = funcMap[1](this.elements[0].value);
+                    }
+                }, false);
+            })
+        });
+    </script>
 </head>
 <body>
 <form action="/profile" method="get">
-    <input type="text" name="steamids" placeholder="steamid">
+    <input type="text" name="steamids" placeholder="steamid|vanity name|profile url">
     <button type="submit">Profile</button>
 </form>
 
 <form action="/sourcebans" method="get">
-    <input type="text" name="steamids" placeholder="steamid">
+    <input type="text" name="steamids" placeholder="steamid|vanity name|profile url">
     <button type="submit">Sourcebans</button>
 </form>
 
 <form action="/bd" method="get">
-    <input type="text" name="steamids" placeholder="steamid">
+    <input type="text" name="steamids" placeholder="steamid|vanity name|profile url">
     <button type="submit">Bot Detector</button>
 </form>
 
 <form action="/bans" method="get">
-    <input type="text" name="steamids" placeholder="steamid">
+    <input type="text" name="steamids" placeholder="steamid|vanity name|profile url">
     <button type="submit">Steam Bans</button>
 </form>
 
 <form action="/friends" method="get">
-    <input type="text" name="steamids" placeholder="steamid">
+    <input type="text" name="steamids" placeholder="steamid|vanity name|profile url">
     <button type="submit">Steam Friends</button>
 </form>
 
 <form action="/summary" method="get">
-    <input type="text" name="steamids" placeholder="steamid">
+    <input type="text" name="steamids" placeholder="steamid|vanity name|profile url">
     <button type="submit">Steam Summary</button>
 </form>
 
@@ -783,13 +808,13 @@
     <button type="submit">Log By ID</button>
 </form>
 
-<form  method="get" id="log_player">
-    <input type="text" name="steamids" placeholder="steamid">
+<form method="get" id="log_player">
+    <input type="text" name="steamids" placeholder="steamid|vanity name|profile url">
     <button type="submit">Log Summary</button>
 </form>
 
 <form method="get" id="logs">
-    <input type="text" name="steamids" placeholder="steamid">
+    <input type="text" name="steamids" placeholder="steamid|vanity name|profile url">
     <button type="submit">Player Log List</button>
 </form>
 
@@ -806,37 +831,8 @@
     <a href="https://github.com/leighmacdonald/bd-api/blob/master/docs/API.md">API</a>
 
     <a href="/stats">Stats</a>
-    <br />
+    <br/>
     {{ .Version }}</h6>
 
 </body>
-<script>
-    document.querySelector('#log').addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (this.elements[0].value !== "") {
-            location.href = '/log/' + this.elements[0].value;
-        }
-    }, false);
-
-    document.querySelector('#log_player').addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (this.elements[0].value !== "") {
-            location.href = '/log/player/' + this.elements[0].value;
-        }
-    }, false);
-
-    document.querySelector('#logs').addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (this.elements[0].value !== "") {
-            location.href = '/log/player/' + this.elements[0].value + '/list';
-        }
-    }, false);
-
-    document.querySelector('#steam_id').addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (this.elements[0].value !== "") {
-            location.href = '/steamid/' + encodeURIComponent(this.elements[0].value);
-        }
-    }, false);
-</script>
 </html>

@@ -1157,14 +1157,18 @@ func (db *pgStore) logsTFPlayerSummary(ctx context.Context, steamID steamid.Stea
 	const query = `
 		SELECT
 			count(p.log_id),
-			
-			round(avg(p.kills)::numeric, 2), round(avg(p.assists)::numeric, 2),round(avg(p.deaths)::numeric, 2), round(avg(p.damage)::numeric, 2),
-			round(avg(p.dpm)::numeric, 2), round(avg(p.kad)::numeric, 2), round(avg(p.kd)::numeric, 2), round(avg(p.dt)::numeric, 2), round(avg(p.dtm)::numeric, 2),
-			round(avg(p.hp)::numeric, 2), round(avg(p.bs)::numeric, 2), round(avg(p.hs)::numeric, 2), round(avg(p.caps)::numeric, 2), round(avg(p.healing_taken)::numeric, 2),
-			
-			sum(p.kills), sum(p.assists),sum(p.deaths), sum(p.damage),
-			sum(p.dt), 
-			sum(p.hp), sum(p.bs), sum(p.hs), sum(p.caps), sum(p.healing_taken)
+		
+			coalesce(round(avg(p.kills)::numeric, 2), 0), coalesce(round(avg(p.assists)::numeric, 2), 0),
+			coalesce(round(avg(p.deaths)::numeric, 2), 0), coalesce(round(avg(p.damage)::numeric, 2), 0),
+			coalesce(round(avg(p.dpm)::numeric, 2), 0), coalesce(round(avg(p.kad)::numeric, 2), 0),
+			coalesce(round(avg(p.kd)::numeric, 2), 0), coalesce(round(avg(p.dt)::numeric, 2), 0),
+			coalesce(round(avg(p.dtm)::numeric, 2), 0), coalesce(round(avg(p.hp)::numeric, 2), 0),
+			coalesce(round(avg(p.bs)::numeric, 2), 0), coalesce(round(avg(p.hs)::numeric, 2), 0),
+			coalesce(round(avg(p.caps)::numeric, 2), 0), coalesce(round(avg(p.healing_taken)::numeric, 2), 0),
+		
+			coalesce(sum(p.kills), 0), coalesce(sum(p.assists), 0), coalesce(sum(p.deaths), 0), coalesce(sum(p.damage), 0),
+			coalesce(sum(p.dt), 0), coalesce(sum(p.hp), 0), coalesce(sum(p.bs), 0), coalesce(sum(p.hs), 0),
+			coalesce(sum(p.caps), 0), coalesce(sum(p.healing_taken), 0)
 		FROM logstf_player p
 		LEFT JOIN public.logstf l on l.log_id = p.log_id
 		WHERE steam_id = $1`
