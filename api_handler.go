@@ -1,12 +1,14 @@
 package main
 
 import (
+	"cmp"
 	_ "embed"
 	"errors"
 	"fmt"
 	"html/template"
 	"log/slog"
 	"net/http"
+	"slices"
 	"sync"
 	"time"
 
@@ -372,6 +374,37 @@ func handleGetStats(database *pgStore) func(http.ResponseWriter, *http.Request) 
 
 				return
 			}
+
+			lists, errLists := database.botDetectorLists(request.Context())
+			if errLists != nil && !errors.Is(errLists, errDatabaseNoResults) {
+				responseErr(writer, request, http.StatusInternalServerError, errLists, "Failed to generate stats")
+
+				return
+			}
+
+			for _, list := range lists {
+				newStats.BotDetectorLists = append(newStats.BotDetectorLists, domain.BDListBasic{
+					Name: list.BDListName,
+					URL:  list.URL,
+				})
+			}
+
+			sourcebans, errSB := database.sourcebansSites(request.Context())
+			if errSB != nil && !errors.Is(errSB, errDatabaseNoResults) {
+				responseErr(writer, request, http.StatusInternalServerError, errSB, "Failed to generate stats")
+
+				return
+			}
+
+			for _, site := range sourcebans {
+				newStats.SourcebansSites = append(newStats.SourcebansSites, string(site.Name))
+			}
+
+			slices.SortFunc(newStats.BotDetectorLists, func(a, b domain.BDListBasic) int {
+				return cmp.Compare(a.Name, b.Name)
+			})
+
+			slices.Sort(newStats.SourcebansSites)
 
 			statsMu.Lock()
 			updated = time.Now()

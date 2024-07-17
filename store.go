@@ -631,6 +631,36 @@ func (db *pgStore) sourcebansSiteGet(ctx context.Context, siteID int, site *doma
 	return nil
 }
 
+func (db *pgStore) sourcebansSites(ctx context.Context) ([]domain.SbSite, error) {
+	query, args, errSQL := sb.
+		Select("sb_site_id", "name", "updated_on", "created_on").
+		From("sb_site").
+		ToSql()
+	if errSQL != nil {
+		return nil, dbErr(errSQL, "Failed to generate query")
+	}
+
+	rows, errRows := db.pool.Query(ctx, query, args...)
+	if errRows != nil {
+		return nil, dbErr(errSQL, "Failed to generate rows")
+	}
+
+	defer rows.Close()
+
+	var sites []domain.SbSite
+
+	for rows.Next() {
+		var site domain.SbSite
+		if errQuery := rows.Scan(&site.SiteID, &site.Name, &site.UpdatedOn, &site.CreatedOn); errQuery != nil {
+			return nil, dbErr(errQuery, "Failed to scan sourcebans site")
+		}
+
+		sites = append(sites, site)
+	}
+
+	return sites, nil
+}
+
 func (db *pgStore) sourcebansSiteDelete(ctx context.Context, siteID int) error {
 	query, args, errSQL := sb.
 		Delete("sb_site").
@@ -1623,17 +1653,18 @@ func (db *pgStore) servemeRecordsSearch(ctx context.Context, collection steamid.
 }
 
 type siteStats struct {
-	BDListEntriesCount   int             `json:"bd_list_entries_count"`
-	BDListCount          int             `json:"bd_list_count"`
-	LogsTFCount          int             `json:"logs_tf_count"`
-	LogsTFPlayerCount    int             `json:"logs_tf_player_count"`
-	PlayersCount         int             `json:"players_count"`
-	SourcebansSitesCount int             `json:"sourcebans_sites_count"`
-	SourcebansBanCount   int             `json:"sourcebans_ban_count"`
-	ServemeBanCount      int             `json:"serveme_ban_count"`
-	AvatarCount          int             `json:"avatar_count"`
-	NameCount            int             `json:"name_count"`
-	BotDetectorLists     []domain.BDList `json:"bot_detector_lists"`
+	BDListEntriesCount   int                  `json:"bd_list_entries_count"`
+	BDListCount          int                  `json:"bd_list_count"`
+	LogsTFCount          int                  `json:"logs_tf_count"`
+	LogsTFPlayerCount    int                  `json:"logs_tf_player_count"`
+	PlayersCount         int                  `json:"players_count"`
+	SourcebansSitesCount int                  `json:"sourcebans_sites_count"`
+	SourcebansBanCount   int                  `json:"sourcebans_ban_count"`
+	ServemeBanCount      int                  `json:"serveme_ban_count"`
+	AvatarCount          int                  `json:"avatar_count"`
+	NameCount            int                  `json:"name_count"`
+	BotDetectorLists     []domain.BDListBasic `json:"bot_detector_lists"`
+	SourcebansSites      []string             `json:"sourcebans_sites"`
 }
 
 func (db *pgStore) stats(ctx context.Context) (siteStats, error) {
