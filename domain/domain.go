@@ -496,3 +496,8 @@ type BDListEntry struct {
 	CreatedOn     time.Time
 	UpdatedOn     time.Time
 }
+
+type BDListBasic struct {
+	Name string
+	URL  string
+}
