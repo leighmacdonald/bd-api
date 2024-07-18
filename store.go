@@ -994,14 +994,9 @@ func (db *pgStore) bdListEntryDelete(ctx context.Context, entryID int64) error {
 	return nil
 }
 
-type BDSearchResult struct {
-	ListName string             `json:"list_name"`
-	Match    domain.TF2BDPlayer `json:"match"`
-}
-
-func (db *pgStore) botDetectorListSearch(ctx context.Context, collection steamid.Collection, attrs []string) ([]BDSearchResult, error) {
+func (db *pgStore) botDetectorListSearch(ctx context.Context, collection steamid.Collection, attrs []string) ([]domain.BDSearchResult, error) {
 	if len(collection) == 0 {
-		return []BDSearchResult{}, nil
+		return []domain.BDSearchResult{}, nil
 	}
 
 	if len(attrs) == 0 {
@@ -1030,10 +1025,10 @@ func (db *pgStore) botDetectorListSearch(ctx context.Context, collection steamid
 	}
 	defer rows.Close()
 
-	var results []BDSearchResult
+	var results []domain.BDSearchResult
 
 	for rows.Next() {
-		var res BDSearchResult
+		var res domain.BDSearchResult
 		var lastSeen time.Time
 		var steamID int64
 		if errScan := rows.Scan(&res.ListName, &res.Match.Attributes, &res.Match.Proof,
