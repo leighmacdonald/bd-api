@@ -127,95 +127,150 @@ Profile is a higher level "meta" object that combines the following different da
 - Steam Vac States
 - Steam Friends
 - Competitive History RGL/UGC/ETF2L (soon)
-- Sourcebans History (soon)
-- LogsTF counts (soon)
+- Sourcebans History
+- LogsTF counts
+- Bot Detector entries
 
 Example: https://bd-api.roto.lol/profile?steamids=76561197970669109,76561197992870439
 
 ```json
 [
-    {
-        "summary": {
-            "steamid": "76561197970669109",
-            "communityvisibilitystate": 3,
-            "profilestate": 1,
-            "personaname": "FROYO b4nny",
-            "profileurl": "https://steamcommunity.com/id/b4nny/",
-            "avatar": "https://avatars.steamstatic.com/cd78b56fcb7cc9f74ae30b5b2add073f87bf7fdb.jpg",
-            "avatarmedium": "https://avatars.steamstatic.com/cd78b56fcb7cc9f74ae30b5b2add073f87bf7fdb_medium.jpg",
-            "avatarfull": "https://avatars.steamstatic.com/cd78b56fcb7cc9f74ae30b5b2add073f87bf7fdb_full.jpg",
-            "avatarhash": "cd78b56fcb7cc9f74ae30b5b2add073f87bf7fdb",
-            "personastate": 1,
-            "realname": "Grant Vincent",
-            "primaryclanid": "103582791436587036",
-            "timecreated": 1100741621,
-            "personastateflags": 0,
-            "loccountrycode": "US",
-            "locstatecode": "WA",
-            "loccityid": 3961,
-            "lastlogoff": 0,
-            "commentpermission": 1
-        },
-        "ban_state": {
-            "SteamId": "76561197970669109",
-            "CommunityBanned": false,
-            "VACBanned": false,
-            "NumberOfVACBans": 0,
-            "DaysSinceLastBan": 0,
-            "NumberOfGameBans": 0,
-            "EconomyBan": "none"
-        },
-        "seasons": null,
-        "friends": [
-            {
-                "steamid": "76561197960265749",
-                "relationship": "friend",
-                "friend_since": 1449274040
-            },
-            {
-                "steamid": "76561197960269040",
-                "relationship": "friend",
-                "friend_since": 1449272149
-            }
-        ],
-        "logs_count": 0
+  {
+    "summary": {
+      "steamid": "76561199234205416",
+      "communityvisibilitystate": 3,
+      "profilestate": 1,
+      "personaname": "ìº”ë””",
+      "profileurl": "https://steamcommunity.com/profiles/76561199234205416/",
+      "avatar": "https://avatars.steamstatic.com/cc84710808071fa4ba4b94c3011a9576b89f6714.jpg",
+      "avatarmedium": "https://avatars.steamstatic.com/cc84710808071fa4ba4b94c3011a9576b89f6714_medium.jpg",
+      "avatarfull": "https://avatars.steamstatic.com/cc84710808071fa4ba4b94c3011a9576b89f6714_full.jpg",
+      "avatarhash": "cc84710808071fa4ba4b94c3011a9576b89f6714",
+      "personastate": 0,
+      "realname": "",
+      "primaryclanid": "103582791429521408",
+      "timecreated": 1641867135,
+      "personastateflags": 0,
+      "loccountrycode": "KR",
+      "locstatecode": "",
+      "loccityid": 0,
+      "lastlogoff": 0,
+      "commentpermission": 0
     },
-    {
-        "summary": {
-            "steamid": "76561197992870439",
-            "communityvisibilitystate": 3,
-            "profilestate": 1,
-            "personaname": "camp3r",
-            "profileurl": "https://steamcommunity.com/id/camp3r101/",
-            "avatar": "https://avatars.steamstatic.com/6df07a18bd18e0a213958fe6f9109a360da5cd84.jpg",
-            "avatarmedium": "https://avatars.steamstatic.com/6df07a18bd18e0a213958fe6f9109a360da5cd84_medium.jpg",
-            "avatarfull": "https://avatars.steamstatic.com/6df07a18bd18e0a213958fe6f9109a360da5cd84_full.jpg",
-            "avatarhash": "6df07a18bd18e0a213958fe6f9109a360da5cd84",
-            "personastate": 1,
-            "realname": "camp3r#0001",
-            "primaryclanid": "103582791465096569",
-            "timecreated": 1190868909,
-            "personastateflags": 0,
-            "loccountrycode": "US",
-            "locstatecode": "",
-            "loccityid": 0,
-            "lastlogoff": 1688774660,
-            "commentpermission": 1
-        },
-        "ban_state": {
-            "SteamId": "76561197992870439",
-            "CommunityBanned": false,
-            "VACBanned": false,
-            "NumberOfVACBans": 0,
-            "DaysSinceLastBan": 0,
-            "NumberOfGameBans": 0,
-            "EconomyBan": "none"
-        },
-        "seasons": null,
-        "friends": [],
-        "logs_count": 0
-    }
+    "ban_state": {
+      "steam_id": "76561199234205416",
+      "community_banned": true,
+      "vac_banned": false,
+      "number_of_vac_bans": 0,
+      "days_since_last_ban": 18,
+      "number_of_game_bans": 1,
+      "economy_ban": "none"
+    },
+    "source_bans": [
+      {
+        "ban_id": 39085,
+        "site_name": "ugc",
+        "site_id": 26,
+        "persona_name": "U",
+        "steam_id": "76561199234205416",
+        "reason": "SMAC 0.8.6.3: ConVar sv_cheats violation",
+        "duration": 0,
+        "permanent": true,
+        "created_on": "2023-06-17T07:47:34Z"
+      },
+      {
+        "ban_id": 132632,
+        "site_name": "loos",
+        "site_id": 12,
+        "persona_name": "winter",
+        "steam_id": "76561199234205416",
+        "reason": "[StAC] Banned for pSilent after 10 detections",
+        "duration": 0,
+        "permanent": true,
+        "created_on": "2023-01-14T22:34:50Z"
+      }
+    ],
+    "serve_me": {
+      "steam_id": "76561199234205416",
+      "name": "xxx",
+      "reason": "match invader",
+      "deleted": false,
+      "created_on": "2024-07-18T01:36:27.686317-06:00"
+    },
+    "logs_count": 0,
+    "bot_detector": [
+      {
+        "list_name": "megacheaterdb",
+        "match": {
+          "attributes": [
+            "cheater"
+          ],
+          "last_seen": {
+            "player_name": "LUCY",
+            "time": 1685340466
+          },
+          "steamid": "76561199234205416",
+          "proof": [
+            "located at x: 1882.979323141968, y: 610.4778454820851"
+          ]
+        }
+      },
+      {
+        "list_name": "sleepy-bots",
+        "match": {
+          "attributes": [
+            "cheater"
+          ],
+          "last_seen": {
+            "player_name": "0x0000001a",
+            "time": 1681010087
+          },
+          "steamid": "76561199234205416",
+          "proof": [
+            "main bot host, see sleepylist for more info",
+            "aka LUCY/pokerface/pokerfake"
+          ]
+        }
+      },
+      {
+        "list_name": "sleepy",
+        "match": {
+          "attributes": [
+            "cheater"
+          ],
+          "last_seen": {
+            "player_name": "winter",
+            "time": 1673669662
+          },
+          "steamid": "76561199234205416",
+          "proof": [
+            "known as LUCY/pokerface/pokerfake // bot host",
+            "**AVOID INTERACTING AT ALL COSTS**",
+            "can be commonly seen in DCinside | í¬ì»¤ íŽ˜ì´í¬â·â·â·(122.153): ì»¤ë®¤ì„­ì—ì„œ ì³ë°•í˜€ì„œ ë´‡ ë‘ë ¤ì›Œí•˜ëŠ”ê±° ë¶ˆìŒí•©ë‹ˆë‹¤",
+            "https://gall.dcinside.com/board/view/?id=teamfortress2\u0026no=599008",
+            "í¬ì»¤ íŽ˜ì´í¬â·â·â·(122.153): í—¨ë¦¬ ì˜¤ëžœë§Œì´ë„¤ ì¹œì‚­ë‹¹í•´ì„œ ë­í•˜ëŠ”ì§€ ëª°ëžëŠ”ë° ì—¬ì „ížˆ ì–´ì„ ëŒë¦¬ë‚˜ë³´ë„¤",
+            "ã…‡ã…‡(115.22): ìœ—ìƒˆë‚€ ì¡´ë‚˜ í•µ ë„¤ìž„ë“œìž„",
+            "https://gall.dcinside.com/board/view/?id=teamfortress2\u0026no=598195"
+          ]
+        }
+      }
+    ],
+    "seasons": [],
+    "friends": [
+      {
+        "steamid": "76561197961103864",
+        "relationship": "friend",
+        "friend_since": 1262099119
+      },
+      {
+        "steamid": "76561197962134573",
+        "relationship": "friend",
+        "friend_since": 1337005818
+      }
+    ]
+  }
 ]
+
 ```
 
 ## GET /sourcebans

@@ -117,7 +117,6 @@ func handleGetProfile(database *pgStore, cache cache) http.HandlerFunc {
 		}
 
 		profiles, errProfile := loadProfiles(request.Context(), database, cache, ids)
-
 		if errProfile != nil || len(profiles) == 0 {
 			responseErr(writer, request, http.StatusInternalServerError, errLoadFailed, "")
 
@@ -194,14 +193,14 @@ func handleGetBotDetector(database *pgStore) http.HandlerFunc {
 		}
 
 		if results == nil {
-			results = []BDSearchResult{}
+			results = []domain.BDSearchResult{}
 		}
 
 		responseOk(writer, request, results, "TF2BD Search Results")
 	}
 }
 
-// handleGetLogByID returns a overview for a single logstf match similar to the main logs.tf site. Some info
+// handleGetLogByID returns an overview for a single logstf match similar to the main logs.tf site. Some info
 // is currently omitted such as specific player weapon stats, chatlogs and kill streaks.
 func handleGetLogByID(database *pgStore) http.HandlerFunc {
 	return func(writer http.ResponseWriter, reader *http.Request) {

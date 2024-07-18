@@ -37,6 +37,8 @@ var (
 
 // loadProfiles concurrently loads data from all of the tracked data source tables and assembles them into
 // a slice of domain.Profile.
+//
+//nolint:cyclop
 func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs steamid.Collection) ([]domain.Profile, error) { //nolint:funlen
 	var ( //nolint:prealloc
 		waitGroup   = &sync.WaitGroup{}
@@ -45,6 +47,7 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 		profiles    []domain.Profile
 		logs        map[steamid.SteamID]int
 		friends     friendMap
+		bdEntries   []domain.BDSearchResult
 		servemeBans []*domain.ServeMeRecord
 		sourceBans  BanRecordMap
 	)
@@ -55,6 +58,19 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 
 	localCtx, cancel := context.WithTimeout(ctx, apiTimeout)
 	defer cancel()
+
+	waitGroup.Add(1)
+
+	go func() {
+		defer waitGroup.Done()
+
+		foundBDEntries, errBDSearch := database.botDetectorListSearch(localCtx, steamIDs, nil)
+		if errBDSearch != nil {
+			slog.Error("Failed to get bot detector records", ErrAttr(errBDSearch))
+		}
+
+		bdEntries = foundBDEntries
+	}()
 
 	waitGroup.Add(1)
 
@@ -140,7 +156,20 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 	}
 
 	for _, sid := range steamIDs {
-		var profile domain.Profile
+		profile := domain.Profile{
+			SourceBans:  make([]domain.SbBanRecord, 0),
+			ServeMe:     nil,
+			LogsCount:   0,
+			BotDetector: make([]domain.BDSearchResult, 0),
+			Seasons:     make([]domain.Season, 0),
+			Friends:     make([]steamweb.Friend, 0),
+		}
+
+		for _, entry := range bdEntries {
+			if entry.Match.Steamid == sid.String() {
+				profile.BotDetector = append(profile.BotDetector, entry)
+			}
+		}
 
 		for _, summary := range summaries {
 			if summary.SteamID == sid {

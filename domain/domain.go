@@ -187,13 +187,14 @@ type SbSite struct {
 
 // Profile is a high level meta profile of several services.
 type Profile struct {
-	Summary    steamweb.PlayerSummary `json:"summary"`
-	BanState   PlayerBanState         `json:"ban_state"`
-	Seasons    []Season               `json:"seasons"`
-	Friends    []steamweb.Friend      `json:"friends"`
-	SourceBans []SbBanRecord          `json:"source_bans"`
-	ServeMe    *ServeMeRecord         `json:"serve_me"`
-	LogsCount  int                    `json:"logs_count"`
+	Summary     steamweb.PlayerSummary `json:"summary"`
+	BanState    PlayerBanState         `json:"ban_state"`
+	SourceBans  []SbBanRecord          `json:"source_bans"`
+	ServeMe     *ServeMeRecord         `json:"serve_me"`
+	LogsCount   int                    `json:"logs_count"`
+	BotDetector []BDSearchResult       `json:"bot_detector"`
+	Seasons     []Season               `json:"seasons"`
+	Friends     []steamweb.Friend      `json:"friends"`
 }
 
 type PlayerBanState struct {
@@ -500,4 +501,9 @@ type BDListEntry struct {
 type BDListBasic struct {
 	Name string
 	URL  string
+}
+
+type BDSearchResult struct {
+	ListName string      `json:"list_name"`
+	Match    TF2BDPlayer `json:"match"`
 }
