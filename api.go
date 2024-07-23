@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -242,13 +243,14 @@ type apiErr struct {
 	Error string `json:"error"`
 }
 
-func responseErr(w http.ResponseWriter, r *http.Request, status int, err error, userMsg string) {
+func responseErr(w http.ResponseWriter, request *http.Request, status int, err error, userMsg string) {
 	msg := err.Error()
 	if userMsg != "" {
 		msg = userMsg
 	}
-	renderResponse(w, r, status, map[string]string{"error": msg}, "Error")
-	slog.Error("error executing request", ErrAttr(err))
+	renderResponse(w, request, status, map[string]string{"error": msg}, "Error")
+	slog.Error("Error executing request", ErrAttr(err),
+		slog.String("path", request.URL.Path), slog.String("query", request.URL.RawQuery))
 }
 
 func responseOk(w http.ResponseWriter, r *http.Request, data any, title string) {
@@ -260,14 +262,18 @@ func renderResponse(writer http.ResponseWriter, request *http.Request, status in
 		data = []string{}
 	}
 
+	// steamids and logs never change, use very long cache timeout
+	perm := strings.HasPrefix(request.URL.Path, "/steamid/") ||
+		(strings.HasPrefix(request.URL.Path, "/log/") && !strings.HasPrefix(request.URL.Path, "/log/player"))
+
 	if strings.Contains(strings.ToLower(request.Header.Get("Accept")), "text/html") {
-		renderHTMLResponse(writer, request, status, data, title)
+		renderHTMLResponse(writer, request, status, data, perm, title)
 	} else {
-		renderJSONResponse(writer, request, status, data)
+		renderJSONResponse(writer, request, status, data, perm)
 	}
 }
 
-func renderHTMLResponse(writer http.ResponseWriter, request *http.Request, status int, data any, title string) {
+func renderHTMLResponse(writer http.ResponseWriter, request *http.Request, status int, data any, perm bool, title string) {
 	writer.Header().Set("Content-Type", "text/html")
 
 	css, body, errEnc := encoder.Encode(data)
@@ -284,10 +290,10 @@ func renderHTMLResponse(writer http.ResponseWriter, request *http.Request, statu
 		"css":   template.CSS(css),
 		"body":  template.HTML(body), //nolint:gosec
 	}); errExec != nil {
-		slog.Error("failed to execute template", ErrAttr(errExec))
+		slog.Error("Failed to execute template", ErrAttr(errExec))
 	}
 
-	if handleCacheHeaders(writer, request, buf.Bytes()) {
+	if handleCacheHeaders(writer, request, buf.Bytes(), perm) {
 		return
 	}
 
@@ -298,16 +304,16 @@ func renderHTMLResponse(writer http.ResponseWriter, request *http.Request, statu
 	}
 }
 
-func renderJSONResponse(writer http.ResponseWriter, request *http.Request, status int, data any) {
+func renderJSONResponse(writer http.ResponseWriter, request *http.Request, status int, data any, perm bool) {
 	buf := bytes.NewBuffer(nil)
 
 	if errWrite := encodeJSONIndent(buf, data); errWrite != nil {
-		slog.Error("failed to write out json response", ErrAttr(errWrite))
+		slog.Error("Failed to write out json response", ErrAttr(errWrite))
 	}
 
 	writer.Header().Set("Content-Type", "application/json")
 
-	if handleCacheHeaders(writer, request, buf.Bytes()) {
+	if handleCacheHeaders(writer, request, buf.Bytes(), perm) {
 		return
 	}
 
@@ -358,6 +364,9 @@ func getSteamIDs(writer http.ResponseWriter, request *http.Request) (steamid.Col
 
 		return steamid.Collection{sid64}, true
 	}
+
+	// Sort sids so that etags are more accurate
+	slices.Sort(entries)
 
 	var validIDs steamid.Collection
 
@@ -479,15 +488,19 @@ func newHTTPServer(ctx context.Context, router *http.ServeMux, addr string) *htt
 }
 
 func generateETag(data []byte) string {
-	crc := crc32.ChecksumIEEE(data)
-	return fmt.Sprintf(`%08X`, crc)
+	return fmt.Sprintf(`%08X`, crc32.ChecksumIEEE(data))
 }
 
-func handleCacheHeaders(writer http.ResponseWriter, request *http.Request, data []byte) bool {
+func handleCacheHeaders(writer http.ResponseWriter, request *http.Request, data []byte, perm bool) bool {
 	eTag := generateETag(data)
 
 	writer.Header().Set("ETag", eTag)
-	writer.Header().Set("Cache-Control", "max-age=86400") // One day cache
+
+	if perm {
+		writer.Header().Set("Cache-Control", "max-age=31536000") // One year cache
+	} else {
+		writer.Header().Set("Cache-Control", "max-age=86400") // One day cache
+	}
 
 	if match := request.Header.Get("If-None-Match"); match != "" {
 		if strings.Contains(match, eTag) {
