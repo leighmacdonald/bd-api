@@ -1,9 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"fmt"
+	"hash/crc32"
 	"html/template"
+	"io"
 	"log/slog"
 	"net"
 	"net/http"
@@ -257,32 +261,60 @@ func renderResponse(writer http.ResponseWriter, request *http.Request, status in
 	}
 
 	if strings.Contains(strings.ToLower(request.Header.Get("Accept")), "text/html") {
-		writer.Header().Set("Content-Type", "text/html")
-		writer.WriteHeader(status)
+		renderHTMLResponse(writer, request, status, data, title)
+	} else {
+		renderJSONResponse(writer, request, status, data)
+	}
+}
 
-		css, body, errEnc := encoder.Encode(data)
-		if errEnc != nil {
-			responseErr(writer, request, http.StatusInternalServerError, errEnc, "encoder failed")
+func renderHTMLResponse(writer http.ResponseWriter, request *http.Request, status int, data any, title string) {
+	writer.Header().Set("Content-Type", "text/html")
 
-			return
-		}
-
-		if errExec := indexTMPL.Execute(writer, map[string]any{
-			"title": title,
-			"css":   template.CSS(css),
-			"body":  template.HTML(body), //nolint:gosec
-		}); errExec != nil {
-			slog.Error("failed to execute template", ErrAttr(errExec))
-		}
+	css, body, errEnc := encoder.Encode(data)
+	if errEnc != nil {
+		responseErr(writer, request, http.StatusInternalServerError, errEnc, "encoder failed")
 
 		return
 	}
 
-	writer.Header().Set("Content-Type", "application/json")
+	buf := bytes.NewBuffer(nil)
+
+	if errExec := indexTMPL.Execute(buf, map[string]any{
+		"title": title,
+		"css":   template.CSS(css),
+		"body":  template.HTML(body), //nolint:gosec
+	}); errExec != nil {
+		slog.Error("failed to execute template", ErrAttr(errExec))
+	}
+
+	if handleCacheHeaders(writer, request, buf.Bytes()) {
+		return
+	}
+
 	writer.WriteHeader(status)
 
-	if errWrite := encodeJSONIndent(writer, data); errWrite != nil {
+	if _, err := io.Copy(writer, buf); err != nil {
+		slog.Error("Failed to copy response buffer", ErrAttr(err))
+	}
+}
+
+func renderJSONResponse(writer http.ResponseWriter, request *http.Request, status int, data any) {
+	buf := bytes.NewBuffer(nil)
+
+	if errWrite := encodeJSONIndent(buf, data); errWrite != nil {
 		slog.Error("failed to write out json response", ErrAttr(errWrite))
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+
+	if handleCacheHeaders(writer, request, buf.Bytes()) {
+		return
+	}
+
+	writer.WriteHeader(status)
+
+	if _, err := io.Copy(writer, buf); err != nil {
+		slog.Error("Failed to copy response buffer", ErrAttr(err))
 	}
 }
 
@@ -444,6 +476,28 @@ func newHTTPServer(ctx context.Context, router *http.ServeMux, addr string) *htt
 	}
 
 	return httpServer
+}
+
+func generateETag(data []byte) string {
+	crc := crc32.ChecksumIEEE(data)
+	return fmt.Sprintf(`%08X`, crc)
+}
+
+func handleCacheHeaders(writer http.ResponseWriter, request *http.Request, data []byte) bool {
+	eTag := generateETag(data)
+
+	writer.Header().Set("ETag", eTag)
+	writer.Header().Set("Cache-Control", "max-age=86400") // One day cache
+
+	if match := request.Header.Get("If-None-Match"); match != "" {
+		if strings.Contains(match, eTag) {
+			writer.WriteHeader(http.StatusNotModified)
+
+			return true
+		}
+	}
+
+	return false
 }
 
 func runHTTP(ctx context.Context, router *http.ServeMux, listenAddr string) int {
