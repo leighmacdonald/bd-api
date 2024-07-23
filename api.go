@@ -1,12 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"fmt"
+	"hash/crc32"
 	"html/template"
+	"io"
 	"log/slog"
 	"net"
 	"net/http"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -238,13 +243,14 @@ type apiErr struct {
 	Error string `json:"error"`
 }
 
-func responseErr(w http.ResponseWriter, r *http.Request, status int, err error, userMsg string) {
+func responseErr(w http.ResponseWriter, request *http.Request, status int, err error, userMsg string) {
 	msg := err.Error()
 	if userMsg != "" {
 		msg = userMsg
 	}
-	renderResponse(w, r, status, map[string]string{"error": msg}, "Error")
-	slog.Error("error executing request", ErrAttr(err))
+	renderResponse(w, request, status, map[string]string{"error": msg}, "Error")
+	slog.Error("Error executing request", ErrAttr(err),
+		slog.String("path", request.URL.Path), slog.String("query", request.URL.RawQuery))
 }
 
 func responseOk(w http.ResponseWriter, r *http.Request, data any, title string) {
@@ -256,33 +262,65 @@ func renderResponse(writer http.ResponseWriter, request *http.Request, status in
 		data = []string{}
 	}
 
+	// steamids and logs never change, use very long cache timeout
+	perm := strings.HasPrefix(request.URL.Path, "/steamid/") ||
+		(strings.HasPrefix(request.URL.Path, "/log/") && !strings.HasPrefix(request.URL.Path, "/log/player"))
+
 	if strings.Contains(strings.ToLower(request.Header.Get("Accept")), "text/html") {
-		writer.Header().Set("Content-Type", "text/html")
-		writer.WriteHeader(status)
+		renderHTMLResponse(writer, request, status, data, perm, title)
+	} else {
+		renderJSONResponse(writer, request, status, data, perm)
+	}
+}
 
-		css, body, errEnc := encoder.Encode(data)
-		if errEnc != nil {
-			responseErr(writer, request, http.StatusInternalServerError, errEnc, "encoder failed")
+func renderHTMLResponse(writer http.ResponseWriter, request *http.Request, status int, data any, perm bool, title string) {
+	writer.Header().Set("Content-Type", "text/html")
 
-			return
-		}
-
-		if errExec := indexTMPL.Execute(writer, map[string]any{
-			"title": title,
-			"css":   template.CSS(css),
-			"body":  template.HTML(body), //nolint:gosec
-		}); errExec != nil {
-			slog.Error("failed to execute template", ErrAttr(errExec))
-		}
+	css, body, errEnc := encoder.Encode(data)
+	if errEnc != nil {
+		responseErr(writer, request, http.StatusInternalServerError, errEnc, "encoder failed")
 
 		return
 	}
 
-	writer.Header().Set("Content-Type", "application/json")
+	buf := bytes.NewBuffer(nil)
+
+	if errExec := indexTMPL.Execute(buf, map[string]any{
+		"title": title,
+		"css":   template.CSS(css),
+		"body":  template.HTML(body), //nolint:gosec
+	}); errExec != nil {
+		slog.Error("Failed to execute template", ErrAttr(errExec))
+	}
+
+	if handleCacheHeaders(writer, request, buf.Bytes(), perm) {
+		return
+	}
+
 	writer.WriteHeader(status)
 
-	if errWrite := encodeJSONIndent(writer, data); errWrite != nil {
-		slog.Error("failed to write out json response", ErrAttr(errWrite))
+	if _, err := io.Copy(writer, buf); err != nil {
+		slog.Error("Failed to copy response buffer", ErrAttr(err))
+	}
+}
+
+func renderJSONResponse(writer http.ResponseWriter, request *http.Request, status int, data any, perm bool) {
+	buf := bytes.NewBuffer(nil)
+
+	if errWrite := encodeJSONIndent(buf, data); errWrite != nil {
+		slog.Error("Failed to write out json response", ErrAttr(errWrite))
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+
+	if handleCacheHeaders(writer, request, buf.Bytes(), perm) {
+		return
+	}
+
+	writer.WriteHeader(status)
+
+	if _, err := io.Copy(writer, buf); err != nil {
+		slog.Error("Failed to copy response buffer", ErrAttr(err))
 	}
 }
 
@@ -326,6 +364,9 @@ func getSteamIDs(writer http.ResponseWriter, request *http.Request) (steamid.Col
 
 		return steamid.Collection{sid64}, true
 	}
+
+	// Sort sids so that etags are more accurate
+	slices.Sort(entries)
 
 	var validIDs steamid.Collection
 
@@ -444,6 +485,32 @@ func newHTTPServer(ctx context.Context, router *http.ServeMux, addr string) *htt
 	}
 
 	return httpServer
+}
+
+func generateETag(data []byte) string {
+	return fmt.Sprintf(`%08X`, crc32.ChecksumIEEE(data))
+}
+
+func handleCacheHeaders(writer http.ResponseWriter, request *http.Request, data []byte, perm bool) bool {
+	eTag := generateETag(data)
+
+	writer.Header().Set("ETag", eTag)
+
+	if perm {
+		writer.Header().Set("Cache-Control", "max-age=31536000") // One year cache
+	} else {
+		writer.Header().Set("Cache-Control", "max-age=86400") // One day cache
+	}
+
+	if match := request.Header.Get("If-None-Match"); match != "" {
+		if strings.Contains(match, eTag) {
+			writer.WriteHeader(http.StatusNotModified)
+
+			return true
+		}
+	}
+
+	return false
 }
 
 func runHTTP(ctx context.Context, router *http.ServeMux, listenAddr string) int {
