@@ -39,6 +39,7 @@ type appConfig struct {
 	LogFilePath              string          `mapstructure:"log_file_path"`
 	LogstfScraperEnabled     bool            `mapstructure:"logstf_scraper_enabled"`
 	SourcebansScraperEnabled bool            `mapstructure:"sourcebans_scraper_enabled"`
+	RGLScraperEnabled        bool            `mapstructure:"rgl_scraper_enabled"`
 	ProxiesEnabled           bool            `mapstructure:"proxies_enabled"`
 	Proxies                  []*proxyContext `mapstructure:"proxies"`
 	ScrapeDelay              int             `mapstructure:"scrape_delay"`

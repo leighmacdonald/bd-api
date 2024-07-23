@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"errors"
+	"github.com/PuerkitoBio/goquery"
+	"github.com/gocolly/colly"
 	"log/slog"
 	"strings"
 	"time"
@@ -114,4 +116,75 @@ func parseRGLDivision(div string) domain.Division {
 	default:
 		return domain.RGLRankNone
 	}
+}
+
+func NewRGLScraper(database *pgStore, config appConfig) (*SiteScraper, error) {
+	const domainName = "rgl.gg"
+
+	scraper, errScraper := NewScraper(database, config, domainName)
+	if errScraper != nil {
+		return nil, errScraper
+	}
+
+	return scraper, nil
+}
+
+func startRGLScraper(ctx context.Context, scraper *SiteScraper) {
+	scraperInterval := time.Hour
+	scraperTimer := time.NewTimer(scraperInterval)
+
+	scrapeRGL(ctx, scraper)
+
+	for {
+		select {
+		case <-scraperTimer.C:
+			scrapeRGL(ctx, scraper)
+			scraperTimer.Reset(scraperInterval)
+		case <-ctx.Done():
+			return
+		}
+	}
+}
+
+func scrapeRGL(ctx context.Context, scraper *SiteScraper) {
+	var (
+		startTime = time.Now()
+	)
+
+	scraper.log.Info("Starting rgl scrape job")
+
+	scraper.OnHTML("html", func(element *colly.HTMLElement) {
+		element.ForEach("a", func(i int, element *colly.HTMLElement) {
+			href := element.Attr("href")
+			if strings.HasPrefix(strings.ToLower(href), "https://rgl.gg/") {
+				if err := scraper.queue.AddURL(href); err != nil {
+					scraper.log.Error("Failed to add to queue", ErrAttr(err))
+				}
+			}
+		})
+
+		if !strings.HasPrefix(strings.ToLower(element.Request.URL.Path), "https://rgl.gg/public/playerprofile?p=") {
+			return
+		}
+
+	})
+
+	if errAdd := scraper.queue.AddURL("https://rgl.gg"); errAdd != nil {
+		scraper.log.Error("Failed to add queue error", ErrAttr(errAdd))
+
+		return
+	}
+
+	if errRun := scraper.queue.Run(scraper.Collector); errRun != nil {
+		scraper.log.Error("Queue returned error", ErrAttr(errRun))
+
+		return
+	}
+
+	scraper.log.Info("Completed scrape job",
+		slog.Duration("duration", time.Since(startTime)))
+}
+
+func parseRGLPlayerFromDoc(doc *goquery.Selection) {
+	rgl.Profile()
 }

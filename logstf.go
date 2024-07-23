@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"path/filepath"
 	"regexp"
 	"slices"
 	"strconv"
@@ -15,8 +14,6 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
-	"github.com/gocolly/colly/extensions"
-	"github.com/gocolly/colly/queue"
 	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 )
@@ -31,56 +28,11 @@ var (
 	errLogID          = errors.New("failed to parse log id")
 )
 
-type logsTFScraper struct {
-	*colly.Collector
-	log   *slog.Logger
-	queue *queue.Queue
-	db    *pgStore
-}
-
-func newLogsTFScraper(database *pgStore, config appConfig) (*logsTFScraper, error) {
-	logger := slog.With("name", "logstf")
-	debugLogger := scrapeLogger{logger: logger} //nolint:exhaustruct
-
-	reqQueue, errQueue := queue.New(6, &queue.InMemoryQueueStorage{})
-	if errQueue != nil {
-		return nil, errors.Join(errQueue, errScrapeQueueInit)
-	}
-
-	collector := colly.NewCollector(
-		colly.UserAgent("bd-api"),
-		colly.CacheDir(filepath.Join(config.CacheDir, "logstf")),
-		colly.Debugger(&debugLogger),
-		colly.AllowedDomains("logs.tf"),
-	)
-
-	extensions.RandomUserAgent(collector)
-
-	scraper := logsTFScraper{
-		Collector: collector,
-		log:       logger,
-		queue:     reqQueue,
-		db:        database,
-	}
-
-	scraper.SetRequestTimeout(requestTimeout)
-	scraper.OnRequest(func(r *colly.Request) {
-		slog.Debug("Visiting", slog.String("url", r.URL.String()))
-	})
-
-	initialDelay := time.Duration(config.ScrapeDelay) * time.Millisecond
-
-	parallelism := 1
-	if config.ProxiesEnabled {
-		parallelism = len(config.Proxies)
-	}
-
-	if errLimit := scraper.Limit(&colly.LimitRule{ //nolint:exhaustruct
-		DomainGlob:  "*logs.tf",
-		Delay:       initialDelay,
-		Parallelism: parallelism,
-	}); errLimit != nil {
-		return nil, errors.Join(errLimit, errScrapeLimit)
+func NewLogsTFScraper(database *pgStore, config appConfig) (*SiteScraper, error) {
+	const domainName = "logs.tf"
+	scraper, errScraper := NewScraper(database, config, domainName)
+	if errScraper != nil {
+		return nil, errScraper
 	}
 
 	// Keep track of which log ids
@@ -88,29 +40,30 @@ func newLogsTFScraper(database *pgStore, config appConfig) (*logsTFScraper, erro
 
 	scraper.OnError(func(response *colly.Response, err error) {
 		if response.StatusCode != http.StatusTooManyRequests {
-			logger.Error("Request error", slog.String("url", response.Request.URL.String()), ErrAttr(err))
+			scraper.log.Error("Request error", slog.String("url", response.Request.URL.String()), ErrAttr(err))
 
 			return
 		}
 
 		// initialDelay += time.Millisecond * 100
-		slog.Info("Too many requests...", slog.String("delay", initialDelay.String()))
+		slog.Info("Too many requests...", slog.String("delay", scraper.delay.String()))
 
 		time.Sleep(time.Second * 2)
 
 		if errLimit := scraper.Limit(&colly.LimitRule{ //nolint:exhaustruct
-			DomainGlob: "*logs.tf",
-			Delay:      initialDelay,
+			DomainGlob: "*" + domainName,
+			Delay:      scraper.delay,
 		}); errLimit != nil {
 			panic(errScrapeLimit)
 		}
+
 		idStr := strings.TrimPrefix(response.Request.URL.Path, "/")
 		logID, errID := strconv.Atoi(idStr)
 		if errID != nil {
 			panic(errID)
 		}
 		if slices.Contains(retries, logID) {
-			logger.Error("Failed retry", slog.String("url", response.Request.URL.String()), ErrAttr(err))
+			scraper.log.Error("Failed retry", slog.String("url", response.Request.URL.String()), ErrAttr(err))
 
 			return
 		}
@@ -118,23 +71,23 @@ func newLogsTFScraper(database *pgStore, config appConfig) (*logsTFScraper, erro
 		retries = append(retries, logID)
 
 		if errRetry := response.Request.Retry(); errRetry != nil {
-			logger.Error("Retry error", slog.String("url", response.Request.URL.String()), ErrAttr(err))
+			scraper.log.Error("Retry error", slog.String("url", response.Request.URL.String()), ErrAttr(err))
 		}
 	})
 
-	return &scraper, nil
+	return scraper, nil
 }
 
-func (s logsTFScraper) start(ctx context.Context) {
+func startLogsTF(ctx context.Context, scraper *SiteScraper) {
 	scraperInterval := time.Hour
 	scraperTimer := time.NewTimer(scraperInterval)
 
-	s.scrape(ctx)
+	scrapeLogsTF(ctx, scraper)
 
 	for {
 		select {
 		case <-scraperTimer.C:
-			s.scrape(ctx)
+			scrapeLogsTF(ctx, scraper)
 			scraperTimer.Reset(scraperInterval)
 		case <-ctx.Done():
 			return
@@ -142,8 +95,8 @@ func (s logsTFScraper) start(ctx context.Context) {
 	}
 }
 
-func (s logsTFScraper) scrape(ctx context.Context) {
-	s.log.Info("Starting scrape job")
+func scrapeLogsTF(ctx context.Context, scraper *SiteScraper) {
+	scraper.log.Info("Starting scrape job")
 
 	var (
 		startTime    = time.Now()
@@ -157,7 +110,7 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 		lastCount    = time.Now()
 	)
 
-	minID, errID := s.db.logsTFNewestID(ctx)
+	minID, errID := scraper.db.logsTFNewestID(ctx)
 	if errID != nil {
 		if errors.Is(errID, errDatabaseNoResults) {
 			minID = 1
@@ -168,13 +121,13 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 		return
 	}
 
-	s.OnHTML("html", func(element *colly.HTMLElement) {
+	scraper.OnHTML("html", func(element *colly.HTMLElement) {
 		if start {
 			start = false
 			// Setup the queue
 			maxIDValue, errMaxID := getLogsTFMaxID(element.DOM)
 			if errMaxID != nil {
-				s.log.Error("No log id parsed, using default", ErrAttr(errMaxID))
+				scraper.log.Error("No log id parsed, using default", ErrAttr(errMaxID))
 
 				return
 			}
@@ -185,8 +138,8 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 				if i <= minID {
 					continue
 				}
-				if errNext := s.queue.AddURL(fmt.Sprintf("https://logs.tf/%d", i)); errNext != nil {
-					s.log.Error("failed to add url to queue", ErrAttr(errNext))
+				if errNext := scraper.queue.AddURL(fmt.Sprintf("https://logs.tf/%d", i)); errNext != nil {
+					scraper.log.Error("failed to add url to queue", ErrAttr(errNext))
 				}
 			}
 
@@ -210,7 +163,7 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 			return
 		}
 
-		if err := s.db.logsTFMatchCreate(ctx, match); err != nil {
+		if err := scraper.db.logsTFMatchCreate(ctx, match); err != nil {
 			slog.Error("Failed to insert match", ErrAttr(err))
 		}
 
@@ -229,19 +182,19 @@ func (s logsTFScraper) scrape(ctx context.Context) {
 	})
 
 	// The index is checked first so that we can get the max ID
-	if errAdd := s.queue.AddURL("https://logs.tf"); errAdd != nil {
-		s.log.Error("Failed to add queue error", ErrAttr(errAdd))
+	if errAdd := scraper.queue.AddURL("https://logs.tf"); errAdd != nil {
+		scraper.log.Error("Failed to add queue error", ErrAttr(errAdd))
 
 		return
 	}
 
-	if errRun := s.queue.Run(s.Collector); errRun != nil {
-		s.log.Error("Queue returned error", ErrAttr(errRun))
+	if errRun := scraper.queue.Run(scraper.Collector); errRun != nil {
+		scraper.log.Error("Queue returned error", ErrAttr(errRun))
 
 		return
 	}
 
-	s.log.Info("Completed scrape job",
+	scraper.log.Info("Completed scrape job",
 		slog.Duration("duration", time.Since(startTime)))
 }
 
