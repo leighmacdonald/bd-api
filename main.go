@@ -51,23 +51,6 @@ func runLogsTFScraper(ctx context.Context, database *pgStore, config appConfig) 
 	return nil
 }
 
-func runRGLScraper(ctx context.Context, database *pgStore, config appConfig) error {
-	scraper, errScraper := NewRGLScraper(database, config)
-	if errScraper != nil {
-		return errScraper
-	}
-
-	if config.ProxiesEnabled {
-		if errProxies := attachCollectorProxies(scraper.Collector, &config); errProxies != nil {
-			return errProxies
-		}
-	}
-
-	go startRGLScraper(ctx, scraper)
-
-	return nil
-}
-
 func runSourcebansScraper(ctx context.Context, database *pgStore, config appConfig) error {
 	scrapers, errScrapers := initScrapers(ctx, database, config.CacheDir)
 	if errScrapers != nil {
@@ -118,11 +101,7 @@ func run(ctx context.Context) int {
 	}
 
 	if config.RGLScraperEnabled {
-		if err := runRGLScraper(ctx, database, config); err != nil {
-			slog.Error("failed to init rgl scraper", ErrAttr(err))
-
-			return 1
-		}
+		go startRGLScraper(ctx, database)
 	}
 
 	if config.SourcebansScraperEnabled {

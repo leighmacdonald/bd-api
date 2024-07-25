@@ -3,23 +3,24 @@ package main
 import (
 	"context"
 	"errors"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/gocolly/colly"
 	"log/slog"
 	"strings"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/rgl"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 )
 
+var (
+	errFetchTeam   = errors.New("failed to fetch rgl team via api")
+	errFetchSeason = errors.New("failed to fetch rgl season via api")
+)
+
 // Current issues:
-
 // - Sometime api just fails on the first attempt
-
 // - Empty value.
-
 func getRGL(ctx context.Context, log *slog.Logger, sid64 steamid.SteamID) ([]domain.Season, error) {
 	startTime := time.Now()
 	client := NewHTTPClient()
@@ -118,27 +119,16 @@ func parseRGLDivision(div string) domain.Division {
 	}
 }
 
-func NewRGLScraper(database *pgStore, config appConfig) (*SiteScraper, error) {
-	const domainName = "rgl.gg"
-
-	scraper, errScraper := NewScraper(database, config, domainName)
-	if errScraper != nil {
-		return nil, errScraper
-	}
-
-	return scraper, nil
-}
-
-func startRGLScraper(ctx context.Context, scraper *SiteScraper) {
+func startRGLScraper(ctx context.Context, database *pgStore) {
 	scraperInterval := time.Hour
 	scraperTimer := time.NewTimer(scraperInterval)
 
-	scrapeRGL(ctx, scraper)
+	scrapeRGL(ctx, database)
 
 	for {
 		select {
 		case <-scraperTimer.C:
-			scrapeRGL(ctx, scraper)
+			scrapeRGL(ctx, database)
 			scraperTimer.Reset(scraperInterval)
 		case <-ctx.Done():
 			return
@@ -146,45 +136,248 @@ func startRGLScraper(ctx context.Context, scraper *SiteScraper) {
 	}
 }
 
-func scrapeRGL(ctx context.Context, scraper *SiteScraper) {
+// scrapeRGL handles fetching all of the RGL data.
+// It operates in the following order:
+//
+// - Fetch bans
+// - Fetch season
+// - Fetch season teams
+// - Fetch season team members
+// - Fetch season matches?
+func scrapeRGL(ctx context.Context, database *pgStore) {
 	var (
-		startTime = time.Now()
+		curID    = 1
+		waitTime = time.Second
+		maxErr   = 100
+		curErr   = 0
 	)
 
-	scraper.log.Info("Starting rgl scrape job")
+	waiter := func(err error) {
+		if err != nil {
+			waitTime *= 2
+		}
+		time.Sleep(waitTime)
+	}
 
-	scraper.OnHTML("html", func(element *colly.HTMLElement) {
-		element.ForEach("a", func(i int, element *colly.HTMLElement) {
-			href := element.Attr("href")
-			if strings.HasPrefix(strings.ToLower(href), "https://rgl.gg/") {
-				if err := scraper.queue.AddURL(href); err != nil {
-					scraper.log.Error("Failed to add to queue", ErrAttr(err))
-				}
+	for curErr < maxErr {
+		season, errSeason := getRGLSeason(ctx, database, curID)
+		if errSeason != nil {
+			if errSeason.Error() == "invalid status code: 404 Not Found" {
+				curID++
+				maxErr++
+				waiter(errSeason)
+
+				continue
 			}
-		})
 
-		if !strings.HasPrefix(strings.ToLower(element.Request.URL.Path), "https://rgl.gg/public/playerprofile?p=") {
-			return
+			if errors.Is(errSeason, rgl.ErrRateLimit) {
+				slog.Error("Failed to fetch season (rate limited)", slog.Int("season", curID), slog.Duration("waitTime", waitTime), ErrAttr(errSeason))
+				waiter(errSeason)
+
+				continue
+			}
+
+			slog.Error("Unhandled error", ErrAttr(errSeason))
+			curID++
+			curErr++
+
+			continue
 		}
 
-	})
+		waiter(nil)
 
-	if errAdd := scraper.queue.AddURL("https://rgl.gg"); errAdd != nil {
-		scraper.log.Error("Failed to add queue error", ErrAttr(errAdd))
+		slog.Info("Got RGL season", slog.Int("season_id", season.SeasonID))
 
-		return
+		for _, teamID := range season.ParticipatingTeams {
+			team, errTeam := getRGLTeam(ctx, database, teamID)
+			if errTeam != nil {
+				slog.Error("Failed to fetch team", ErrAttr(errTeam))
+				waiter(errTeam)
+
+				continue
+			}
+
+			slog.Info("Got team", slog.String("name", team.TeamName))
+		}
+
+		curID++
 	}
-
-	if errRun := scraper.queue.Run(scraper.Collector); errRun != nil {
-		scraper.log.Error("Queue returned error", ErrAttr(errRun))
-
-		return
-	}
-
-	scraper.log.Info("Completed scrape job",
-		slog.Duration("duration", time.Since(startTime)))
 }
 
-func parseRGLPlayerFromDoc(doc *goquery.Selection) {
-	rgl.Profile()
+type RGLSeason struct {
+	SeasonID           int       `json:"season_id"`
+	Name               string    `json:"name"`
+	Maps               []string  `json:"maps"`
+	FormatName         string    `json:"format_name"`
+	RegionName         string    `json:"region_name"`
+	ParticipatingTeams []int     `json:"participating_teams"`
+	CreatedOn          time.Time `json:"created_on"`
+}
+
+type RGLTeam struct {
+	TeamID       int
+	SeasonID     int
+	DivisionID   int
+	DivisionName string
+	TeamLeader   steamid.SteamID
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	Tag          string
+	TeamName     string
+	FinalRank    int
+	// TeamStatus   string
+	// TeamReady    bool
+}
+
+func getRGLTeam(ctx context.Context, database *pgStore, teamID int) (RGLTeam, error) {
+	team, errTeam := rglTeamGet(ctx, database, teamID)
+	if errTeam != nil && !errors.Is(errTeam, errDatabaseNoResults) {
+		return team, errTeam
+	}
+
+	if team.TeamID == 0 {
+		fetched, errFetch := rgl.Team(ctx, NewHTTPClient(), int64(teamID))
+		if errFetch != nil {
+			return team, errors.Join(errFetch, errFetchTeam)
+		}
+
+		team.TeamID = fetched.TeamID
+		team.SeasonID = fetched.SeasonID
+		team.DivisionID = fetched.DivisionID
+		team.DivisionName = fetched.DivisionName
+		team.TeamLeader = steamid.New(fetched.TeamLeader)
+		team.Tag = fetched.Tag
+		team.TeamName = fetched.Name
+		team.FinalRank = fetched.FinalRank
+		team.CreatedAt = fetched.CreatedAt
+		team.UpdatedAt = fetched.UpdatedAt
+
+		record := newPlayerRecord(team.TeamLeader)
+		if err := database.playerGetOrCreate(ctx, team.TeamLeader, &record); err != nil {
+			return team, err
+		}
+
+		if err := rglTeamInsert(ctx, database, team); err != nil {
+			return team, err
+		}
+	}
+
+	return team, nil
+}
+
+func rglTeamGet(ctx context.Context, database *pgStore, teamID int) (RGLTeam, error) {
+	var team RGLTeam
+	query, args, errQuery := sb.
+		Select("team_id", "season_id", "division_id", "division_name", "team_leader", "tag", "team_name", "final_rank",
+			"created_at", "updated_at").
+		From("rgl_team").
+		Where(sq.Eq{"team_id": teamID}).
+		ToSql()
+	if errQuery != nil {
+		return team, dbErr(errQuery, "Failed to build query")
+	}
+
+	if err := database.pool.QueryRow(ctx, query, args...).
+		Scan(&team.TeamID, &team.SeasonID, &team.DivisionID, &team.DivisionName, &team.TeamLeader, &team.Tag, &team.TeamName, &team.FinalRank,
+			&team.CreatedAt, &team.UpdatedAt); err != nil {
+		return team, dbErr(err, "Failed to query rgl team")
+	}
+
+	return team, nil
+}
+
+func rglTeamInsert(ctx context.Context, database *pgStore, team RGLTeam) error {
+	query, args, errQuery := sb.
+		Insert("rgl_team").
+		SetMap(map[string]interface{}{
+			"team_id":       team.TeamID,
+			"season_id":     team.SeasonID,
+			"division_id":   team.DivisionID,
+			"division_name": team.DivisionName,
+			"team_leader":   team.TeamLeader,
+			"tag":           team.Tag,
+			"team_name":     team.TeamName,
+			"final_rank":    team.FinalRank,
+			"created_at":    team.CreatedAt,
+			"updated_at":    team.UpdatedAt,
+		}).ToSql()
+	if errQuery != nil {
+		return dbErr(errQuery, "Failed to insert rgl team")
+	}
+
+	if _, err := database.pool.Exec(ctx, query, args...); err != nil {
+		return dbErr(err, "Failed to exec rgl team insert")
+	}
+
+	return nil
+}
+
+func getRGLSeason(ctx context.Context, database *pgStore, seasonID int) (RGLSeason, error) {
+	season, errSeason := rglSeasonGet(ctx, database, seasonID)
+	if errSeason != nil && !errors.Is(errSeason, errDatabaseNoResults) {
+		return season, errSeason
+	}
+
+	if season.SeasonID == 0 {
+		fetchedSeason, errFetch := rgl.Season(ctx, NewHTTPClient(), int64(seasonID))
+		if errFetch != nil {
+			return season, errors.Join(errFetch, errFetchSeason)
+		}
+
+		season.SeasonID = seasonID
+		season.Name = fetchedSeason.Name
+		season.Maps = fetchedSeason.Maps
+		season.RegionName = fetchedSeason.RegionName
+		season.FormatName = fetchedSeason.FormatName
+		season.ParticipatingTeams = fetchedSeason.ParticipatingTeams
+		season.CreatedOn = time.Now()
+
+		if err := rglSeasonInsert(ctx, database, season); err != nil {
+			return season, err
+		}
+	}
+
+	return season, nil
+}
+
+func rglSeasonGet(ctx context.Context, database *pgStore, seasonID int) (RGLSeason, error) {
+	var season RGLSeason
+	query, args, errQuery := sb.
+		Select("season_id", "maps", "season_name", "format_name", "region_name", "participating_teams", "created_on").
+		From("rgl_season").
+		Where(sq.Eq{"season_id": seasonID}).
+		ToSql()
+	if errQuery != nil {
+		return season, dbErr(errQuery, "Failed to build query")
+	}
+
+	if err := database.pool.QueryRow(ctx, query, args...).
+		Scan(&season.SeasonID, &season.Maps, &season.Name, &season.FormatName, &season.RegionName, &season.ParticipatingTeams, &season.CreatedOn); err != nil {
+		return season, dbErr(err, "Failed to query rgl season")
+	}
+
+	return season, nil
+}
+
+func rglSeasonInsert(ctx context.Context, database *pgStore, season RGLSeason) error {
+	query, args, errQuery := sb.
+		Insert("rgl_season").
+		SetMap(map[string]interface{}{
+			"season_id":           season.SeasonID,
+			"maps":                season.Maps,
+			"season_name":         season.Name,
+			"format_name":         season.FormatName,
+			"region_name":         season.RegionName,
+			"participating_teams": season.ParticipatingTeams,
+			"created_on":          season.CreatedOn,
+		}).ToSql()
+	if errQuery != nil {
+		return dbErr(errQuery, "Failed to insert rgl season")
+	}
+
+	if _, err := database.pool.Exec(ctx, query, args...); err != nil {
+		return dbErr(err, "Failed to exec rgl season insert")
+	}
+
+	return nil
 }

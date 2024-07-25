@@ -2,13 +2,14 @@ package main
 
 import (
 	"errors"
-	"github.com/gocolly/colly"
-	"github.com/gocolly/colly/extensions"
-	"github.com/gocolly/colly/queue"
 	"log/slog"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/gocolly/colly"
+	"github.com/gocolly/colly/extensions"
+	"github.com/gocolly/colly/queue"
 )
 
 type SiteScraper struct {
