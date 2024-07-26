@@ -101,7 +101,8 @@ func run(ctx context.Context) int {
 	}
 
 	if config.RGLScraperEnabled {
-		go startRGLScraper(ctx, database)
+		rglScraper := NewRGLScraper(database)
+		go rglScraper.start(ctx)
 	}
 
 	if config.SourcebansScraperEnabled {

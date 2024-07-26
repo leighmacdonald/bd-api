@@ -10,8 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/leighmacdonald/bd-api/domain"
-	"github.com/leighmacdonald/rgl"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 )
@@ -145,72 +143,6 @@ func getSteamBans(ctx context.Context, cache cache, steamIDs steamid.Collection)
 	}
 
 	return banStates, nil
-}
-
-func getCompHistory(ctx context.Context, cache cache, steamIDs steamid.Collection) domain.CompMap {
-	var (
-		results   = domain.CompMap{}
-		missed    steamid.Collection
-		startTime = time.Now()
-	)
-
-	missed = append(missed, steamIDs...)
-
-	// for _, steamID := range steamIDs { //nolint:gosimple
-	//	// var seasons []Season
-	//	missed = append(missed, steamID)
-	//
-	//	// seasonsBody, errCache := a.cache.get(makeKey(KeyRGL, steamID))
-	//	// if errCache != nil {
-	//	//	if errors.Is(errCache, errCacheExpired) {
-	//	//		missed = append(missed, steamID)
-	//	//
-	//	//		continue
-	//	//	}
-	//	// }
-	//	//
-	//	// if errUnmarshal := json.Unmarshal(seasonsBody, &seasons); errUnmarshal != nil {
-	//	//	slog.Error("Failed to unmarshal cached result", ErrAttr(errUnmarshal))
-	//	//
-	//	//	missed = append(missed, steamID)
-	//	//
-	//	//	continue
-	//	// }
-	//	//
-	//	// results[steamID] = append(results[steamID], seasons...)
-	// }
-
-	for _, steamID := range missed {
-		logger := slog.With(slog.String("site", "rgl"), slog.String("steam_id", steamID.String()))
-		rglSeasons, errRGL := getRGL(ctx, logger, steamID)
-
-		if errRGL != nil {
-			if errors.Is(errRGL, rgl.ErrRateLimit) {
-				logger.Warn("API Rate limited")
-			} else {
-				logger.Error("Failed to fetch rgl data", ErrAttr(errRGL))
-			}
-
-			continue
-		}
-
-		body, errMarshal := json.Marshal(rglSeasons)
-		if errMarshal != nil {
-			logger.Error("Failed to marshal rgl data", ErrAttr(errRGL))
-
-			continue
-		}
-
-		if errSet := cache.set(makeKey(KeyRGL, steamID), bytes.NewReader(body)); errSet != nil {
-			logger.Error("Failed to update cache", ErrAttr(errSet))
-		}
-
-		results[steamID] = append(results[steamID], rglSeasons...)
-	}
-
-	slog.Debug("RGL Query time", slog.Duration("duration", time.Since(startTime)))
-
-	return results
 }
 
 func getSteamSummaries(ctx context.Context, cache cache, steamIDs steamid.Collection) ([]steamweb.PlayerSummary, error) {

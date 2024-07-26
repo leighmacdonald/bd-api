@@ -1685,3 +1685,120 @@ func (db *pgStore) stats(ctx context.Context) (siteStats, error) {
 
 	return stats, nil
 }
+
+func (db *pgStore) rglTeamGet(ctx context.Context, teamID int) (RGLTeam, error) {
+	var team RGLTeam
+	query, args, errQuery := sb.
+		Select("team_id", "season_id", "division_id", "division_name", "team_leader", "tag", "team_name", "final_rank",
+			"created_at", "updated_at").
+		From("rgl_team").
+		Where(sq.Eq{"team_id": teamID}).
+		ToSql()
+	if errQuery != nil {
+		return team, dbErr(errQuery, "Failed to build query")
+	}
+
+	if err := db.pool.QueryRow(ctx, query, args...).
+		Scan(&team.TeamID, &team.SeasonID, &team.DivisionID, &team.DivisionName, &team.TeamLeader, &team.Tag, &team.TeamName, &team.FinalRank,
+			&team.CreatedAt, &team.UpdatedAt); err != nil {
+		return team, dbErr(err, "Failed to query rgl team")
+	}
+
+	return team, nil
+}
+
+func (db *pgStore) rglTeamInsert(ctx context.Context, team RGLTeam) error {
+	query, args, errQuery := sb.
+		Insert("rgl_team").
+		SetMap(map[string]interface{}{
+			"team_id":       team.TeamID,
+			"season_id":     team.SeasonID,
+			"division_id":   team.DivisionID,
+			"division_name": team.DivisionName,
+			"team_leader":   team.TeamLeader,
+			"tag":           team.Tag,
+			"team_name":     team.TeamName,
+			"final_rank":    team.FinalRank,
+			"created_at":    team.CreatedAt,
+			"updated_at":    team.UpdatedAt,
+		}).ToSql()
+	if errQuery != nil {
+		return dbErr(errQuery, "Failed to insert rgl team")
+	}
+
+	if _, err := db.pool.Exec(ctx, query, args...); err != nil {
+		return dbErr(err, "Failed to exec rgl team insert")
+	}
+
+	return nil
+}
+
+func (db *pgStore) rglSeasonGet(ctx context.Context, seasonID int) (RGLSeason, error) {
+	var season RGLSeason
+	query, args, errQuery := sb.
+		Select("season_id", "maps", "season_name", "format_name", "region_name", "participating_teams", "created_on").
+		From("rgl_season").
+		Where(sq.Eq{"season_id": seasonID}).
+		ToSql()
+	if errQuery != nil {
+		return season, dbErr(errQuery, "Failed to build query")
+	}
+
+	if err := db.pool.QueryRow(ctx, query, args...).
+		Scan(&season.SeasonID, &season.Maps, &season.Name, &season.FormatName, &season.RegionName, &season.ParticipatingTeams, &season.CreatedOn); err != nil {
+		return season, dbErr(err, "Failed to query rgl season")
+	}
+
+	return season, nil
+}
+
+func (db *pgStore) rglSeasonInsert(ctx context.Context, season RGLSeason) error {
+	query, args, errQuery := sb.
+		Insert("rgl_season").
+		SetMap(map[string]interface{}{
+			"season_id":           season.SeasonID,
+			"maps":                season.Maps,
+			"season_name":         season.Name,
+			"format_name":         season.FormatName,
+			"region_name":         season.RegionName,
+			"participating_teams": season.ParticipatingTeams,
+			"created_on":          season.CreatedOn,
+		}).ToSql()
+	if errQuery != nil {
+		return dbErr(errQuery, "Failed to insert rgl season")
+	}
+
+	if _, err := db.pool.Exec(ctx, query, args...); err != nil {
+		return dbErr(err, "Failed to exec rgl season insert")
+	}
+
+	return nil
+}
+
+func (db *pgStore) rglTeamMemberInsert(ctx context.Context, member RGLTeamMember) error {
+	const query = `
+		INSERT INTO rgl_team_member (team_id, steam_id, name, is_team_leader, joined_at, left_at) 
+		VALUES ($1, $2, $3 ,$4, $5, $6)
+		ON CONFLICT (team_id, steam_id)
+		DO UPDATE SET left_at = $6`
+
+	if _, err := db.pool.Exec(ctx, query, member.TeamID, member.SteamID.Int64(), member.Name, member.IsTeamLeader, member.JoinedAt, member.LeftAt); err != nil {
+		return dbErr(err, "Failed to exec rgl team member insert")
+	}
+
+	return nil
+}
+
+func (db *pgStore) rglBanInsert(ctx context.Context, member RGLBan) error {
+	const query = `
+		INSERT INTO rgl_ban (steam_id, alias, expires_at, created_at, reason) 
+		VALUES ($1, $2, $3 ,$4, $5)
+		ON CONFLICT (steam_id, created_at)
+		DO NOTHING`
+
+	if _, err := db.pool.Exec(ctx, query, member.SteamID.Int64(), member.Alias, member.ExpiresAt, member.CreatedAt, member.Reason); err != nil {
+		return dbErr(err, "Failed to exec rgl ban insert")
+	}
+
+	return nil
+}

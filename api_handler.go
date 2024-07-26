@@ -34,23 +34,15 @@ func handleGetFriendList(cache cache) http.HandlerFunc {
 
 // handleGetComp returns a list of a users competitive history.
 // This is very incomplete currently.
-func handleGetComp(cache cache) http.HandlerFunc {
+func handleGetComp(_ cache) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
-		ids, ok := getSteamIDs(writer, request)
+		// ids, ok := getSteamIDs(writer, request)
+		//
+		// if !ok {
+		//	return
+		// }
 
-		if !ok {
-			return
-		}
-
-		compHistory := getCompHistory(request.Context(), cache, ids)
-
-		if len(ids) != len(compHistory) {
-			slog.Warn("Failed to fully fetch comp history")
-			responseErr(writer, request, http.StatusInternalServerError, errLoadFailed, "")
-
-			return
-		}
-		responseOk(writer, request, compHistory, "Comp History")
+		responseOk(writer, request, []any{}, "Comp History")
 	}
 }
 

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log/slog"
 	"testing"
 	"time"
 
@@ -32,18 +31,4 @@ func TestETF2L(t *testing.T) {
 	seasons, err := getETF2L(c, testIDb4nny)
 	require.NoError(t, err)
 	require.Greater(t, len(seasons), 3)
-}
-
-func TestRGL(t *testing.T) {
-	t.Parallel()
-
-	seasons, errSeasons := getRGL(context.Background(), slog.Default(), steamid.New(76561198084134025))
-	if errSeasons != nil {
-		// Dumb hack because rgl api often just doesn't work on the first call...
-
-		seasons, errSeasons = getRGL(context.Background(), slog.Default(), steamid.New(76561198084134025))
-	}
-
-	require.NoError(t, errSeasons)
-	require.LessOrEqual(t, 1, len(seasons))
 }
