@@ -31,6 +31,7 @@ type proxyContext struct {
 
 type appConfig struct {
 	ListenAddr               string          `mapstructure:"listen_addr"`
+	ExternalURL              string          `mapstructure:"external_url"`
 	SteamAPIKey              string          `mapstructure:"steam_api_key"`
 	DSN                      string          `mapstructure:"dsn"`
 	RunMode                  string          `mapstructure:"run_mode"`
