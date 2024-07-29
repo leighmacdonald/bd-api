@@ -58,6 +58,7 @@ func createRouter(database *pgStore, cacheHandler cache, config appConfig) (*htt
 	mux.HandleFunc("GET /", handleGetIndex())
 	mux.HandleFunc("GET /stats", handleGetStats(database))
 	mux.HandleFunc("GET /list/rgl", handleGetRGLList(database, config))
+	mux.HandleFunc("GET /list/serveme", handleGetServemeListBD(database, config))
 	mux.HandleFunc("GET /rgl/player_history", handleGetRGLPlayerHistory(database))
 
 	return mux, nil

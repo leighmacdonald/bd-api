@@ -444,3 +444,49 @@ func handleGetRGLList(database *pgStore, config appConfig) func(http.ResponseWri
 		responseOk(writer, request, list, "RGL Ban List")
 	}
 }
+
+func handleGetServemeListBD(database *pgStore, config appConfig) func(http.ResponseWriter, *http.Request) {
+	//goland:noinspection ALL
+	extURL := "http://" + config.ListenAddr + "/"
+	if config.ExternalURL != "" {
+		extURL = config.ExternalURL
+	}
+
+	extURL = strings.TrimSuffix(extURL, "/")
+
+	return func(writer http.ResponseWriter, request *http.Request) {
+		bans, errBans := database.servemeRecords(request.Context())
+		if errBans != nil {
+			responseErr(writer, request, http.StatusInternalServerError, errBans, "Failed to get serveme ban list")
+
+			return
+		}
+
+		list := domain.TF2BDSchema{
+			Schema: "https://raw.githubusercontent.com/leighmacdonald/bd-api/master/schemas/playerlist.schema.json",
+			FileInfo: domain.FileInfo{
+				Authors:     []string{"serveme.tf", "bd-api"},
+				Description: "All serveme.tf bans",
+				Title:       "serveme.tf Bans",
+				UpdateURL:   extURL + "/list/serveme",
+			},
+			Players: make([]domain.TF2BDPlayer, len(bans)),
+		}
+
+		for banIdx, ban := range bans {
+			player := domain.TF2BDPlayer{
+				Attributes: []string{"serveme"},
+				LastSeen: domain.LastSeen{
+					PlayerName: ban.Name,
+					Time:       int(ban.CreatedOn.Unix()),
+				},
+				Steamid: ban.SteamID,
+				Proof:   []string{ban.Reason, "Permanent Ban"},
+			}
+
+			list.Players[banIdx] = player
+		}
+
+		responseOk(writer, request, list, "Serveme Ban List")
+	}
+}
