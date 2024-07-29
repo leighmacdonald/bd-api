@@ -1789,16 +1789,50 @@ func (db *pgStore) rglTeamMemberInsert(ctx context.Context, member RGLTeamMember
 	return nil
 }
 
-func (db *pgStore) rglBanInsert(ctx context.Context, member RGLBan) error {
+func (db *pgStore) rglBansReplace(ctx context.Context, bans []RGLBan) error {
 	const query = `
 		INSERT INTO rgl_ban (steam_id, alias, expires_at, created_at, reason) 
-		VALUES ($1, $2, $3 ,$4, $5)
-		ON CONFLICT (steam_id, created_at)
-		DO NOTHING`
+		VALUES ($1, $2, $3 ,$4, $5)`
 
-	if _, err := db.pool.Exec(ctx, query, member.SteamID.Int64(), member.Alias, member.ExpiresAt, member.CreatedAt, member.Reason); err != nil {
-		return dbErr(err, "Failed to exec rgl ban insert")
+	if _, err := db.pool.Exec(ctx, `DELETE FROM rgl_ban`); err != nil {
+		return dbErr(err, "failed to cleanup rgl_ban table")
+	}
+
+	batch := &pgx.Batch{}
+
+	for _, ban := range bans {
+		record := newPlayerRecord(ban.SteamID)
+		if err := db.playerGetOrCreate(ctx, ban.SteamID, &record); err != nil {
+			return err
+		}
+
+		batch.Queue(query, ban.SteamID.Int64(), ban.Alias, ban.ExpiresAt, ban.CreatedAt.Truncate(time.Second), ban.Reason)
+	}
+
+	if err := db.pool.SendBatch(context.Background(), batch).Close(); err != nil {
+		return dbErr(err, "Failed to send batch rgl bans")
 	}
 
 	return nil
+}
+
+func (db *pgStore) rglGetBans(ctx context.Context) ([]RGLBan, error) {
+	rows, errRows := db.pool.Query(ctx, `SELECT steam_id, alias, expires_at, created_at, reason FROM rgl_ban`)
+	if errRows != nil && !errors.Is(errRows, errDatabaseNoResults) {
+		return nil, dbErr(errRows, "Failed to load bans")
+	}
+
+	defer rows.Close()
+
+	var bans []RGLBan
+	for rows.Next() {
+		var ban RGLBan
+		if err := rows.Scan(&ban.SteamID, &ban.Alias, &ban.ExpiresAt, &ban.CreatedAt, &ban.Reason); err != nil {
+			return nil, dbErr(err, "Failed to scan rgl bans")
+		}
+
+		bans = append(bans, ban)
+	}
+
+	return bans, nil
 }
