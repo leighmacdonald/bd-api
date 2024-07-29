@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS rgl_season
     format_name         text        not null default '',
     region_name         text        not null default '',
     participating_teams int[]       not null,
+    matches             int[]       not null,
     created_on          timestamptz not null
 );
 
@@ -29,12 +30,12 @@ CREATE TABLE IF NOT EXISTS rgl_team
 
 CREATE TABLE IF NOT EXISTS rgl_team_member
 (
-    team_id int not null references rgl_team (team_id),
-    steam_id bigint not null references player (steam_id),
-    name text not null,
-    is_team_leader bool not null,
-    joined_at timestamptz not null,
-    left_at timestamptz
+    team_id        int         not null references rgl_team (team_id),
+    steam_id       bigint      not null references player (steam_id),
+    name           text        not null,
+    is_team_leader bool        not null,
+    joined_at      timestamptz not null,
+    left_at        timestamptz
 );
 
 CREATE UNIQUE INDEX rgl_team_member_uidx ON rgl_team_member (team_id, steam_id);
@@ -52,20 +53,20 @@ create table if not exists rgl_ban
 
 create table if not exists rgl_match
 (
-    match_id int primary key not null,
-    seasonName text not null,
-    divisionName text not null,
-    division_id int not null,
-    season_id int not null,
-    region_id int not null,
-    match_date timestamptz not null,
-    match_name text not null,
-    is_forfeit bool not null,
-    winner int not null references rgl_team (team_id),
-    team_id_a int not null references rgl_team (team_id),
-    points_a int not null,
-    team_id_b int not null references rgl_team (team_id),
-    points_b int not null
+    match_id      int primary key not null references rgl_match (match_id),
+    season_name   text            not null,
+    division_name text            not null,
+    division_id   int             not null,
+    season_id     int             not null references rgl_season (season_id),
+    region_id     int             not null,
+    match_date    timestamptz     not null,
+    match_name    text            not null,
+    is_forfeit    bool            not null,
+    winner        int             not null references rgl_team (team_id),
+    team_id_a     int             not null references rgl_team (team_id),
+    points_a      numeric(4, 1)   not null,
+    team_id_b     int             not null references rgl_team (team_id),
+    points_b      numeric(4, 1)   not null
 );
 
 

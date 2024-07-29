@@ -23,12 +23,17 @@ import (
 
 var errTestContainer = errors.New("failed to bring up test container")
 
+var (
+	testIDb4nny  = steamid.New("76561197970669109")
+	testIDCamper = steamid.New("76561197992870439")
+)
+
 func newTestDB(ctx context.Context) (string, *postgres.PostgresContainer, error) {
 	const testInfo = "bdapi-test"
 	username, password, dbName := testInfo, testInfo, testInfo
-	cont, errContainer := postgres.RunContainer(
+	cont, errContainer := postgres.Run(
 		ctx,
-		testcontainers.WithImage("docker.io/postgres:15-bullseye"),
+		"docker.io/postgres:15-bullseye",
 		postgres.WithDatabase(dbName),
 		postgres.WithUsername(username),
 		postgres.WithPassword(password),
@@ -100,7 +105,7 @@ func TestApp(t *testing.T) {
 		t.Skip("BDAPI_STEAM_API_KEY not set")
 	}
 
-	router, err := createRouter(database, cacheHandler)
+	router, err := createRouter(database, cacheHandler, appConfig{})
 	require.NoError(t, err)
 
 	t.Run("apiTestBans", apiTestBans(router))                             //nolint:paralleltest

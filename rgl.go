@@ -7,57 +7,18 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/rgl"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 )
 
 var (
-	errFetchTeam   = errors.New("failed to fetch rgl team via api")
-	errFetchSeason = errors.New("failed to fetch rgl season via api")
-	errFetchBans   = errors.New("failed to fetch rgl bans")
+	errFetchMatch        = errors.New("failed to fetch rgl match via api")
+	errFetchMatchInvalid = errors.New("fetched invalid rgl match via api")
+	errFetchTeam         = errors.New("failed to fetch rgl team via api")
+	errFetchSeason       = errors.New("failed to fetch rgl season via api")
+	errFetchBans         = errors.New("failed to fetch rgl bans")
 )
-
-type RGLSeason struct {
-	SeasonID           int       `json:"season_id"`
-	Name               string    `json:"name"`
-	Maps               []string  `json:"maps"`
-	FormatName         string    `json:"format_name"`
-	RegionName         string    `json:"region_name"`
-	ParticipatingTeams []int     `json:"participating_teams"`
-	CreatedOn          time.Time `json:"created_on"`
-}
-
-type RGLTeam struct {
-	TeamID       int             `json:"team_id,omitempty"`
-	SeasonID     int             `json:"season_id,omitempty"`
-	DivisionID   int             `json:"division_id,omitempty"`
-	DivisionName string          `json:"division_name,omitempty"`
-	TeamLeader   steamid.SteamID `json:"team_leader"`
-	CreatedAt    time.Time       `json:"created_at"`
-	UpdatedAt    time.Time       `json:"updated_at"`
-	Tag          string          `json:"tag,omitempty"`
-	TeamName     string          `json:"team_name,omitempty"`
-	FinalRank    int             `json:"final_rank,omitempty"`
-	// TeamStatus   string
-	// TeamReady    bool
-}
-
-type RGLTeamMember struct {
-	TeamID       int             `json:"team_id"`
-	Name         string          `json:"name"`
-	IsTeamLeader bool            `json:"is_team_leader"`
-	SteamID      steamid.SteamID `json:"steam_id"`
-	JoinedAt     time.Time       `json:"joined_at"`
-	LeftAt       *time.Time      `json:"left_at"`
-}
-
-type RGLBan struct {
-	SteamID   steamid.SteamID `json:"steam_id"`
-	Alias     string          `json:"alias"`
-	ExpiresAt time.Time       `json:"expires_at"`
-	CreatedAt time.Time       `json:"created_at"`
-	Reason    string          `json:"reason"`
-}
 
 func NewRGLScraper(database *pgStore) RGLScraper {
 	return RGLScraper{
@@ -100,14 +61,14 @@ func (r *RGLScraper) waiter(err error) {
 	time.Sleep(r.waitTime)
 }
 
-// scrapeRGL handles fetching all of the RGL data.
+// scrapeRGL handles fetching all the RGL data.
 // It operates in the following order:
 //
 // - Fetch bans
 // - Fetch season
 // - Fetch season teams
 // - Fetch season team members
-// - Fetch season matches?
+// - Fetch season matches.
 func (r *RGLScraper) scrapeRGL(ctx context.Context) {
 	var (
 		curID    = 1
@@ -161,13 +122,25 @@ func (r *RGLScraper) scrapeRGL(ctx context.Context) {
 			slog.Info("Got team", slog.String("name", team.TeamName))
 		}
 
+		for _, matchID := range season.Matches {
+			match, errMatch := r.getRGLMatch(ctx, matchID)
+			if errMatch != nil {
+				slog.Error("Failed to fetch match", ErrAttr(errMatch))
+				r.waiter(errMatch)
+
+				continue
+			}
+
+			slog.Info("Got RGL match", slog.String("name", match.MatchName), slog.String("season", match.SeasonName))
+		}
+
 		curID++
 	}
 
 	slog.Info("Max errors reached. Stopping RGL update.")
 }
 
-func (r *RGLScraper) getRGLTeam(ctx context.Context, teamID int) (RGLTeam, error) {
+func (r *RGLScraper) getRGLTeam(ctx context.Context, teamID int) (domain.RGLTeam, error) {
 	team, errTeam := r.database.rglTeamGet(ctx, teamID)
 	if errTeam != nil && !errors.Is(errTeam, errDatabaseNoResults) {
 		return team, errTeam
@@ -209,7 +182,7 @@ func (r *RGLScraper) getRGLTeam(ctx context.Context, teamID int) (RGLTeam, error
 				return team, err
 			}
 
-			if err := r.database.rglTeamMemberInsert(ctx, RGLTeamMember{
+			if err := r.database.rglTeamMemberInsert(ctx, domain.RGLTeamMember{
 				TeamID:       team.TeamID,
 				Name:         player.Name,
 				IsTeamLeader: player.IsLeader,
@@ -225,7 +198,7 @@ func (r *RGLScraper) getRGLTeam(ctx context.Context, teamID int) (RGLTeam, error
 	return team, nil
 }
 
-func (r *RGLScraper) getRGLSeason(ctx context.Context, seasonID int) (RGLSeason, error) {
+func (r *RGLScraper) getRGLSeason(ctx context.Context, seasonID int) (domain.RGLSeason, error) {
 	season, errSeason := r.database.rglSeasonGet(ctx, seasonID)
 	if errSeason != nil && !errors.Is(errSeason, errDatabaseNoResults) {
 		return season, errSeason
@@ -243,6 +216,7 @@ func (r *RGLScraper) getRGLSeason(ctx context.Context, seasonID int) (RGLSeason,
 		season.RegionName = fetchedSeason.RegionName
 		season.FormatName = fetchedSeason.FormatName
 		season.ParticipatingTeams = fetchedSeason.ParticipatingTeams
+		season.Matches = fetchedSeason.MatchesPlayedDuringSeason
 		season.CreatedOn = time.Now()
 
 		if err := r.database.rglSeasonInsert(ctx, season); err != nil {
@@ -256,7 +230,7 @@ func (r *RGLScraper) getRGLSeason(ctx context.Context, seasonID int) (RGLSeason,
 func (r *RGLScraper) updateBans(ctx context.Context) error {
 	var (
 		offset = 0
-		bans   []RGLBan
+		bans   []domain.RGLBan
 	)
 
 	slog.Info("Starting RGL Bans update")
@@ -280,7 +254,7 @@ func (r *RGLScraper) updateBans(ctx context.Context) error {
 				continue
 			}
 
-			bans = append(bans, RGLBan{
+			bans = append(bans, domain.RGLBan{
 				SteamID:   sid,
 				Alias:     ban.Alias,
 				ExpiresAt: ban.ExpiresAt,
@@ -301,4 +275,44 @@ func (r *RGLScraper) updateBans(ctx context.Context) error {
 	slog.Info("Updated RGL bans successfully", slog.Int("count", len(bans)))
 
 	return nil
+}
+
+func (r *RGLScraper) getRGLMatch(ctx context.Context, matchID int) (domain.RGLMatch, error) {
+	match, errMatch := r.database.rglMatchGet(ctx, matchID)
+	if errMatch != nil && !errors.Is(errMatch, errDatabaseNoResults) {
+		return match, errMatch
+	}
+
+	if match.MatchID == 0 {
+		fetched, err := rgl.Match(ctx, NewHTTPClient(), int64(matchID))
+		if err != nil {
+			return match, errors.Join(err, errFetchMatch)
+		}
+
+		if len(fetched.Teams) < 2 {
+			return match, errors.Join(err, errFetchMatchInvalid)
+		}
+
+		match.MatchID = fetched.MatchID
+		match.MatchName = fetched.MatchName
+		match.MatchDate = fetched.MatchDate
+		match.DivisionName = fetched.DivisionName
+		match.DivisionID = fetched.DivisionID
+		match.RegionID = fetched.RegionID
+		match.MatchDate = fetched.MatchDate
+		match.IsForfeit = fetched.IsForfeit
+		match.Winner = fetched.Winner
+		match.SeasonName = fetched.SeasonName
+		match.SeasonID = fetched.SeasonID
+		match.TeamIDA = fetched.Teams[0].TeamID
+		match.PointsA = fetched.Teams[0].Points
+		match.TeamIDB = fetched.Teams[1].TeamID
+		match.PointsB = fetched.Teams[1].Points
+
+		if errInsert := r.database.rglMatchInsert(ctx, match); errInsert != nil {
+			return match, errInsert
+		}
+	}
+
+	return match, nil
 }

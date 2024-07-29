@@ -47,7 +47,6 @@ func createRouter(database *pgStore, cacheHandler cache, config appConfig) (*htt
 	mux.HandleFunc("GET /bans", handleGetBans())
 	mux.HandleFunc("GET /summary", handleGetSummary(cacheHandler))
 	mux.HandleFunc("GET /profile", handleGetProfile(database, cacheHandler))
-	mux.HandleFunc("GET /comp", handleGetComp(cacheHandler))
 	mux.HandleFunc("GET /friends", handleGetFriendList(cacheHandler))
 	mux.HandleFunc("GET /sourcebans", handleGetSourceBansMany(database))
 	mux.HandleFunc("GET /sourcebans/{steam_id}", handleGetSourceBans(database))
@@ -59,6 +58,7 @@ func createRouter(database *pgStore, cacheHandler cache, config appConfig) (*htt
 	mux.HandleFunc("GET /", handleGetIndex())
 	mux.HandleFunc("GET /stats", handleGetStats(database))
 	mux.HandleFunc("GET /list/rgl", handleGetRGLList(database, config))
+	mux.HandleFunc("GET /rgl/player_history", handleGetRGLPlayerHistory(database))
 
 	return mux, nil
 }

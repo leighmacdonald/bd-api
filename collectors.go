@@ -1,20 +1,22 @@
 package main
 
 import (
+	"cmp"
 	"context"
 	"errors"
+	"log/slog"
+	"slices"
+	"sync"
+
 	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
-	"log/slog"
-	"sort"
-	"sync"
 )
 
 // loadProfiles concurrently loads data from all the tracked data source tables and assembles them into
 // a slice of domain.Profile.
 //
-//nolint:cyclop
+//nolint:cyclop,maintidx
 func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs steamid.Collection) ([]domain.Profile, error) { //nolint:funlen
 	var ( //nolint:prealloc
 		waitGroup   = &sync.WaitGroup{}
@@ -26,6 +28,7 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 		bdEntries   []domain.BDSearchResult
 		servemeBans []*domain.ServeMeRecord
 		sourceBans  BanRecordMap
+		rglHist     []domain.RGLPlayerTeamHistory
 	)
 
 	if len(steamIDs) > maxResults {
@@ -115,6 +118,21 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 	go func() {
 		defer waitGroup.Done()
 
+		rglTeamHist, errs := database.rglPlayerTeamHistory(localCtx, steamIDs)
+		if errs != nil && !errors.Is(errs, errDatabaseNoResults) {
+			slog.Error("Failed to get rgl history records")
+
+			return
+		}
+
+		rglHist = rglTeamHist
+	}()
+
+	waitGroup.Add(1)
+
+	go func() {
+		defer waitGroup.Done()
+
 		logsVal, err := database.logsTFLogCount(localCtx, steamIDs)
 		if err != nil {
 			slog.Error("failed to query log counts", ErrAttr(err))
@@ -137,7 +155,7 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 			ServeMe:     nil,
 			LogsCount:   0,
 			BotDetector: make([]domain.BDSearchResult, 0),
-			Seasons:     make([]domain.Season, 0),
+			RGL:         make([]domain.RGLPlayerTeamHistory, 0),
 			Friends:     make([]steamweb.Friend, 0),
 		}
 
@@ -179,6 +197,12 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 			}
 		}
 
+		for _, hist := range rglHist {
+			if hist.SteamID == sid {
+				profile.RGL = append(profile.RGL, hist)
+			}
+		}
+
 		for logSID, count := range logs {
 			if logSID == sid {
 				profile.LogsCount = count
@@ -200,12 +224,44 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 			profile.Friends = []steamweb.Friend{}
 		}
 
-		profile.Seasons = []domain.Season{}
-		sort.Slice(profile.Seasons, func(i, j int) bool {
-			return profile.Seasons[i].DivisionInt < profile.Seasons[j].DivisionInt
-		})
 		profiles = append(profiles, profile)
 	}
 
 	return profiles, nil
+}
+
+func loadStats(ctx context.Context, database *pgStore) (siteStats, error) {
+	stats, err := database.stats(ctx)
+	if err != nil {
+		return stats, err
+	}
+
+	lists, errLists := database.botDetectorLists(ctx)
+	if errLists != nil && !errors.Is(errLists, errDatabaseNoResults) {
+		return stats, errLists
+	}
+
+	for _, list := range lists {
+		stats.BotDetectorLists = append(stats.BotDetectorLists, domain.BDListBasic{
+			Name: list.BDListName,
+			URL:  list.URL,
+		})
+	}
+
+	sourcebans, errSB := database.sourcebansSites(ctx)
+	if errSB != nil && !errors.Is(errSB, errDatabaseNoResults) {
+		return stats, errSB
+	}
+
+	for _, site := range sourcebans {
+		stats.SourcebansSites = append(stats.SourcebansSites, string(site.Name))
+	}
+
+	slices.SortFunc(stats.BotDetectorLists, func(a, b domain.BDListBasic) int {
+		return cmp.Compare(a.Name, b.Name)
+	})
+
+	slices.Sort(stats.SourcebansSites)
+
+	return stats, nil
 }
