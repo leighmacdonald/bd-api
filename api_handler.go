@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -407,5 +408,53 @@ func handleGetStats(database *pgStore) func(http.ResponseWriter, *http.Request) 
 		defer statsMu.RUnlock()
 
 		responseOk(writer, request, stats, "Global Site Stats")
+	}
+}
+
+func handleGetRGLList(database *pgStore, config appConfig) func(http.ResponseWriter, *http.Request) {
+	extURL := "http://" + config.ListenAddr + "/"
+	if config.ExternalURL != "" {
+		extURL = config.ExternalURL
+	}
+
+	extURL = strings.TrimSuffix(extURL, "/")
+
+	return func(writer http.ResponseWriter, request *http.Request) {
+		bans, errBans := database.rglGetBans(request.Context())
+		if errBans != nil {
+			responseErr(writer, request, http.StatusInternalServerError, errBans, "Failed to get ban list")
+
+			return
+		}
+
+		list := domain.TF2BDSchema{
+			Schema: "https://raw.githubusercontent.com/leighmacdonald/bd-api/master/schemas/playerlist.schema.json",
+			FileInfo: domain.FileInfo{
+				Authors:     []string{"rgl league", "bd-api"},
+				Description: "All league bans and infractions",
+				Title:       "RGL.gg Bans",
+				UpdateURL:   extURL + "/list/rgl",
+			},
+			Players: make([]domain.TF2BDPlayer, len(bans)),
+		}
+
+		for i, ban := range bans {
+			player := domain.TF2BDPlayer{
+				Attributes: []string{"rgl"},
+				LastSeen: domain.LastSeen{
+					PlayerName: ban.Alias,
+					Time:       int(ban.CreatedAt.Unix()),
+				},
+				Steamid: ban.SteamID,
+				Proof:   []string{ban.Reason},
+			}
+			if ban.ExpiresAt.After(time.Date(2500, 0, 0, 0, 0, 0, 0, time.UTC)) {
+				player.Proof = append(player.Proof, "Permanent Ban")
+			}
+
+			list.Players[i] = player
+		}
+
+		responseOk(writer, request, list, "RGL Ban List")
 	}
 }

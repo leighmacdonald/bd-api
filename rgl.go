@@ -51,6 +51,14 @@ type RGLTeamMember struct {
 	LeftAt       *time.Time      `json:"left_at"`
 }
 
+type RGLBan struct {
+	SteamID   steamid.SteamID `json:"steam_id"`
+	Alias     string          `json:"alias"`
+	ExpiresAt time.Time       `json:"expires_at"`
+	CreatedAt time.Time       `json:"created_at"`
+	Reason    string          `json:"reason"`
+}
+
 func NewRGLScraper(database *pgStore) RGLScraper {
 	return RGLScraper{
 		database: database,
@@ -245,50 +253,52 @@ func (r *RGLScraper) getRGLSeason(ctx context.Context, seasonID int) (RGLSeason,
 	return season, nil
 }
 
-type RGLBan struct {
-	SteamID   steamid.SteamID `json:"steam_id"`
-	Alias     string          `json:"alias"`
-	ExpiresAt time.Time       `json:"expires_at"`
-	CreatedAt time.Time       `json:"created_at"`
-	Reason    string          `json:"reason"`
-}
-
 func (r *RGLScraper) updateBans(ctx context.Context) error {
-	offset := 0
+	var (
+		offset = 0
+		bans   []RGLBan
+	)
+
+	slog.Info("Starting RGL Bans update")
+
 	for {
-		bans, errBans := rgl.Bans(ctx, r.client, 100, offset)
+		slog.Info("Fetching RGL ban set", slog.Int("offset", offset))
+
+		fetched, errBans := rgl.Bans(ctx, r.client, 100, offset)
 		if errBans != nil {
 			return errors.Join(errBans, errFetchBans)
 		}
 
-		for _, ban := range bans {
+		if len(fetched) == 0 {
+			break
+		}
+
+		for _, ban := range fetched {
 			sid := steamid.New(ban.SteamID)
 			if !sid.Valid() {
+				// A couple entries seem to have a 0 value for SID
 				continue
 			}
 
-			record := newPlayerRecord(sid)
-			if err := r.database.playerGetOrCreate(ctx, sid, &record); err != nil {
-				return err
-			}
-
-			if err := r.database.rglBanInsert(ctx, RGLBan{
+			bans = append(bans, RGLBan{
 				SteamID:   sid,
 				Alias:     ban.Alias,
 				ExpiresAt: ban.ExpiresAt,
 				CreatedAt: ban.CreatedAt,
 				Reason:    ban.Reason,
-			}); err != nil {
-				if errors.Is(err, errDatabaseUnique) {
-					continue
-				}
-
-				return errors.Join(err, errFetchBans)
-			}
+			})
 		}
 
 		r.waiter(nil)
 
 		offset += 100
 	}
+
+	if err := r.database.rglBansReplace(ctx, bans); err != nil {
+		return err
+	}
+
+	slog.Info("Updated RGL bans successfully", slog.Int("count", len(bans)))
+
+	return nil
 }
