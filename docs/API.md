@@ -674,6 +674,57 @@ Example: https://bd-api.roto.lol/list/rgl
     ]
 }
 ```
+
+## GET /list/serveme
+
+Return a Bot Detector compatible json result consisting of all known serveme bans.
+
+Example: https://bd-api.roto.lol/list/serveme
+
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/leighmacdonald/bd-api/master/schemas/playerlist.schema.json",
+  "file_info": {
+    "authors": [
+      "serveme.tf",
+      "bd-api"
+    ],
+    "description": "All serveme.tf bans",
+    "title": "serveme.tf Bans",
+    "update_url": "http://:8888/list/serveme"
+  },
+  "players": [
+    {
+      "attributes": [
+        "serveme"
+      ],
+      "last_seen": {
+        "player_name": "88 street",
+        "time": 1722244260
+      },
+      "steamid": "76561198025169706",
+      "proof": [
+        "match invader",
+        "Permanent Ban"
+      ]
+    },
+    {
+      "attributes": [
+        "serveme"
+      ],
+      "last_seen": {
+        "player_name": "88 street",
+        "time": 1722244260
+      },
+      "steamid": "76561198065316185",
+      "proof": [
+        "match invader",
+        "Permanent Ban"
+      ]
+    }
+  ]
+}
+```
 ## GET /stats
 
 Get the current global stats for the site.
