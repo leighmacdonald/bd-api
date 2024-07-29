@@ -737,8 +737,12 @@
             padding-top: 50px;
         }
 
-        h1, h6 {
+        h1, h5, h6 {
             text-align: center;
+        }
+
+        h5 {
+            margin: 0.5rem;
         }
 
         button, input {
@@ -832,12 +836,13 @@
     <button type="submit" style="width: 99%">serveme.tf Bans</button>
 </form>
 
+<h5>Bot Detector Ban Lists<br /><a href="/list/rgl">rgl.gg</a><br /><a href="/list/serveme">serveme.tf</a></h5>
+
 <h6>
     <a href="https://github.com/leighmacdonald/bd-api/blob/master/docs/API.md">API</a>
-
     <a href="/stats">Stats</a>
     <br/>
-    {{ .Version }}</h6>
-
+    {{ .Version }}
+</h6>
 </body>
 </html>
