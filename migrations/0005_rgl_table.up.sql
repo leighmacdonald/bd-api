@@ -41,18 +41,32 @@ CREATE UNIQUE INDEX rgl_team_member_uidx ON rgl_team_member (team_id, steam_id);
 
 create table if not exists rgl_ban
 (
-    steam_id   bigint primary key references player (steam_id),
+    steam_id   bigint references player (steam_id),
     alias      text        not null,
     expires_at timestamptz not null,
     created_at timestamptz not null,
     reason     text        not null
 );
 
-CREATE UNIQUE INDEX rgl_ban_uidx ON rgl_ban (steam_id, created_at);
+-- CREATE UNIQUE INDEX rgl_ban_uidx ON rgl_ban (steam_id, created_at);
 
--- create table if not exists rgl_match
--- (
---     match_id int primary key
--- );
+create table if not exists rgl_match
+(
+    match_id int primary key not null,
+    seasonName text not null,
+    divisionName text not null,
+    division_id int not null,
+    season_id int not null,
+    region_id int not null,
+    match_date timestamptz not null,
+    match_name text not null,
+    is_forfeit bool not null,
+    winner int not null references rgl_team (team_id),
+    team_id_a int not null references rgl_team (team_id),
+    points_a int not null,
+    team_id_b int not null references rgl_team (team_id),
+    points_b int not null
+);
+
 
 commit;
