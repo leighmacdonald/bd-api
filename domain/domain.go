@@ -193,7 +193,7 @@ type Profile struct {
 	ServeMe     *ServeMeRecord         `json:"serve_me"`
 	LogsCount   int                    `json:"logs_count"`
 	BotDetector []BDSearchResult       `json:"bot_detector"`
-	Seasons     []Season               `json:"seasons"`
+	RGL         []RGLPlayerTeamHistory `json:"rgl"`
 	Friends     []steamweb.Friend      `json:"friends"`
 }
 
@@ -206,58 +206,6 @@ type PlayerBanState struct {
 	NumberOfGameBans int                   `json:"number_of_game_bans"`
 	EconomyBan       steamweb.EconBanState `json:"economy_ban"`
 }
-
-// Division tries to define a generalized ranked division order.
-type Division int
-
-// *Rough* mapping of skill for each division for sorting, 0 being invite.
-const (
-	RGLRankInvite       Division = 0
-	ETF2LPremiership    Division = 0
-	UGCRankPlatinum     Division = 1
-	ETF2LDiv1           Division = 1
-	RGLRankDiv1         Division = 1
-	RGLRankDiv2         Division = 1
-	ETF2LDiv2           Division = 2
-	RGLRankMain         Division = 2
-	RGLRankAdvanced     Division = 2
-	ETF2LMid            Division = 3
-	UGCRankGold         Division = 3
-	ETF2LLow            Division = 4
-	RGLRankIntermediate Division = 4
-	ETF2LOpen           Division = 5
-	RGLRankOpen         Division = 5
-	UGCRankSilver       Division = 6
-	RGLRankAmateur      Division = 6
-	UGCRankSteel        Division = 7
-	UGCRankIron         Division = 8
-	RGLRankFreshMeat    Division = 9
-	RGLRankNone         Division = 10
-	UGCRankNone         Division = 10
-	UnknownDivision     Division = 20
-)
-
-// League represents supported leagues.
-type League string
-
-//
-// const (
-//	leagueUGC   League = "ugc"
-//	leagueESEA  League = "esea"
-//	leagueETF2L League = "etf2l"
-//	leagueRGL   League = "rgl"
-//)
-
-// Season stores generalized league season data.
-type Season struct {
-	League      League   `json:"league"`
-	Division    string   `json:"division"`
-	DivisionInt Division `json:"division_int"`
-	Format      string   `json:"format"`
-	TeamName    string   `json:"team_name"`
-}
-
-type CompMap map[steamid.SteamID][]Season
 
 // JSONDuration handles encoding time.Duration values into seconds.
 type JSONDuration struct {
@@ -506,4 +454,77 @@ type BDListBasic struct {
 type BDSearchResult struct {
 	ListName string      `json:"list_name"`
 	Match    TF2BDPlayer `json:"match"`
+}
+
+type RGLSeason struct {
+	SeasonID           int       `json:"season_id"`
+	Name               string    `json:"name"`
+	Maps               []string  `json:"maps"`
+	FormatName         string    `json:"format_name"`
+	RegionName         string    `json:"region_name"`
+	ParticipatingTeams []int     `json:"participating_teams"`
+	Matches            []int     `json:"matches"`
+	CreatedOn          time.Time `json:"created_on"`
+}
+
+type RGLTeam struct {
+	TeamID       int             `json:"team_id,omitempty"`
+	SeasonID     int             `json:"season_id,omitempty"`
+	DivisionID   int             `json:"division_id,omitempty"`
+	DivisionName string          `json:"division_name,omitempty"`
+	TeamLeader   steamid.SteamID `json:"team_leader"`
+	CreatedAt    time.Time       `json:"created_at"`
+	UpdatedAt    time.Time       `json:"updated_at"`
+	Tag          string          `json:"tag,omitempty"`
+	TeamName     string          `json:"team_name,omitempty"`
+	FinalRank    int             `json:"final_rank,omitempty"`
+	// TeamStatus   string
+	// TeamReady    bool
+}
+
+type RGLPlayerTeamHistory struct {
+	DivisionName string          `json:"division_name,omitempty"`
+	TeamLeader   steamid.SteamID `json:"team_leader"`
+	Tag          string          `json:"tag,omitempty"`
+	TeamName     string          `json:"team_name,omitempty"`
+	FinalRank    int             `json:"final_rank,omitempty"`
+	Name         string          `json:"name"`
+	IsTeamLeader bool            `json:"is_team_leader"`
+	JoinedAt     time.Time       `json:"joined_at"`
+	LeftAt       *time.Time      `json:"left_at"`
+	SteamID      steamid.SteamID `json:"-"`
+}
+
+type RGLTeamMember struct {
+	TeamID       int             `json:"team_id"`
+	Name         string          `json:"name"`
+	IsTeamLeader bool            `json:"is_team_leader"`
+	SteamID      steamid.SteamID `json:"steam_id"`
+	JoinedAt     time.Time       `json:"joined_at"`
+	LeftAt       *time.Time      `json:"left_at"`
+}
+
+type RGLMatch struct {
+	MatchID      int       `json:"match_id"`
+	SeasonID     int       `json:"season_id"`
+	SeasonName   string    `json:"season_name"`
+	DivisionName string    `json:"division_name"`
+	DivisionID   int       `json:"division_id"`
+	RegionID     int       `json:"region_id"`
+	MatchDate    time.Time `json:"match_date"`
+	MatchName    string    `json:"match_name"`
+	IsForfeit    bool      `json:"is_forfeit"`
+	Winner       int       `json:"winner"`
+	TeamIDA      int       `json:"team_ida"`
+	PointsA      float32   `json:"points_a"`
+	TeamIDB      int       `json:"team_idb"`
+	PointsB      float32   `json:"points_b"`
+}
+
+type RGLBan struct {
+	SteamID   steamid.SteamID `json:"steam_id"`
+	Alias     string          `json:"alias"`
+	ExpiresAt time.Time       `json:"expires_at"`
+	CreatedAt time.Time       `json:"created_at"`
+	Reason    string          `json:"reason"`
 }

@@ -255,7 +255,19 @@ Example: https://bd-api.roto.lol/profile?steamids=76561197970669109,765611979928
         }
       }
     ],
-    "seasons": [],
+    "rgl": [
+      {
+        "division_name": "RGL-Invite",
+        "team_leader": "76561199234205416",
+        "tag": "TEST",
+        "team_name": "test",
+        "final_rank": 1,
+        "name": "test",
+        "is_team_leader": true,
+        "joined_at": "2018-06-13T00:05:25.783-06:00",
+        "left_at": "0000-12-31T16:26:08-07:33"
+      }
+    ],
     "friends": [
       {
         "steamid": "76561197961103864",
@@ -576,6 +588,92 @@ Example: https://bd-api.roto.lol/steamid/76561197961279983
 }
 ```
 
+## GET /rgl/player_history
+
+Fetch player team histories for RGL.
+
+Example: https://bd-api.roto.lol/rgl/player_history?steamids=76561197970669109,76561198053621664
+
+```json
+{
+    "76561197970669109": [
+        {
+            "division_name": "RGL-Invite",
+            "team_leader": "76561197970669109",
+            "tag": "FROYO",
+            "team_name": "froyotech",
+            "final_rank": 1,
+            "name": "b4nny",
+            "is_team_leader": true,
+            "joined_at": "2018-06-13T00:05:25.783-06:00",
+            "left_at": "0000-12-31T16:26:08-07:33"
+        }
+    ],
+    "76561198053621664": [
+        {
+            "division_name": "RGL-Invite",
+            "team_leader": "76561197970669109",
+            "tag": "FROYO",
+            "team_name": "froyotech",
+            "final_rank": 1,
+            "name": "habib",
+            "is_team_leader": false,
+            "joined_at": "2018-06-13T03:17:43.753-06:00",
+            "left_at": "0000-12-31T16:26:08-07:33"
+        }
+    ]
+}
+
+```
+
+## GET /list/rgl
+
+Return a Bot Detector compatible json result consisting of all known RGL bans.
+
+Example: https://bd-api.roto.lol/list/rgl
+
+```json
+{
+    "$schema": "https://raw.githubusercontent.com/leighmacdonald/bd-api/master/schemas/playerlist.schema.json",
+    "file_info": {
+        "authors": [
+            "rgl league",
+            "bd-api"
+        ],
+        "description": "All league bans and infractions",
+        "title": "RGL.gg Bans",
+        "update_url": "http://:8888/list/rgl"
+    },
+    "players": [
+        {
+            "attributes": [
+                "rgl"
+            ],
+            "last_seen": {
+                "player_name": "maxe0911",
+                "time": 1721782795
+            },
+            "steamid": "76561198157757879",
+            "proof": [
+                "VAC ban is for a non-TF2 game."
+            ]
+        },
+        {
+            "attributes": [
+                "rgl"
+            ],
+            "last_seen": {
+                "player_name": "mitty",
+                "time": 1721633471
+            },
+            "steamid": "76561198391550027",
+            "proof": [
+                "Failure to Submit Demos: 1st Offense"
+            ]
+        }
+    ]
+}
+```
 ## GET /stats
 
 Get the current global stats for the site.

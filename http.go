@@ -1,8 +1,6 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"time"
@@ -27,35 +25,4 @@ func NewHTTPClient() *http.Client {
 	}
 
 	return c
-}
-
-func get(ctx context.Context, url string, receiver interface{}) (*http.Response, error) {
-	req, errNewReq := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if errNewReq != nil {
-		return nil, errors.Join(errNewReq, errRequestCreate)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{ //nolint:exhaustruct
-		// Don't follow redirects
-		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-
-	resp, errResp := client.Do(req)
-	if errResp != nil {
-		return nil, errors.Join(errResp, errRequestPerform)
-	}
-
-	if receiver != nil {
-		defer logCloser(resp.Body)
-
-		if errUnmarshal := json.NewDecoder(resp.Body).Decode(&receiver); errUnmarshal != nil {
-			return resp, errors.Join(errUnmarshal, errResponseDecode)
-		}
-	}
-
-	return resp, nil
 }

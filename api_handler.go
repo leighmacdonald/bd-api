@@ -1,14 +1,13 @@
 package main
 
 import (
-	"cmp"
 	_ "embed"
 	"errors"
 	"fmt"
 	"html/template"
 	"log/slog"
 	"net/http"
-	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -29,28 +28,6 @@ func handleGetFriendList(cache cache) http.HandlerFunc {
 
 		friends := getSteamFriends(request.Context(), cache, ids)
 		responseOk(writer, request, friends, "Steam Summaries")
-	}
-}
-
-// handleGetComp returns a list of a users competitive history.
-// This is very incomplete currently.
-func handleGetComp(cache cache) http.HandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		ids, ok := getSteamIDs(writer, request)
-
-		if !ok {
-			return
-		}
-
-		compHistory := getCompHistory(request.Context(), cache, ids)
-
-		if len(ids) != len(compHistory) {
-			slog.Warn("Failed to fully fetch comp history")
-			responseErr(writer, request, http.StatusInternalServerError, errLoadFailed, "")
-
-			return
-		}
-		responseOk(writer, request, compHistory, "Comp History")
 	}
 }
 
@@ -367,43 +344,12 @@ func handleGetStats(database *pgStore) func(http.ResponseWriter, *http.Request) 
 		statsMu.RUnlock()
 
 		if timeDiff > time.Minute*15 {
-			newStats, err := database.stats(request.Context())
-			if err != nil {
-				responseErr(writer, request, http.StatusInternalServerError, err, "Failed to generate stats")
+			newStats, errStats := loadStats(request.Context(), database)
+			if errStats != nil {
+				responseErr(writer, request, http.StatusInternalServerError, errStats, "Failed to generate stats")
 
 				return
 			}
-
-			lists, errLists := database.botDetectorLists(request.Context())
-			if errLists != nil && !errors.Is(errLists, errDatabaseNoResults) {
-				responseErr(writer, request, http.StatusInternalServerError, errLists, "Failed to generate stats")
-
-				return
-			}
-
-			for _, list := range lists {
-				newStats.BotDetectorLists = append(newStats.BotDetectorLists, domain.BDListBasic{
-					Name: list.BDListName,
-					URL:  list.URL,
-				})
-			}
-
-			sourcebans, errSB := database.sourcebansSites(request.Context())
-			if errSB != nil && !errors.Is(errSB, errDatabaseNoResults) {
-				responseErr(writer, request, http.StatusInternalServerError, errSB, "Failed to generate stats")
-
-				return
-			}
-
-			for _, site := range sourcebans {
-				newStats.SourcebansSites = append(newStats.SourcebansSites, string(site.Name))
-			}
-
-			slices.SortFunc(newStats.BotDetectorLists, func(a, b domain.BDListBasic) int {
-				return cmp.Compare(a.Name, b.Name)
-			})
-
-			slices.Sort(newStats.SourcebansSites)
 
 			statsMu.Lock()
 			updated = time.Now()
@@ -415,5 +361,86 @@ func handleGetStats(database *pgStore) func(http.ResponseWriter, *http.Request) 
 		defer statsMu.RUnlock()
 
 		responseOk(writer, request, stats, "Global Site Stats")
+	}
+}
+
+func handleGetRGLPlayerHistory(database *pgStore) func(http.ResponseWriter, *http.Request) {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		sids, sidOk := getSteamIDs(writer, request)
+		if !sidOk {
+			return
+		}
+
+		history, err := database.rglPlayerTeamHistory(request.Context(), sids)
+		if err != nil {
+			responseErr(writer, request, http.StatusInternalServerError, err, "Failed to generate histories")
+
+			return
+		}
+
+		histMap := map[string][]domain.RGLPlayerTeamHistory{}
+
+		for _, sid := range sids {
+			if _, ok := histMap[sid.String()]; !ok {
+				histMap[sid.String()] = []domain.RGLPlayerTeamHistory{}
+			}
+
+			for _, hist := range history {
+				if sid == hist.SteamID {
+					histMap[sid.String()] = append(histMap[sid.String()], hist)
+				}
+			}
+		}
+
+		responseOk(writer, request, histMap, "Player RGL Team Histories")
+	}
+}
+
+func handleGetRGLList(database *pgStore, config appConfig) func(http.ResponseWriter, *http.Request) {
+	//goland:noinspection ALL
+	extURL := "http://" + config.ListenAddr + "/"
+	if config.ExternalURL != "" {
+		extURL = config.ExternalURL
+	}
+
+	extURL = strings.TrimSuffix(extURL, "/")
+
+	return func(writer http.ResponseWriter, request *http.Request) {
+		bans, errBans := database.rglBansGetAll(request.Context())
+		if errBans != nil {
+			responseErr(writer, request, http.StatusInternalServerError, errBans, "Failed to get ban list")
+
+			return
+		}
+
+		list := domain.TF2BDSchema{
+			Schema: "https://raw.githubusercontent.com/leighmacdonald/bd-api/master/schemas/playerlist.schema.json",
+			FileInfo: domain.FileInfo{
+				Authors:     []string{"rgl league", "bd-api"},
+				Description: "All league bans and infractions",
+				Title:       "RGL.gg Bans",
+				UpdateURL:   extURL + "/list/rgl",
+			},
+			Players: make([]domain.TF2BDPlayer, len(bans)),
+		}
+
+		for banIdx, ban := range bans {
+			player := domain.TF2BDPlayer{
+				Attributes: []string{"rgl"},
+				LastSeen: domain.LastSeen{
+					PlayerName: ban.Alias,
+					Time:       int(ban.CreatedAt.Unix()),
+				},
+				Steamid: ban.SteamID,
+				Proof:   []string{ban.Reason},
+			}
+			if ban.ExpiresAt.After(time.Date(2500, 0, 0, 0, 0, 0, 0, time.UTC)) {
+				player.Proof = append(player.Proof, "Permanent Ban")
+			}
+
+			list.Players[banIdx] = player
+		}
+
+		responseOk(writer, request, list, "RGL Ban List")
 	}
 }

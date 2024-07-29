@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
-	"strings"
+	"net/http"
 	"time"
 
 	"github.com/leighmacdonald/bd-api/domain"
@@ -12,106 +12,307 @@ import (
 	"github.com/leighmacdonald/steamid/v4/steamid"
 )
 
-// Current issues:
+var (
+	errFetchMatch        = errors.New("failed to fetch rgl match via api")
+	errFetchMatchInvalid = errors.New("fetched invalid rgl match via api")
+	errFetchTeam         = errors.New("failed to fetch rgl team via api")
+	errFetchSeason       = errors.New("failed to fetch rgl season via api")
+	errFetchBans         = errors.New("failed to fetch rgl bans")
+)
 
-// - Sometime api just fails on the first attempt
-
-// - Empty value.
-
-func getRGL(ctx context.Context, log *slog.Logger, sid64 steamid.SteamID) ([]domain.Season, error) {
-	startTime := time.Now()
-	client := NewHTTPClient()
-
-	_, errProfile := rgl.Profile(ctx, client, sid64)
-	if errProfile != nil {
-		return nil, errors.Join(errProfile, errRequestPerform)
+func NewRGLScraper(database *pgStore) RGLScraper {
+	return RGLScraper{
+		database: database,
+		curID:    0,
+		waitTime: time.Second,
+		client:   NewHTTPClient(),
 	}
-
-	teams, errTeams := rgl.ProfileTeams(ctx, client, sid64)
-	if errTeams != nil {
-		return nil, errRequestPerform
-	}
-
-	seasons := make([]domain.Season, len(teams))
-
-	for index, team := range teams {
-		seasonStartTime := time.Now()
-
-		var season domain.Season
-		seasonInfo, errSeason := rgl.Season(ctx, client, team.SeasonID)
-
-		if errSeason != nil {
-			return nil, errRequestPerform
-		}
-
-		season.League = "rgl"
-		season.Division = seasonInfo.Name
-		season.DivisionInt = parseRGLDivision(team.DivisionName)
-		season.TeamName = team.TeamName
-
-		lowerName := strings.ToLower(seasonInfo.Name)
-
-		if seasonInfo.FormatName == "" {
-			switch {
-			case strings.Contains(lowerName, "sixes"):
-
-				seasonInfo.FormatName = "Sixes"
-			case strings.Contains(lowerName, "prolander"):
-
-				seasonInfo.FormatName = "Prolander"
-			case strings.Contains(lowerName, "hl season"):
-
-				seasonInfo.FormatName = "HL"
-			case strings.Contains(lowerName, "p7 season"):
-
-				seasonInfo.FormatName = "Prolander"
-			}
-		}
-
-		season.Format = seasonInfo.FormatName
-		seasons[index] = season
-
-		log.Info("RGL season fetched", slog.Duration("duration", time.Since(seasonStartTime)))
-	}
-
-	log.Info("RGL Completed", slog.Duration("duration", time.Since(startTime)))
-
-	return seasons, nil
 }
 
-func parseRGLDivision(div string) domain.Division {
-	switch div {
-	case "RGL-Invite":
-		fallthrough
-	case "Invite":
-		return domain.RGLRankInvite
-	case "RGL-Div-1":
-		return domain.RGLRankDiv1
-	case "RGL-Div-2":
-		return domain.RGLRankDiv2
-	case "RGL-Main":
-		fallthrough
-	case "Main":
-		return domain.RGLRankMain
-	case "RGL-Advanced":
-		fallthrough
-	case "Advanced-1":
-		fallthrough
-	case "Advanced":
-		return domain.RGLRankAdvanced
-	case "RGL-Intermediate":
-		fallthrough
-	case "Intermediate":
-		return domain.RGLRankIntermediate
-	case "RGL-Challenger":
-		return domain.RGLRankIntermediate
-	case "Open":
-		return domain.RGLRankOpen
-	case "Amateur":
-		return domain.RGLRankAmateur
-	case "Fresh Meat":
-		return domain.RGLRankFreshMeat
-	default:
-		return domain.RGLRankNone
+type RGLScraper struct {
+	database *pgStore
+	curID    int
+	waitTime time.Duration
+	client   *http.Client
+}
+
+func (r *RGLScraper) start(ctx context.Context) {
+	scraperInterval := time.Hour
+	scraperTimer := time.NewTimer(scraperInterval)
+
+	r.scrapeRGL(ctx)
+
+	for {
+		select {
+		case <-scraperTimer.C:
+			r.scrapeRGL(ctx)
+			scraperTimer.Reset(scraperInterval)
+		case <-ctx.Done():
+			return
+		}
 	}
+}
+
+func (r *RGLScraper) waiter(err error) {
+	if err != nil {
+		r.waitTime *= 2
+	}
+
+	time.Sleep(r.waitTime)
+}
+
+// scrapeRGL handles fetching all the RGL data.
+// It operates in the following order:
+//
+// - Fetch bans
+// - Fetch season
+// - Fetch season teams
+// - Fetch season team members
+// - Fetch season matches.
+func (r *RGLScraper) scrapeRGL(ctx context.Context) {
+	var (
+		curID    = 1
+		waitTime = time.Second
+		maxErr   = 100
+		curErr   = 0
+	)
+
+	if err := r.updateBans(ctx); err != nil {
+		slog.Error("Failed to update bans", ErrAttr(err))
+	}
+
+	for curErr < maxErr {
+		season, errSeason := r.getRGLSeason(ctx, curID)
+		if errSeason != nil {
+			if errSeason.Error() == "invalid status code: 404 Not Found" {
+				curID++
+				maxErr++
+				r.waiter(errSeason)
+
+				continue
+			}
+
+			if errors.Is(errSeason, rgl.ErrRateLimit) {
+				slog.Error("Failed to fetch season (rate limited)", slog.Int("season", curID), slog.Duration("waitTime", waitTime), ErrAttr(errSeason))
+				r.waiter(errSeason)
+
+				continue
+			}
+
+			slog.Error("Unhandled error", ErrAttr(errSeason))
+			curID++
+			curErr++
+
+			continue
+		}
+
+		r.waiter(nil)
+
+		slog.Info("Got RGL season", slog.Int("season_id", season.SeasonID))
+
+		for _, teamID := range season.ParticipatingTeams {
+			team, errTeam := r.getRGLTeam(ctx, teamID)
+			if errTeam != nil {
+				slog.Error("Failed to fetch team", ErrAttr(errTeam))
+				r.waiter(errTeam)
+
+				continue
+			}
+
+			slog.Info("Got team", slog.String("name", team.TeamName))
+		}
+
+		for _, matchID := range season.Matches {
+			match, errMatch := r.getRGLMatch(ctx, matchID)
+			if errMatch != nil {
+				slog.Error("Failed to fetch match", ErrAttr(errMatch))
+				r.waiter(errMatch)
+
+				continue
+			}
+
+			slog.Info("Got RGL match", slog.String("name", match.MatchName), slog.String("season", match.SeasonName))
+		}
+
+		curID++
+	}
+
+	slog.Info("Max errors reached. Stopping RGL update.")
+}
+
+func (r *RGLScraper) getRGLTeam(ctx context.Context, teamID int) (domain.RGLTeam, error) {
+	team, errTeam := r.database.rglTeamGet(ctx, teamID)
+	if errTeam != nil && !errors.Is(errTeam, errDatabaseNoResults) {
+		return team, errTeam
+	}
+
+	if team.TeamID == 0 { //nolint:nestif
+		fetched, errFetch := rgl.Team(ctx, NewHTTPClient(), int64(teamID))
+		if errFetch != nil {
+			r.waiter(errFetch)
+
+			return team, errors.Join(errFetch, errFetchTeam)
+		}
+
+		r.waiter(nil)
+
+		team.TeamID = fetched.TeamID
+		team.SeasonID = fetched.SeasonID
+		team.DivisionID = fetched.DivisionID
+		team.DivisionName = fetched.DivisionName
+		team.TeamLeader = steamid.New(fetched.TeamLeader)
+		team.Tag = fetched.Tag
+		team.TeamName = fetched.Name
+		team.FinalRank = fetched.FinalRank
+		team.CreatedAt = fetched.CreatedAt
+		team.UpdatedAt = fetched.UpdatedAt
+
+		record := newPlayerRecord(team.TeamLeader)
+		if err := r.database.playerGetOrCreate(ctx, team.TeamLeader, &record); err != nil {
+			return team, err
+		}
+
+		if err := r.database.rglTeamInsert(ctx, team); err != nil {
+			return team, err
+		}
+
+		for _, player := range fetched.Players {
+			memberRecord := newPlayerRecord(player.SteamID)
+			if err := r.database.playerGetOrCreate(ctx, player.SteamID, &memberRecord); err != nil {
+				return team, err
+			}
+
+			if err := r.database.rglTeamMemberInsert(ctx, domain.RGLTeamMember{
+				TeamID:       team.TeamID,
+				Name:         player.Name,
+				IsTeamLeader: player.IsLeader,
+				SteamID:      player.SteamID,
+				JoinedAt:     player.JoinedAt,
+				LeftAt:       &player.UpdatedOn,
+			}); err != nil {
+				slog.Error("Failed to ensure team member", ErrAttr(err))
+			}
+		}
+	}
+
+	return team, nil
+}
+
+func (r *RGLScraper) getRGLSeason(ctx context.Context, seasonID int) (domain.RGLSeason, error) {
+	season, errSeason := r.database.rglSeasonGet(ctx, seasonID)
+	if errSeason != nil && !errors.Is(errSeason, errDatabaseNoResults) {
+		return season, errSeason
+	}
+
+	if season.SeasonID == 0 {
+		fetchedSeason, errFetch := rgl.Season(ctx, r.client, int64(seasonID))
+		if errFetch != nil {
+			return season, errors.Join(errFetch, errFetchSeason)
+		}
+
+		season.SeasonID = seasonID
+		season.Name = fetchedSeason.Name
+		season.Maps = fetchedSeason.Maps
+		season.RegionName = fetchedSeason.RegionName
+		season.FormatName = fetchedSeason.FormatName
+		season.ParticipatingTeams = fetchedSeason.ParticipatingTeams
+		season.Matches = fetchedSeason.MatchesPlayedDuringSeason
+		season.CreatedOn = time.Now()
+
+		if err := r.database.rglSeasonInsert(ctx, season); err != nil {
+			return season, err
+		}
+	}
+
+	return season, nil
+}
+
+func (r *RGLScraper) updateBans(ctx context.Context) error {
+	var (
+		offset = 0
+		bans   []domain.RGLBan
+	)
+
+	slog.Info("Starting RGL Bans update")
+
+	for {
+		slog.Info("Fetching RGL ban set", slog.Int("offset", offset))
+
+		fetched, errBans := rgl.Bans(ctx, r.client, 100, offset)
+		if errBans != nil {
+			return errors.Join(errBans, errFetchBans)
+		}
+
+		if len(fetched) == 0 {
+			break
+		}
+
+		for _, ban := range fetched {
+			sid := steamid.New(ban.SteamID)
+			if !sid.Valid() {
+				// A couple entries seem to have a 0 value for SID
+				continue
+			}
+
+			bans = append(bans, domain.RGLBan{
+				SteamID:   sid,
+				Alias:     ban.Alias,
+				ExpiresAt: ban.ExpiresAt,
+				CreatedAt: ban.CreatedAt,
+				Reason:    ban.Reason,
+			})
+		}
+
+		r.waiter(nil)
+
+		offset += 100
+	}
+
+	if err := r.database.rglBansReplace(ctx, bans); err != nil {
+		return err
+	}
+
+	slog.Info("Updated RGL bans successfully", slog.Int("count", len(bans)))
+
+	return nil
+}
+
+func (r *RGLScraper) getRGLMatch(ctx context.Context, matchID int) (domain.RGLMatch, error) {
+	match, errMatch := r.database.rglMatchGet(ctx, matchID)
+	if errMatch != nil && !errors.Is(errMatch, errDatabaseNoResults) {
+		return match, errMatch
+	}
+
+	if match.MatchID == 0 {
+		fetched, err := rgl.Match(ctx, NewHTTPClient(), int64(matchID))
+		if err != nil {
+			return match, errors.Join(err, errFetchMatch)
+		}
+
+		if len(fetched.Teams) < 2 {
+			return match, errors.Join(err, errFetchMatchInvalid)
+		}
+
+		match.MatchID = fetched.MatchID
+		match.MatchName = fetched.MatchName
+		match.MatchDate = fetched.MatchDate
+		match.DivisionName = fetched.DivisionName
+		match.DivisionID = fetched.DivisionID
+		match.RegionID = fetched.RegionID
+		match.MatchDate = fetched.MatchDate
+		match.IsForfeit = fetched.IsForfeit
+		match.Winner = fetched.Winner
+		match.SeasonName = fetched.SeasonName
+		match.SeasonID = fetched.SeasonID
+		match.TeamIDA = fetched.Teams[0].TeamID
+		match.PointsA = fetched.Teams[0].Points
+		match.TeamIDB = fetched.Teams[1].TeamID
+		match.PointsB = fetched.Teams[1].Points
+
+		if errInsert := r.database.rglMatchInsert(ctx, match); errInsert != nil {
+			return match, errInsert
+		}
+	}
+
+	return match, nil
 }

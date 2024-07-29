@@ -31,6 +31,7 @@ type proxyContext struct {
 
 type appConfig struct {
 	ListenAddr               string          `mapstructure:"listen_addr"`
+	ExternalURL              string          `mapstructure:"external_url"`
 	SteamAPIKey              string          `mapstructure:"steam_api_key"`
 	DSN                      string          `mapstructure:"dsn"`
 	RunMode                  string          `mapstructure:"run_mode"`
@@ -39,6 +40,7 @@ type appConfig struct {
 	LogFilePath              string          `mapstructure:"log_file_path"`
 	LogstfScraperEnabled     bool            `mapstructure:"logstf_scraper_enabled"`
 	SourcebansScraperEnabled bool            `mapstructure:"sourcebans_scraper_enabled"`
+	RGLScraperEnabled        bool            `mapstructure:"rgl_scraper_enabled"`
 	ProxiesEnabled           bool            `mapstructure:"proxies_enabled"`
 	Proxies                  []*proxyContext `mapstructure:"proxies"`
 	ScrapeDelay              int             `mapstructure:"scrape_delay"`

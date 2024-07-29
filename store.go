@@ -1685,3 +1685,237 @@ func (db *pgStore) stats(ctx context.Context) (siteStats, error) {
 
 	return stats, nil
 }
+
+func (db *pgStore) rglTeamGet(ctx context.Context, teamID int) (domain.RGLTeam, error) {
+	var team domain.RGLTeam
+	query, args, errQuery := sb.
+		Select("team_id", "season_id", "division_id", "division_name", "team_leader", "tag", "team_name", "final_rank",
+			"created_at", "updated_at").
+		From("rgl_team").
+		Where(sq.Eq{"team_id": teamID}).
+		ToSql()
+	if errQuery != nil {
+		return team, dbErr(errQuery, "Failed to build query")
+	}
+
+	if err := db.pool.QueryRow(ctx, query, args...).
+		Scan(&team.TeamID, &team.SeasonID, &team.DivisionID, &team.DivisionName, &team.TeamLeader, &team.Tag, &team.TeamName, &team.FinalRank,
+			&team.CreatedAt, &team.UpdatedAt); err != nil {
+		return team, dbErr(err, "Failed to query rgl team")
+	}
+
+	return team, nil
+}
+
+func (db *pgStore) rglTeamInsert(ctx context.Context, team domain.RGLTeam) error {
+	query, args, errQuery := sb.
+		Insert("rgl_team").
+		SetMap(map[string]interface{}{
+			"team_id":       team.TeamID,
+			"season_id":     team.SeasonID,
+			"division_id":   team.DivisionID,
+			"division_name": team.DivisionName,
+			"team_leader":   team.TeamLeader,
+			"tag":           team.Tag,
+			"team_name":     team.TeamName,
+			"final_rank":    team.FinalRank,
+			"created_at":    team.CreatedAt,
+			"updated_at":    team.UpdatedAt,
+		}).ToSql()
+	if errQuery != nil {
+		return dbErr(errQuery, "Failed to insert rgl team")
+	}
+
+	if _, err := db.pool.Exec(ctx, query, args...); err != nil {
+		return dbErr(err, "Failed to exec rgl team insert")
+	}
+
+	return nil
+}
+
+func (db *pgStore) rglSeasonGet(ctx context.Context, seasonID int) (domain.RGLSeason, error) {
+	var season domain.RGLSeason
+	query, args, errQuery := sb.
+		Select("season_id", "maps", "season_name", "format_name", "region_name", "participating_teams", "matches", "created_on").
+		From("rgl_season").
+		Where(sq.Eq{"season_id": seasonID}).
+		ToSql()
+	if errQuery != nil {
+		return season, dbErr(errQuery, "Failed to build query")
+	}
+
+	if err := db.pool.QueryRow(ctx, query, args...).
+		Scan(&season.SeasonID, &season.Maps, &season.Name, &season.FormatName, &season.RegionName, &season.ParticipatingTeams, &season.Matches, &season.CreatedOn); err != nil {
+		return season, dbErr(err, "Failed to query rgl season")
+	}
+
+	return season, nil
+}
+
+func (db *pgStore) rglSeasonInsert(ctx context.Context, season domain.RGLSeason) error {
+	query, args, errQuery := sb.
+		Insert("rgl_season").
+		SetMap(map[string]interface{}{
+			"season_id":           season.SeasonID,
+			"maps":                season.Maps,
+			"season_name":         season.Name,
+			"format_name":         season.FormatName,
+			"region_name":         season.RegionName,
+			"participating_teams": season.ParticipatingTeams,
+			"matches":             season.Matches,
+			"created_on":          season.CreatedOn,
+		}).ToSql()
+	if errQuery != nil {
+		return dbErr(errQuery, "Failed to insert rgl season")
+	}
+
+	if _, err := db.pool.Exec(ctx, query, args...); err != nil {
+		return dbErr(err, "Failed to exec rgl season insert")
+	}
+
+	return nil
+}
+
+func (db *pgStore) rglTeamMemberInsert(ctx context.Context, member domain.RGLTeamMember) error {
+	const query = `
+		INSERT INTO rgl_team_member (team_id, steam_id, name, is_team_leader, joined_at, left_at) 
+		VALUES ($1, $2, $3 ,$4, $5, $6)
+		ON CONFLICT (team_id, steam_id)
+		DO UPDATE SET left_at = $6`
+
+	if _, err := db.pool.Exec(ctx, query, member.TeamID, member.SteamID.Int64(), member.Name, member.IsTeamLeader, member.JoinedAt, member.LeftAt); err != nil {
+		return dbErr(err, "Failed to exec rgl team member insert")
+	}
+
+	return nil
+}
+
+func (db *pgStore) rglBansReplace(ctx context.Context, bans []domain.RGLBan) error {
+	const query = `
+		INSERT INTO rgl_ban (steam_id, alias, expires_at, created_at, reason) 
+		VALUES ($1, $2, $3 ,$4, $5)`
+
+	if _, err := db.pool.Exec(ctx, `DELETE FROM rgl_ban`); err != nil {
+		return dbErr(err, "failed to cleanup rgl_ban table")
+	}
+
+	batch := &pgx.Batch{}
+
+	for _, ban := range bans {
+		record := newPlayerRecord(ban.SteamID)
+		if err := db.playerGetOrCreate(ctx, ban.SteamID, &record); err != nil {
+			return err
+		}
+
+		batch.Queue(query, ban.SteamID.Int64(), ban.Alias, ban.ExpiresAt, ban.CreatedAt.Truncate(time.Second), ban.Reason)
+	}
+
+	if err := db.pool.SendBatch(context.Background(), batch).Close(); err != nil {
+		return dbErr(err, "Failed to send batch rgl bans")
+	}
+
+	return nil
+}
+
+func (db *pgStore) rglBansGetAll(ctx context.Context) ([]domain.RGLBan, error) {
+	rows, errRows := db.pool.Query(ctx, `SELECT steam_id, alias, expires_at, created_at, reason FROM rgl_ban`)
+	if errRows != nil && !errors.Is(errRows, errDatabaseNoResults) {
+		return nil, dbErr(errRows, "Failed to load bans")
+	}
+
+	defer rows.Close()
+
+	var bans []domain.RGLBan
+	for rows.Next() {
+		var ban domain.RGLBan
+		if err := rows.Scan(&ban.SteamID, &ban.Alias, &ban.ExpiresAt, &ban.CreatedAt, &ban.Reason); err != nil {
+			return nil, dbErr(err, "Failed to scan rgl bans")
+		}
+
+		bans = append(bans, ban)
+	}
+
+	return bans, nil
+}
+
+func (db *pgStore) rglMatchGet(ctx context.Context, matchID int) (domain.RGLMatch, error) {
+	const query = `
+		SELECT match_id, season_name, division_name, division_id, season_id, region_id, 
+		       match_date, match_name, is_forfeit, winner, team_id_a, points_a, team_id_b, points_b 
+		FROM rgl_match
+		WHERE match_id = $1`
+
+	var match domain.RGLMatch
+
+	if err := db.pool.QueryRow(ctx, query, matchID).
+		Scan(&match.MatchID, &match.SeasonName, &match.DivisionName, &match.DivisionID, &match.SeasonID, &match.RegionID,
+			&match.MatchDate, &match.MatchName, &match.IsForfeit, &match.Winner, &match.TeamIDA, &match.PointsA,
+			&match.TeamIDB, &match.PointsB); err != nil {
+		return match, dbErr(err, "Failed to scan rgl match")
+	}
+
+	return match, nil
+}
+
+func (db *pgStore) rglMatchInsert(ctx context.Context, match domain.RGLMatch) error {
+	query, args, errQuery := sb.Insert("rgl_match").
+		SetMap(map[string]interface{}{
+			"match_id":      match.MatchID,
+			"season_name":   match.SeasonName,
+			"division_name": match.DivisionName,
+			"division_id":   match.DivisionID,
+			"season_id":     match.SeasonID,
+			"region_id":     match.RegionID,
+			"match_date":    match.MatchDate,
+			"match_name":    match.MatchName,
+			"is_forfeit":    match.IsForfeit,
+			"winner":        match.Winner,
+			"team_id_a":     match.TeamIDA,
+			"points_a":      match.PointsA,
+			"team_id_b":     match.TeamIDB,
+			"points_b":      match.PointsB,
+		}).ToSql()
+	if errQuery != nil {
+		return dbErr(errQuery, "Failed to build rgl match insert query")
+	}
+
+	if _, err := db.pool.Exec(ctx, query, args...); err != nil {
+		return dbErr(err, "Failed to exec rgl match insert")
+	}
+
+	return nil
+}
+
+func (db *pgStore) rglPlayerTeamHistory(ctx context.Context, steamIDs steamid.Collection) ([]domain.RGLPlayerTeamHistory, error) {
+	query, args, errQuery := sb.
+		Select("t.division_name", "t.team_leader", "t.tag", "t.team_name", "t.final_rank",
+			"rtm.name", "rtm.is_team_leader", "rtm.joined_at", "rtm.left_at", "rtm.steam_id").
+		From("rgl_team t").
+		LeftJoin("rgl_team_member rtm ON t.team_id = rtm.team_id").
+		Where(sq.Eq{"rtm.steam_id": steamIDs.ToInt64Slice()}).
+		OrderBy("rtm.joined_at DESC").ToSql()
+	if errQuery != nil {
+		return nil, dbErr(errQuery, "Failed to construct rgl team history query")
+	}
+
+	rows, errRows := db.pool.Query(ctx, query, args...)
+	if errRows != nil && !errors.Is(errRows, errDatabaseNoResults) {
+		return nil, dbErr(errRows, "Failed to query team history")
+	}
+
+	defer rows.Close()
+
+	teams := make([]domain.RGLPlayerTeamHistory, 0)
+
+	for rows.Next() {
+		var hist domain.RGLPlayerTeamHistory
+		if err := rows.Scan(&hist.DivisionName, &hist.TeamLeader, &hist.Tag, &hist.TeamName, &hist.FinalRank,
+			&hist.Name, &hist.IsTeamLeader, &hist.JoinedAt, &hist.LeftAt, &hist.SteamID); err != nil {
+			return nil, dbErr(err, "Failed to scan rgl team history")
+		}
+
+		teams = append(teams, hist)
+	}
+
+	return teams, nil
+}

@@ -23,15 +23,15 @@ var (
 	errSSHProxySwitcher   = errors.New("failed to create proxy round robin switcher")
 )
 
-type proxyManager struct {
+type ProxyManager struct {
 	proxies map[string]*proxyContext
 }
 
-func newProxyManager() *proxyManager {
-	return &proxyManager{proxies: map[string]*proxyContext{}}
+func NewProxyManager() *ProxyManager {
+	return &ProxyManager{proxies: map[string]*proxyContext{}}
 }
 
-func (p *proxyManager) start(config *appConfig) {
+func (p *ProxyManager) start(config *appConfig) {
 	waitGroup := &sync.WaitGroup{}
 	for _, serverCfg := range config.Proxies {
 		waitGroup.Add(1)
@@ -87,7 +87,7 @@ func (p *proxyManager) start(config *appConfig) {
 	waitGroup.Wait()
 }
 
-func (p *proxyManager) stop() {
+func (p *ProxyManager) stop() {
 	waitGroup := &sync.WaitGroup{}
 	for _, curProxy := range p.proxies {
 		waitGroup.Add(1)

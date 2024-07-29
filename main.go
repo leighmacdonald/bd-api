@@ -34,6 +34,42 @@ func createAppDeps(ctx context.Context) (appConfig, cache, *pgStore, error) {
 	return config, cacheHandler, database, nil
 }
 
+func runLogsTFScraper(ctx context.Context, database *pgStore, config appConfig) error {
+	logsScraper, errLogsTF := NewLogsTFScraper(database, config)
+	if errLogsTF != nil {
+		return errLogsTF
+	}
+
+	if config.ProxiesEnabled {
+		if errProxies := attachCollectorProxies(logsScraper.Collector, &config); errProxies != nil {
+			return errProxies
+		}
+	}
+
+	go startLogsTF(ctx, logsScraper)
+
+	return nil
+}
+
+func runSourcebansScraper(ctx context.Context, database *pgStore, config appConfig) error {
+	scrapers, errScrapers := initScrapers(ctx, database, config.CacheDir)
+	if errScrapers != nil {
+		return errScrapers
+	}
+
+	if config.ProxiesEnabled {
+		for _, scraper := range scrapers {
+			if errProxies := attachCollectorProxies(scraper.Collector, &config); errProxies != nil {
+				return errProxies
+			}
+		}
+	}
+
+	go startScrapers(ctx, database, scrapers)
+
+	return nil
+}
+
 func run(ctx context.Context) int {
 	config, cacheHandler, database, errSetup := createAppDeps(ctx)
 	if errSetup != nil {
@@ -42,14 +78,14 @@ func run(ctx context.Context) int {
 		return 1
 	}
 
-	router, errRouter := createRouter(database, cacheHandler)
+	router, errRouter := createRouter(database, cacheHandler, config)
 	if errRouter != nil {
 		slog.Error("failed to create router", ErrAttr(errRouter))
 
 		return 1
 	}
 
-	proxyMgr := newProxyManager()
+	proxyMgr := NewProxyManager()
 	if config.ProxiesEnabled {
 		proxyMgr.start(&config)
 
@@ -57,43 +93,24 @@ func run(ctx context.Context) int {
 	}
 
 	if config.LogstfScraperEnabled {
-		logsScraper, errLogsTF := newLogsTFScraper(database, config)
-		if errLogsTF != nil {
-			slog.Error("failed to init logstf scraper", ErrAttr(errLogsTF))
+		if err := runLogsTFScraper(ctx, database, config); err != nil {
+			slog.Error("failed to init logstf scraper", ErrAttr(err))
 
 			return 1
 		}
+	}
 
-		if config.ProxiesEnabled {
-			if errProxies := attachCollectorProxies(logsScraper.Collector, &config); errProxies != nil {
-				slog.Error("Failed to setup proxies", ErrAttr(errProxies))
-
-				return 1
-			}
-		}
-
-		go logsScraper.start(ctx)
+	if config.RGLScraperEnabled {
+		rglScraper := NewRGLScraper(database)
+		go rglScraper.start(ctx)
 	}
 
 	if config.SourcebansScraperEnabled {
-		scrapers, errScrapers := initScrapers(ctx, database, config.CacheDir)
-		if errScrapers != nil {
-			slog.Error("failed to setup scrapers")
+		if err := runSourcebansScraper(ctx, database, config); err != nil {
+			slog.Error("failed to init sourcebans scraper", ErrAttr(err))
 
 			return 1
 		}
-
-		if config.ProxiesEnabled {
-			for _, scraper := range scrapers {
-				if errProxies := attachCollectorProxies(scraper.Collector, &config); errProxies != nil {
-					slog.Error("Failed to setup proxies", ErrAttr(errProxies))
-
-					return 1
-				}
-			}
-		}
-
-		go startScrapers(ctx, database, scrapers)
 	}
 
 	go listUpdater(ctx, database)
