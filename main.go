@@ -6,7 +6,7 @@ import (
 	"log/slog"
 )
 
-var version = "1.0.7"
+var version = "1.0.8"
 
 func createAppDeps(ctx context.Context) (appConfig, cache, *pgStore, error) {
 	var config appConfig
@@ -103,6 +103,11 @@ func run(ctx context.Context) int {
 	if config.RGLScraperEnabled {
 		rglScraper := NewRGLScraper(database)
 		go rglScraper.start(ctx)
+	}
+
+	if config.ETF2LScraperEnabled {
+		etf2lScraper := NewETF2LScraper(database)
+		go etf2lScraper.start(ctx)
 	}
 
 	if config.SourcebansScraperEnabled {

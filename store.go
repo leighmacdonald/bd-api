@@ -1919,3 +1919,91 @@ func (db *pgStore) rglPlayerTeamHistory(ctx context.Context, steamIDs steamid.Co
 
 	return teams, nil
 }
+
+func (db *pgStore) etf2lBansUpdate(ctx context.Context, bans []domain.ETF2LBan) error {
+	const query = `
+		INSERT INTO etf2l_ban (steam_id, alias, expires_at, created_at, reason) 
+		VALUES ($1, $2, $3 ,$4, $5)`
+
+	if _, err := db.pool.Exec(ctx, `DELETE FROM etf2l_ban`); err != nil {
+		return dbErr(err, "Failed to delete previous bans")
+	}
+
+	batch := &pgx.Batch{}
+
+	for _, ban := range bans {
+		record := newPlayerRecord(ban.SteamID)
+		if err := db.playerGetOrCreate(ctx, ban.SteamID, &record); err != nil {
+			return err
+		}
+
+		batch.Queue(query, ban.SteamID.Int64(), ban.Alias, ban.ExpiresAt, ban.CreatedAt, ban.Reason)
+	}
+
+	if err := db.pool.SendBatch(context.Background(), batch).Close(); err != nil {
+		return dbErr(err, "Failed to send batch etf2l bans")
+	}
+
+	return nil
+}
+
+func (db *pgStore) rglBansQuery(ctx context.Context, steamIDs steamid.Collection) ([]domain.RGLBan, error) {
+	query, args, errQuery := sb.Select("steam_id", "alias", "expires_at", "created_at", "reason").
+		From("rgl_ban").
+		Where(sq.Eq{"steam_id": steamIDs.ToInt64Slice()}).
+		ToSql()
+	if errQuery != nil {
+		return nil, dbErr(errQuery, "Failed to build query")
+	}
+
+	rows, errRows := db.pool.Query(ctx, query, args...)
+	if errRows != nil {
+		return nil, dbErr(errRows, "Failed to exec query")
+	}
+
+	defer rows.Close()
+
+	var bans []domain.RGLBan
+
+	for rows.Next() {
+		var ban domain.RGLBan
+		if errScan := rows.Scan(&ban.SteamID, &ban.Alias, &ban.ExpiresAt, &ban.CreatedAt, &ban.Reason); errScan != nil {
+			return nil, dbErr(errScan, "Failed to scan ban")
+		}
+
+		bans = append(bans, ban)
+	}
+
+	return bans, nil
+}
+
+func (db *pgStore) etf2lBansQuery(ctx context.Context, steamIDs steamid.Collection) ([]domain.ETF2LBan, error) {
+	query, args, errQuery := sb.
+		Select("steam_id", "alias", "expires_at", "created_at", "reason").
+		From("etf2l_ban").
+		Where(sq.Eq{"steam_id": steamIDs}).
+		ToSql()
+	if errQuery != nil {
+		return nil, dbErr(errQuery, "Failed to build etf2l ban query")
+	}
+
+	rows, errRows := db.pool.Query(ctx, query, args...)
+	if errRows != nil {
+		return nil, dbErr(errRows, "Failed to exec etf2l ban query")
+	}
+
+	defer rows.Close()
+
+	var bans []domain.ETF2LBan
+
+	for rows.Next() {
+		var ban domain.ETF2LBan
+		if errScan := rows.Scan(&ban.SteamID, &ban.Alias, &ban.ExpiresAt, &ban.CreatedAt, &ban.Reason); errScan != nil {
+			return nil, dbErr(errScan, "Failed to scan etf2l ban")
+		}
+
+		bans = append(bans, ban)
+	}
+
+	return bans, nil
+}

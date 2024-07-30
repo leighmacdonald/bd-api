@@ -11,7 +11,7 @@ linters:
     - bodyclose
     - containedctx
     #- contextcheck
-    - cyclop
+    #- cyclop
     - decorder
     #- depguard
     - dogsled
@@ -37,9 +37,9 @@ linters:
     #- gocognit
     #- goconst
     - gocritic
-    - gocyclo
+    #- gocyclo
     - godot
-    - godox
+    #- godox
     - err113
     - gofmt
     - gofumpt

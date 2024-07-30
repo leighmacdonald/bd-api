@@ -41,6 +41,7 @@ type appConfig struct {
 	LogstfScraperEnabled     bool            `mapstructure:"logstf_scraper_enabled"`
 	SourcebansScraperEnabled bool            `mapstructure:"sourcebans_scraper_enabled"`
 	RGLScraperEnabled        bool            `mapstructure:"rgl_scraper_enabled"`
+	ETF2LScraperEnabled      bool            `mapstructure:"etf2l_scraper_enabled"`
 	ProxiesEnabled           bool            `mapstructure:"proxies_enabled"`
 	Proxies                  []*proxyContext `mapstructure:"proxies"`
 	ScrapeDelay              int             `mapstructure:"scrape_delay"`

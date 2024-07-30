@@ -16,6 +16,8 @@ import (
 // loadProfiles concurrently loads data from all the tracked data source tables and assembles them into
 // a slice of domain.Profile.
 //
+// TODO trim down this behemoth
+//
 //nolint:cyclop,maintidx
 func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs steamid.Collection) ([]domain.Profile, error) { //nolint:funlen
 	var ( //nolint:prealloc
@@ -29,6 +31,7 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 		servemeBans []*domain.ServeMeRecord
 		sourceBans  BanRecordMap
 		rglHist     []domain.RGLPlayerTeamHistory
+		leagueBans  domain.LeagueBanMap
 	)
 
 	if len(steamIDs) > maxResults {
@@ -88,6 +91,28 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 		}
 
 		bans = banState
+	}()
+
+	waitGroup.Add(1)
+
+	go func() {
+		defer waitGroup.Done()
+
+		etf2lBans, errETF2L := database.etf2lBansQuery(ctx, steamIDs)
+		if errETF2L != nil && !errors.Is(errETF2L, errDatabaseNoResults) {
+			slog.Error("Could not load etf2l bans", ErrAttr(errETF2L))
+
+			return
+		}
+
+		rglBans, errRGL := database.rglBansQuery(ctx, steamIDs)
+		if errRGL != nil && !errors.Is(errRGL, errDatabaseNoResults) {
+			slog.Error("Could not load rgl bans", ErrAttr(errETF2L))
+
+			return
+		}
+
+		leagueBans = assembleLeagueBans(steamIDs, etf2lBans, rglBans)
 	}()
 
 	waitGroup.Add(1)
@@ -203,6 +228,10 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 			}
 		}
 
+		if lBans, found := leagueBans[sid]; found {
+			profile.LeagueBans = lBans
+		}
+
 		for logSID, count := range logs {
 			if logSID == sid {
 				profile.LogsCount = count
@@ -264,4 +293,24 @@ func loadStats(ctx context.Context, database *pgStore) (siteStats, error) {
 	slices.Sort(stats.SourcebansSites)
 
 	return stats, nil
+}
+
+func assembleLeagueBans(steamIDs steamid.Collection, etf2lBans []domain.ETF2LBan, rglBans []domain.RGLBan) domain.LeagueBanMap {
+	resMap := domain.LeagueBanMap{}
+	for _, sid := range steamIDs {
+		resMap[sid] = map[domain.League][]any{
+			"rgl":   make([]any, 0),
+			"etf2l": make([]any, 0),
+		}
+	}
+
+	for _, ban := range etf2lBans {
+		resMap[ban.SteamID]["etf2l"] = append(resMap[ban.SteamID]["etf2l"], ban)
+	}
+
+	for _, ban := range rglBans {
+		resMap[ban.SteamID]["rgl"] = append(resMap[ban.SteamID]["rgl"], ban)
+	}
+
+	return resMap
 }

@@ -445,6 +445,55 @@ func handleGetRGLList(database *pgStore, config appConfig) func(http.ResponseWri
 	}
 }
 
+func handleGetETF2LList(database *pgStore, config appConfig) func(http.ResponseWriter, *http.Request) {
+	//goland:noinspection ALL
+	extURL := "http://" + config.ListenAddr + "/"
+	if config.ExternalURL != "" {
+		extURL = config.ExternalURL
+	}
+
+	extURL = strings.TrimSuffix(extURL, "/")
+
+	return func(writer http.ResponseWriter, request *http.Request) {
+		bans, errBans := database.rglBansGetAll(request.Context())
+		if errBans != nil {
+			responseErr(writer, request, http.StatusInternalServerError, errBans, "Failed to get ban list")
+
+			return
+		}
+
+		list := domain.TF2BDSchema{
+			Schema: "https://raw.githubusercontent.com/leighmacdonald/bd-api/master/schemas/playerlist.schema.json",
+			FileInfo: domain.FileInfo{
+				Authors:     []string{"etf2l league", "bd-api"},
+				Description: "All league bans and infractions",
+				Title:       "ETF2L Bans",
+				UpdateURL:   extURL + "/list/etf2l",
+			},
+			Players: make([]domain.TF2BDPlayer, len(bans)),
+		}
+
+		for banIdx, ban := range bans {
+			player := domain.TF2BDPlayer{
+				Attributes: []string{"etf2l"},
+				LastSeen: domain.LastSeen{
+					PlayerName: ban.Alias,
+					Time:       int(ban.CreatedAt.Unix()),
+				},
+				Steamid: ban.SteamID,
+				Proof:   []string{ban.Reason},
+			}
+			if ban.ExpiresAt.After(time.Date(2030, 0, 0, 0, 0, 0, 0, time.UTC)) {
+				player.Proof = append(player.Proof, "Permanent Ban")
+			}
+
+			list.Players[banIdx] = player
+		}
+
+		responseOk(writer, request, list, "ETF2L Ban List")
+	}
+}
+
 func handleGetServemeListBD(database *pgStore, config appConfig) func(http.ResponseWriter, *http.Request) {
 	//goland:noinspection ALL
 	extURL := "http://" + config.ListenAddr + "/"
@@ -488,5 +537,30 @@ func handleGetServemeListBD(database *pgStore, config appConfig) func(http.Respo
 		}
 
 		responseOk(writer, request, list, "Serveme Ban List")
+	}
+}
+
+func handleGetLeagueBans(database *pgStore) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		ids, ok := getSteamIDs(writer, request)
+		if !ok {
+			return
+		}
+
+		etf2lBans, errETF2L := database.etf2lBansQuery(request.Context(), ids)
+		if errETF2L != nil && !errors.Is(errETF2L, errDatabaseNoResults) {
+			responseErr(writer, request, http.StatusBadRequest, errLoadFailed, "could not load etf2l bans")
+
+			return
+		}
+
+		rglBans, errRGL := database.rglBansQuery(request.Context(), ids)
+		if errRGL != nil && !errors.Is(errRGL, errDatabaseNoResults) {
+			responseErr(writer, request, http.StatusBadRequest, errLoadFailed, "could not load rgl bans")
+
+			return
+		}
+
+		responseOk(writer, request, assembleLeagueBans(ids, etf2lBans, rglBans), "League Bans")
 	}
 }

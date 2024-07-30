@@ -197,6 +197,26 @@ Example: https://bd-api.roto.lol/profile?steamids=76561197970669109,765611979928
       "deleted": false,
       "created_on": "2024-07-18T01:36:27.686317-06:00"
     },
+    "league_bans": {
+      "etf2l": [
+        {
+          "steam_id": "76561199234205416",
+          "alias": "test",
+          "expires_at": "2037-12-30T16:00:00-07:00",
+          "created_at": "2024-07-07T12:52:19-06:00",
+          "reason": "Cheating"
+        }
+      ],
+      "rgl": [
+        {
+          "steam_id": "76561199234205416",
+          "alias": "test",
+          "expires_at": "2019-08-31T23:00:00-06:00",
+          "created_at": "2019-04-10T22:37:49-06:00",
+          "reason": "Using an in-game exploit that messes with hitboxes during playoff match."
+        }
+      ]
+    },
     "logs_count": 0,
     "bot_detector": [
       {

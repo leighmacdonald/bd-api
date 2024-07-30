@@ -191,6 +191,7 @@ type Profile struct {
 	BanState    PlayerBanState         `json:"ban_state"`
 	SourceBans  []SbBanRecord          `json:"source_bans"`
 	ServeMe     *ServeMeRecord         `json:"serve_me"`
+	LeagueBans  map[League][]any       `json:"league_bans"`
 	LogsCount   int                    `json:"logs_count"`
 	BotDetector []BDSearchResult       `json:"bot_detector"`
 	RGL         []RGLPlayerTeamHistory `json:"rgl"`
@@ -528,3 +529,15 @@ type RGLBan struct {
 	CreatedAt time.Time       `json:"created_at"`
 	Reason    string          `json:"reason"`
 }
+
+// ETF2LBan aliases the RGLBan model which is already good, just make it more obvious what it is.
+type ETF2LBan RGLBan
+
+type LeagueBanMap map[steamid.SteamID]map[League][]any
+
+type League string
+
+const (
+	RGL   League = "rgl"
+	ETF2L League = "rgl"
+)
