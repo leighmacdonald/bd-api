@@ -55,7 +55,7 @@ func (r *RGLScraper) start(ctx context.Context) {
 
 func (r *RGLScraper) waiter(err error) {
 	if err != nil {
-		r.waitTime *= 2
+		r.waitTime = min(r.waitTime*2, time.Second*30)
 	}
 
 	time.Sleep(r.waitTime)
@@ -125,8 +125,13 @@ func (r *RGLScraper) scrapeRGL(ctx context.Context) {
 		for _, matchID := range season.Matches {
 			match, errMatch := r.getRGLMatch(ctx, matchID)
 			if errMatch != nil {
+				if errors.Is(errMatch, errDatabaseUnique) {
+					slog.Warn("Match team does not exist", ErrAttr(errMatch))
+
+					continue
+				}
+
 				slog.Error("Failed to fetch match", ErrAttr(errMatch))
-				r.waiter(errMatch)
 
 				continue
 			}
@@ -284,6 +289,8 @@ func (r *RGLScraper) getRGLMatch(ctx context.Context, matchID int) (domain.RGLMa
 	}
 
 	if match.MatchID == 0 {
+		r.waiter(nil)
+
 		fetched, err := rgl.Match(ctx, NewHTTPClient(), int64(matchID))
 		if err != nil {
 			return match, errors.Join(err, errFetchMatch)
