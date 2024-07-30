@@ -757,6 +757,17 @@
             color: var(--accent);
         }
 
+        .footer {
+            text-align: center;
+            font-size: small
+        }
+
+        .lists {
+            text-align: center;
+            list-style-type: none;
+            padding: 0;
+            margin:0;
+        }
     </style>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -812,6 +823,11 @@
     <button type="submit">RGL Team History</button>
 </form>
 
+<form action="/league_bans" method="get">
+    <input type="text" name="steamids" placeholder="steamid|vanity name|profile url">
+    <button type="submit">Comp League Bans</button>
+</form>
+
 <form method="get" id="log">
     <input type="text" name="steamids" placeholder="12345">
     <button type="submit">Log By ID</button>
@@ -836,13 +852,19 @@
     <button type="submit" style="width: 99%">serveme.tf Bans</button>
 </form>
 
-<h5>Bot Detector Ban Lists<br /><a href="/list/rgl">rgl.gg</a><br /><a href="/list/serveme">serveme.tf</a></h5>
+<h5>Bot Detector Ban Lists</h5>
 
-<h6>
+<ul class="lists">
+    <li><a href="/list/etf2l">etf2l.org</a></li>
+    <li><a href="/list/rgl">rgl.gg</a></li>
+    <li><a href="/list/serveme">serveme.tf</a></li>
+</ul>
+
+<p class="footer">
     <a href="https://github.com/leighmacdonald/bd-api/blob/master/docs/API.md">API</a>
-    <a href="/stats">Stats</a>
-    <br/>
+    <a href="/stats">Stats</a><br />
     {{ .Version }}
-</h6>
+</p>
+
 </body>
 </html>

@@ -3,16 +3,15 @@ package main
 import (
 	"context"
 	"errors"
-	"github.com/leighmacdonald/bd-api/domain"
-	"github.com/leighmacdonald/etf2l"
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/leighmacdonald/bd-api/domain"
+	"github.com/leighmacdonald/etf2l"
 )
 
-var (
-	errETF2LFetchBans = errors.New("failed to fetch etf2l bans")
-)
+var errETF2LFetchBans = errors.New("failed to fetch etf2l bans")
 
 type ETF2LScraper struct {
 	database   *pgStore
@@ -58,7 +57,7 @@ func (e *ETF2LScraper) updateBans(ctx context.Context) error {
 		return errors.Join(errBans, errETF2LFetchBans)
 	}
 
-	var eBans []domain.ETF2LBan
+	var eBans []domain.ETF2LBan //nolint:prealloc
 
 	for _, ban := range bans {
 		if !ban.Steamid64.Valid() {
