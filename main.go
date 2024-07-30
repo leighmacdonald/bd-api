@@ -105,6 +105,11 @@ func run(ctx context.Context) int {
 		go rglScraper.start(ctx)
 	}
 
+	if config.ETF2LScraperEnabled {
+		etf2lScraper := NewETF2LScraper(database)
+		go etf2lScraper.start(ctx)
+	}
+
 	if config.SourcebansScraperEnabled {
 		if err := runSourcebansScraper(ctx, database, config); err != nil {
 			slog.Error("failed to init sourcebans scraper", ErrAttr(err))

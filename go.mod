@@ -15,6 +15,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.17.1
 	github.com/jackc/pgerrcode v0.0.0-20240316143900-6e2875d9b438
 	github.com/jackc/pgx/v5 v5.6.0
+	github.com/leighmacdonald/etf2l v0.0.0-20240730061846-bfcc1ef54a90
 	github.com/leighmacdonald/rgl v0.0.0-20240729075133-fdd39c1890c8
 	github.com/leighmacdonald/steamid/v4 v4.0.4
 	github.com/leighmacdonald/steamweb/v2 v2.2.1

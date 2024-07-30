@@ -528,3 +528,6 @@ type RGLBan struct {
 	CreatedAt time.Time       `json:"created_at"`
 	Reason    string          `json:"reason"`
 }
+
+// ETF2LBan aliases the RGLBan model which is already good, just make it more obvious what it is.
+type ETF2LBan RGLBan

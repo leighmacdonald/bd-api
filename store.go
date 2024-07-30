@@ -1919,3 +1919,30 @@ func (db *pgStore) rglPlayerTeamHistory(ctx context.Context, steamIDs steamid.Co
 
 	return teams, nil
 }
+
+func (db *pgStore) etf2lBansUpdate(ctx context.Context, bans []domain.ETF2LBan) error {
+	const query = `
+		INSERT INTO etf2l_ban (steam_id, alias, expires_at, created_at, reason) 
+		VALUES ($1, $2, $3 ,$4, $5)`
+
+	if _, err := db.pool.Exec(ctx, `DELETE FROM etf2l_ban`); err != nil {
+		return dbErr(err, "Failed to delete previous bans")
+	}
+
+	batch := &pgx.Batch{}
+
+	for _, ban := range bans {
+		record := newPlayerRecord(ban.SteamID)
+		if err := db.playerGetOrCreate(ctx, ban.SteamID, &record); err != nil {
+			return err
+		}
+
+		batch.Queue(query, ban.SteamID.Int64(), ban.Alias, ban.ExpiresAt, ban.CreatedAt, ban.Reason)
+	}
+
+	if err := db.pool.SendBatch(context.Background(), batch).Close(); err != nil {
+		return dbErr(err, "Failed to send batch etf2l bans")
+	}
+
+	return nil
+}
