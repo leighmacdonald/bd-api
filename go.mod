@@ -19,6 +19,7 @@ require (
 	github.com/leighmacdonald/steamweb/v2 v2.2.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/riverqueue/river v0.10.1
+	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.10.1
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
@@ -95,7 +96,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/riverqueue/river/riverdriver v0.10.1 // indirect
-	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.10.1 // indirect
 	github.com/riverqueue/river/rivershared v0.10.1 // indirect
 	github.com/riverqueue/river/rivertype v0.10.1 // indirect
 	github.com/sagikazarmark/locafero v0.6.0 // indirect

@@ -196,9 +196,7 @@ func profileUpdater(ctx context.Context, database *pgStore) {
 		updateInterval = time.Second
 	)
 
-	var (
-		updateTicker = time.NewTicker(updateInterval)
-	)
+	updateTicker := time.NewTicker(updateInterval)
 
 	for {
 		select {

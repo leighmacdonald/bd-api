@@ -34,3 +34,6 @@ test:
 
 update:
 	go get -u ./...
+
+river:
+	docker run -p 8080:8080 --env "DATABASE_URL=postgresql://bdapi:bdapi@192.168.0.200:5445/bdapi" ghcr.io/riverqueue/riverui:latest

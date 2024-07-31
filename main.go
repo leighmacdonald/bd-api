@@ -31,6 +31,10 @@ func createAppDeps(ctx context.Context) (appConfig, cache, *pgStore, error) {
 		return config, nil, nil, errors.Join(err, errDatabasePing)
 	}
 
+	if err := setupQueue(ctx, database.pool); err != nil {
+		return config, nil, nil, errors.Join(err, errDatabaseMigrate)
+	}
+
 	return config, cacheHandler, database, nil
 }
 
@@ -121,6 +125,21 @@ func run(ctx context.Context) int {
 	go listUpdater(ctx, database)
 	go profileUpdater(ctx, database)
 	go startServeMeUpdater(ctx, database)
+
+	workers := createJobWorkers(database)
+
+	jobClient, err := startJobClient(ctx, database.pool, config.ScrapeDelay, workers)
+	if err != nil {
+		slog.Error("Failed to create job client", ErrAttr(err))
+
+		return 1
+	}
+
+	defer func() {
+		if errStop := jobClient.Stop(ctx); errStop != nil {
+			slog.Error("Failed to cleanly stop job client", ErrAttr(errStop))
+		}
+	}()
 
 	return runHTTP(ctx, router, config.ListenAddr)
 }

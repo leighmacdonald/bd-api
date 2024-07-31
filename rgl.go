@@ -10,6 +10,7 @@ import (
 	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/rgl"
 	"github.com/leighmacdonald/steamid/v4/steamid"
+	"golang.org/x/time/rate"
 )
 
 var (
@@ -19,6 +20,15 @@ var (
 	errFetchSeason       = errors.New("failed to fetch rgl season via api")
 	errFetchBans         = errors.New("failed to fetch rgl bans")
 )
+
+const (
+	rglRefillRate = 0.5
+	rglBucketSize = 5
+)
+
+func NewRGLLimiter() *rate.Limiter {
+	return rate.NewLimiter(rglRefillRate, rglBucketSize)
+}
 
 func NewRGLScraper(database *pgStore) RGLScraper {
 	return RGLScraper{
@@ -76,10 +86,6 @@ func (r *RGLScraper) scrapeRGL(ctx context.Context) {
 		maxErr   = 100
 		curErr   = 0
 	)
-
-	if err := r.updateBans(ctx); err != nil {
-		slog.Error("Failed to update bans", ErrAttr(err))
-	}
 
 	for curErr < maxErr {
 		season, errSeason := r.getRGLSeason(ctx, curID)
@@ -230,56 +236,6 @@ func (r *RGLScraper) getRGLSeason(ctx context.Context, seasonID int) (domain.RGL
 	}
 
 	return season, nil
-}
-
-func (r *RGLScraper) updateBans(ctx context.Context) error {
-	var (
-		offset = 0
-		bans   []domain.RGLBan
-	)
-
-	slog.Info("Starting RGL Bans update")
-
-	for {
-		slog.Info("Fetching RGL ban set", slog.Int("offset", offset))
-
-		fetched, errBans := rgl.Bans(ctx, r.client, 100, offset)
-		if errBans != nil {
-			return errors.Join(errBans, errFetchBans)
-		}
-
-		if len(fetched) == 0 {
-			break
-		}
-
-		for _, ban := range fetched {
-			sid := steamid.New(ban.SteamID)
-			if !sid.Valid() {
-				// A couple entries seem to have a 0 value for SID
-				continue
-			}
-
-			bans = append(bans, domain.RGLBan{
-				SteamID:   sid,
-				Alias:     ban.Alias,
-				ExpiresAt: ban.ExpiresAt,
-				CreatedAt: ban.CreatedAt,
-				Reason:    ban.Reason,
-			})
-		}
-
-		r.waiter(nil)
-
-		offset += 100
-	}
-
-	if err := r.database.rglBansReplace(ctx, bans); err != nil {
-		return err
-	}
-
-	slog.Info("Updated RGL bans successfully", slog.Int("count", len(bans)))
-
-	return nil
 }
 
 func (r *RGLScraper) getRGLMatch(ctx context.Context, matchID int) (domain.RGLMatch, error) {
