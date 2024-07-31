@@ -1,8 +1,6 @@
 module github.com/leighmacdonald/bd-api
 
-go 1.22
-
-toolchain go1.22.0
+go 1.22.5
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
@@ -20,6 +18,7 @@ require (
 	github.com/leighmacdonald/steamid/v4 v4.0.4
 	github.com/leighmacdonald/steamweb/v2 v2.2.1
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/riverqueue/river v0.10.1
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
@@ -95,6 +94,10 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
+	github.com/riverqueue/river/riverdriver v0.10.1 // indirect
+	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.10.1 // indirect
+	github.com/riverqueue/river/rivershared v0.10.1 // indirect
+	github.com/riverqueue/river/rivertype v0.10.1 // indirect
 	github.com/sagikazarmark/locafero v0.6.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
@@ -120,6 +123,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.28.0 // indirect
 	go.opentelemetry.io/otel/trace v1.28.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
+	go.uber.org/goleak v1.3.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
 	golang.org/x/sys v0.22.0 // indirect
