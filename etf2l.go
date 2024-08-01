@@ -13,43 +13,8 @@ import (
 
 var errETF2LFetchBans = errors.New("failed to fetch etf2l bans")
 
-type ETF2LScraper struct {
-	database   *pgStore
-	client     *etf2l.Client
-	httpClient *http.Client
-}
-
-func NewETF2LScraper(database *pgStore) ETF2LScraper {
-	return ETF2LScraper{
-		database:   database,
-		client:     etf2l.New(),
-		httpClient: NewHTTPClient(),
-	}
-}
-
-func (e *ETF2LScraper) start(ctx context.Context) {
-	e.scrape(ctx)
-
-	ticker := time.NewTicker(time.Hour * 6)
-
-	for {
-		select {
-		case <-ticker.C:
-			e.scrape(ctx)
-		case <-ctx.Done():
-			return
-		}
-	}
-}
-
-func (e *ETF2LScraper) scrape(ctx context.Context) {
-	if err := e.updateBans(ctx); err != nil {
-		slog.Error("Failed to update ETF2L bans", ErrAttr(err))
-	}
-}
-
-func (e *ETF2LScraper) updateBans(ctx context.Context) error {
-	bans, errBans := e.client.Bans(ctx, e.httpClient, etf2l.BanOpts{
+func updateETF2LBans(ctx context.Context, database *pgStore, client *etf2l.Client, httpClient *http.Client) error {
+	bans, errBans := client.Bans(ctx, httpClient, etf2l.BanOpts{
 		Recursive: etf2l.BaseOpts{Recursive: true},
 	})
 
@@ -73,11 +38,11 @@ func (e *ETF2LScraper) updateBans(ctx context.Context) error {
 		})
 	}
 
-	if err := e.database.etf2lBansUpdate(ctx, eBans); err != nil {
+	if err := database.etf2lBansUpdate(ctx, eBans); err != nil {
 		return dbErr(err, "failed to update etf2l bans")
 	}
 
-	slog.Info("Got ETF2L bans", slog.Int("count", len(bans)))
+	slog.Debug("Got ETF2L bans", slog.Int("count", len(bans)))
 
 	return nil
 }

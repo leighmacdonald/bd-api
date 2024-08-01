@@ -8,7 +8,6 @@ import (
 	"log/slog"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
@@ -189,93 +188,4 @@ func getSteamSummaries(ctx context.Context, cache cache, steamIDs steamid.Collec
 	}
 
 	return summaries, nil
-}
-
-func profileUpdater(ctx context.Context, database *pgStore) {
-	const (
-		maxQueuedCount = 100
-		updateInterval = time.Second
-	)
-
-	var (
-		updateQueue   steamid.Collection
-		updateTicker  = time.NewTicker(updateInterval)
-		triggerUpdate = make(chan any)
-	)
-
-	for {
-		select {
-		case <-updateTicker.C:
-			triggerUpdate <- true
-		case <-triggerUpdate:
-			var expiredIDs steamid.Collection
-			expiredProfiles, errProfiles := database.playerGetExpiredProfiles(ctx, maxQueuedCount)
-			if errProfiles != nil {
-				slog.Error("Failed to fetch expired profiles", ErrAttr(errProfiles))
-			}
-
-			additional := 0
-
-			for len(expiredProfiles) < maxQueuedCount {
-				for _, sid64 := range updateQueue {
-					var pr PlayerRecord
-					if errQueued := database.playerGetOrCreate(ctx, sid64, &pr); errQueued != nil {
-						continue
-					}
-
-					expiredProfiles = append(expiredProfiles, pr)
-					additional++
-				}
-			}
-
-			updateQueue = updateQueue[additional:]
-
-			if len(expiredProfiles) == 0 {
-				continue
-			}
-
-			for _, profile := range expiredProfiles {
-				expiredIDs = append(expiredIDs, profile.SteamID)
-			}
-
-			summaries, errSum := steamweb.PlayerSummaries(ctx, expiredIDs)
-			if errSum != nil {
-				slog.Error("Failed to fetch summaries", ErrAttr(errSum))
-
-				continue
-			}
-
-			bans, errBans := steamweb.GetPlayerBans(ctx, expiredIDs)
-			if errBans != nil {
-				slog.Error("Failed to fetch bans", ErrAttr(errSum))
-
-				continue
-			}
-
-			for _, profile := range expiredProfiles {
-				prof := profile
-				for _, sum := range summaries {
-					if sum.SteamID.Int64() == prof.SteamID.Int64() {
-						prof.applySummary(sum)
-
-						break
-					}
-				}
-
-				for _, ban := range bans {
-					if ban.SteamID.Int64() == prof.SteamID.Int64() {
-						prof.applyBans(ban)
-
-						break
-					}
-				}
-
-				if errSave := database.playerRecordSave(ctx, &prof); errSave != nil {
-					slog.Error("Failed to update profile", slog.Int64("sid", prof.SteamID.Int64()), ErrAttr(errSave))
-				}
-			}
-		case <-ctx.Done():
-			return
-		}
-	}
 }

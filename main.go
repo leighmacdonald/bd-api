@@ -31,24 +31,11 @@ func createAppDeps(ctx context.Context) (appConfig, cache, *pgStore, error) {
 		return config, nil, nil, errors.Join(err, errDatabasePing)
 	}
 
+	if err := setupQueue(ctx, database.pool); err != nil {
+		return config, nil, nil, errors.Join(err, errDatabaseMigrate)
+	}
+
 	return config, cacheHandler, database, nil
-}
-
-func runLogsTFScraper(ctx context.Context, database *pgStore, config appConfig) error {
-	logsScraper, errLogsTF := NewLogsTFScraper(database, config)
-	if errLogsTF != nil {
-		return errLogsTF
-	}
-
-	if config.ProxiesEnabled {
-		if errProxies := attachCollectorProxies(logsScraper.Collector, &config); errProxies != nil {
-			return errProxies
-		}
-	}
-
-	go startLogsTF(ctx, logsScraper)
-
-	return nil
 }
 
 func runSourcebansScraper(ctx context.Context, database *pgStore, config appConfig) error {
@@ -92,35 +79,18 @@ func run(ctx context.Context) int {
 		defer proxyMgr.stop()
 	}
 
-	if config.LogstfScraperEnabled {
-		if err := runLogsTFScraper(ctx, database, config); err != nil {
-			slog.Error("failed to init logstf scraper", ErrAttr(err))
+	jobClient, err := InitJobClient(ctx, database, config)
+	if err != nil {
+		slog.Error("Failed to create job client", ErrAttr(err))
 
-			return 1
+		return 1
+	}
+
+	defer func() {
+		if errStop := jobClient.Stop(ctx); errStop != nil {
+			slog.Error("Failed to cleanly stop job client", ErrAttr(errStop))
 		}
-	}
-
-	if config.RGLScraperEnabled {
-		rglScraper := NewRGLScraper(database)
-		go rglScraper.start(ctx)
-	}
-
-	if config.ETF2LScraperEnabled {
-		etf2lScraper := NewETF2LScraper(database)
-		go etf2lScraper.start(ctx)
-	}
-
-	if config.SourcebansScraperEnabled {
-		if err := runSourcebansScraper(ctx, database, config); err != nil {
-			slog.Error("failed to init sourcebans scraper", ErrAttr(err))
-
-			return 1
-		}
-	}
-
-	go listUpdater(ctx, database)
-	go profileUpdater(ctx, database)
-	go startServeMeUpdater(ctx, database)
+	}()
 
 	return runHTTP(ctx, router, config.ListenAddr)
 }
