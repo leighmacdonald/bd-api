@@ -26,6 +26,8 @@ var (
 	errParseScores    = errors.New("failed to parse scores")
 	errParseDate      = errors.New("failed to parse logs creation date")
 	errLogID          = errors.New("failed to parse log id")
+	errAddQueue       = errors.New("failed to add new url to queue")
+	errRunQueue       = errors.New("error running queue")
 )
 
 func NewLogsTFScraper(database *pgStore, config appConfig) (*SiteScraper, error) {
@@ -78,24 +80,7 @@ func NewLogsTFScraper(database *pgStore, config appConfig) (*SiteScraper, error)
 	return scraper, nil
 }
 
-func startLogsTF(ctx context.Context, scraper *SiteScraper) {
-	scraperInterval := time.Hour
-	scraperTimer := time.NewTimer(scraperInterval)
-
-	scrapeLogsTF(ctx, scraper)
-
-	for {
-		select {
-		case <-scraperTimer.C:
-			scrapeLogsTF(ctx, scraper)
-			scraperTimer.Reset(scraperInterval)
-		case <-ctx.Done():
-			return
-		}
-	}
-}
-
-func scrapeLogsTF(ctx context.Context, scraper *SiteScraper) {
+func scrapeLogsTF(ctx context.Context, scraper *SiteScraper) error {
 	scraper.log.Info("Starting scrape job")
 
 	var (
@@ -112,13 +97,11 @@ func scrapeLogsTF(ctx context.Context, scraper *SiteScraper) {
 
 	minID, errID := scraper.db.logsTFNewestID(ctx)
 	if errID != nil {
-		if errors.Is(errID, errDatabaseNoResults) {
-			minID = 1
-		} else {
-			slog.Error("Failed to get int id", ErrAttr(errID))
+		if !errors.Is(errID, errDatabaseNoResults) {
+			return errors.Join(errID, errLogID)
 		}
 
-		return
+		minID = 1
 	}
 
 	scraper.OnHTML("html", func(element *colly.HTMLElement) {
@@ -183,19 +166,17 @@ func scrapeLogsTF(ctx context.Context, scraper *SiteScraper) {
 
 	// The index is checked first so that we can get the max ID
 	if errAdd := scraper.queue.AddURL("https://logs.tf"); errAdd != nil {
-		scraper.log.Error("Failed to add queue error", ErrAttr(errAdd))
-
-		return
+		return errors.Join(errAdd, errAddQueue)
 	}
 
 	if errRun := scraper.queue.Run(scraper.Collector); errRun != nil {
-		scraper.log.Error("Queue returned error", ErrAttr(errRun))
-
-		return
+		return errors.Join(errRun, errRunQueue)
 	}
 
 	scraper.log.Info("Completed scrape job",
 		slog.Duration("duration", time.Since(startTime)))
+
+	return nil
 }
 
 func getLogsTFMaxID(doc *goquery.Selection) (int, error) {

@@ -53,7 +53,7 @@ type listMapping struct {
 // - If the entry is not known locally, it is created
 // - If a known entry is no longer in the downloaded list, it is marked as deleted.
 // - If an entry contains differing data, it will be updated.
-func updateLists(ctx context.Context, lists []domain.BDList, database *pgStore) {
+func updateLists(ctx context.Context, lists []domain.BDList, database *pgStore) error {
 	client := NewHTTPClient()
 	waitGroup := sync.WaitGroup{}
 	errs := make(chan error, len(lists))
@@ -87,9 +87,11 @@ func updateLists(ctx context.Context, lists []domain.BDList, database *pgStore) 
 
 	for res := range results {
 		if errUpdate := updateListEntries(ctx, database, res); errUpdate != nil {
-			slog.Error("failed to update entries", ErrAttr(errUpdate))
+			return errUpdate
 		}
 	}
+
+	return nil
 }
 
 var (
@@ -248,27 +250,11 @@ func findDeleted(existingList []domain.BDListEntry, mapping listMapping) []domai
 	return deleted
 }
 
-func doListUpdate(ctx context.Context, database *pgStore) {
+func doListUpdate(ctx context.Context, database *pgStore) error {
 	lists, errLists := database.botDetectorLists(ctx)
 	if errLists != nil {
-		slog.Error("failed to load lists", ErrAttr(errLists))
-
-		return
+		return errLists
 	}
-	updateLists(ctx, lists, database)
-}
 
-func listUpdater(ctx context.Context, database *pgStore) {
-	ticker := time.NewTicker(time.Hour * 6)
-
-	doListUpdate(ctx, database)
-
-	for {
-		select {
-		case <-ticker.C:
-			doListUpdate(ctx, database)
-		case <-ctx.Done():
-			return
-		}
-	}
+	return updateLists(ctx, lists, database)
 }

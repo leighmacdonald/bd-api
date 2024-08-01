@@ -4,24 +4,29 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"net/http"
 
 	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/rgl"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/riverqueue/river"
-	"golang.org/x/time/rate"
 )
 
 type RGLBanArgs struct{}
 
 func (RGLBanArgs) Kind() string {
-	return "rgl_bans"
+	return string(KindRGLBan)
+}
+
+func (RGLBanArgs) InsertOpts() river.InsertOpts {
+	return rglInsertOpts()
 }
 
 type RGLBansWorker struct {
 	river.WorkerDefaults[RGLBanArgs]
-	database *pgStore
-	limiter  *rate.Limiter
+	database   *pgStore
+	limiter    *LimiterCustom
+	httpClient *http.Client
 }
 
 func (w *RGLBansWorker) Work(ctx context.Context, _ *river.Job[RGLBanArgs]) error {
@@ -33,16 +38,12 @@ func (w *RGLBansWorker) Work(ctx context.Context, _ *river.Job[RGLBanArgs]) erro
 
 	slog.Info("Starting RGL Bans update")
 
-	client := NewHTTPClient()
-
 	for {
-		if err := w.limiter.Wait(ctx); err != nil {
-			slog.Error("Failed to wait for rgl limiter", ErrAttr(err))
-		}
+		w.limiter.Wait(ctx)
 
 		slog.Info("Fetching RGL ban set", slog.Int("offset", offset))
 
-		fetched, errBans := rgl.Bans(ctx, client, 100, offset)
+		fetched, errBans := rgl.Bans(ctx, w.httpClient, 100, offset)
 		if errBans != nil {
 			return errors.Join(errBans, errFetchBans)
 		}

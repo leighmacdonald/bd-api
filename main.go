@@ -38,23 +38,6 @@ func createAppDeps(ctx context.Context) (appConfig, cache, *pgStore, error) {
 	return config, cacheHandler, database, nil
 }
 
-func runLogsTFScraper(ctx context.Context, database *pgStore, config appConfig) error {
-	logsScraper, errLogsTF := NewLogsTFScraper(database, config)
-	if errLogsTF != nil {
-		return errLogsTF
-	}
-
-	if config.ProxiesEnabled {
-		if errProxies := attachCollectorProxies(logsScraper.Collector, &config); errProxies != nil {
-			return errProxies
-		}
-	}
-
-	go startLogsTF(ctx, logsScraper)
-
-	return nil
-}
-
 func runSourcebansScraper(ctx context.Context, database *pgStore, config appConfig) error {
 	scrapers, errScrapers := initScrapers(ctx, database, config.CacheDir)
 	if errScrapers != nil {
@@ -96,39 +79,7 @@ func run(ctx context.Context) int {
 		defer proxyMgr.stop()
 	}
 
-	if config.LogstfScraperEnabled {
-		if err := runLogsTFScraper(ctx, database, config); err != nil {
-			slog.Error("failed to init logstf scraper", ErrAttr(err))
-
-			return 1
-		}
-	}
-
-	if config.RGLScraperEnabled {
-		rglScraper := NewRGLScraper(database)
-		go rglScraper.start(ctx)
-	}
-
-	if config.ETF2LScraperEnabled {
-		etf2lScraper := NewETF2LScraper(database)
-		go etf2lScraper.start(ctx)
-	}
-
-	if config.SourcebansScraperEnabled {
-		if err := runSourcebansScraper(ctx, database, config); err != nil {
-			slog.Error("failed to init sourcebans scraper", ErrAttr(err))
-
-			return 1
-		}
-	}
-
-	go listUpdater(ctx, database)
-	go profileUpdater(ctx, database)
-	go startServeMeUpdater(ctx, database)
-
-	workers := createJobWorkers(database)
-
-	jobClient, err := startJobClient(ctx, database.pool, config.ScrapeDelay, workers)
+	jobClient, err := InitJobClient(ctx, database, config)
 	if err != nil {
 		slog.Error("Failed to create job client", ErrAttr(err))
 

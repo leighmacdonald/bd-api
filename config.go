@@ -49,7 +49,6 @@ type appConfig struct {
 	PrivateKeyPassword       string          `mapstructure:"private_key_password"`
 	EnableCache              bool            `mapstructure:"enable_cache"`
 	CacheDir                 string          `mapstructure:"cache_dir"`
-	MaxWorkers               int             `json:"max_workers"`
 }
 
 func makeSigner(keyPath string, password string) (ssh.Signer, error) { //nolint:ireturn

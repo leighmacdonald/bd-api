@@ -15,30 +15,14 @@ import (
 
 var errReadCSVRows = errors.New("failed to read csv rows")
 
-func startServeMeUpdater(ctx context.Context, database *pgStore) {
-	updateServeMe(ctx, database)
-
-	ticker := time.NewTicker(time.Hour * 6)
-	for {
-		select {
-		case <-ticker.C:
-			updateServeMe(ctx, database)
-		case <-ctx.Done():
-			return
-		}
-	}
-}
-
-func updateServeMe(ctx context.Context, database *pgStore) {
+func updateServeMe(ctx context.Context, database *pgStore) error {
 	entries, errDownload := downloadServeMeList(ctx)
 	if errDownload != nil {
-		slog.Error("Failed to download serveme list", ErrAttr(errDownload))
-
-		return
+		return errDownload
 	}
 
 	if len(entries) == 0 {
-		return
+		return nil
 	}
 
 	// Ensure FK's are satisfied
@@ -52,19 +36,17 @@ func updateServeMe(ctx context.Context, database *pgStore) {
 		}
 
 		if err := database.playerGetOrCreate(ctx, entry.SteamID, &record); err != nil {
-			slog.Error("Failed to ensure player exists", ErrAttr(err))
-
-			return
+			return err
 		}
 	}
 
 	if err := database.servemeUpdate(ctx, entries); err != nil {
-		slog.Error("Failed to save serveme list", ErrAttr(err))
-
-		return
+		return err
 	}
 
 	slog.Info("Inserted serveme records", slog.Int("count", len(entries)))
+
+	return nil
 }
 
 func downloadServeMeList(ctx context.Context) ([]domain.ServeMeRecord, error) {

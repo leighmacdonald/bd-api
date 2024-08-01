@@ -22,6 +22,7 @@ import (
 	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
+	"github.com/riverqueue/river"
 )
 
 var (
@@ -2006,4 +2007,50 @@ func (db *pgStore) etf2lBansQuery(ctx context.Context, steamIDs steamid.Collecti
 	}
 
 	return bans, nil
+}
+
+func (db *pgStore) insertJobTx(ctx context.Context, client *river.Client[pgx.Tx], job river.JobArgs, opts *river.InsertOpts) error {
+	transaction, errTx := db.pool.Begin(ctx)
+	if errTx != nil {
+		return dbErr(errTx, "Failed to being tx")
+	}
+
+	defer func() {
+		_ = transaction.Rollback(ctx)
+	}()
+
+	if _, err := client.InsertTx(ctx, transaction, job, opts); err != nil {
+		slog.Error("Failed to insert rgl season followup jobs", ErrAttr(err))
+
+		return errors.Join(err, errQueueInsert)
+	}
+
+	if err := transaction.Commit(ctx); err != nil {
+		return dbErr(err, "Failed to commit jobs tx")
+	}
+
+	return nil
+}
+
+func (db *pgStore) insertJobsTx(ctx context.Context, client *river.Client[pgx.Tx], jobs []river.InsertManyParams) error {
+	transaction, errTx := db.pool.Begin(ctx)
+	if errTx != nil {
+		return dbErr(errTx, "Failed to being tx")
+	}
+
+	defer func() {
+		_ = transaction.Rollback(ctx)
+	}()
+
+	if _, err := client.InsertManyTx(ctx, transaction, jobs); err != nil {
+		slog.Error("Failed to insert rgl season followup jobs", ErrAttr(err))
+
+		return errors.Join(err, errQueueInsert)
+	}
+
+	if err := transaction.Commit(ctx); err != nil {
+		return dbErr(err, "Failed to commit jobs tx")
+	}
+
+	return nil
 }
