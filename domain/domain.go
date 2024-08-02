@@ -116,7 +116,7 @@ const (
 )
 
 type TimeStamped struct {
-	UpdatedOn time.Time `json:"-"`
+	UpdatedOn time.Time `json:"updated_on"`
 	CreatedOn time.Time `json:"created_on"`
 }
 
@@ -160,10 +160,6 @@ type Player struct {
 	GameBans                 int                      `json:"game_bans"`
 	EconomyBanned            EconBanState             `json:"economy_banned"`
 	LogsTFCount              int                      `json:"logs_tf_count"`
-	UGCUpdatedOn             time.Time                `json:"ugc_updated_on"`
-	RGLUpdatedOn             time.Time                `json:"rgl_updated_on"`
-	ETF2LUpdatedOn           time.Time                `json:"etf2_l_updated_on"`
-	LogsTFUpdatedOn          time.Time                `json:"logs_tf_updated_on"`
 	TimeStamped
 }
 
@@ -541,3 +537,32 @@ const (
 	RGL   League = "rgl"
 	ETF2L League = "rgl"
 )
+
+type SteamGame struct {
+	AppID      steamid.AppID `json:"app_id"`
+	Name       string        `json:"name"`
+	ImgIconURL string        `json:"img_icon_url"`
+	ImgLogoURL string        `json:"img_logo_url"`
+	TimeStamped
+}
+
+type SteamGameOwned struct {
+	SteamID                  steamid.SteamID `json:"steam_id"`
+	AppID                    steamid.AppID   `json:"app_id"`
+	PlaytimeForeverMinutes   int             `json:"playtime_forever_minutes"`
+	PlaytimeTwoWeeks         int             `json:"playtime_two_weeks"`
+	HasCommunityVisibleStats bool            `json:"has_community_visible_stats"`
+	TimeStamped
+}
+
+type PlayerSteamGameOwned struct {
+	SteamID                  steamid.SteamID `json:"steam_id"`
+	AppID                    steamid.AppID   `json:"app_id"`
+	Name                     string          `json:"name"`
+	ImgIconURL               string          `json:"img_icon_url"`
+	ImgLogoURL               string          `json:"img_logo_url"`
+	PlaytimeForeverMinutes   int             `json:"playtime_forever_minutes"`
+	PlaytimeTwoWeeks         int             `json:"playtime_two_weeks"`
+	HasCommunityVisibleStats bool            `json:"has_community_visible_stats"`
+	TimeStamped
+}

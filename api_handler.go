@@ -31,6 +31,28 @@ func handleGetFriendList(cache cache) http.HandlerFunc {
 	}
 }
 
+func handleGetOwnedGames(database *pgStore) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		ids, ok := getSteamIDs(writer, request)
+		if !ok {
+			return
+		}
+
+		update, updateOk := boolQuery(request, "update")
+		if !updateOk {
+			slog.Warn("Failed to parse owned games update query value")
+		}
+
+		games, errGames := getOwnedGames(request.Context(), database, ids, update)
+		if errGames != nil {
+			responseErr(writer, request, http.StatusInternalServerError, errGames, "Error loading owned game data")
+
+			return
+		}
+		responseOk(writer, request, games, "Owned Games")
+	}
+}
+
 // handleGetSummary returns a players steam profile summary. This mirrors the data shape in the steam summary api.
 func handleGetSummary(cache cache) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {

@@ -173,7 +173,7 @@ func scrapeLogsTF(ctx context.Context, scraper *SiteScraper) error {
 		return errors.Join(errRun, errRunQueue)
 	}
 
-	scraper.log.Info("Completed scrape job",
+	scraper.log.Debug("Completed scrape job",
 		slog.Duration("duration", time.Since(startTime)))
 
 	return nil

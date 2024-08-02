@@ -52,7 +52,7 @@ func runSourcebansScraper(ctx context.Context, database *pgStore, config appConf
 		}
 	}
 
-	go startScrapers(ctx, database, scrapers)
+	runScrapers(ctx, database, scrapers)
 
 	return nil
 }
@@ -79,7 +79,7 @@ func run(ctx context.Context) int {
 		defer proxyMgr.stop()
 	}
 
-	jobClient, err := InitJobClient(ctx, database, config)
+	jobClient, err := initJobClient(ctx, database, config)
 	if err != nil {
 		slog.Error("Failed to create job client", ErrAttr(err))
 

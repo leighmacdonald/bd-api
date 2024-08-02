@@ -77,24 +77,6 @@ func runScrapers(ctx context.Context, database *pgStore, scrapers []*sbScraper) 
 	waitGroup.Wait()
 }
 
-func startScrapers(ctx context.Context, database *pgStore, scrapers []*sbScraper) {
-	const scraperInterval = time.Hour * 24
-	scraperTicker := time.NewTicker(scraperInterval)
-
-	sync.OnceFunc(func() {
-		runScrapers(ctx, database, scrapers)
-	})()
-
-	for {
-		select {
-		case <-scraperTicker.C:
-			runScrapers(ctx, database, scrapers)
-		case <-ctx.Done():
-			return
-		}
-	}
-}
-
 type sbRecord struct {
 	Name      string
 	SteamID   steamid.SteamID

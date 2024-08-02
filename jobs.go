@@ -13,6 +13,7 @@ import (
 	"github.com/riverqueue/river/riverdriver/riverpgxv5"
 	"github.com/riverqueue/river/rivermigrate"
 	"github.com/riverqueue/river/rivershared/util/slogutil"
+	"github.com/riverqueue/river/rivertype"
 )
 
 var (
@@ -73,10 +74,10 @@ func steamInsertOpts() river.InsertOpts {
 	return river.InsertOpts{
 		Queue:    string(QueueSteam),
 		Priority: int(Slow),
-		UniqueOpts: river.UniqueOpts{
-			ByArgs:   true,
-			ByPeriod: 24 * time.Hour,
-		},
+		// UniqueOpts: river.UniqueOpts{
+		//	ByArgs:   true,
+		//	ByPeriod: 24 * time.Hour,
+		// },
 	}
 }
 
@@ -103,26 +104,34 @@ func setupQueue(ctx context.Context, dbPool *pgxpool.Pool) error {
 }
 
 func createJobWorkers(database *pgStore, config appConfig) *river.Workers {
-	steamClient := NewHTTPClient()
 	workers := river.NewWorkers()
+	steamLimiter := NewSteamLimiter()
 
+	// Steam
 	river.AddWorker[SteamSummaryArgs](workers, &SteamSummaryWorker{
-		database:   database,
-		httpClient: steamClient,
+		database: database,
+		limiter:  steamLimiter,
 	})
 	river.AddWorker[SteamBanArgs](workers, &SteamBanWorker{
-		database:   database,
-		httpClient: steamClient,
+		database: database,
+		limiter:  steamLimiter,
+	})
+	river.AddWorker[SteamGamesArgs](workers, &SteamGamesWorker{
+		database: database,
+		limiter:  steamLimiter,
 	})
 
+	// Serveme.tf
 	river.AddWorker[ServemeArgs](workers, &ServemeWorker{
 		database: database,
 	})
 
+	// Bot detector lists
 	river.AddWorker[BDListArgs](workers, &BDListWorker{
 		database: database,
 	})
 
+	// RGL
 	if config.RGLScraperEnabled {
 		rglLimiter := NewRGLLimiter()
 		rglClient := NewHTTPClient()
@@ -149,6 +158,7 @@ func createJobWorkers(database *pgStore, config appConfig) *river.Workers {
 		})
 	}
 
+	// ETF2L
 	if config.ETF2LScraperEnabled {
 		river.AddWorker[ETF2LBanArgs](workers, &ETF2LBanWorker{
 			database:   database,
@@ -157,6 +167,7 @@ func createJobWorkers(database *pgStore, config appConfig) *river.Workers {
 		})
 	}
 
+	// Sourcebans
 	if config.SourcebansScraperEnabled {
 		river.AddWorker[SourcebansArgs](workers, &SourcebansWorker{
 			database: database,
@@ -164,6 +175,7 @@ func createJobWorkers(database *pgStore, config appConfig) *river.Workers {
 		})
 	}
 
+	// Logs.tf
 	if config.LogstfScraperEnabled {
 		river.AddWorker[LogsTFArgs](workers, &LogsTFWorker{
 			database: database,
@@ -183,7 +195,7 @@ func createPeriodicJobs(config appConfig) []*river.PeriodicJob {
 			},
 			&river.PeriodicJobOpts{RunOnStart: true}),
 		river.NewPeriodicJob(
-			river.PeriodicInterval(1*time.Minute),
+			river.PeriodicInterval(2*time.Minute),
 			func() (river.JobArgs, *river.InsertOpts) {
 				return SteamSummaryArgs{}, nil
 			},
@@ -213,6 +225,7 @@ func createPeriodicJobs(config appConfig) []*river.PeriodicJob {
 			),
 		)
 	}
+
 	if config.ETF2LScraperEnabled {
 		jobs = append(jobs,
 			river.NewPeriodicJob(
@@ -222,6 +235,7 @@ func createPeriodicJobs(config appConfig) []*river.PeriodicJob {
 				},
 				&river.PeriodicJobOpts{RunOnStart: true}))
 	}
+
 	if config.SourcebansScraperEnabled {
 		jobs = append(jobs,
 			river.NewPeriodicJob(
@@ -230,6 +244,16 @@ func createPeriodicJobs(config appConfig) []*river.PeriodicJob {
 					return SourcebansArgs{}, nil
 				},
 				&river.PeriodicJobOpts{RunOnStart: false}))
+	}
+
+	if config.LogstfScraperEnabled {
+		jobs = append(jobs,
+			river.NewPeriodicJob(
+				river.PeriodicInterval(time.Hour),
+				func() (river.JobArgs, *river.InsertOpts) {
+					return LogsTFArgs{}, nil
+				},
+				&river.PeriodicJobOpts{RunOnStart: true}))
 	}
 
 	return jobs
@@ -243,13 +267,14 @@ func createJobClient(dbPool *pgxpool.Pool, workers *river.Workers, periodic []*r
 			string(QueueDefault):    {MaxWorkers: 2},
 			string(QueuePriority):   {MaxWorkers: 1},
 			string(QueueRGL):        {MaxWorkers: 1},
-			string(QueueSteam):      {MaxWorkers: 10},
+			string(QueueSteam):      {MaxWorkers: 2},
 			string(QueueETF2L):      {MaxWorkers: 1},
 			string(QueueLogsTF):     {MaxWorkers: 1},
 			string(QueueSourcebans): {MaxWorkers: 1},
 		},
 		Workers:      workers,
 		PeriodicJobs: periodic,
+		ErrorHandler: &JobErrorHandler{},
 		MaxAttempts:  3,
 	})
 	if err != nil {
@@ -259,7 +284,7 @@ func createJobClient(dbPool *pgxpool.Pool, workers *river.Workers, periodic []*r
 	return newRiverClient, nil
 }
 
-func InitJobClient(ctx context.Context, database *pgStore, config appConfig) (*river.Client[pgx.Tx], error) {
+func initJobClient(ctx context.Context, database *pgStore, config appConfig) (*river.Client[pgx.Tx], error) {
 	workers := createJobWorkers(database, config)
 	periodic := createPeriodicJobs(config)
 
@@ -273,4 +298,23 @@ func InitJobClient(ctx context.Context, database *pgStore, config appConfig) (*r
 	}
 
 	return newRiverClient, nil
+}
+
+type JobErrorHandler struct{}
+
+func (*JobErrorHandler) HandleError(_ context.Context, job *rivertype.JobRow, err error) *river.ErrorHandlerResult {
+	slog.Error("Job returned error", ErrAttr(err),
+		slog.String("queue", job.Queue), slog.String("kind", job.Kind),
+		slog.String("args", string(job.EncodedArgs)))
+
+	return nil
+}
+
+func (*JobErrorHandler) HandlePanic(_ context.Context, job *rivertype.JobRow, panicVal any, trace string) *river.ErrorHandlerResult {
+	slog.Error("Job panic",
+		slog.String("trace", trace), slog.Any("value", panicVal),
+		slog.String("queue", job.Queue), slog.String("kind", job.Kind),
+		slog.String("args", string(job.EncodedArgs)))
+
+	return nil
 }

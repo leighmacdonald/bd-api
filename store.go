@@ -207,10 +207,6 @@ func newPlayerRecord(sid64 steamid.SteamID) PlayerRecord {
 			GameBans:                 0,
 			EconomyBanned:            0,
 			LogsTFCount:              0,
-			UGCUpdatedOn:             time.Time{},
-			RGLUpdatedOn:             time.Time{},
-			ETF2LUpdatedOn:           time.Time{},
-			LogsTFUpdatedOn:          time.Time{},
 			TimeStamped: domain.TimeStamped{
 				UpdatedOn: createdOn,
 				CreatedOn: createdOn,
@@ -391,13 +387,11 @@ func (db *pgStore) playerRecordSave(ctx context.Context, record *PlayerRecord) e
 			Insert("player").
 			Columns("steam_id", "community_visibility_state", "profile_state", "persona_name", "vanity",
 				"avatar_hash", "persona_state", "real_name", "time_created", "loc_country_code", "loc_state_code", "loc_city_id",
-				"community_banned", "vac_banned", "game_bans", "economy_banned", "logstf_count", "ugc_updated_on", "rgl_updated_on",
-				"etf2l_updated_on", "logstf_updated_on", "steam_updated_on", "created_on").
+				"community_banned", "vac_banned", "game_bans", "economy_banned", "logstf_count", "updated_on", "created_on").
 			Values(record.SteamID.Int64(), record.CommunityVisibilityState, record.ProfileState, record.PersonaName, record.Vanity,
 				record.AvatarHash, record.PersonaState, record.RealName, record.TimeCreated, record.LocCountryCode,
 				record.LocStateCode, record.LocCityID, record.CommunityBanned, record.VacBanned, record.GameBans,
-				record.EconomyBanned, record.LogsTFCount, record.UGCUpdatedOn, record.RGLUpdatedOn, record.ETF2LUpdatedOn,
-				record.LogsTFUpdatedOn, record.UpdatedOn, record.CreatedOn).
+				record.EconomyBanned, record.LogsTFCount, record.UpdatedOn, record.CreatedOn).
 			ToSql()
 		if errSQL != nil {
 			return dbErr(errSQL, "Failed to generate query")
@@ -440,11 +434,7 @@ func (db *pgStore) playerRecordSave(ctx context.Context, record *PlayerRecord) e
 			Set("game_bans", record.GameBans).
 			Set("economy_banned", record.EconomyBanned).
 			Set("logstf_count", record.LogsTFCount).
-			Set("ugc_updated_on", record.UGCUpdatedOn).
-			Set("rgl_updated_on", record.RGLUpdatedOn).
-			Set("etf2l_updated_on", record.ETF2LUpdatedOn).
-			Set("logstf_updated_on", record.LogsTFUpdatedOn).
-			Set("steam_updated_on", record.UpdatedOn).
+			Set("updated_on", record.UpdatedOn).
 			Where(sq.Eq{"steam_id": record.SteamID}).
 			ToSql()
 		if errSQL != nil {
@@ -470,8 +460,7 @@ func (db *pgStore) playerGetOrCreate(ctx context.Context, sid steamid.SteamID, r
 		Select("community_visibility_state", "profile_state",
 			"persona_name", "vanity", "avatar_hash", "persona_state", "real_name", "time_created", "loc_country_code",
 			"loc_state_code", "loc_city_id", "community_banned", "vac_banned", "game_bans", "economy_banned",
-			"logstf_count", "ugc_updated_on", "rgl_updated_on", "etf2l_updated_on", "logstf_updated_on",
-			"steam_updated_on", "created_on").
+			"logstf_count", "updated_on", "created_on").
 		From("player").
 		Where(sq.Eq{"steam_id": sid.Int64()}).
 		ToSql()
@@ -484,8 +473,7 @@ func (db *pgStore) playerGetOrCreate(ctx context.Context, sid steamid.SteamID, r
 		Scan(&record.CommunityVisibilityState, &record.ProfileState, &record.PersonaName, &record.Vanity,
 			&record.AvatarHash, &record.PersonaState, &record.RealName, &record.TimeCreated, &record.LocCountryCode,
 			&record.LocStateCode, &record.LocCityID, &record.CommunityBanned, &record.VacBanned, &record.GameBans,
-			&record.EconomyBanned, &record.LogsTFCount, &record.UGCUpdatedOn, &record.RGLUpdatedOn, &record.ETF2LUpdatedOn,
-			&record.LogsTFUpdatedOn, &record.TimeStamped.UpdatedOn, &record.TimeStamped.CreatedOn)
+			&record.EconomyBanned, &record.LogsTFCount, &record.TimeStamped.UpdatedOn, &record.TimeStamped.CreatedOn)
 	if errQuery != nil {
 		wrappedErr := dbErr(errQuery, "Failed to query player")
 		if errors.Is(wrappedErr, errDatabaseNoResults) {
@@ -506,11 +494,10 @@ func (db *pgStore) playerGetExpiredProfiles(ctx context.Context, limit int) ([]P
 		Select("steam_id", "community_visibility_state", "profile_state",
 			"persona_name", "vanity", "avatar_hash", "persona_state", "real_name", "time_created", "loc_country_code",
 			"loc_state_code", "loc_city_id", "community_banned", "vac_banned", "game_bans", "economy_banned",
-			"logstf_count", "ugc_updated_on", "rgl_updated_on", "etf2l_updated_on", "logstf_updated_on",
-			"steam_updated_on", "created_on").
+			"logstf_count", "updated_on", "created_on").
 		From("player").
-		Where("steam_updated_on < now() - interval '24 hour'").
-		OrderBy("steam_updated_on desc").
+		Where("updated_on < now() - interval '24 hour'").
+		OrderBy("updated_on desc").
 		Limit(uint64(limit)).
 		ToSql()
 	if errSQL != nil {
@@ -535,8 +522,7 @@ func (db *pgStore) playerGetExpiredProfiles(ctx context.Context, limit int) ([]P
 			Scan(&sid, &record.CommunityVisibilityState, &record.ProfileState, &record.PersonaName,
 				&record.Vanity, &record.AvatarHash, &record.PersonaState, &record.RealName, &record.TimeCreated,
 				&record.LocCountryCode, &record.LocStateCode, &record.LocCityID, &record.CommunityBanned,
-				&record.VacBanned, &record.GameBans, &record.EconomyBanned, &record.LogsTFCount, &record.UGCUpdatedOn,
-				&record.RGLUpdatedOn, &record.ETF2LUpdatedOn, &record.LogsTFUpdatedOn, &record.TimeStamped.UpdatedOn,
+				&record.VacBanned, &record.GameBans, &record.EconomyBanned, &record.LogsTFCount, &record.TimeStamped.UpdatedOn,
 				&record.TimeStamped.CreatedOn); errQuery != nil {
 			return nil, dbErr(errQuery, "Failed to scan expired ban")
 		}
@@ -2053,4 +2039,75 @@ func (db *pgStore) insertJobsTx(ctx context.Context, client *river.Client[pgx.Tx
 	}
 
 	return nil
+}
+
+func (db *pgStore) ensureSteamGame(ctx context.Context, game domain.SteamGame) error {
+	const query = `
+		INSERT INTO steam_game (app_id, name, img_icon_url, img_logo_url, created_on, updated_on) 
+		VALUES ($1, $2, $3, $4, $5, $6)
+		ON CONFLICT (app_id) DO NOTHING`
+
+	if _, err := db.pool.Exec(ctx, query, game.AppID, game.Name, game.ImgIconURL, game.ImgLogoURL, game.CreatedOn, game.UpdatedOn); err != nil {
+		return dbErr(err, "Failed to ensure steam game")
+	}
+
+	return nil
+}
+
+func (db *pgStore) updateOwnedGame(ctx context.Context, game domain.SteamGameOwned) error {
+	const query = `
+		INSERT INTO player_owned_games (
+		                                steam_id, app_id, playtime_forever_minutes, playtime_two_weeks, 
+		                                has_community_visible_stats, created_on, updated_on) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		ON CONFLICT (steam_id, app_id) DO UPDATE 
+		    SET playtime_forever_minutes = $3, playtime_two_weeks = $4, has_community_visible_stats = $5, 
+		        updated_on = $7`
+
+	if _, err := db.pool.Exec(ctx, query, game.SteamID, game.AppID, game.PlaytimeForeverMinutes, game.PlaytimeTwoWeeks, game.HasCommunityVisibleStats,
+		game.CreatedOn, game.UpdatedOn); err != nil {
+		return dbErr(err, "Failed to ensure steam game")
+	}
+
+	return nil
+}
+
+type OwnedGameMap map[steamid.SteamID][]domain.PlayerSteamGameOwned
+
+func (db *pgStore) getOwnedGames(ctx context.Context, steamIDs steamid.Collection) (OwnedGameMap, error) {
+	query, args, errQuery := sb.
+		Select("o.steam_id", "o.app_id", "o.playtime_forever_minutes", "o.playtime_two_weeks",
+			"o.has_community_visible_stats", "o.created_on", "o.updated_on", "g.name", "g.img_icon_url", "g.img_logo_url").
+		From("player_owned_games o").
+		LeftJoin("steam_game g USING(app_id)").
+		Where(sq.Eq{"o.steam_id": steamIDs.ToInt64Slice()}).
+		ToSql()
+	if errQuery != nil {
+		return nil, dbErr(errQuery, "Failed to build query")
+	}
+
+	owned := OwnedGameMap{}
+
+	rows, errRows := db.pool.Query(ctx, query, args...)
+	if errRows != nil {
+		return nil, dbErr(errRows, "Failed to query owned games")
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var psgo domain.PlayerSteamGameOwned
+		if errScan := rows.Scan(&psgo.SteamID, &psgo.AppID, &psgo.PlaytimeForeverMinutes, &psgo.PlaytimeTwoWeeks,
+			&psgo.HasCommunityVisibleStats, &psgo.CreatedOn, &psgo.UpdatedOn, &psgo.Name, &psgo.ImgIconURL,
+			&psgo.ImgLogoURL); errScan != nil {
+			return nil, dbErr(errScan, "Failed to scan owned game")
+		}
+		if _, ok := owned[psgo.SteamID]; !ok {
+			owned[psgo.SteamID] = make([]domain.PlayerSteamGameOwned, 0)
+		}
+
+		owned[psgo.SteamID] = append(owned[psgo.SteamID], psgo)
+	}
+
+	return owned, nil
 }

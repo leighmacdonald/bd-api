@@ -2,8 +2,6 @@ package main
 
 import (
 	"errors"
-
-	"golang.org/x/time/rate"
 )
 
 var (
@@ -13,12 +11,3 @@ var (
 	errFetchSeason       = errors.New("failed to fetch rgl season via api")
 	errFetchBans         = errors.New("failed to fetch rgl bans")
 )
-
-const (
-	rglRefillRate = 0.5
-	rglBucketSize = 5
-)
-
-func NewRGLLimiter() *LimiterCustom {
-	return &LimiterCustom{Limiter: rate.NewLimiter(rglRefillRate, rglBucketSize)}
-}

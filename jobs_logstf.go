@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log/slog"
+	"time"
 
 	"github.com/riverqueue/river"
 )
@@ -15,8 +16,9 @@ func (LogsTFArgs) Kind() string {
 
 func (LogsTFArgs) InsertOpts() river.InsertOpts {
 	return river.InsertOpts{
-		Queue:    string(QueueLogsTF),
-		Priority: int(Slow),
+		Queue:      string(QueueLogsTF),
+		Priority:   int(Slow),
+		UniqueOpts: river.UniqueOpts{ByPeriod: time.Hour},
 	}
 }
 
@@ -24,6 +26,10 @@ type LogsTFWorker struct {
 	river.WorkerDefaults[LogsTFArgs]
 	database *pgStore
 	config   appConfig
+}
+
+func (w *LogsTFWorker) Timeout(_ *river.Job[LogsTFArgs]) time.Duration {
+	return time.Hour * 6
 }
 
 func (w *LogsTFWorker) Work(ctx context.Context, _ *river.Job[LogsTFArgs]) error {
