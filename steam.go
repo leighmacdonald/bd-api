@@ -8,7 +8,9 @@ import (
 	"log/slog"
 	"strings"
 	"sync"
+	"time"
 
+	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 )
@@ -188,4 +190,102 @@ func getSteamSummaries(ctx context.Context, cache cache, steamIDs steamid.Collec
 	}
 
 	return summaries, nil
+}
+
+func updateOwnedGames(ctx context.Context, database *pgStore, steamID steamid.SteamID) ([]domain.PlayerSteamGameOwned, error) {
+	games, errGames := steamweb.GetOwnedGames(ctx, steamID)
+	if errGames != nil {
+		// TODO check for just private info.
+		return nil, errors.Join(errGames, errSteamAPIResult)
+	}
+
+	var owned []domain.PlayerSteamGameOwned //nolint:prealloc
+
+	for _, game := range games {
+		steamGame := domain.SteamGame{
+			AppID:      game.AppID,
+			Name:       game.Name,
+			ImgIconURL: game.ImgIconURL,
+			ImgLogoURL: game.ImgLogoURL,
+			TimeStamped: domain.TimeStamped{
+				CreatedOn: time.Now(),
+				UpdatedOn: time.Now(),
+			},
+		}
+
+		if err := database.ensureSteamGame(ctx, steamGame); err != nil {
+			return nil, err
+		}
+
+		ownedGame := domain.SteamGameOwned{
+			SteamID:                  steamID,
+			AppID:                    game.AppID,
+			PlaytimeForeverMinutes:   game.PlaytimeForever,
+			PlaytimeTwoWeeks:         game.Playtime2Weeks,
+			HasCommunityVisibleStats: game.HasCommunityVisibleStats,
+			TimeStamped: domain.TimeStamped{
+				CreatedOn: time.Now(),
+				UpdatedOn: time.Now(),
+			},
+		}
+
+		if err := database.updateOwnedGame(ctx, ownedGame); err != nil {
+			return nil, err
+		}
+
+		owned = append(owned, domain.PlayerSteamGameOwned{
+			SteamID:                  steamID,
+			AppID:                    game.AppID,
+			Name:                     game.Name,
+			ImgIconURL:               game.ImgIconURL,
+			ImgLogoURL:               game.ImgLogoURL,
+			PlaytimeForeverMinutes:   ownedGame.PlaytimeForeverMinutes,
+			PlaytimeTwoWeeks:         ownedGame.PlaytimeTwoWeeks,
+			HasCommunityVisibleStats: ownedGame.HasCommunityVisibleStats,
+			TimeStamped:              ownedGame.TimeStamped,
+		})
+	}
+
+	return owned, nil
+}
+
+func getOwnedGames(ctx context.Context, database *pgStore, steamIDs steamid.Collection, forceUpdate bool) (OwnedGameMap, error) {
+	var (
+		missed steamid.Collection
+		owned  = OwnedGameMap{}
+	)
+
+	if !forceUpdate {
+		existing, errOwned := database.getOwnedGames(ctx, steamIDs)
+		if errOwned != nil && !errors.Is(errOwned, errDatabaseNoResults) {
+			return nil, errOwned
+		}
+
+		for _, sid := range steamIDs {
+			games, ok := existing[sid]
+			if !ok || len(games) == 0 {
+				missed = append(missed, sid)
+			}
+		}
+
+		owned = existing
+	} else {
+		missed = steamIDs
+	}
+
+	for _, missedSid := range missed {
+		time.Sleep(time.Millisecond * 100)
+		updated, err := updateOwnedGames(ctx, database, missedSid)
+		if err != nil {
+			return nil, err
+		}
+
+		if updated == nil {
+			updated = []domain.PlayerSteamGameOwned{}
+		}
+
+		owned[missedSid] = updated
+	}
+
+	return owned, nil
 }

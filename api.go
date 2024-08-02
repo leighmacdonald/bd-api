@@ -48,6 +48,7 @@ func createRouter(database *pgStore, cacheHandler cache, config appConfig) (*htt
 	mux.HandleFunc("GET /summary", handleGetSummary(cacheHandler))
 	mux.HandleFunc("GET /profile", handleGetProfile(database, cacheHandler))
 	mux.HandleFunc("GET /friends", handleGetFriendList(cacheHandler))
+	mux.HandleFunc("GET /owned_games", handleGetOwnedGames(database))
 	mux.HandleFunc("GET /sourcebans", handleGetSourceBansMany(database))
 	mux.HandleFunc("GET /sourcebans/{steam_id}", handleGetSourceBans(database))
 	mux.HandleFunc("GET /bd", handleGetBotDetector(database))
@@ -242,6 +243,20 @@ func intParam(w http.ResponseWriter, r *http.Request, param string) (int, bool) 
 	}
 
 	return intVal, true
+}
+
+func boolQuery(request *http.Request, name string) (bool, bool) {
+	boolString := request.URL.Query().Get(name)
+	if boolString == "" {
+		return false, true
+	}
+
+	boolVal, err := strconv.ParseBool(boolString)
+	if err != nil {
+		return false, false
+	}
+
+	return boolVal, true
 }
 
 func steamIDFromSlug(w http.ResponseWriter, r *http.Request) (steamid.SteamID, bool) {

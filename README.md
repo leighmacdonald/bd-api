@@ -36,7 +36,10 @@ lists need to be inserted into the database manually, this tool does not come wi
 
 ### Competitive Leagues (RGL, ETF2L, UGC, More?)
 
-There is some preliminary support for scraping this data, however its not functional yet.
+There is some preliminary support for scraping this data. 
+
+- RGL is mostly complete (bans, seasons, teams, matches).
+- ETF2L bans only so far.
 
 ## API
 

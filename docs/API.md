@@ -302,8 +302,51 @@ Example: https://bd-api.roto.lol/profile?steamids=76561197970669109,765611979928
     ]
   }
 ]
+```
+
+## GET /owned_games
+
+Fetch a list of the users owned games. Note that many users have some or all of this data hidden. If you would
+like to forcefully refresh this data, you can append an `&update=true` query value to the request, otherwise
+only data older than 2 weeks or data that does not exists yet will be pulled from the steam api.
+
+Supports querying up to 100 steamids at a time, but make sure your timeout is long enough as there is some
+pauses in the queries to not hammer valve apis and get rate limited.
+
+Example: https://bd-api.roto.lol/owned_games?steamids=DG_AU
+
+```json
+{
+    "76561198088775634": [
+        {
+            "steam_id": "76561198088775634",
+            "app_id": 730,
+            "name": "Counter-Strike 2",
+            "img_icon_url": "8dbc71957312bbd3baea65848b545be9eae2a355",
+            "img_logo_url": "",
+            "playtime_forever_minutes": 910,
+            "playtime_two_weeks": 0,
+            "has_community_visible_stats": true,
+            "updated_on": "2024-08-01T21:19:24.828453-06:00",
+            "created_on": "2024-08-01T21:07:10.549166-06:00"
+        },
+        {
+            "steam_id": "76561198088775634",
+            "app_id": 440,
+            "name": "Team Fortress 2",
+            "img_icon_url": "e3f595a92552da3d664ad00277fad2107345f743",
+            "img_logo_url": "",
+            "playtime_forever_minutes": 693625,
+            "playtime_two_weeks": 1087,
+            "has_community_visible_stats": true,
+            "updated_on": "2024-08-01T21:19:25.916484-06:00",
+            "created_on": "2024-08-01T21:07:12.747306-06:00"
+        }
+    ]
+}
 
 ```
+
 
 ## GET /sourcebans
 
