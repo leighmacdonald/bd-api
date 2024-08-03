@@ -33,7 +33,7 @@ func newTestDB(ctx context.Context) (string, *postgres.PostgresContainer, error)
 	username, password, dbName := testInfo, testInfo, testInfo
 	cont, errContainer := postgres.Run(
 		ctx,
-		"docker.io/postgres:15-bullseye",
+		"timescale/timescaledb-ha:pg15",
 		postgres.WithDatabase(dbName),
 		postgres.WithUsername(username),
 		postgres.WithPassword(password),
