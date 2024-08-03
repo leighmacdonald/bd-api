@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 	"log/slog"
+	"net"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -20,7 +22,29 @@ var (
 	errSteamBanDecode     = errors.New("failed to decode steam ban state")
 	errSteamSummaryFetch  = errors.New("failed to fetch steam summary")
 	errSteamSummaryDecode = errors.New("failed to decode steam summary")
+	errAddr               = errors.New("failed to parse server addr")
+	errPort               = errors.New("failed to parse server port")
+	errFetchServers       = errors.New("could not fetch servers")
 )
+
+func parseHostPort(hostPortStr string) (net.IP, int, error) {
+	hostParts := strings.Split(hostPortStr, ":")
+	if len(hostParts) != 2 {
+		return nil, 0, errAddr
+	}
+
+	addr := net.ParseIP(hostParts[0])
+	if addr == nil {
+		return nil, 0, errAddr
+	}
+
+	port, err := strconv.Atoi(hostParts[1])
+	if err != nil {
+		return nil, 0, errors.Join(err, errPort)
+	}
+
+	return addr, port, nil
+}
 
 func steamIDCollectionToInt64Slice(collection steamid.Collection) []int64 {
 	ids := make([]int64, len(collection))

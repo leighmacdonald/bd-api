@@ -3,10 +3,13 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/leighmacdonald/steamweb/v2"
 	"github.com/riverqueue/river"
@@ -182,4 +185,160 @@ func (w *SteamGamesWorker) Work(ctx context.Context, job *river.Job[SteamGamesAr
 	}
 
 	return nil
+}
+
+type SteamServersArgs struct{}
+
+func (SteamServersArgs) Kind() string {
+	return string(KindSteamServers)
+}
+
+func (SteamServersArgs) InsertOpts() river.InsertOpts {
+	opts := steamInsertOpts()
+	opts.Priority = int(High)
+
+	return opts
+}
+
+type SteamServersWorker struct {
+	river.WorkerDefaults[SteamServersArgs]
+	database    *pgStore
+	limiter     *LimiterCustom
+	serverCache map[steamid.SteamID]domain.SteamServer
+	mapCache    map[string]domain.Map
+}
+
+func (w *SteamServersWorker) Work(ctx context.Context, _ *river.Job[SteamServersArgs]) error {
+	var (
+		stats  []domain.SteamServerInfo
+		counts domain.SteamServerCounts
+	)
+
+	for _, region := range []int{0, 1, 2, 3, 4, 5, 6, 7, 255} {
+		now := time.Now()
+		newServers, errServers := steamweb.GetServerList(ctx, map[string]string{
+			"dedicated": "1",
+			"appid":     "440",
+			"region":    fmt.Sprintf("%d", region),
+		})
+		if errServers != nil {
+			slog.Error("Failed to get servers", ErrAttr(errServers))
+
+			return errors.Join(errServers, errFetchServers)
+		}
+
+		for _, server := range newServers {
+			sid := steamid.New(server.Steamid)
+
+			_, err := w.ensureServer(ctx, sid, now, server)
+			if err != nil {
+				return err
+			}
+
+			mapInfo, errMapInfo := w.ensureMap(ctx, server.Map)
+			if errMapInfo != nil {
+				return errMapInfo
+			}
+
+			stats = append(stats, domain.SteamServerInfo{
+				SteamID: sid,
+				Time:    now,
+				Players: server.Players,
+				Bots:    server.Bots,
+				MapID:   mapInfo.MapID,
+			})
+
+			if server.Os == "l" {
+				counts.Linux++
+			} else {
+				counts.Windows++
+			}
+
+			if server.Secure {
+				counts.Vac++
+			}
+
+			if strings.HasPrefix(server.Addr, "169.254") {
+				counts.SDR++
+			}
+
+			if strings.HasPrefix(server.Name, "Valve Matchmaking") && server.Region == 255 {
+				counts.Valve++
+			} else {
+				counts.Community++
+			}
+
+			counts.Time = now
+		}
+
+		time.Sleep(time.Second)
+	}
+
+	if err := w.database.insertSteamServersStats(ctx, stats); err != nil {
+		return err
+	}
+
+	if err := w.database.insertSteamServersCounts(ctx, counts); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (w *SteamServersWorker) ensureServer(ctx context.Context, sid steamid.SteamID, now time.Time, server steamweb.Server) (domain.SteamServer, error) {
+	// Insert new servers or update expired ones
+	cacheServer, found := w.serverCache[sid]
+	if found && time.Since(cacheServer.UpdatedOn) < time.Hour*12 {
+		return cacheServer, nil
+	}
+
+	host, port, errParse := parseHostPort(server.Addr)
+	if errParse != nil {
+		return cacheServer, errParse
+	}
+
+	steamServer := domain.SteamServer{
+		SteamID:    sid,
+		Addr:       host,
+		GamePort:   port,
+		Name:       server.Name,
+		AppID:      server.Appid,
+		GameDir:    server.GameDir,
+		Version:    server.Version,
+		Region:     server.Region,
+		MaxPlayers: server.MaxPlayers,
+		Secure:     server.Secure,
+		Os:         server.Os,
+		GameType:   strings.Split(strings.ToLower(server.GameType), ","),
+		TimeStamped: domain.TimeStamped{
+			UpdatedOn: now,
+			CreatedOn: now,
+		},
+	}
+
+	if err := w.database.insertSteamServer(ctx, steamServer); err != nil {
+		return steamServer, err
+	}
+
+	w.serverCache[sid] = steamServer
+
+	return steamServer, nil
+}
+
+func (w *SteamServersWorker) ensureMap(ctx context.Context, mapName string) (domain.Map, error) {
+	mapName = strings.ToLower(mapName)
+
+	mapInfo, mapFound := w.mapCache[mapName]
+	if mapFound {
+		return mapInfo, nil
+	}
+
+	newMap, errMI := w.database.createMap(ctx, mapName)
+	if errMI != nil {
+		return mapInfo, errMI
+	}
+
+	w.mapCache[mapName] = newMap
+
+	return newMap, nil
 }

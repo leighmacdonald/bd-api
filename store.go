@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 	"slices"
+	"strings"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -2064,7 +2065,7 @@ func (db *pgStore) updateOwnedGame(ctx context.Context, game domain.SteamGameOwn
 		    SET playtime_forever_minutes = $3, playtime_two_weeks = $4, has_community_visible_stats = $5, 
 		        updated_on = $7`
 
-	if _, err := db.pool.Exec(ctx, query, game.SteamID, game.AppID, game.PlaytimeForeverMinutes, game.PlaytimeTwoWeeks, game.HasCommunityVisibleStats,
+	if _, err := db.pool.Exec(ctx, query, game.SteamID.Int64(), game.AppID, game.PlaytimeForeverMinutes, game.PlaytimeTwoWeeks, game.HasCommunityVisibleStats,
 		game.CreatedOn, game.UpdatedOn); err != nil {
 		return dbErr(err, "Failed to ensure steam game")
 	}
@@ -2096,12 +2097,18 @@ func (db *pgStore) getOwnedGames(ctx context.Context, steamIDs steamid.Collectio
 	defer rows.Close()
 
 	for rows.Next() {
-		var psgo domain.PlayerSteamGameOwned
-		if errScan := rows.Scan(&psgo.SteamID, &psgo.AppID, &psgo.PlaytimeForeverMinutes, &psgo.PlaytimeTwoWeeks,
+		var (
+			psgo domain.PlayerSteamGameOwned
+			sid  int64
+		)
+		if errScan := rows.Scan(&sid, &psgo.AppID, &psgo.PlaytimeForeverMinutes, &psgo.PlaytimeTwoWeeks,
 			&psgo.HasCommunityVisibleStats, &psgo.CreatedOn, &psgo.UpdatedOn, &psgo.Name, &psgo.ImgIconURL,
 			&psgo.ImgLogoURL); errScan != nil {
 			return nil, dbErr(errScan, "Failed to scan owned game")
 		}
+
+		psgo.SteamID = steamid.New(sid)
+
 		if _, ok := owned[psgo.SteamID]; !ok {
 			owned[psgo.SteamID] = make([]domain.PlayerSteamGameOwned, 0)
 		}
@@ -2110,4 +2117,83 @@ func (db *pgStore) getOwnedGames(ctx context.Context, steamIDs steamid.Collectio
 	}
 
 	return owned, nil
+}
+
+func (db *pgStore) insertSteamServer(ctx context.Context, server domain.SteamServer) error {
+	const query = `
+		INSERT INTO steam_server (
+		                          steam_id, addr, game_port, name, app_id, game_dir, 
+		                          version, region, secure, os, tags, created_on, updated_on) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+		ON CONFLICT (steam_id) DO 
+		    UPDATE SET 
+		        addr = $2, game_port = $3, name = $4, app_id = $5, game_dir = $6, version = $7,
+		        region = $8, secure = $9, os = $10, tags = $11, updated_on = $13`
+	if _, err := db.pool.
+		Exec(ctx, query, server.SteamID.Int64(), server.Addr, server.GamePort, server.Name, server.AppID, server.GameDir,
+			server.Version, server.Region, server.Secure, server.Os, server.GameType, server.CreatedOn, server.UpdatedOn); err != nil {
+		return dbErr(err, "Failed to insert server")
+	}
+
+	return nil
+}
+
+func (db *pgStore) insertSteamServersStats(ctx context.Context, stats []domain.SteamServerInfo) error {
+	const query = `
+		INSERT INTO steam_server_info (steam_id, time, players, bots, map_id)
+		VALUES ($1, $2, $3, $4, $5)`
+
+	batch := &pgx.Batch{}
+	for _, s := range stats {
+		batch.Queue(query, s.SteamID.Int64(), s.Time, s.Players, s.Bots, s.MapID)
+	}
+
+	if err := db.pool.SendBatch(ctx, batch).Close(); err != nil {
+		return dbErr(err, "Failed to send server info batch")
+	}
+
+	return nil
+}
+
+func (db *pgStore) insertSteamServersCounts(ctx context.Context, stats domain.SteamServerCounts) error {
+	const query = `
+		INSERT INTO steam_server_counts (time, valve, community, linux, windows, vac, sdr) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7)`
+
+	if _, err := db.pool.Exec(ctx, query, stats.Time, stats.Valve, stats.Community, stats.Linux, stats.Windows, stats.Vac, stats.SDR); err != nil {
+		return dbErr(err, "Failed to save server counts")
+	}
+
+	return nil
+}
+
+func (db *pgStore) createMap(ctx context.Context, mapName string) (domain.Map, error) {
+	const query = `INSERT INTO maps (map_name, created_on) VALUES ($1, $2) RETURNING map_id`
+
+	mapInfo := domain.Map{
+		MapName:   strings.ToLower(mapName),
+		CreatedOn: time.Now(),
+	}
+
+	if err := db.pool.QueryRow(ctx, query, mapInfo.MapName, mapInfo.CreatedOn).Scan(&mapInfo.MapID); err != nil {
+		if errors.Is(dbErr(err, "Duplicate"), errDatabaseUnique) {
+			return db.getMap(ctx, mapInfo.MapName)
+		}
+
+		return mapInfo, dbErr(err, "Failed to create map")
+	}
+
+	return mapInfo, nil
+}
+
+func (db *pgStore) getMap(ctx context.Context, mapName string) (domain.Map, error) {
+	const query = `SELECT map_id, map_name, created_on FROM maps WHERE map_name = $1`
+	var mapInfo domain.Map
+
+	if err := db.pool.QueryRow(ctx, query, mapName).
+		Scan(&mapInfo.MapID, &mapInfo.MapName, &mapInfo.CreatedOn); err != nil {
+		return mapInfo, dbErr(err, "Failed to query map")
+	}
+
+	return mapInfo, nil
 }

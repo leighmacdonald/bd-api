@@ -15,7 +15,7 @@ services:
       BDAPI_DATABASE_DSN: postgresql://bdapi:bdapi@postgres:5445/bdapi
     command: ./bd-api serve
   postgres:
-    image: postgres:15-bullseye
+    image: timescale/timescaledb-ha:pg15
     restart: always
     volumes:
       - bdapi_db:/var/lib/postgresql/data
