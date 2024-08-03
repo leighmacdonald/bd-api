@@ -8,7 +8,9 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/leighmacdonald/bd-api/domain"
 	"github.com/leighmacdonald/etf2l"
+	"github.com/leighmacdonald/steamid/v4/steamid"
 	"github.com/riverqueue/river"
 	"github.com/riverqueue/river/riverdriver/riverpgxv5"
 	"github.com/riverqueue/river/rivermigrate"
@@ -41,6 +43,7 @@ const (
 	KindSteamSummary JobsKind = "steam_summary"
 	KindSteamBan     JobsKind = "steam_ban"
 	KindSteamGames   JobsKind = "steam_games"
+	KindSteamServers JobsKind = "steam_servers"
 	KindServemeBan   JobsKind = "serveme_ban"
 	KindSourcebans   JobsKind = "sourcebans"
 	KindLogsTF       JobsKind = "logstf"
@@ -119,6 +122,12 @@ func createJobWorkers(database *pgStore, config appConfig) *river.Workers {
 	river.AddWorker[SteamGamesArgs](workers, &SteamGamesWorker{
 		database: database,
 		limiter:  steamLimiter,
+	})
+	river.AddWorker[SteamServersArgs](workers, &SteamServersWorker{
+		database:    database,
+		limiter:     steamLimiter,
+		serverCache: map[steamid.SteamID]domain.SteamServer{},
+		mapCache:    map[string]domain.Map{},
 	})
 
 	// Serveme.tf
@@ -201,6 +210,12 @@ func createPeriodicJobs(config appConfig) []*river.PeriodicJob {
 			},
 			&river.PeriodicJobOpts{RunOnStart: true}),
 		river.NewPeriodicJob(
+			river.PeriodicInterval(5*time.Minute),
+			func() (river.JobArgs, *river.InsertOpts) {
+				return SteamServersArgs{}, nil
+			},
+			&river.PeriodicJobOpts{RunOnStart: true}),
+		river.NewPeriodicJob(
 			river.PeriodicInterval(1*time.Minute),
 			func() (river.JobArgs, *river.InsertOpts) {
 				return BDListArgs{}, nil
@@ -267,7 +282,7 @@ func createJobClient(dbPool *pgxpool.Pool, workers *river.Workers, periodic []*r
 			string(QueueDefault):    {MaxWorkers: 2},
 			string(QueuePriority):   {MaxWorkers: 1},
 			string(QueueRGL):        {MaxWorkers: 1},
-			string(QueueSteam):      {MaxWorkers: 2},
+			string(QueueSteam):      {MaxWorkers: 1},
 			string(QueueETF2L):      {MaxWorkers: 1},
 			string(QueueLogsTF):     {MaxWorkers: 1},
 			string(QueueSourcebans): {MaxWorkers: 1},

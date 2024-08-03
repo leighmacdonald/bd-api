@@ -4,6 +4,7 @@ package domain
 import (
 	"encoding/json"
 	"math"
+	"net"
 	"time"
 
 	"github.com/leighmacdonald/steamid/v4/steamid"
@@ -565,4 +566,44 @@ type PlayerSteamGameOwned struct {
 	PlaytimeTwoWeeks         int             `json:"playtime_two_weeks"`
 	HasCommunityVisibleStats bool            `json:"has_community_visible_stats"`
 	TimeStamped
+}
+
+type Map struct {
+	MapID     int
+	MapName   string
+	CreatedOn time.Time
+}
+
+type SteamServer struct {
+	SteamID    steamid.SteamID
+	Addr       net.IP
+	GamePort   int
+	Name       string
+	AppID      int
+	GameDir    string
+	Version    string
+	Region     int
+	MaxPlayers int
+	Secure     bool
+	Os         string
+	GameType   []string
+	TimeStamped
+}
+
+type SteamServerInfo struct {
+	SteamID steamid.SteamID
+	Time    time.Time
+	Players int
+	Bots    int
+	MapID   int
+}
+
+type SteamServerCounts struct {
+	Time      time.Time
+	Valve     int
+	Community int
+	Linux     int
+	Windows   int
+	Vac       int
+	SDR       int
 }
