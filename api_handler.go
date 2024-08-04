@@ -43,6 +43,15 @@ func handleGetOwnedGames(database *pgStore) http.HandlerFunc {
 			slog.Warn("Failed to parse owned games update query value")
 		}
 
+		for _, sid := range ids {
+			pr := newPlayerRecord(sid)
+			if err := database.playerGetOrCreate(request.Context(), sid, &pr); err != nil {
+				responseErr(writer, request, http.StatusInternalServerError, err, "Error loading player")
+
+				return
+			}
+		}
+
 		games, errGames := getOwnedGames(request.Context(), database, ids, update)
 		if errGames != nil {
 			responseErr(writer, request, http.StatusInternalServerError, errGames, "Error loading owned game data")
