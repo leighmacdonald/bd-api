@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -22,7 +23,16 @@ var (
 func NewHTTPClient() *http.Client {
 	c := &http.Client{ //nolint:exhaustruct
 		Timeout: time.Second * 10,
+		Transport: &http.Transport{
+			Proxy: proxySwitcher(),
+		},
 	}
 
 	return c
+}
+
+func proxySwitcher() func(r *http.Request) (*url.URL, error) {
+	return func(r *http.Request) (*url.URL, error) {
+
+	}
 }
