@@ -1,6 +1,7 @@
 begin;
 
 DROP TABLE IF EXISTS player_bans;
+DROP TYPE IF EXISTS economy_ban_types;
 
 ALTER TABLE player ADD COLUMN IF NOT EXISTS community_banned bool not null;
 ALTER TABLE player ADD COLUMN IF NOT EXISTS vac_banned bool not null;
