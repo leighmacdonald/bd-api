@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/riverqueue/river"
 )
@@ -25,5 +26,11 @@ type ServemeWorker struct {
 }
 
 func (w *ServemeWorker) Work(ctx context.Context, _ *river.Job[ServemeArgs]) error {
-	return updateServeMe(ctx, w.database)
+	if err := updateServeMe(ctx, w.database); err != nil {
+		slog.Error("Failed to execute serveme update", ErrAttr(err))
+
+		return err
+	}
+
+	return nil
 }

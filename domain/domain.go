@@ -155,11 +155,6 @@ type Player struct {
 	LocCountryCode           string                   `json:"loc_country_code"`
 	LocStateCode             string                   `json:"loc_state_code"`
 	LocCityID                int                      `json:"loc_city_id"`
-	CommunityBanned          bool                     `json:"community_banned"`
-	VacBanned                bool                     `json:"vac_banned"`
-	LastBannedOn             time.Time                `json:"last_banned_on"`
-	GameBans                 int                      `json:"game_bans"`
-	EconomyBanned            EconBanState             `json:"economy_banned"`
 	LogsTFCount              int                      `json:"logs_tf_count"`
 	TimeStamped
 }
@@ -184,7 +179,7 @@ type SbSite struct {
 
 // Profile is a high level meta profile of several services.
 type Profile struct {
-	Summary     steamweb.PlayerSummary `json:"summary"`
+	Summary     Player                 `json:"summary"`
 	BanState    PlayerBanState         `json:"ban_state"`
 	SourceBans  []SbBanRecord          `json:"source_bans"`
 	ServeMe     *ServeMeRecord         `json:"serve_me"`
@@ -203,6 +198,7 @@ type PlayerBanState struct {
 	DaysSinceLastBan int                   `json:"days_since_last_ban"`
 	NumberOfGameBans int                   `json:"number_of_game_bans"`
 	EconomyBan       steamweb.EconBanState `json:"economy_ban"`
+	TimeStamped
 }
 
 // JSONDuration handles encoding time.Duration values into seconds.

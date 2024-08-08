@@ -63,7 +63,7 @@ func sourceBansStoreTest(database *pgStore) func(t *testing.T) {
 		pRecord := newPlayerRecord(testIDCamper)
 		pRecord.PersonaName = "blah"
 		pRecord.Vanity = "poop3r"
-		require.NoError(t, database.playerRecordSave(context.Background(), &pRecord))
+		require.NoError(t, database.playerSave(context.Background(), &pRecord))
 
 		t0 := time.Now().AddDate(-1, 0, 0)
 		t1 := t0.AddDate(0, 1, 0)
@@ -81,7 +81,7 @@ func sourceBansPlayerRecordTest(database *pgStore) func(t *testing.T) {
 		pRecord := newPlayerRecord(steamid.New(76561197961279983))
 		pRecord.PersonaName = "blah"
 		pRecord.Vanity = "123"
-		require.NoError(t, database.playerRecordSave(context.Background(), &pRecord))
+		require.NoError(t, database.playerSave(context.Background(), &pRecord))
 
 		names, errNames := database.playerNames(context.Background(), pRecord.SteamID)
 		require.NoError(t, errNames)
@@ -162,7 +162,7 @@ func bdTest(database *pgStore) func(t *testing.T) {
 		var entriesA []domain.BDListEntry
 		for idx := 0; idx < 5; idx++ {
 			record := newPlayerRecord(steamid.RandSID64())
-			require.NoError(t, database.playerRecordSave(ctx, &record))
+			require.NoError(t, database.playerSave(ctx, &record))
 			entry, errEntry := database.botDetectorListEntryCreate(ctx, domain.BDListEntry{
 				BDListID:   listA.BDListID,
 				SteamID:    record.SteamID,

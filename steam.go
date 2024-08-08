@@ -18,13 +18,9 @@ import (
 )
 
 var (
-	errSteamBanFetch      = errors.New("failed to fetch steam ban state")
-	errSteamBanDecode     = errors.New("failed to decode steam ban state")
-	errSteamSummaryFetch  = errors.New("failed to fetch steam summary")
-	errSteamSummaryDecode = errors.New("failed to decode steam summary")
-	errAddr               = errors.New("failed to parse server addr")
-	errPort               = errors.New("failed to parse server port")
-	errFetchServers       = errors.New("could not fetch servers")
+	errAddr         = errors.New("failed to parse server addr")
+	errPort         = errors.New("failed to parse server port")
+	errFetchServers = errors.New("could not fetch servers")
 )
 
 func parseHostPort(hostPortStr string) (net.IP, int, error) {
@@ -125,95 +121,151 @@ func getSteamFriends(ctx context.Context, cache cache, steamIDs steamid.Collecti
 	return output
 }
 
-func getSteamBans(ctx context.Context, cache cache, steamIDs steamid.Collection) ([]steamweb.PlayerBanState, error) {
-	var (
-		banStates []steamweb.PlayerBanState
-		missed    steamid.Collection
-	)
-
-	for _, steamID := range steamIDs {
-		var banState steamweb.PlayerBanState
-		summaryBody, errCache := cache.get(makeKey(KeyBans, steamID))
-		if errCache == nil {
-			if err := json.Unmarshal(summaryBody, &banState); err != nil {
-				slog.Error("Failed to unmarshal cached result", ErrAttr(err))
-			}
-		}
-
-		if banState.SteamID.Valid() {
-			banStates = append(banStates, banState)
-		} else {
-			missed = append(missed, steamID)
-		}
+func playerBanStateFromSteam(s steamweb.PlayerBanState) domain.PlayerBanState {
+	return domain.PlayerBanState{
+		SteamID:          s.SteamID,
+		CommunityBanned:  s.CommunityBanned,
+		VACBanned:        s.VACBanned,
+		NumberOfVACBans:  s.NumberOfVACBans,
+		DaysSinceLastBan: s.DaysSinceLastBan,
+		NumberOfGameBans: s.NumberOfGameBans,
+		EconomyBan:       s.EconomyBan,
+		TimeStamped:      newTimeStamped(),
 	}
-
-	if len(missed) > 0 {
-		newBans, errBans := steamweb.GetPlayerBans(ctx, missed)
-		if errBans != nil {
-			return nil, errors.Join(errBans, errSteamBanFetch)
-		}
-
-		for _, ban := range newBans {
-			body, errMarshal := json.Marshal(ban)
-			if errMarshal != nil {
-				return nil, errors.Join(errMarshal, errSteamBanDecode)
-			}
-
-			if errSet := cache.set(makeKey(KeyBans, ban.SteamID), bytes.NewReader(body)); errSet != nil {
-				slog.Error("Failed to update cache", ErrAttr(errSet))
-			}
-		}
-
-		banStates = append(banStates, newBans...)
-	}
-
-	return banStates, nil
 }
 
-func getSteamSummaries(ctx context.Context, cache cache, steamIDs steamid.Collection) ([]steamweb.PlayerSummary, error) {
+func getSteamBans(ctx context.Context, database *pgStore, steamIDs steamid.Collection) ([]domain.PlayerBanState, error) {
 	var (
-		summaries []steamweb.PlayerSummary
-		missed    steamid.Collection
+		invalid   steamid.Collection
+		validBans []domain.PlayerBanState
 	)
 
-	for _, steamID := range steamIDs {
-		var summary steamweb.PlayerSummary
-		summaryBody, errCache := cache.get(makeKey(KeySummary, steamID))
+	bans, errBans := database.getPlayerBanStates(ctx, steamIDs)
+	if errBans != nil {
+		return nil, errBans
+	}
 
-		if errCache == nil {
-			if err := json.Unmarshal(summaryBody, &summary); err != nil {
-				slog.Error("Failed to unmarshal cached result", ErrAttr(err))
+	for _, sid := range steamIDs {
+		foundAndValid := false
+
+		for _, ban := range bans {
+			if ban.SteamID == sid {
+				// Mark old entries to be refreshed from API
+				if time.Since(ban.UpdatedOn) < time.Hour*12 {
+					foundAndValid = true
+
+					validBans = append(validBans, ban)
+				}
+
+				break
 			}
 		}
 
-		if summary.SteamID.Valid() {
-			summaries = append(summaries, summary)
-		} else {
-			missed = append(missed, steamID)
+		if !foundAndValid {
+			invalid = append(invalid, sid)
 		}
 	}
 
-	if len(missed) > 0 {
-		newSummaries, errSummaries := steamweb.PlayerSummaries(ctx, missed)
-		if errSummaries != nil {
-			return nil, errors.Join(errSummaries, errSteamSummaryFetch)
+	if len(invalid) > 0 {
+		updates, err := steamweb.GetPlayerBans(ctx, invalid)
+		if err != nil {
+			return nil, err
 		}
 
-		for _, summary := range newSummaries {
-			body, errMarshal := json.Marshal(summary)
-			if errMarshal != nil {
-				return nil, errors.Join(errMarshal, errSteamSummaryDecode)
+		for _, banUpdate := range updates {
+			banState := playerBanStateFromSteam(banUpdate)
+			if errSave := database.playerBanStateSave(ctx, banState); errSave != nil {
+				return nil, errSave
 			}
 
-			if errSet := cache.set(makeKey(KeySummary, summary.SteamID), bytes.NewReader(body)); errSet != nil {
-				slog.Error("Failed to update cache", ErrAttr(errSet))
-			}
+			validBans = append(validBans, banState)
 		}
 
-		summaries = append(summaries, newSummaries...)
 	}
 
-	return summaries, nil
+	return validBans, nil
+}
+
+func newTimeStamped() domain.TimeStamped {
+	now := time.Now()
+
+	return domain.TimeStamped{CreatedOn: now, UpdatedOn: now}
+}
+
+func playerFromSteamSummary(summary steamweb.PlayerSummary) domain.Player {
+	return domain.Player{
+		SteamID:                  summary.SteamID,
+		CommunityVisibilityState: summary.CommunityVisibilityState,
+		ProfileState:             summary.ProfileState,
+		PersonaName:              summary.PersonaName,
+		Vanity:                   "",
+		AvatarHash:               summary.AvatarHash,
+		PersonaState:             summary.PersonaState,
+		RealName:                 summary.RealName,
+		TimeCreated:              time.Unix(int64(summary.TimeCreated), 0),
+		LocCountryCode:           summary.LocCountryCode,
+		LocStateCode:             summary.LocStateCode,
+		LocCityID:                summary.LocCityID,
+		LogsTFCount:              0,
+		TimeStamped:              newTimeStamped(),
+	}
+}
+
+// getSteamSummaries handles querying player profiles from the database. If the player
+// does not already exist, or if the player otherwise is out of date, the steam api
+// will be queried to pull in the latest data.
+func getSteamSummaries(ctx context.Context, database *pgStore, steamIDs steamid.Collection) ([]domain.Player, error) {
+	var (
+		invalid        steamid.Collection
+		validSummaries []domain.Player
+	)
+
+	summaries, errSummaries := database.getPlayerSummaries(ctx, steamIDs)
+	if errSummaries != nil && !errors.Is(errSummaries, errDatabaseNoResults) {
+		return nil, errSummaries
+	}
+
+	for _, sid := range steamIDs {
+		foundAndValid := false
+
+		for _, sum := range summaries {
+			if sum.SteamID == sid {
+				// Mark old entries to be refreshed from API
+				if time.Since(sum.UpdatedOn) < time.Hour*12 {
+					foundAndValid = true
+
+					validSummaries = append(validSummaries, sum)
+				}
+
+				break
+			}
+		}
+
+		if !foundAndValid {
+			invalid = append(invalid, sid)
+
+			continue
+		}
+	}
+
+	if len(invalid) > 0 {
+		updates, err := steamweb.PlayerSummaries(ctx, invalid)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, summaryUpdate := range updates {
+			player := playerFromSteamSummary(summaryUpdate)
+			if errSave := database.playerSave(ctx, player); errSave != nil {
+				return nil, errSave
+			}
+
+			validSummaries = append(validSummaries, player)
+		}
+
+	}
+
+	return validSummaries, nil
 }
 
 func updateOwnedGames(ctx context.Context, database *pgStore, steamID steamid.SteamID) ([]domain.PlayerSteamGameOwned, error) {

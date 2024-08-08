@@ -139,85 +139,28 @@ func (db *pgStore) migrate() error {
 	return nil
 }
 
-type PlayerRecord struct {
-	domain.Player
-	isNewRecord bool
-}
-
-func (r *PlayerRecord) applyBans(ban steamweb.PlayerBanState) {
-	r.CommunityBanned = ban.CommunityBanned
-	r.VacBanned = ban.VACBanned
-	r.GameBans = ban.NumberOfGameBans
-
-	if ban.DaysSinceLastBan > 0 {
-		r.LastBannedOn = time.Now().AddDate(0, 0, -ban.DaysSinceLastBan)
-	}
-
-	switch ban.EconomyBan {
-	case steamweb.EconBanNone:
-		r.EconomyBanned = domain.EconBanNone
-	case steamweb.EconBanProbation:
-		r.EconomyBanned = domain.EconBanProbation
-	case steamweb.EconBanBanned:
-		r.EconomyBanned = domain.EconBanBanned
-	}
-
-	r.UpdatedOn = time.Now()
-}
-
-func (r *PlayerRecord) applySummary(sum steamweb.PlayerSummary) {
-	r.Vanity = sum.ProfileURL
-	r.AvatarHash = sum.AvatarHash
-	r.CommunityVisibilityState = sum.CommunityVisibilityState
-	r.PersonaState = sum.PersonaState
-	r.ProfileState = sum.ProfileState
-	r.PersonaName = sum.PersonaName
-
-	if sum.TimeCreated > 0 {
-		r.TimeCreated = time.Unix(int64(sum.TimeCreated), 0)
-	}
-
-	r.LocCityID = sum.LocCityID
-	r.LocCountryCode = sum.LocCountryCode
-	r.LocStateCode = sum.LocStateCode
-	r.UpdatedOn = time.Now()
-}
-
 const defaultAvatar = "fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb"
 
-func newPlayerRecord(sid64 steamid.SteamID) PlayerRecord {
-	createdOn := time.Now()
-
-	return PlayerRecord{
-		Player: domain.Player{
-			SteamID:                  sid64,
-			CommunityVisibilityState: steamweb.VisibilityPrivate,
-			ProfileState:             steamweb.ProfileStateNew,
-			PersonaName:              "",
-			Vanity:                   "",
-			AvatarHash:               defaultAvatar,
-			PersonaState:             steamweb.StateOffline,
-			RealName:                 "",
-			TimeCreated:              time.Time{},
-			LocCountryCode:           "",
-			LocStateCode:             "",
-			LocCityID:                0,
-			CommunityBanned:          false,
-			VacBanned:                false,
-			LastBannedOn:             time.Time{},
-			GameBans:                 0,
-			EconomyBanned:            0,
-			LogsTFCount:              0,
-			TimeStamped: domain.TimeStamped{
-				UpdatedOn: createdOn,
-				CreatedOn: createdOn,
-			},
-		},
-		isNewRecord: true,
+func newPlayer(sid64 steamid.SteamID) domain.Player {
+	return domain.Player{
+		SteamID:                  sid64,
+		CommunityVisibilityState: steamweb.VisibilityPrivate,
+		ProfileState:             steamweb.ProfileStateNew,
+		PersonaName:              "",
+		Vanity:                   "",
+		AvatarHash:               defaultAvatar,
+		PersonaState:             steamweb.StateOffline,
+		RealName:                 "",
+		TimeCreated:              time.Time{},
+		LocCountryCode:           "",
+		LocStateCode:             "",
+		LocCityID:                0,
+		LogsTFCount:              0,
+		TimeStamped:              newTimeStamped(),
 	}
 }
 
-func playerNameSave(ctx context.Context, transaction pgx.Tx, record *PlayerRecord) error {
+func playerNameSave(ctx context.Context, transaction pgx.Tx, record *domain.Player) error {
 	query, args, errSQL := sb.
 		Insert("player_names").
 		Columns("steam_id", "persona_name").
@@ -234,7 +177,7 @@ func playerNameSave(ctx context.Context, transaction pgx.Tx, record *PlayerRecor
 	return nil
 }
 
-func playerAvatarSave(ctx context.Context, transaction pgx.Tx, record *PlayerRecord) error {
+func playerAvatarSave(ctx context.Context, transaction pgx.Tx, record *domain.Player) error {
 	query, args, errSQL := sb.
 		Insert("player_avatars").
 		Columns("steam_id", "avatar_hash").
@@ -251,7 +194,7 @@ func playerAvatarSave(ctx context.Context, transaction pgx.Tx, record *PlayerRec
 	return nil
 }
 
-func playerVanitySave(ctx context.Context, transaction pgx.Tx, record *PlayerRecord) error {
+func playerVanitySave(ctx context.Context, transaction pgx.Tx, record *domain.Player) error {
 	if record.Vanity == "" {
 		return nil
 	}
@@ -302,6 +245,41 @@ func (db *pgStore) playerNames(ctx context.Context, sid steamid.SteamID) ([]doma
 	}
 
 	return records, nil
+}
+
+func (db *pgStore) getPlayerSummaries(ctx context.Context, steamIDs steamid.Collection) ([]domain.Player, error) {
+	query, args, errQuery := sb.
+		Select("steam_id", "community_visibility_state", "profile_state", "vanity", "persona_name",
+			"avatar_hash", "persona_state", "real_name", "time_created", "loc_country_code", "loc_state_code", "loc_city_id", "logstf_count",
+			"updated_on", "created_on").
+		From("player").
+		Where(sq.Eq{"steam_id": steamIDs}).
+		ToSql()
+	if errQuery != nil {
+		return nil, dbErr(errQuery, "Failed to build query")
+	}
+
+	rows, errRows := db.pool.Query(ctx, query, args...)
+	if errRows != nil {
+		return nil, dbErr(errRows, "failed to query rows")
+	}
+
+	defer rows.Close()
+
+	var summaries []domain.Player
+	for rows.Next() {
+		var sum domain.Player
+
+		if err := rows.Scan(&sum.SteamID, &sum.CommunityVisibilityState, &sum.ProfileState, &sum.PersonaName, &sum.AvatarHash, &sum.Vanity,
+			&sum.PersonaState, &sum.RealName, &sum.TimeCreated, &sum.LocCountryCode, &sum.LocStateCode, &sum.LocCityID, &sum.LogsTFCount,
+			&sum.UpdatedOn, &sum.CreatedOn); err != nil {
+			return nil, dbErr(err, "Failed to scan player summary")
+		}
+
+		summaries = append(summaries, sum)
+	}
+
+	return summaries, nil
 }
 
 //nolint:dupl
@@ -367,135 +345,152 @@ func (db *pgStore) playerVanityNames(ctx context.Context, sid steamid.SteamID) (
 	return records, nil
 }
 
-func (db *pgStore) playerRecordSave(ctx context.Context, record *PlayerRecord) error {
-	success := false
+func (db *pgStore) getPlayerBanStates(ctx context.Context, steamIDs steamid.Collection) ([]domain.PlayerBanState, error) {
+	query, args, errQuery := sb.
+		Select("steam_id", "community_banned", "vac_banned", "number_of_vac_bans",
+			"number_of_game_bans", "economy_ban", "created_on", "updated_on").
+		From("player_bans").
+		Where(sq.Eq{"steam_id": steamIDs}).
+		ToSql()
 
+	if errQuery != nil {
+		return nil, dbErr(errQuery, "Failed to build query")
+	}
+
+	rows, errRows := db.pool.Query(ctx, query, args...)
+	if errRows != nil {
+		return nil, dbErr(errRows, "Failed to query bans")
+	}
+
+	defer rows.Close()
+
+	var bans []domain.PlayerBanState
+
+	for rows.Next() {
+		var ban domain.PlayerBanState
+		if errScan := rows.Scan(&ban.SteamID, &ban.CommunityBanned, &ban.VACBanned, &ban.NumberOfVACBans,
+			&ban.NumberOfGameBans, &ban.EconomyBan, &ban.CreatedOn, &ban.UpdatedOn); errScan != nil {
+			return nil, dbErr(errScan, "Failed to scan ban")
+		}
+
+		bans = append(bans, ban)
+
+	}
+
+	return bans, nil
+}
+
+func (db *pgStore) playerBanStateSave(ctx context.Context, record domain.PlayerBanState) error {
+	const query = `
+		INSERT INTO player_bans (
+			community_banned, vac_banned, number_of_vac_bans, 
+		    number_of_game_gans, economy_ban, created_on, updated_on, steam_id) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		ON CONFLICT (steam_id) DO UPDATE 
+		SET community_banned = $1, vac_banned = $2, number_of_vac_bans = $3, 
+		    number_of_game_gans = $4, economy_ban = $5, updated_on = $7
+		`
+
+	if _, err := db.pool.Exec(ctx, query, record.CommunityBanned, record.VACBanned, record.NumberOfVACBans,
+		record.NumberOfGameBans, record.EconomyBan, record.CreatedOn, record.UpdatedOn, record.SteamID.Int64()); err != nil {
+		return dbErr(err, "Failed to update ban state")
+	}
+
+	return nil
+}
+
+func (db *pgStore) playerSave(ctx context.Context, record domain.Player) error {
 	transaction, errTx := db.pool.Begin(ctx) //nolint:exhaustruct
 	if errTx != nil {
 		return dbErr(errTx, "Failed to start transaction")
 	}
 
 	defer func() {
-		if !success {
-			if errRollback := transaction.Rollback(ctx); errRollback != nil {
-				db.log.Error("Failed to rollback player transaction", ErrAttr(errRollback))
-			}
+		if errRollback := transaction.Rollback(ctx); errRollback != nil {
+			db.log.Error("Failed to rollback player transaction", ErrAttr(errRollback))
 		}
 	}()
 
-	if record.isNewRecord { //nolint:nestif
-		query, args, errSQL := sb.
-			Insert("player").
-			Columns("steam_id", "community_visibility_state", "profile_state", "persona_name", "vanity",
-				"avatar_hash", "persona_state", "real_name", "time_created", "loc_country_code", "loc_state_code", "loc_city_id",
-				"community_banned", "vac_banned", "game_bans", "economy_banned", "logstf_count", "updated_on", "created_on").
-			Values(record.SteamID.Int64(), record.CommunityVisibilityState, record.ProfileState, record.PersonaName, record.Vanity,
-				record.AvatarHash, record.PersonaState, record.RealName, record.TimeCreated, record.LocCountryCode,
-				record.LocStateCode, record.LocCityID, record.CommunityBanned, record.VacBanned, record.GameBans,
-				record.EconomyBanned, record.LogsTFCount, record.UpdatedOn, record.CreatedOn).
-			ToSql()
-		if errSQL != nil {
-			return dbErr(errSQL, "Failed to generate query")
-		}
+	const query = `
+		INSERT INTO player (
+			profile_state, persona_name, vanity, avatar_hash, persona_state, 
+			real_name, time_created, loc_country_code, loc_state_code, loc_city_id, 
+			logstf_count, updated_on, created_on, steam_id) 
+		VALUES ($1, $2, $3, $4, $5, $6,$7,$8, $9, $10, $11, $12, $13, $14)
+		ON CONFLICT (steam_id) DO UPDATE SET 
+			profile_state = $1, persona_name = $2, vanity = $3, avatar_hash = $4, persona_state = $5,
+			real_name = $6, time_created = $7, loc_country_code = $8, loc_state_code = $9, loc_city_id = $10,
+			logstf_count = $11, updated_on = $12`
 
-		if _, errExec := transaction.Exec(ctx, query, args...); errExec != nil {
-			return dbErr(errExec, "Failed to save player record")
-		}
-
-		record.isNewRecord = false
-
-		if errName := playerNameSave(ctx, transaction, record); errName != nil {
-			return errName
-		}
-
-		if errVanity := playerVanitySave(ctx, transaction, record); errVanity != nil {
-			return errVanity
-		}
-
-		if errAvatar := playerAvatarSave(ctx, transaction, record); errAvatar != nil {
-			return errAvatar
-		}
-	} else {
-		query, args, errSQL := sb.
-			Update("player").
-			Set("steam_id", record.SteamID.Int64()).
-			Set("community_visibility_state", record.CommunityVisibilityState).
-			Set("profile_state", record.ProfileState).
-			Set("persona_name", record.PersonaName).
-			Set("vanity", record.Vanity).
-			Set("avatar_hash", record.AvatarHash).
-			Set("persona_state", record.PersonaState).
-			Set("real_name", record.RealName).
-			Set("time_created", record.TimeCreated).
-			Set("loc_country_code", record.LocCountryCode).
-			Set("loc_state_code", record.LocStateCode).
-			Set("loc_city_id", record.LocCityID).
-			Set("community_banned", record.CommunityBanned).
-			Set("vac_banned", record.VacBanned).
-			Set("game_bans", record.GameBans).
-			Set("economy_banned", record.EconomyBanned).
-			Set("logstf_count", record.LogsTFCount).
-			Set("updated_on", record.UpdatedOn).
-			Where(sq.Eq{"steam_id": record.SteamID}).
-			ToSql()
-		if errSQL != nil {
-			return dbErr(errSQL, "Failed to generate query")
-		}
-
-		if _, errExec := transaction.Exec(ctx, query, args...); errExec != nil {
-			return dbErr(errExec, "Failed to update player record")
-		}
+	if _, errExec := transaction.
+		Exec(ctx, query, record.ProfileState, record.PersonaName, record.Vanity, record.AvatarHash, record.PersonaState,
+			record.RealName, record.TimeCreated, record.LocCountryCode, record.LocStateCode, record.LocCityID,
+			record.LogsTFCount, record.UpdatedOn, record.CreatedOn, record.SteamID.Int64()); errExec != nil {
+		return dbErr(errExec, "Failed to save player record")
 	}
+
+	// TODO add checks for existing match
+	/**
+	if errName := playerNameSave(ctx, transaction, record); errName != nil {
+		return errName
+	}
+
+	if errVanity := playerVanitySave(ctx, transaction, record); errVanity != nil {
+		return errVanity
+	}
+
+	if errAvatar := playerAvatarSave(ctx, transaction, record); errAvatar != nil {
+		return errAvatar
+	}
+	*/
 
 	if errCommit := transaction.Commit(ctx); errCommit != nil {
 		return dbErr(errCommit, "Failed to commit player update transaction")
 	}
 
-	success = true
-
 	return nil
 }
 
-func (db *pgStore) playerGetOrCreate(ctx context.Context, sid steamid.SteamID, record *PlayerRecord) error {
+func (db *pgStore) playerGetOrCreate(ctx context.Context, sid steamid.SteamID) (domain.Player, error) {
 	query, args, errSQL := sb.
 		Select("community_visibility_state", "profile_state",
 			"persona_name", "vanity", "avatar_hash", "persona_state", "real_name", "time_created", "loc_country_code",
-			"loc_state_code", "loc_city_id", "community_banned", "vac_banned", "game_bans", "economy_banned",
-			"logstf_count", "updated_on", "created_on").
+			"loc_state_code", "loc_city_id", "logstf_count", "updated_on", "created_on").
 		From("player").
 		Where(sq.Eq{"steam_id": sid.Int64()}).
 		ToSql()
 	if errSQL != nil {
-		return dbErr(errSQL, "Failed to generate query")
+		return domain.Player{}, dbErr(errSQL, "Failed to generate query")
 	}
+
+	record := domain.Player{SteamID: sid}
 
 	errQuery := db.pool.
 		QueryRow(ctx, query, args...).
 		Scan(&record.CommunityVisibilityState, &record.ProfileState, &record.PersonaName, &record.Vanity,
 			&record.AvatarHash, &record.PersonaState, &record.RealName, &record.TimeCreated, &record.LocCountryCode,
-			&record.LocStateCode, &record.LocCityID, &record.CommunityBanned, &record.VacBanned, &record.GameBans,
-			&record.EconomyBanned, &record.LogsTFCount, &record.TimeStamped.UpdatedOn, &record.TimeStamped.CreatedOn)
+			&record.LocStateCode, &record.LocCityID, &record.LogsTFCount, &record.TimeStamped.UpdatedOn, &record.TimeStamped.CreatedOn)
 	if errQuery != nil {
 		wrappedErr := dbErr(errQuery, "Failed to query player")
 		if errors.Is(wrappedErr, errDatabaseNoResults) {
-			return db.playerRecordSave(ctx, record)
+			if err := db.playerSave(ctx, record); err != nil {
+				return domain.Player{}, err
+			}
+
+			return domain.Player{}, wrappedErr
 		}
 
-		return wrappedErr
+		return domain.Player{}, wrappedErr
 	}
 
-	record.SteamID = sid
-	record.isNewRecord = false
-
-	return nil
+	return record, nil
 }
 
-func (db *pgStore) playerGetExpiredProfiles(ctx context.Context, limit int) ([]PlayerRecord, error) {
+func (db *pgStore) playerGetExpiredProfiles(ctx context.Context, limit int) ([]domain.Player, error) {
 	query, args, errSQL := sb.
 		Select("steam_id", "community_visibility_state", "profile_state",
 			"persona_name", "vanity", "avatar_hash", "persona_state", "real_name", "time_created", "loc_country_code",
-			"loc_state_code", "loc_city_id", "community_banned", "vac_banned", "game_bans", "economy_banned",
-			"logstf_count", "updated_on", "created_on").
+			"loc_state_code", "loc_city_id", "logstf_count", "updated_on", "created_on").
 		From("player").
 		Where("updated_on < now() - interval '24 hour'").
 		OrderBy("updated_on desc").
@@ -512,19 +507,18 @@ func (db *pgStore) playerGetExpiredProfiles(ctx context.Context, limit int) ([]P
 
 	defer rows.Close()
 
-	var records []PlayerRecord
+	var records []domain.Player
 
 	for rows.Next() {
 		var (
-			record PlayerRecord
+			record domain.Player
 			sid    int64
 		)
 		if errQuery := rows.
 			Scan(&sid, &record.CommunityVisibilityState, &record.ProfileState, &record.PersonaName,
 				&record.Vanity, &record.AvatarHash, &record.PersonaState, &record.RealName, &record.TimeCreated,
-				&record.LocCountryCode, &record.LocStateCode, &record.LocCityID, &record.CommunityBanned,
-				&record.VacBanned, &record.GameBans, &record.EconomyBanned, &record.LogsTFCount, &record.TimeStamped.UpdatedOn,
-				&record.TimeStamped.CreatedOn); errQuery != nil {
+				&record.LocCountryCode, &record.LocStateCode, &record.LocCityID, &record.LogsTFCount,
+				&record.TimeStamped.UpdatedOn, &record.TimeStamped.CreatedOn); errQuery != nil {
 			return nil, dbErr(errQuery, "Failed to scan expired ban")
 		}
 
@@ -1035,14 +1029,7 @@ func (db *pgStore) botDetectorListSearch(ctx context.Context, collection steamid
 func (db *pgStore) logsTFMatchCreate(ctx context.Context, match *domain.LogsTFMatch) error {
 	// Ensure  player FK's exist
 	for _, player := range match.Players {
-		playerRecord := PlayerRecord{
-			Player: domain.Player{
-				SteamID:     player.SteamID,
-				PersonaName: player.Name,
-			},
-			isNewRecord: true,
-		}
-		if err := db.playerGetOrCreate(ctx, player.SteamID, &playerRecord); err != nil {
+		if _, err := db.playerGetOrCreate(ctx, player.SteamID); err != nil {
 			return err
 		}
 	}
@@ -1790,8 +1777,7 @@ func (db *pgStore) rglBansReplace(ctx context.Context, bans []domain.RGLBan) err
 	batch := &pgx.Batch{}
 
 	for _, ban := range bans {
-		record := newPlayerRecord(ban.SteamID)
-		if err := db.playerGetOrCreate(ctx, ban.SteamID, &record); err != nil {
+		if _, err := db.playerGetOrCreate(ctx, ban.SteamID); err != nil {
 			return err
 		}
 
@@ -1920,8 +1906,7 @@ func (db *pgStore) etf2lBansUpdate(ctx context.Context, bans []domain.ETF2LBan) 
 	batch := &pgx.Batch{}
 
 	for _, ban := range bans {
-		record := newPlayerRecord(ban.SteamID)
-		if err := db.playerGetOrCreate(ctx, ban.SteamID, &record); err != nil {
+		if _, err := db.playerGetOrCreate(ctx, ban.SteamID); err != nil {
 			return err
 		}
 

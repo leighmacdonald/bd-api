@@ -27,15 +27,7 @@ func updateServeMe(ctx context.Context, database *pgStore) error {
 
 	// Ensure FK's are satisfied
 	for _, entry := range entries {
-		record := PlayerRecord{
-			Player: domain.Player{
-				SteamID:     entry.SteamID,
-				PersonaName: entry.Name,
-			},
-			isNewRecord: true,
-		}
-
-		if err := database.playerGetOrCreate(ctx, entry.SteamID, &record); err != nil {
+		if _, err := database.playerGetOrCreate(ctx, entry.SteamID); err != nil {
 			return err
 		}
 	}

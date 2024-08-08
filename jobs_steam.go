@@ -67,26 +67,10 @@ func (w *SteamSummaryWorker) Work(ctx context.Context, _ *river.Job[SteamSummary
 		expiredIDs = append(expiredIDs, profile.SteamID)
 	}
 
-	w.limiter.Wait(ctx)
+	if _, err := getSteamSummaries(ctx, w.database, expiredIDs); err != nil {
+		slog.Error("Error trying to update expired summaries")
 
-	summaries, errSum := steamweb.PlayerSummaries(ctx, expiredIDs)
-	if errSum != nil {
-		return errors.Join(errSum, errSteamAPIResult)
-	}
-
-	for _, profile := range expiredProfiles {
-		prof := profile
-		for _, sum := range summaries {
-			if sum.SteamID.Int64() == prof.SteamID.Int64() {
-				prof.applySummary(sum)
-
-				break
-			}
-		}
-
-		if errSave := w.database.playerRecordSave(ctx, &prof); errSave != nil {
-			slog.Error("Failed to update profile", slog.Int64("sid", prof.SteamID.Int64()), ErrAttr(errSave))
-		}
+		return err
 	}
 
 	if err := w.database.insertJobTx(ctx, client, SteamBanArgs{SteamIDs: expiredIDs}, nil); err != nil {
@@ -129,22 +113,10 @@ type SteamBanWorker struct {
 func (w *SteamBanWorker) Work(ctx context.Context, job *river.Job[SteamBanArgs]) error {
 	w.limiter.Wait(ctx)
 
-	bans, errBans := steamweb.GetPlayerBans(ctx, job.Args.SteamIDs)
-	if errBans != nil {
-		return errors.Join(errBans, errSteamAPIResult)
-	}
+	if _, err := getSteamBans(ctx, w.database, job.Args.SteamIDs); err != nil {
+		slog.Error("Failed to refresh steam ban states", ErrAttr(err))
 
-	for _, ban := range bans {
-		var record PlayerRecord
-		if errQueued := w.database.playerGetOrCreate(ctx, ban.SteamID, &record); errQueued != nil {
-			continue
-		}
-
-		record.applyBans(ban)
-
-		if errSave := w.database.playerRecordSave(ctx, &record); errSave != nil {
-			return errSave
-		}
+		return err
 	}
 
 	return nil

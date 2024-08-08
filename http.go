@@ -18,11 +18,19 @@ var (
 	errResponseFormat   = errors.New("failed to format body")
 )
 
+const (
+	httpTimeout = time.Second * 15
+)
+
 // NewHTTPClient allocates a preconfigured *http.Client.
 
 func NewHTTPClient() *http.Client {
+	return &http.Client{Timeout: httpTimeout}
+}
+
+func NewHTTPClientWithSwitcher() *http.Client {
 	c := &http.Client{ //nolint:exhaustruct
-		Timeout: time.Second * 10,
+		Timeout: httpTimeout,
 		Transport: &http.Transport{
 			Proxy: proxySwitcher(),
 		},
@@ -33,6 +41,7 @@ func NewHTTPClient() *http.Client {
 
 func proxySwitcher() func(r *http.Request) (*url.URL, error) {
 	return func(r *http.Request) (*url.URL, error) {
-
+		panic("fix")
+		return nil, nil
 	}
 }

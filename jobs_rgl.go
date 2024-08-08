@@ -302,8 +302,7 @@ func (w *RGLTeamWorker) Work(ctx context.Context, job *river.Job[RGLTeamArgs]) e
 		team.CreatedAt = fetched.CreatedAt
 		team.UpdatedAt = fetched.UpdatedAt
 
-		record := newPlayerRecord(team.TeamLeader)
-		if err := w.database.playerGetOrCreate(ctx, team.TeamLeader, &record); err != nil {
+		if _, err := w.database.playerGetOrCreate(ctx, team.TeamLeader); err != nil {
 			return err
 		}
 
@@ -312,8 +311,7 @@ func (w *RGLTeamWorker) Work(ctx context.Context, job *river.Job[RGLTeamArgs]) e
 		}
 
 		for _, player := range fetched.Players {
-			memberRecord := newPlayerRecord(player.SteamID)
-			if err := w.database.playerGetOrCreate(ctx, player.SteamID, &memberRecord); err != nil {
+			if _, err := w.database.playerGetOrCreate(ctx, player.SteamID); err != nil {
 				return err
 			}
 

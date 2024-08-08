@@ -22,8 +22,8 @@ import (
 func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs steamid.Collection) ([]domain.Profile, error) { //nolint:funlen
 	var ( //nolint:prealloc
 		waitGroup   = &sync.WaitGroup{}
-		summaries   []steamweb.PlayerSummary
-		bans        []steamweb.PlayerBanState
+		summaries   []domain.Player
+		bans        []domain.PlayerBanState
 		profiles    []domain.Profile
 		logs        map[steamid.SteamID]int
 		friends     friendMap
@@ -72,7 +72,7 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 	go func() {
 		defer waitGroup.Done()
 
-		sum, errSum := getSteamSummaries(localCtx, cache, steamIDs)
+		sum, errSum := getSteamSummaries(localCtx, database, steamIDs)
 		if errSum != nil || len(sum) == 0 {
 			slog.Error("Failed to load player summaries", ErrAttr(errSum))
 		}
@@ -85,7 +85,7 @@ func loadProfiles(ctx context.Context, database *pgStore, cache cache, steamIDs 
 	go func() {
 		defer waitGroup.Done()
 
-		banState, errBanState := getSteamBans(localCtx, cache, steamIDs)
+		banState, errBanState := getSteamBans(localCtx, database, steamIDs)
 		if errBanState != nil || len(banState) == 0 {
 			slog.Error("Failed to load player ban states", ErrAttr(errBanState))
 		}

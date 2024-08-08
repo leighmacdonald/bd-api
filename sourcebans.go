@@ -245,8 +245,8 @@ func (scraper *sbScraper) start(ctx context.Context, database *pgStore) {
 		scraper.results = append(scraper.results, results...)
 		scraper.resultsMu.Unlock()
 		for _, result := range results {
-			pRecord := newPlayerRecord(result.SteamID)
-			if errPlayer := database.playerGetOrCreate(ctx, result.SteamID, &pRecord); errPlayer != nil {
+			pRecord, errPlayer := database.playerGetOrCreate(ctx, result.SteamID)
+			if errPlayer != nil {
 				slog.Error("failed to get player record", slog.String("sid64", result.SteamID.String()), ErrAttr(errPlayer))
 
 				continue

@@ -110,10 +110,10 @@ func updateListEntries(ctx context.Context, database *pgStore, mapping listMappi
 	deletedEntries := findDeleted(existingList, mapping)
 
 	for _, entry := range newEntries {
-		pr := newPlayerRecord(entry.SteamID)
-		if err := database.playerGetOrCreate(ctx, entry.SteamID, &pr); err != nil {
+		if _, err := database.playerGetOrCreate(ctx, entry.SteamID); err != nil {
 			return errors.Join(err, errPlayerGetOrCreate)
 		}
+
 		if _, err := database.botDetectorListEntryCreate(ctx, entry); err != nil {
 			if errors.Is(err, errDatabaseUnique) {
 				continue
@@ -123,6 +123,7 @@ func updateListEntries(ctx context.Context, database *pgStore, mapping listMappi
 			continue
 		}
 	}
+
 	if len(newEntries) > 0 {
 		slog.Info("Added new list entries", slog.Int("count", len(newEntries)),
 			slog.String("list", mapping.list.BDListName), slog.Int("bd_list_id", mapping.list.BDListID))

@@ -44,8 +44,7 @@ func handleGetOwnedGames(database *pgStore) http.HandlerFunc {
 		}
 
 		for _, sid := range ids {
-			pr := newPlayerRecord(sid)
-			if err := database.playerGetOrCreate(request.Context(), sid, &pr); err != nil {
+			if _, err := database.playerGetOrCreate(request.Context(), sid); err != nil {
 				responseErr(writer, request, http.StatusInternalServerError, err, "Error loading player")
 
 				return
@@ -63,14 +62,14 @@ func handleGetOwnedGames(database *pgStore) http.HandlerFunc {
 }
 
 // handleGetSummary returns a players steam profile summary. This mirrors the data shape in the steam summary api.
-func handleGetSummary(cache cache) http.HandlerFunc {
+func handleGetSummary(database *pgStore) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		ids, ok := getSteamIDs(writer, request)
 		if !ok {
 			return
 		}
 
-		summaries, errSum := getSteamSummaries(request.Context(), cache, ids)
+		summaries, errSum := getSteamSummaries(request.Context(), database, ids)
 		if errSum != nil || len(ids) != len(summaries) {
 			responseErr(writer, request, http.StatusBadRequest, errLoadFailed, "steam api fetch failed")
 
